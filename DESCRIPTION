@@ -1,0 +1,11 @@
+Package: heart
+Title: Parametric Recurrent Event Analysis
+Version: 0.0-0
+Author: Haoda Fu <fu_haoda@lily.com>
+	Wenjie Wang			
+	Jun Yan
+Maintainer: Haoda Fu <fu_haoda@lily.com>
+Description: Companion of Hypoglycemic Events Analysis via Recurrent Time-to-Event (HEART) Models, Journal of Biopharmaceutical Statistics, 2015.
+Depends: R (>= 3.1.2)
+License: GPL (>= 3)
+LazyData: true
