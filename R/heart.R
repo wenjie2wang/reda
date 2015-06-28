@@ -24,12 +24,13 @@
 #' heart: A package for parametric recurrent event analysis .
 #'
 #' The heart package provides three categories of important functions:
-#' fitheart, plot and so on.
+#' heart, plot and so on.
 #' 
-#' @section fitheart functions:
-#' The fitheart functions ...
+#' @section heart functions:
+#' The heart functions ...
 #'
 #' @docType package
-#' @name fitheart
+#' @name heart
+#' 
 NULL
 #> NULL

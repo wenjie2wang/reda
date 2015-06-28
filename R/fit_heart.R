@@ -12,7 +12,7 @@
 ##
 ##   The R package heart is distributed in the hope that it will be useful,
 ##   but WITHOUT ANY WARRANTY without even the implied warranty of
-##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOse_  See the
+##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ##   GNU General Public License for more details.
 ##
 ##   You should have received a copy of the GNU General Public License
@@ -77,7 +77,7 @@ logL_heart <- function(par, data, BaselinePieces) {
                     data$Time[data$Event == 1])
   rho_i <- expXBeta[data$Event == 1] * rho_0_ij
   rho_i[rho_i < 1e-100] <- 1e-100
-  sum.log.rho_i <- sum(log(rho_i))
+  sum_log_rho_i <- sum(log(rho_i))
   ## these codes to make sure that the order will not change 
   ## if the patient ID is not ordered
   n_ij <- table(data$ID)[order(unique(data$ID))] - 1  
@@ -85,7 +85,7 @@ logL_heart <- function(par, data, BaselinePieces) {
   ## the sequence will not be generated for this subject
   theta_j_1 <- par_theta + sequence(n_ij) - 1  
   theta_j_1[theta_j_1 < 1e-100] <- 1e-100
-  sum.log_theta_j_1 <- sum(log(theta_j_1))
+  sum_log_theta_j_1 <- sum(log(theta_j_1))
   mu0i <- mu0(par_BaselinePW = par_alpha, BaselinePieces = BaselinePieces, 
               data$Time[data$Event == 0])
   mui <- mu0i * expXBeta[data$Event == 0]
@@ -95,8 +95,8 @@ logL_heart <- function(par, data, BaselinePieces) {
   if (par_theta < 1e-100) {
     par_theta <- 1e-100
   }
-  logLH <- m * par_theta * log(par_theta) + sum.log.rho_i + 
-    sum.log_theta_j_1 - sum.log_theta_mui
+  logLH <- m * par_theta * log(par_theta) + sum_log_rho_i + 
+    sum_log_theta_j_1 - sum.log_theta_mui
   penal <- ifelse(par_theta < 0 | min(par_alpha) < 0, 1e+50, 0)
   negLH <- -logLH + penal
   ## Calculate the gradient
@@ -121,6 +121,49 @@ logL_heart <- function(par, data, BaselinePieces) {
   negLH
 }
 
+heart_control <- function (gradtol = 1e-6, stepmax = 1e5, 
+                           steptol = 1e-6, iterlim = 1e2) {
+  
+  ## controls for function stats::nlm
+  m <- match.call(expand.dots = FALSE)
+  if (!is.numeric(gradtol) || gradtol <= 0) {
+    stop("value of 'gradtol' must be > 0")
+  }
+  if (!is.numeric(stepmax) || stepmax <= 0) {
+    stop("value of 'stepmax' must be > 0")
+  } 
+  if (!is.numeric(steptol) || steptol <= 0) {
+    stop("value of 'steptol' must be > 0")
+  } 
+  if (!is.numeric(iterlim) || iterlim <= 0) {
+    stop("maximum number of iterations must be > 0")
+  }
+  ## return
+  list(gradtol = gradtol, stepmax = stepmax, 
+       steptol = steptol, iterlim = iterlim)
+}
+
+heart_start <- function(beta, theta = 0.5, alpha) {
+  
+  ## beta = starting value(s) for coefficients of covariates
+  ## theta = starting value for random effects
+  ## alpha = starting values for piece-wise baseline rate functions
+
+  if (missing(beta)) {
+    beta <- rep(1, nbeta)
+  } else if (length(beta) != nbeta) {
+      stop("number of starting values for coefficients of covariates 
+           does not match with the specified formula")
+  }
+  if (theta <= 0) {
+    stop("value of parameter for random effects must be > 0")
+  }
+  if (missing(alpha)) {
+    alpha <- rep(0.15, nbl)
+  }
+  ## return
+  list(beta = beta, theta = theta, alpha = alpha)
+}
 
 ## functions to export ========================================================
 
@@ -143,12 +186,50 @@ logL_heart <- function(par, data, BaselinePieces) {
 #' sum(1:10)
 #' sum(1:5, 6:10)
 #' sum(F, F, F, T, T)
-heart <- function(formula, data, BaselinePieces, ini) {
-  ## record the function call 
-  call <- match.call()
-  # Prepare data matrix LRX
-  mf <- model.frame(formula, data)
-  mm <- model.matrix(formula, data)
+heart <- function(formula, data, subset, blpieces, 
+                  start = list(), control = list(), ...) {
+  
+  if(missing(formula)) {
+    stop("formula is missing.")
+  } else if(!survrec::is.Survr(formula)) {
+    # stop("formula must be a Survival recurrent object.")
+  }
+  if(missing(data)) {
+    data <- environment(formula)
+  }
+
+  ## record the function call to return
+  Call <- match.call()
+  ## Prepare data matrix: id, time, event ~ X(s)
+  mcall <- match.call(expand.dots = FALSE)
+  mmcall <- match(c("formula", "data", "subset", "blpieces",   
+                    "start", "control"), names(mcall), 0L)
+  mcall <- mcall[c(1L, mmcall)]
+  ## drop unused levels in factors 
+  mcall$drop.unused.levels <- TRUE
+  mcall[[1L]] <- quote(stats::model.frame)
+  mf <- eval(mcall, parent.frame())
+  mm <- stats::model.matrix(formula, data = data)
+  dat <- cbind(mf[, 1][, 1:3], mm[, -1])
+  ## number of covariates excluding intercept
+  nbeta <- ncol(mm) - 1 
+  ## baselinepieces
+  if(missing(blpieces)) {
+    warning("Without specification, baseline pieces are set as 
+            Q1, Q2 and Q3 of event time.")
+    blpieces <- as.vector(round(quantile(dat$time), seq(0.25, 0.75, 0.25)))
+  }
+  ## number of baseline pieces
+  nbl <- length(blpieces)
+  
+  start <- do.call("heart_start", start)
+  control <- do.call("heart_control", control)
+  
+
+
+  
+  
+
   
   fit <- nlm(logL_heart, ini, data = data, 
              BaselinePieces = BaselinePieces, hessian = TRUE)
