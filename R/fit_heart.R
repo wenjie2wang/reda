@@ -22,36 +22,36 @@
 
 
 ## internal functions ========================================================
-whereT <- function(tt, BaselinePieces) {
+whereT <- function(tt, baselinepieces) {
   ## return
-  min(which(tt <= BaselinePieces))
+  min(which(tt <= baselinepieces))
 }
 
-rho_0 <- function(par_BaselinePW, BaselinePieces, Tvec) {
-  indx <- apply(as.array(Tvec), 1, whereT, BaselinePieces)
+rho_0 <- function(par_BaselinePW, baselinepieces, Tvec) {
+  indx <- apply(as.array(Tvec), 1, whereT, baselinepieces)
   ## return
   par_BaselinePW[indx]
 }
 
-mu0 <- function(par_BaselinePW, BaselinePieces, Tvec) {
-  indx <- apply(as.array(Tvec), 1, whereT, BaselinePieces)
-  BL_segments <- c(BaselinePieces[1], diff(BaselinePieces))
+mu0 <- function(par_BaselinePW, baselinepieces, Tvec) {
+  indx <- apply(as.array(Tvec), 1, whereT, baselinepieces)
+  BL_segments <- c(baselinepieces[1], diff(baselinepieces))
   ## The CMF at each time point  
   CumMean_Pieces <- diffinv(BL_segments * par_BaselinePW)[-1]  
   ## return
-  CumMean_Pieces[indx] - (BaselinePieces[indx] - Tvec) * par_BaselinePW[indx]
+  CumMean_Pieces[indx] - (baselinepieces[indx] - Tvec) * par_BaselinePW[indx]
 }
 
-dmu0_alpha <- function(tt, BaselinePieces) {
-  BL_segments <- c(BaselinePieces[1], diff(BaselinePieces))
-  indx <- min(which(tt <= BaselinePieces))
+dmu0_alpha <- function(tt, baselinepieces) {
+  BL_segments <- c(baselinepieces[1], diff(baselinepieces))
+  indx <- min(which(tt <= baselinepieces))
   value <- BL_segments
-  n_pieces <- length(BaselinePieces)
+  n_pieces <- length(baselinepieces)
   if (indx == n_pieces) {
-    value[n_pieces] <- tt - BaselinePieces[n_pieces - 1]
+    value[n_pieces] <- tt - baselinepieces[n_pieces - 1]
   } else if (indx > 1) {
     value[(indx + 1):n_pieces] <- 0
-    value[indx] <- tt - BaselinePieces[indx - 1]
+    value[indx] <- tt - baselinepieces[indx - 1]
   } else {
     value[(indx + 1):n_pieces] <- 0
     value[indx] <- tt
@@ -60,10 +60,10 @@ dmu0_alpha <- function(tt, BaselinePieces) {
   value
 }
 
-logL_heart <- function(par, data, BaselinePieces) {
-  npieces <- length(BaselinePieces)
-  if (BaselinePieces[npieces] < max(data$Time)) {
-    BaselinePieces[npieces] <- max(data$Time) + 1e-08
+logL_heart <- function(par, data, baselinepieces) {
+  npieces <- length(baselinepieces)
+  if (baselinepieces[npieces] < max(data$time)) {
+    baselinepieces[npieces] <- max(data$time) + 1e-08
     warning("Extend the Baseline Pieces to adjust the data")
   }
   nbeta <- ncol(data) - 3
@@ -73,9 +73,9 @@ logL_heart <- function(par, data, BaselinePieces) {
   par_alpha <- par[(nbeta + 2):length(par)]
   m <- length(unique(data$ID))
   expXBeta <- exp(as.matrix(data[, 4:(3 + nbeta)]) %*% (as.matrix(par_beta)))
-  rho_0_ij <- rho_0(par_BaselinePW = par_alpha, BaselinePieces = BaselinePieces, 
-                    data$Time[data$Event == 1])
-  rho_i <- expXBeta[data$Event == 1] * rho_0_ij
+  rho_0_ij <- rho_0(par_BaselinePW = par_alpha, baselinepieces = baselinepieces, 
+                    data$time[data$event == 1])
+  rho_i <- expXBeta[data$event == 1] * rho_0_ij
   rho_i[rho_i < 1e-100] <- 1e-100
   sum_log_rho_i <- sum(log(rho_i))
   ## these codes to make sure that the order will not change 
@@ -86,9 +86,9 @@ logL_heart <- function(par, data, BaselinePieces) {
   theta_j_1 <- par_theta + sequence(n_ij) - 1  
   theta_j_1[theta_j_1 < 1e-100] <- 1e-100
   sum_log_theta_j_1 <- sum(log(theta_j_1))
-  mu0i <- mu0(par_BaselinePW = par_alpha, BaselinePieces = BaselinePieces, 
-              data$Time[data$Event == 0])
-  mui <- mu0i * expXBeta[data$Event == 0]
+  mu0i <- mu0(par_BaselinePW = par_alpha, baselinepieces = baselinepieces, 
+              data$time[data$event == 0])
+  mui <- mu0i * expXBeta[data$event == 0]
   mui_theta <- par_theta + mui
   mui_theta[mui_theta < 1e-100] <- 1e-100
   sum.log_theta_mui <- sum((n_ij + par_theta) * log(mui_theta))
@@ -101,20 +101,20 @@ logL_heart <- function(par, data, BaselinePieces) {
   negLH <- -logLH + penal
   ## Calculate the gradient
   dl_dbeta <- apply(diag((n_ij - mui)/(par_theta + mui) * par_theta) %*% 
-                      as.matrix(data[data$Event == 0, 4:(3 + nbeta)]), 2, sum)
+                      as.matrix(data[data$event == 0, 4:(3 + nbeta)]), 2, sum)
   dl_dtheta <- m + m * log(par_theta) + 
     sum(1/(par_theta + sequence(n_ij) - 1)) - 
     sum((n_ij + par_theta)/(par_theta + mui)) - sum(log(mui_theta))
-  indx <- apply(as.array(data$Time[data$Event == 1]), 1, 
-                whereT, BaselinePieces)
+  indx <- apply(as.array(data$time[data$event == 1]), 1, 
+                whereT, baselinepieces)
   if (length(unique(indx)) < length(par_alpha)) {
     stop("Some segements have zero events!")
   }
-  indx_taui <- apply(as.array(data$Time[data$Event == 0]), 1, 
-                     whereT, BaselinePieces)
+  indx_taui <- apply(as.array(data$time[data$event == 0]), 1, 
+                     whereT, baselinepieces)
   dl_dalpha_part2 <- diag((n_ij + par_theta) / (par_theta + mui) * 
-                            expXBeta[data$Event == 0]) %*% 
-    t(apply(array(data$Time[data$Event == 0]), 1, dmu0_alpha, BaselinePieces))
+                            expXBeta[data$event == 0]) %*% 
+    t(apply(array(data$time[data$event == 0]), 1, dmu0_alpha, baselinepieces))
   dl_dalpha <- 1 / par_alpha * table(indx) - apply(dl_dalpha_part2, 2, sum)
   attr(negLH, "gradient") <- -c(dl_dbeta, dl_dtheta, dl_dalpha)
   ## return
@@ -143,7 +143,7 @@ heart_control <- function (gradtol = 1e-6, stepmax = 1e5,
        steptol = steptol, iterlim = iterlim)
 }
 
-heart_start <- function(beta, theta = 0.5, alpha) {
+heart_start <- function(beta, theta = 0.5, alpha, nbeta, nalpha) {
   
   ## beta = starting value(s) for coefficients of covariates
   ## theta = starting value for random effects
@@ -159,7 +159,7 @@ heart_start <- function(beta, theta = 0.5, alpha) {
     stop("value of parameter for random effects must be > 0")
   }
   if (missing(alpha)) {
-    alpha <- rep(0.15, nbl)
+    alpha <- rep(0.15, nalpha)
   }
   ## return
   list(beta = beta, theta = theta, alpha = alpha)
@@ -186,9 +186,9 @@ heart_start <- function(beta, theta = 0.5, alpha) {
 #' sum(1:10)
 #' sum(1:5, 6:10)
 #' sum(F, F, F, T, T)
-heart <- function(formula, data, subset, blpieces, 
+heart <- function(formula, data, subset, na.action, baselinepieces, 
                   start = list(), control = list(), ...) {
-  
+  ## arguments check
   if(missing(formula)) {
     stop("formula is missing.")
   } else if(!survrec::is.Survr(formula)) {
@@ -200,62 +200,69 @@ heart <- function(formula, data, subset, blpieces,
 
   ## record the function call to return
   Call <- match.call()
-  ## Prepare data matrix: id, time, event ~ X(s)
+  
+  ## Prepare data: id, time, event ~ X(s)
   mcall <- match.call(expand.dots = FALSE)
-  mmcall <- match(c("formula", "data", "subset", "blpieces",   
-                    "start", "control"), names(mcall), 0L)
+  mmcall <- match(c("formula", "data", "subset", "na.action"), names(mcall), 0L)
   mcall <- mcall[c(1L, mmcall)]
   ## drop unused levels in factors 
   mcall$drop.unused.levels <- TRUE
   mcall[[1L]] <- quote(stats::model.frame)
   mf <- eval(mcall, parent.frame())
-  mm <- stats::model.matrix(formula, data = data)
-  dat <- cbind(mf[, 1][, 1:3], mm[, -1])
+  mm <- stats::model.matrix(formula, data = mf)
   ## number of covariates excluding intercept
   nbeta <- ncol(mm) - 1 
+  ## covariates' names
+  covar_names <- base::colnames(mm)[-1]
+  ## data 
+  dat <- as.data.frame(cbind(mf[, 1][, 1:3], mm[, -1]))
+  colnames(dat) <- c("ID", "time", "event", covar_names)
+
   ## baselinepieces
-  if(missing(blpieces)) {
-    warning("Without specification, baseline pieces are set as 
-            Q1, Q2 and Q3 of event time.")
-    blpieces <- as.vector(round(quantile(dat$time), seq(0.25, 0.75, 0.25)))
+  if(missing(baselinepieces)) {
+    warning("Baseline pieces are set as median and maximum of event time.")
+    baselinepieces <- as.vector(round(quantile(dat$time, c(0.5, 1)), 
+                                digits = 1))
   }
-  ## number of baseline pieces
-  nbl <- length(blpieces)
-  
-  start <- do.call("heart_start", start)
+  ## number of baseline pieces or rate functions
+  nalpha <- length(baselinepieces)
+  startlist <- c(start, nbeta = nbeta, nalpha = nalpha)
+  start <- do.call("heart_start", startlist)
   control <- do.call("heart_control", control)
-  
-
-
-  
-  
-
-  
-  fit <- nlm(logL_heart, ini, data = data, 
-             BaselinePieces = BaselinePieces, hessian = TRUE)
+  ini <- do.call("c", start)
   length_par <- length(ini)
-  length_alpha <- length(BaselinePieces)
-  length_beta <- length_par - length_alpha - 1
-  est_beta <- matrix(NA, nrow = length_beta, ncol = 3)
+  
+  fit <- nlm(logL_heart, ini, data = dat, 
+             baselinepieces = baselinepieces, hessian = TRUE,
+             gradtol = control$gradtol, stepmax = control$stepmax,
+             steptol = control$steptol, iterlim = control$iterlim)
+
+  est_beta <- matrix(NA, nrow = nbeta, ncol = 3)
   colnames(est_beta) <- c("beta", "se(beta)", "two sided p-value")
   
   se_vec <- sqrt(diag(solve(fit$hessian)))
   
-  est_beta[, 1] <- fit$estimate[1:length_beta]
-  est_beta[, 2] <- se_vec[1:length_beta]
+  est_beta[, 1] <- fit$estimate[1:nbeta]
+  est_beta[, 2] <- se_vec[1:nbeta]
   est_beta[, 3] <- 2 * pnorm(-abs(est_beta[, 1]/est_beta[, 2]))
   
   est_theta <- matrix(NA, nrow = 1, ncol = 2)
   colnames(est_theta) <- c("theta", "se(theta)")
-  est_theta[1, ] <- c(fit$estimate[length_beta + 1], se_vec[length_beta + 1])
+  est_theta[1, ] <- c(fit$estimate[nbeta + 1], se_vec[nbeta + 1])
   
-  est_alpha <- matrix(NA, nrow = length_alpha, ncol = 2)
+  est_alpha <- matrix(NA, nrow = nalpha, ncol = 2)
   colnames(est_alpha) <- c("alpha", "se(alpha)")
   
-  est_alpha[, 1] <- fit$estimate[(length_beta + 2):length_par]
-  est_alpha[, 2] <- se_vec[(length_beta + 2):length_par]
-  results <- list(beta = est_beta, theta = est_theta, alpha = est_alpha, 
-                  Convergence = fit$code, `Fisher Info Matrix` = fit$hessian)
-  return(results)
+  est_alpha[, 1] <- fit$estimate[(nbeta + 2):length_par]
+  est_alpha[, 2] <- se_vec[(nbeta + 2):length_par]
+  results <- list(call = Call, formula = formula, 
+                  baselinepieces = baselinepieces,
+                  estimates = list(beta = est_beta, 
+                                   theta = est_theta, 
+                                   alpha = est_alpha),
+                  control = control, Convergence = fit$code, 
+                  `Fisher Info Matrix` = fit$hessian)
+  invisible(results)
 }
+
 

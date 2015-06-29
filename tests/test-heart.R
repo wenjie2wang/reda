@@ -1,7 +1,7 @@
 testdat <- data.frame(matrix(c(1, 20, 1, 5, 1, 70, 1, 5, 1, 100, 0, 
                     5, 2, 60, 1, 8, 2, 100, 0, 8), nrow = 5, byrow = TRUE))
 colnames(testdat) <- c("ID", "Time", "Event", "X")
-BaselinePieces <- c(50, 100)
+baselinepieces <- c(50, 100)
 ini <- c(0.3, 0.5, 0.15, 0.16)
 testdat
 #   ID Time Event X
