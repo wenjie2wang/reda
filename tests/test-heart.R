@@ -24,3 +24,7 @@ BaselinePieces <- c(BaselinePieces, max(testdat$Time))
 BaselinePieces
 # [1]  53  85 121 284
 ini <- rep(0.15, 4)
+
+heartfit <- heart(formula = survrec::Survr(ID, Time, Event) ~ X, data = testdat, 
+                  baselinepieces = baselinepieces)
+str(heartfit)

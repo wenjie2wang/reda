@@ -60,12 +60,23 @@ dmu0_alpha <- function(tt, baselinepieces) {
   value
 }
 
-logL_heart <- function(par, data, baselinepieces) {
-  npieces <- length(baselinepieces)
-  if (baselinepieces[npieces] < max(data$time)) {
-    baselinepieces[npieces] <- max(data$time) + 1e-08
-    warning("Extend the Baseline Pieces to adjust the data")
+## generate intervals from specified baseline pieces
+int_baseline <- function(baselinepieces){
+  nalpha <- length(baselinepieces)
+  intervals <- rep(NA, nalpha)
+  intervals[1] <- paste0("[0, ", baselinepieces[1], "]", sep = "")
+  if (nalpha > 1) {
+    for(i in 2:nalpha){
+      intervals[i] <- paste0("(", baselinepieces[i - 1], ", ", 
+                             baselinepieces[i], "]", sep = "")
+    }
   }
+  ## return
+  intervals
+}
+
+## compute log likelihood
+logL_heart <- function(par, data, baselinepieces) {
   nbeta <- ncol(data) - 3
   ## par = \THETA in the paper
   par_beta <- par[1:nbeta]
@@ -165,6 +176,18 @@ heart_start <- function(beta, theta = 0.5, alpha, nbeta, nalpha) {
   list(beta = beta, theta = theta, alpha = alpha)
 }
 
+## create S4 Class called "heart" for object from function heart
+setClass(Class = "heart", 
+         slots = c(call = "call", 
+                   formula = "formula", 
+                   baselinepieces = "character",
+                   estimates = "list",
+                   control = "list",
+                   start = "list",
+                   convergence = "integer", 
+                   hessian = "matrix"))
+
+
 ## functions to export ========================================================
 
 #' Fitting Heart Model: Piece-wise Gamma Frailty Model for Recurrent Events. 
@@ -223,9 +246,16 @@ heart <- function(formula, data, subset, na.action, baselinepieces,
     warning("Baseline pieces are set as median and maximum of event time.")
     baselinepieces <- as.vector(round(quantile(dat$time, c(0.5, 1)), 
                                 digits = 1))
-  }
+  } 
   ## number of baseline pieces or rate functions
   nalpha <- length(baselinepieces)
+  if (baselinepieces[nalpha] < max(dat$time)) {
+    baselinepieces[nalpha] <- max(dat$time) + 1e-08
+    warning("Baseline Pieces is extended")
+  }
+  ## friendly version of baseline pieces to print out
+  print_blpieces <- int_baseline(baselinepieces = baselinepieces)
+  
   startlist <- c(start, nbeta = nbeta, nalpha = nalpha)
   start <- do.call("heart_start", startlist)
   control <- do.call("heart_control", control)
@@ -238,7 +268,8 @@ heart <- function(formula, data, subset, na.action, baselinepieces,
              steptol = control$steptol, iterlim = control$iterlim)
 
   est_beta <- matrix(NA, nrow = nbeta, ncol = 3)
-  colnames(est_beta) <- c("beta", "se(beta)", "two sided p-value")
+  colnames(est_beta) <- c("coef", "se", "Pr(>|z|)")
+  rownames(est_beta) <- covar_names
   
   se_vec <- sqrt(diag(solve(fit$hessian)))
   
@@ -247,22 +278,48 @@ heart <- function(formula, data, subset, na.action, baselinepieces,
   est_beta[, 3] <- 2 * pnorm(-abs(est_beta[, 1]/est_beta[, 2]))
   
   est_theta <- matrix(NA, nrow = 1, ncol = 2)
-  colnames(est_theta) <- c("theta", "se(theta)")
+  colnames(est_theta) <- c("theta", "se")
   est_theta[1, ] <- c(fit$estimate[nbeta + 1], se_vec[nbeta + 1])
   
   est_alpha <- matrix(NA, nrow = nalpha, ncol = 2)
-  colnames(est_alpha) <- c("alpha", "se(alpha)")
+  colnames(est_alpha) <- c("alpha", "se")
+  rownames(est_alpha) <- print_blpieces 
   
   est_alpha[, 1] <- fit$estimate[(nbeta + 2):length_par]
   est_alpha[, 2] <- se_vec[(nbeta + 2):length_par]
-  results <- list(call = Call, formula = formula, 
-                  baselinepieces = baselinepieces,
-                  estimates = list(beta = est_beta, 
-                                   theta = est_theta, 
-                                   alpha = est_alpha),
-                  control = control, Convergence = fit$code, 
-                  `Fisher Info Matrix` = fit$hessian)
-  invisible(results)
+  ## results to return
+  results <- new("heart", 
+                 call = Call, formula = formula, 
+                 baselinepieces = print_blpieces,
+                 estimates = list(beta = est_beta, 
+                                  theta = est_theta, 
+                                  alpha = est_alpha),
+                 control = control, convergence = fit$code, 
+                 hessian = fit$hessian)
+  ## return
+  results
 }
+
+## function show for heart object
+setMethod("show", "heart",
+          function(object) {
+            beta <- round(object@estimates$beta[, "coef"], digits = 3)
+            names(beta) <- rownames(object@estimates$beta)
+            theta <- round(object@estimates$theta[, "theta"], digits = 3)
+            names(theta) <- NULL
+            alpha <- round(object@estimates$alpha[, "alpha"], digits = 3)
+            names(alpha) <- rownames(object@estimates$alpha)
+            cat("\ncall: \n")
+            print(object@call)
+            cat("\nbaseline pieces: \n")
+            print(object@baselinepieces)
+            cat("\nestimates: \n", 
+                "-coefficients: \n")
+            print(beta)
+            cat("\n-theta: ", theta, "\n")
+            cat("\n-rate functions: \n")
+            print(alpha)
+          })
+
 
 
