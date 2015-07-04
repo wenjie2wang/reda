@@ -184,6 +184,8 @@ setClass(Class = "heart",
                    estimates = "list",
                    control = "list",
                    start = "list",
+                   na.action = "character",
+                   contrasts = "list",
                    convergence = "integer", 
                    hessian = "matrix"))
 
@@ -210,21 +212,23 @@ setClass(Class = "heart",
 #' sum(1:5, 6:10)
 #' sum(F, F, F, T, T)
 heart <- function(formula, data, subset, na.action, baselinepieces, 
-                  start = list(), control = list(), ...) {
-  ## arguments check
-  if(missing(formula)) {
-    stop("formula is missing.")
-  } else if(!survrec::is.Survr(formula)) {
-    # stop("formula must be a Survival recurrent object.")
-  }
-  if(missing(data)) {
-    data <- environment(formula)
-  }
-
+                  start = list(), control = list(), contrasts = NULL, ...) {
+  
   ## record the function call to return
   Call <- match.call()
   
-  ## Prepare data: id, time, event ~ X(s)
+  ## arguments check
+  if(missing(formula)) {
+    stop("formula argument is missing.")
+  } 
+  if(missing(data)) {
+    data <- environment(formula)
+  }
+  if (! with(data, inherits(eval(Call[[2]][[2]]), "Survr"))) {
+    stop("formula must be a survival recurrent object")
+  }
+  
+  ## Prepare data: ID, time, event ~ X(s)
   mcall <- match.call(expand.dots = FALSE)
   mmcall <- match(c("formula", "data", "subset", "na.action"), names(mcall), 0L)
   mcall <- mcall[c(1L, mmcall)]
@@ -233,6 +237,7 @@ heart <- function(formula, data, subset, na.action, baselinepieces,
   mcall[[1L]] <- quote(stats::model.frame)
   mf <- eval(mcall, parent.frame())
   mm <- stats::model.matrix(formula, data = mf)
+  
   ## number of covariates excluding intercept
   nbeta <- ncol(mm) - 1 
   ## covariates' names
@@ -287,6 +292,14 @@ heart <- function(formula, data, subset, na.action, baselinepieces,
   
   est_alpha[, 1] <- fit$estimate[(nbeta + 2):length_par]
   est_alpha[, 2] <- se_vec[(nbeta + 2):length_par]
+  if (is.null(attr(mf, "na.action"))) {
+    na.action <- options("na.action")[[1]]
+  } else {
+    na.action <- paste("na", class(attr(mf, "na.action")), sep = ".")
+  }
+  if (is.null(contrasts)){
+    contrasts <- options("contrasts")
+  }
   ## results to return
   results <- new("heart", 
                  call = Call, formula = formula, 
@@ -294,7 +307,11 @@ heart <- function(formula, data, subset, na.action, baselinepieces,
                  estimates = list(beta = est_beta, 
                                   theta = est_theta, 
                                   alpha = est_alpha),
-                 control = control, convergence = fit$code, 
+                 control = control,
+                 start = start, 
+                 na.action = na.action,
+                 contrasts = contrasts,
+                 convergence = fit$code, 
                  hessian = fit$hessian)
   ## return
   results
@@ -314,10 +331,10 @@ setMethod("show", "heart",
             cat("\nbaseline pieces: \n")
             print(object@baselinepieces)
             cat("\nestimates: \n", 
-                "-coefficients: \n")
+                "--coefficients: \n", sep = "")
             print(beta)
-            cat("\n-theta: ", theta, "\n")
-            cat("\n-rate functions: \n")
+            cat("\n--theta: ", theta, "\n")
+            cat("\n--rate functions: \n")
             print(alpha)
           })
 
