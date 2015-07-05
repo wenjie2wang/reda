@@ -176,11 +176,11 @@ heart_start <- function(beta, theta = 0.5, alpha, nbeta, nalpha) {
   list(beta = beta, theta = theta, alpha = alpha)
 }
 
-## create S4 Class called "heart" for object from function heart
+## create S4 Class called "heart" for object from function heart to show
 setClass(Class = "heart", 
          slots = c(call = "call", 
                    formula = "formula", 
-                   baselinepieces = "character",
+                   baselinepieces = "numeric",
                    estimates = "list",
                    control = "list",
                    start = "list",
@@ -189,6 +189,13 @@ setClass(Class = "heart",
                    convergence = "integer", 
                    hessian = "matrix"))
 
+## create S4 Class called "summary.heart" for object from summary to show
+setClass(Class = "summary.heart", 
+         slots = c(call = "call", 
+                   baselinepieces = "numeric",
+                   coefficients = "matrix",
+                   theta = "matrix",
+                   baseline = "matrix"))
 
 ## functions to export ========================================================
 
@@ -225,7 +232,7 @@ heart <- function(formula, data, subset, na.action, baselinepieces,
     data <- environment(formula)
   }
   if (! with(data, inherits(eval(Call[[2]][[2]]), "Survr"))) {
-    stop("formula must be a survival recurrent object")
+    stop("formula must be a survival recurrent object.")
   }
   
   ## Prepare data: ID, time, event ~ X(s)
@@ -248,7 +255,7 @@ heart <- function(formula, data, subset, na.action, baselinepieces,
 
   ## baselinepieces
   if(missing(baselinepieces)) {
-    warning("Baseline pieces are set as median and maximum of event time.")
+    warning("Baseline pieces are splitted by median event time.")
     baselinepieces <- as.vector(round(quantile(dat$time, c(0.5, 1)), 
                                 digits = 1))
   } 
@@ -256,10 +263,11 @@ heart <- function(formula, data, subset, na.action, baselinepieces,
   nalpha <- length(baselinepieces)
   if (baselinepieces[nalpha] < max(dat$time)) {
     baselinepieces[nalpha] <- max(dat$time) + 1e-08
-    warning("Baseline Pieces is extended")
+    warning("Baseline pieces is extended.")
   }
   ## friendly version of baseline pieces to print out
   print_blpieces <- int_baseline(baselinepieces = baselinepieces)
+  attr(baselinepieces, "name") <- print_blpieces
   
   startlist <- c(start, nbeta = nbeta, nalpha = nalpha)
   start <- do.call("heart_start", startlist)
@@ -303,7 +311,7 @@ heart <- function(formula, data, subset, na.action, baselinepieces,
   ## results to return
   results <- new("heart", 
                  call = Call, formula = formula, 
-                 baselinepieces = print_blpieces,
+                 baselinepieces = baselinepieces,
                  estimates = list(beta = est_beta, 
                                   theta = est_theta, 
                                   alpha = est_alpha),
@@ -317,9 +325,10 @@ heart <- function(formula, data, subset, na.action, baselinepieces,
   results
 }
 
+
 ## function show for heart object
-setMethod("show", "heart",
-          function(object) {
+setMethod(f = "show", signature = "heart",
+          definition = function(object) {
             beta <- round(object@estimates$beta[, "coef"], digits = 3)
             names(beta) <- rownames(object@estimates$beta)
             theta <- round(object@estimates$theta[, "theta"], digits = 3)
@@ -329,14 +338,81 @@ setMethod("show", "heart",
             cat("\ncall: \n")
             print(object@call)
             cat("\nbaseline pieces: \n")
-            print(object@baselinepieces)
-            cat("\nestimates: \n", 
-                "--coefficients: \n", sep = "")
+            cat(attr(object@baselinepieces, "name"), "\n")
+            cat("\ncoefficients: \n") 
             print(beta)
-            cat("\n--theta: ", theta, "\n")
-            cat("\n--rate functions: \n")
+            cat("\ntheta: ", theta, "\n")
+            cat("\nbaseline rate functions: \n")
             print(alpha)
           })
 
 
+## function coef for heart object
+setMethod(f = "coef", signature = "heart",
+          definition = function(object) {
+            beta <- round(object@estimates$beta[, "coef"], digits = 3)
+            names(beta) <- rownames(object@estimates$beta)
+            ## return
+            beta
+          })
 
+
+## function baseline for heart object
+setGeneric(name = "baseline",
+           def = function(object) {
+             standardGeneric("baseline")
+           })
+
+setMethod(f = "baseline", signature = "heart",
+          definition = function(object) {
+            alpha <- round(object@estimates$alpha[, "alpha"], digits = 3)
+            names(alpha) <- rownames(object@estimates$alpha)
+            ## return
+            alpha
+          })
+
+
+## function summary for heart object
+setMethod(f = "summary", signature = "heart",
+          definition = function(object, showcall = TRUE, showpieces = TRUE, 
+                                digits = 3) {
+            Call <- object@call
+            attr(Call, "show") <- showcall
+            blpieces <- object@baselinepieces
+            attr(blpieces, "show") <- showpieces
+            beta <- round(object@estimates$beta, digits = digits)
+            theta <- round(object@estimates$theta, digits = digits)
+            alpha <- round(object@estimates$alpha, digits = digits)
+            colnames(beta)[1] <- colnames(theta)[1] <- 
+              colnames(alpha)[1] <- "estimates"
+            results <- new("summary.heart", 
+                           call = Call,
+                           baselinepieces = blpieces,
+                           coefficients = beta,
+                           theta = theta, 
+                           baseline = alpha)
+            ## return
+            results
+          })
+
+## function show for summary.heart object
+setMethod(f = "show", signature = "summary.heart",
+          definition = function(object) {
+            if (attr(object@call, "show")) {
+              Call <- object@call
+              attr(Call, "show") <- NULL
+              cat("\ncall: \n")
+              print(Call)
+            }
+            if (attr(object@baselinepieces, "show")) {
+              cat("\nbaseline pieces: \n")
+              cat(attr(object@baselinepieces, "name"), "\n")
+            }
+            cat("\ncoefficients: \n") 
+            printCoefmat(object@coefficients)
+            theta <- as.data.frame(object@theta)
+            cat("\ntheta: \n")
+            print(theta, row.names = FALSE)
+            cat("\nbaseline rate functions: \n")
+            print(object@baseline)
+          })
