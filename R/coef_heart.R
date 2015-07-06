@@ -57,7 +57,7 @@ setMethod(f = "confint", signature = "heart",
               paste(format(100 * probs, trim = TRUE, scientific = FALSE, 
                            digits = digits), "%")
             }
-            cf <- coef(object)
+            cf <- object@estimates$beta[, 1]
             pnames <- names(cf)
             if (missing(parm)) {
               parm <- pnames
@@ -76,6 +76,7 @@ setMethod(f = "confint", signature = "heart",
                         dimnames = list(parm, pct))
             ses <- object@estimates$beta[parm, 2]
             ci[] <- cf[parm] + ses %o% fac
+            ci <- round(ci, digits = 3)
             ## return
             ci
           })
