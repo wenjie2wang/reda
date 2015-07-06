@@ -29,7 +29,11 @@ heartfit <- heart(formula = survrec::Survr(ID, Time, Event) ~ X1 + X2,
                                  steptol = 1e-6, iterlim = 1e2))
 show(heartfit) # or simply call: heartfit
 str(heartfit)
-
+summary(heartfit)
+coef(heartfit)
+confint(heartfit)
+baseline(heartfit)
+plot.baseline(heartfit)
 
 ## dataset: colon from package survrec
 require(survrec)
