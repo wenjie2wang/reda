@@ -7,7 +7,7 @@
 
 * Rewrite plot function by using ggplot2 if necessary.
 
-* Add S4 class functions for print and summary.
+* ~~Add S4 class functions for print and summary.~~
 
 * Tests based on datasets from other R packages for 
 	recurrent event analysis, such as 
