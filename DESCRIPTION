@@ -1,17 +1,18 @@
 Package: heart
 Title: Parametric Recurrent Event Analysis
 Version: 0.0.0.9000
-Authors@R: c(
-    person(given = "Haoda", family = "Fu", email = "fu_haoda@lily.com", 
-           role = c("aut", "cre")),
-    person(given = "Jun", family = "Yan", role = "ctb"),
-    person(given = "Wenjie", family = "Wang", email = "wenjie.2.wang@uconn.edu",
-           role = c("ctb","cre"))
-)
+Date: 2015-07-10
+Authors@R: c(person(given = "Haoda", family = "Fu", email = "fu_haoda@lily.com",
+             role = c("aut")),
+             person(given = "Jun", family = "Yan", role = "ctb"),
+             person(given = "Wenjie", family = "Wang", 
+             email = "wenjie.2.wang@uconn.edu",
+             role = c("ctb","cre")))
 Description: Companion of Hypoglycemic Events Analysis via 
     Recurrent Time-to-Event (HEART) Models, 
     Journal of Biopharmaceutical Statistics, 2015.
+Imports: survrec
 Depends: R (>= 3.2.1)
 License: GPL (>= 3)
 LazyData: true
-
+VignetteBuilder: knitr
