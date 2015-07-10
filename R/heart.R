@@ -1,4 +1,4 @@
-##############################################################################
+################################################################################
 ##
 ##   R package heart by Haoda Fu, Jun Yan, and Wenjie Wang
 ##   Copyright (C) 2015
@@ -18,19 +18,15 @@
 ##   You should have received a copy of the GNU General Public License
 ##   along with the R package heart. If not, see <http://www.gnu.org/licenses/>.
 ##
-##############################################################################
+################################################################################
 
-
-#' heart: A package for parametric recurrent event analysis .
-#'
-#' The heart package provides three categories of important functions:
-#' heart, plot and so on.
+#' Parametric Recurrent Event Analysis by HEART Model.
 #' 
-#' @section heart functions:
-#' The heart functions ...
-#'
+#' The heart package provides functions to fit HEART model for recurrent event
+#' analysis.
+#' 
 #' @docType package
 #' @name heart
-#' 
+#' @import survrec
 NULL
-#> NULL
+
