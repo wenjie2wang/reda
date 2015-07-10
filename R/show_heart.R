@@ -20,27 +20,18 @@
 ##
 ################################################################################
 
-
-#' Fitting Heart Model: Piece-wise Gamma Frailty Model for Recurrent Events. 
-#' The model is named after the paper title of \emph{Fu et al. (2014)},  
-#' Hypoglycemic Events Analysis via Recurrent Time-to-Event (HEART) Models
-#'
-#' \code{functionname} returns fitted model results.
-#'
-#' This is a test Roxygen comments
-#'
-#' @param ... Numeric, complex, or logical vectors.
-#' @param na.rm A logical scalar. 
-#' @return If all inputs are integer and logical, then the output
-#'   will be an integer. If integer overflow
-#'   \url{http://en.wikipedia.org/wiki/Integer_overflow} occurs, the output
-#'   will be NA with a warning. Otherwise it will be a length-one numeric or
-#'   complex vector.
-#' @examples
-#' sum(1:10)
-#' sum(1:5, 6:10)
-#' sum(F, F, F, T, T)
-## function show for heart object
+#' \code{show} prints heart objects.
+#'  
+#' S4 class function to print \code{heart} objects 
+#' generated from function \code{heart}.
+#' 
+#' The contents printed by this function \code{show} is
+#' a brief summary of the \code{heart} object.
+#' 
+#' @param object object from class \code{heart}
+#' @seealso \code{\link[heart]{heart}}
+#' @importFrom heart heart
+#' @export
 setMethod(f = "show", signature = "heart",
           definition = function(object) {
             beta <- round(object@estimates$beta[, "coef"], digits = 3)
@@ -60,7 +51,18 @@ setMethod(f = "show", signature = "heart",
             print(alpha)
           })
 
-## function show for summary.heart object
+#' \code{show} prints summary.heart objects.
+#'  
+#' S4 class function to print \code{summary.heart} objects 
+#' generated from function \code{summary}.
+#' 
+#' The contents printed by this function \code{show} is
+#' a summary of the \code{summary.heart} object.
+#' 
+#' @param object object from class \code{summary.heart}
+#' @seealso \code{\link[heart]{heart}}, \code{\link[heart]{summary}}, 
+#' @importFrom heart heart summary
+#' @export
 setMethod(f = "show", signature = "summary.heart",
           definition = function(object) {
             if (attr(object@call, "show")) {

@@ -22,7 +22,8 @@
 
 ## internal functions that do not export =======================================
 
-## create S4 Class called "summary.heart" for object from summary to show
+## create S4 Class called "summary.heart" for summary.heart object from summary
+#' @export
 setClass(Class = "summary.heart", 
          slots = c(call = "call", 
                    baselinepieces = "numeric",
@@ -32,26 +33,27 @@ setClass(Class = "summary.heart",
 
 
 
-#' Fitting Heart Model: Piece-wise Gamma Frailty Model for Recurrent Events. 
-#' The model is named after the paper title of \emph{Fu et al. (2014)},  
-#' Hypoglycemic Events Analysis via Recurrent Time-to-Event (HEART) Models
+#' Summarizing HEART Model Fits
 #'
-#' \code{functionname} returns fitted model results.
+#' \code{summary} returns summary of estimates from HEART model.
 #'
-#' This is a test Roxygen comments
+#' These are details.
 #'
-#' @param ... Numeric, complex, or logical vectors.
-#' @param na.rm A logical scalar. 
-#' @return If all inputs are integer and logical, then the output
-#'   will be an integer. If integer overflow
-#'   \url{http://en.wikipedia.org/wiki/Integer_overflow} occurs, the output
-#'   will be NA with a warning. Otherwise it will be a length-one numeric or
-#'   complex vector.
+#' @param object heart object from \code{heart}.
+#' @param showcall logic value (TRUE or FALSE) with dafault as TRUE,
+#' indicating whether method \code{show} for object summary.heart prints out 
+#' the call information of original call of \code{heart}.
+#' @param showpieces logic value (TRUE or FALSE) with default as TRUE, 
+#' indicating whether method \code{show} for object summary.heart prints out 
+#' the baseline pieces.
+#' @param digits, an interger specifying the desired number of decimal places 
+#' (round) for estimates. Negative values are allowed 
+#' (\code{help(round)} for more details).
+#' @return summary.heart object
 #' @examples
-#' sum(1:10)
-#' sum(1:5, 6:10)
-#' sum(F, F, F, T, T)
-## function summary for heart object
+#' heart(formula = survrec::Survr(ID, time, event) ~ x,
+#'       data = simu1_dat, baselinepieces = seq(28, 168, length = 5))
+#' summary(heartfit)
 setMethod(f = "summary", signature = "heart",
           definition = function(object, showcall = TRUE, showpieces = TRUE, 
                                 digits = 3) {
