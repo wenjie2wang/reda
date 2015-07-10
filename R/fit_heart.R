@@ -35,7 +35,7 @@ setClass(Class = "heart",
                    convergence = "integer", 
                    hessian = "matrix"))
 
-#' Fitting Heart Model
+#' Fitting HEART Model
 #'
 #' \code{heart} returns fitted model results.
 #'

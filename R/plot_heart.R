@@ -25,9 +25,10 @@
 #' 
 #' \code{plot} produces the plot of baseline function.
 #' 
-#' This is a generic function using R base plotting system, 
+#' This is a function using R base plotting system, 
 #' which probably can be rewritten using ggplot2 later.
 #' (This is a test Roxygen comments)
+#' @export
 plot.baseline <- function(object, CI = TRUE, level = 0.95) {
   baselinepieces <- object@baselinepieces
   n_xx <- 1000

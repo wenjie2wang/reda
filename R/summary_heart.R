@@ -54,6 +54,7 @@ setClass(Class = "summary.heart",
 #' heart(formula = survrec::Survr(ID, time, event) ~ x,
 #'       data = simu1_dat, baselinepieces = seq(28, 168, length = 5))
 #' summary(heartfit)
+#' @export
 setMethod(f = "summary", signature = "heart",
           definition = function(object, showcall = TRUE, showpieces = TRUE, 
                                 digits = 3) {

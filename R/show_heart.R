@@ -30,7 +30,6 @@
 #' 
 #' @param object object from class \code{heart}
 #' @seealso \code{\link[heart]{heart}}
-#' @importFrom heart heart
 #' @export
 setMethod(f = "show", signature = "heart",
           definition = function(object) {
@@ -61,7 +60,6 @@ setMethod(f = "show", signature = "heart",
 #' 
 #' @param object object from class \code{summary.heart}
 #' @seealso \code{\link[heart]{heart}}, \code{\link[heart]{summary}}, 
-#' @importFrom heart heart summary
 #' @export
 setMethod(f = "show", signature = "summary.heart",
           definition = function(object) {

@@ -41,6 +41,7 @@
 #' sum(1:5, 6:10)
 #' sum(F, F, F, T, T)
 #' function coef for heart object
+#' @export
 setMethod(f = "coef", signature = "heart",
           definition = function(object, ...) {
             beta <- round(object@estimates$beta[, "coef"], digits = 3)
@@ -50,6 +51,7 @@ setMethod(f = "coef", signature = "heart",
           })
 
 #' function confint for heart object
+#' @export
 setMethod(f = "confint", signature = "heart",
           definition = function(object, parm, level = 0.95, ...) {
             ## internal function
@@ -57,14 +59,15 @@ setMethod(f = "confint", signature = "heart",
               paste(format(100 * probs, trim = TRUE, scientific = FALSE, 
                            digits = digits), "%")
             }
-            cf <- object@estimates$beta[, 1]
-            pnames <- names(cf)
+            betamat <- object@estimates$beta
+            cf <- betamat[, 1]
+            pnames <- attr(betamat, "dimnames")[[1]]
             if (missing(parm)) {
-              parm <- pnames
+              parm <- seq(nrow(betamat))
             } else if (is.numeric(parm)) { 
-              parm <- pnames[parm]
+              parm <- intersect(seq(nrow(betamat)), parm) 
             } else if (is.character(parm)) {
-              parm <- match(param, pnames, nomatch = NULL)
+              parm <- match(parm, pnames, nomatch = NULL)
             } else {
               stop("invalid argument param")
             }
@@ -74,20 +77,22 @@ setMethod(f = "confint", signature = "heart",
             pct <- format.perc(a, 3)
             ci <- array(NA, dim = c(length(parm), 2L), 
                         dimnames = list(parm, pct))
-            ses <- object@estimates$beta[parm, 2]
+            ses <- betamat[parm, 2]
             ci[] <- cf[parm] + ses %o% fac
             ci <- round(ci, digits = 3)
+            rownames(ci) <- pnames[parm]
             ## return
             ci
           })
 
 
 #' function baseline for heart object
+#' @export
 setGeneric(name = "baseline",
            def = function(object, ...) {
              standardGeneric("baseline")
            })
-
+#' @export
 setMethod(f = "baseline", signature = "heart",
           definition = function(object, ...) {
             alpha <- round(object@estimates$alpha[, "alpha"], digits = 3)
