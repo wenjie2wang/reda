@@ -20,8 +20,6 @@
 ##
 ################################################################################
 
-## internal functions that do not export =======================================
-
 ## create S4 Class called "summary.heart" for summary.heart object from summary
 #' @export
 setClass(Class = "summary.heart", 
@@ -30,7 +28,6 @@ setClass(Class = "summary.heart",
                    coefficients = "matrix",
                    theta = "matrix",
                    baseline = "matrix"))
-
 
 
 #' Summarizing HEART Model Fits
@@ -51,8 +48,9 @@ setClass(Class = "summary.heart",
 #' (\code{help(round)} for more details).
 #' @return summary.heart object
 #' @examples
-#' heart(formula = survrec::Survr(ID, time, event) ~ x,
-#'       data = simu1_dat, baselinepieces = seq(28, 168, length = 5))
+#' data(simuDat)
+#' heartfit <- heart(formula = Survr(ID, time, event) ~ X1 + group, 
+#'                  data = simuDat, baselinepieces = seq(28, 168, length = 5))
 #' summary(heartfit)
 #' @export
 setMethod(f = "summary", signature = "heart",

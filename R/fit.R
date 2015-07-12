@@ -68,18 +68,20 @@ setClass(Class = "heart",
 #' whose names are the names of columns of data containing factors.
 #' See the \code{contrasts.arg} of \code{model.matrix.default} for more detail.
 #' @return a heart object.
+#' @references 
+#' Fu, Haoda, Junxiang Luo, and Yongming Qu. (2014),
+#' "Hypoglycemic Events Analysis via Recurrent Time-to-Event (HEART) Models," 
+#' \emph{Journal of biopharmaceutical statistics}, 2014 Dec 1, Epub 2014 Dec 1.
 #' @examples
-#' library(survrec)
-#' heartfit <- heart(formula = Survr(ID, Time, Event) ~ X1 + X2, 
-#'                   data = testdat, subset = ID %in% 1:4, 
-#'                   na.action = na.omit, 
-#'                   contrasts = list("contr.sum"),
-#'                   baselinepieces = c(50, 100), 
-#'                   start = list(beta = c(0.3, 1), 
-#'                                theta = 0.5, 
-#'                                alpha = c(0.15, 0.16)),
-#'                   control = list(gradtol = 1e-6, stepmax = 1e5, 
-#'                                  steptol = 1e-6, iterlim = 1e2))
+#' data(simuDat)
+#' heartfit <- heart(formula = Survr(ID, time, event) ~ X1 + group, 
+#'                   data = simuDat, baselinepieces = seq(28, 168, length = 5))
+#' str(heartfit)
+#' show(heartfit) # or simply call heartfit
+#' summary(heartfit)
+#' coef(heartfit)
+#' confint(heartfit)
+#' baseline(heartfit)
 #' @export
 heart <- function(formula, baselinepieces, data, subset, na.action, 
                   start = list(), control = list(), contrasts = NULL, ...) {
