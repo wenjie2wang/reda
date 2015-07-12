@@ -45,8 +45,8 @@ plot.baseline(heartfit)
 # 
 # ## generate event times for each process 
 # ## which depends on random seed by myseed and covariate by x
-simu1_fun <- function(beta = 0.3, theta = 0.5, alpha = 0.06, baselinepieces = 168,
-                  x = 0, myseed = 1216, tau = 168) {
+simu1_fun <- function(beta = 0.3, theta = 0.5, alpha = 0.06, 
+                      baselinepieces = 168, x = 0, myseed = 1216, tau = 168) {
   ## generate rate functions for a single process
   set.seed(myseed)
   r <- rgamma(n = 1, shape = theta, scale = 1/theta)
@@ -72,14 +72,15 @@ simu1_fun <- function(beta = 0.3, theta = 0.5, alpha = 0.06, baselinepieces = 16
                  whereT, baselinepieces = baselinepieces)
   ind <- U <= rho_t / rho_m
   timeout <- c(timeinter[ind], tau)
-  eventout <- c(rep(1, tempn), 0)
-  res <- data.frame(ID = myseed, time = timeout, event = eventout, x)
+  eventout <- c(rep(1, length(timeout) - 1), 0)
+  res <- data.frame(ID = myseed, time = timeout, event = eventout, t(x))
   return(res)
 }
-# 
+## generate data for simulation study No.1
 simu1_dat <- NULL
 for (i in 1:200) {
-  simu1_dat <- rbind(simu1_dat, simu1_fun(myseed = i, x = ifelse(i<=100, 0, 1)))
+  simu1_dat <- rbind(simu1_dat, 
+                     simu1_fun(myseed = i, x = ifelse(i <= 100, 0, 1)))
 }
 
 simu1 <- heart(formula = survrec::Survr(ID, time, event) ~ x, 
@@ -90,20 +91,35 @@ coef(simu1)
 confint(simu1)
 baseline(simu1)
 plot.baseline(simu1)
-# 
-# 
-# 
-# 
-# 
-# ## dataset: colon from package survrec
-# # require(survrec)
-# # data(colon)
-# # testdat <- colon
-# # BaselinePieces <- quantile(testdat$time, probs = c(0.25, 0.5, 0.75, 1))
-# # attr(BaselinePieces, "names") <- NULL
-# # BaselinePieces
-# # [1]  21  216  880 2175
-# 
-# 
-# 
-# 
+
+## generate simulation data to export as example data 
+simuDat <- NULL
+set.seed(1216)
+for (i in 1:200) {
+  simuDat <- rbind(simuDat, 
+                    simu1_fun(myseed = i,
+                              beta = c(0.3, 1.5),
+                              x = rbind(ifelse(i <= 100, 0, 1), rnorm(1))))
+}
+simuDat$X2 <- round(simuDat$X2, digits = 2)
+simuDat$X1 <- factor(simuDat$X1, levels = c(0, 1), labels = c("Contr", "Treat"))
+colnames(simuDat)[4:5] <- c("group", "X1")
+save(simuDat, file = "data/simuDat.RData")
+simuFit <- heart(formula = survrec::Survr(ID, time, event) ~ X1 + group, 
+                  data = simuDat, baselinepieces = seq(28, 168, length = 5))
+show(simuFit) 
+summary(simuFit)
+coef(simuFit)
+confint(simuFit)
+baseline(simuFit)
+plot.baseline(simuFit)
+
+## dataset: colon from package survrec
+# require(survrec)
+# data(colon)
+# testdat <- colon
+# BaselinePieces <- quantile(testdat$time, probs = c(0.25, 0.5, 0.75, 1))
+# attr(BaselinePieces, "names") <- NULL
+# BaselinePieces
+# [1]  21  216  880 2175
+
