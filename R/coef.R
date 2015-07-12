@@ -20,27 +20,26 @@
 ##
 ################################################################################
 
-
-#' Fitting Heart Model: Piece-wise Gamma Frailty Model for Recurrent Events. 
-#' The model is named after the paper title of \emph{Fu et al. (2014)},  
-#' Hypoglycemic Events Analysis via Recurrent Time-to-Event (HEART) Models
+#' Extract Coefficients from HEART Model
 #'
-#' \code{functionname} returns fitted model results.
+#' coef is a S4 class generic function 
+#' which extracts model coefficients from objects returned by modeling 
+#' functions. 
 #'
-#' This is a test Roxygen comments
-#'
-#' @param ... Numeric, complex, or logical vectors.
-#' @param na.rm A logical scalar. 
-#' @return If all inputs are integer and logical, then the output
-#'   will be an integer. If integer overflow
-#'   \url{http://en.wikipedia.org/wiki/Integer_overflow} occurs, the output
-#'   will be NA with a warning. Otherwise it will be a length-one numeric or
-#'   complex vector.
+#' These are details
+#' 
+#' @usage 
+#' coef(object)
+#' 
+#' @param object heart object
+#' @param ... other arguments
+#' @return Coefficients extracted from the model object object. 
+#' For heart object, it will be a named numeric vector.
 #' @examples
-#' sum(1:10)
-#' sum(1:5, 6:10)
-#' sum(F, F, F, T, T)
-#' function coef for heart object
+#' data(simuDat)
+#' heartfit <- heart(formula = Survr(ID, time, event) ~ X1 + group, 
+#'                  data = simuDat, baselinepieces = seq(28, 168, length = 5))
+#' coef(heartfit)
 #' @export
 setMethod(f = "coef", signature = "heart",
           definition = function(object, ...) {
@@ -86,17 +85,3 @@ setMethod(f = "confint", signature = "heart",
           })
 
 
-#' function baseline for heart object
-#' @export
-setGeneric(name = "baseline",
-           def = function(object, ...) {
-             standardGeneric("baseline")
-           })
-#' @export
-setMethod(f = "baseline", signature = "heart",
-          definition = function(object, ...) {
-            alpha <- round(object@estimates$alpha[, "alpha"], digits = 3)
-            names(alpha) <- rownames(object@estimates$alpha)
-            ## return
-            alpha
-          })
