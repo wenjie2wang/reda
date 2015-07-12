@@ -20,21 +20,17 @@
 ##
 ################################################################################
 
-#' Extract Coefficients from HEART Model
+#' Extract coefficients estiamtes from HEART model.
 #'
-#' coef is a S4 class generic function 
-#' which extracts model coefficients from objects returned by modeling 
-#' functions. 
+#' \code{coef} is a S4 class generic function 
+#' which extracts model coefficients from the heart object returned by modeling 
+#' function \code{heart}. 
 #'
-#' These are details
-#' 
 #' @usage 
 #' coef(object)
-#' 
-#' @param object heart object
-#' @param ... other arguments
-#' @return Coefficients extracted from the model object object. 
-#' For heart object, it will be a named numeric vector.
+#' @param object heart object.
+#' @param ... other arguments.
+#' @return A named numeric vector.
 #' @examples
 #' data(simuDat)
 #' heartfit <- heart(formula = Survr(ID, time, event) ~ X1 + group, 
@@ -49,7 +45,43 @@ setMethod(f = "coef", signature = "heart",
             beta
           })
 
-#' function confint for heart object
+
+
+#' Confidence Intervals for HEART Model Coefficients
+#'
+#' \code{confint} is a S4 class generic function for heart object, 
+#' which computes confidence intervals 
+#' for all or selected coefficients in a fitted HEART model. 
+#'
+#' Under regularity condition (Shao, 2003, 
+#' Theorem 4.16 and Theorem 4.17, page 287, 290), 
+#' the confidence intervals are constructed loosely 
+#' based on Fisher information matrix and estimates of coefficients. 
+#' See \emph{Fu et al. (2014)} for more details.
+#' 
+#' @usage 
+#' confint(object, parm, level = 0.95, ...)
+#' @param object heart object.
+#' @param parm a specification of which parameters are 
+#' to be given confidence intervals, 
+#' either a vector of numbers or a vector of names. 
+#' If missing, all parameters are considered.
+#' @param level the confidence level required.
+#' @param ... additional argument(s).
+#' @return A numeric matrix with rownames and colnames.
+#' @references 
+#' Shao, J. (2003), 
+#' \emph{Mathematical statistics}, Springer texts in statistics, 
+#' New York: Springer, 2nd edition.
+#' 
+#' Fu, Haoda, Junxiang Luo, and Yongming Qu. (2014),
+#' "Hypoglycemic Events Analysis via Recurrent Time-to-Event (HEART) Models," 
+#' \emph{Journal of biopharmaceutical statistics}, 2014 Dec 1, Epub 2014 Dec 1.
+#' @examples
+#' data(simuDat)
+#' heartfit <- heart(formula = Survr(ID, time, event) ~ X1 + group, 
+#'                   data = simuDat, baselinepieces = seq(28, 168, length = 5))
+#' confint(heartfit)
 #' @export
 setMethod(f = "confint", signature = "heart",
           definition = function(object, parm, level = 0.95, ...) {
