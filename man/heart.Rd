@@ -1,9 +1,9 @@
-% Please edit documentation in R/fit_heart.R, R/heart.R
+% Please edit documentation in R/fit.R, R/heart.R
 \docType{package}
 \name{heart}
 \alias{heart}
 \alias{heart-package}
-\title{Fitting Heart Model}
+\title{Fitting HEART Model}
 \usage{
 heart(formula, baselinepieces, data, subset, na.action, start = list(), 
     control = list(), contrasts = NULL, ...)

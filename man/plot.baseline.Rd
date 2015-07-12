@@ -1,4 +1,4 @@
-% Please edit documentation in R/plot_heart.R
+% Please edit documentation in R/plot.R
 \name{plot.baseline}
 \alias{plot.baseline}
 \title{plot baseline.}

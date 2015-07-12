@@ -1,4 +1,4 @@
-% Please edit documentation in R/summary_heart.R
+% Please edit documentation in R/summary.R
 \docType{methods}
 \name{summary,heart-method}
 \alias{summary,heart-method}
@@ -32,7 +32,8 @@ summary.heart object
 These are details.
 }
 \examples{
-heart(formula = survrec::Survr(ID, time, event) ~ x, data = simu1_dat, 
+data(simuDat)
+heartfit <- heart(formula = Survr(ID, time, event) ~ X1 + group, data = simuDat, 
     baselinepieces = seq(28, 168, length = 5))
 summary(heartfit)
 }

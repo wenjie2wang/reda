@@ -1,34 +1,27 @@
-% Please edit documentation in R/coef_heart.R
+% Please edit documentation in R/coef.R
 \docType{methods}
 \name{coef,heart-method}
 \alias{coef,heart-method}
-\title{Fitting Heart Model: Piece-wise Gamma Frailty Model for Recurrent Events.
-The model is named after the paper title of \emph{Fu et al. (2014)},
-Hypoglycemic Events Analysis via Recurrent Time-to-Event (HEART) Models}
+\title{Extract coefficients estiamtes from HEART model.}
 \usage{
-\S4method{coef}{heart}(object, ...)
+coef(object)
 }
 \arguments{
-\item{...}{Numeric, complex, or logical vectors.}
+\item{object}{heart object.}
 
-\item{na.rm}{A logical scalar.}
+\item{...}{other arguments.}
 }
 \value{
-If all inputs are integer and logical, then the output
-  will be an integer. If integer overflow
-  \url{http://en.wikipedia.org/wiki/Integer_overflow} occurs, the output
-  will be NA with a warning. Otherwise it will be a length-one numeric or
-  complex vector.
+A named numeric vector.
 }
 \description{
-\code{functionname} returns fitted model results.
-}
-\details{
-This is a test Roxygen comments
+\code{coef} is a S4 class generic function
+which extracts model coefficients from the heart object returned by modeling
+function \code{heart}.
 }
 \examples{
-sum(1:10)
-sum(1:5, 6:10)
-sum(F, F, F, T, T)
-function coef for heart object
+data(simuDat)
+heartfit <- heart(formula = Survr(ID, time, event) ~ X1 + group, data = simuDat, 
+    baselinepieces = seq(28, 168, length = 5))
+coef(heartfit)
 }

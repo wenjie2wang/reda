@@ -1,4 +1,4 @@
-% Please edit documentation in R/show_heart.R
+% Please edit documentation in R/show.R
 \docType{methods}
 \name{show,summary.heart-method}
 \alias{show,summary.heart-method}
