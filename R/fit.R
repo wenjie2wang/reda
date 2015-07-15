@@ -83,6 +83,7 @@ setClass(Class = "heart",
 #' confint(heartfit)
 #' baseline(heartfit)
 #' plot_MCF(heartfit)
+#' @import survrec
 #' @export
 heart <- function(formula, baselinepieces, data, subset, na.action, 
                   start = list(), control = list(), contrasts = NULL, ...) {

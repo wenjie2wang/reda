@@ -34,6 +34,7 @@
 #' @param linecolors line colors specified to different groups.
 #' @param ... further arguments.
 #' @return ggplot object.
+#' @import ggplot2
 #' @export
 plot_sampleMCF <- function(MCF, linetypes, linecolors, ...) {
   ## if it is overall MCF
@@ -95,6 +96,7 @@ plot_sampleMCF <- function(MCF, linetypes, linecolors, ...) {
 #' @param level numeric value \eqn{\in (0, 1)} confidence level.
 #' @param ... further arguments.
 #' @return ggplot object
+#' @import ggplot2
 #' @export
 plot_heartMCF <- function(object, CI = TRUE, level = 0.95, ...) {
   baselinepieces <- object@baselinepieces

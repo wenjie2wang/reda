@@ -11,7 +11,7 @@ Authors@R: c(person(given = "Haoda", family = "Fu", email = "fu_haoda@lily.com",
 Description: Companion of Hypoglycemic Events Analysis via 
     Recurrent Time-to-Event (HEART) Models, 
     Journal of Biopharmaceutical Statistics, 2015.
-Imports: survrec
+Imports: survrec, ggplot2
 Depends: R (>= 3.2.1)
 License: GPL (>= 3)
 LazyData: true
