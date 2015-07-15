@@ -20,12 +20,21 @@
 ##
 ################################################################################
 
-#' function baseline for heart object
+## define new generic function named 'baseline'
 #' @export
 setGeneric(name = "baseline",
            def = function(object, ...) {
              standardGeneric("baseline")
            })
+
+#' Estimated Baseline Rate Function. 
+#' 
+#' Extract estiamted baseline rate function from heart object.
+#' 
+#' @usage baseline(object, ...)
+#' @param object heart object.
+#' @param ... further arguments.
+#' @return A named vector.
 #' @export
 setMethod(f = "baseline", signature = "heart",
           definition = function(object, ...) {
@@ -34,3 +43,5 @@ setMethod(f = "baseline", signature = "heart",
             ## return
             alpha
           })
+
+

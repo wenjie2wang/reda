@@ -75,31 +75,29 @@ setClass(Class = "heart",
 #' @examples
 #' data(simuDat)
 #' heartfit <- heart(formula = Survr(ID, time, event) ~ X1 + group, 
-#'                   data = simuDat, baselinepieces = seq(28, 168, length = 5))
+#'                   data = simuDat, baselinepieces = seq(28, 168, length = 6))
 #' str(heartfit)
 #' show(heartfit) # or simply call heartfit
 #' summary(heartfit)
 #' coef(heartfit)
 #' confint(heartfit)
 #' baseline(heartfit)
+#' plot_MCF(heartfit)
 #' @export
 heart <- function(formula, baselinepieces, data, subset, na.action, 
                   start = list(), control = list(), contrasts = NULL, ...) {
-  
   ## record the function call to return
   Call <- match.call()
-  
   ## arguments check
   if(missing(formula)) {
-    stop("formula argument is missing.")
+    stop("Argument 'formula' is required.")
   } 
   if(missing(data)) {
     data <- environment(formula)
   }
   if (! with(data, inherits(eval(Call[[2]][[2]]), "Survr"))) {
-    stop("formula must be a survival recurrent object.")
+    stop("'formula' must be a survival recurrent object.")
   }
-  
   ## Prepare data: ID, time, event ~ X(s)
   mcall <- match.call(expand.dots = FALSE)
   mmcall <- match(c("formula", "data", "subset", "na.action"), names(mcall), 0L)
@@ -109,7 +107,6 @@ heart <- function(formula, baselinepieces, data, subset, na.action,
   mcall[[1L]] <- quote(stats::model.frame)
   mf <- eval(mcall, parent.frame())
   mm <- stats::model.matrix(formula, data = mf)
-  
   ## number of covariates excluding intercept
   nbeta <- ncol(mm) - 1 
   ## covariates' names
@@ -117,7 +114,6 @@ heart <- function(formula, baselinepieces, data, subset, na.action,
   ## data 
   dat <- as.data.frame(cbind(mf[, 1][, 1:3], mm[, -1]))
   colnames(dat) <- c("ID", "time", "event", covar_names)
-
   ## baselinepieces
   if(missing(baselinepieces)) {
     warning("Baseline pieces are splitted by median event time.")
@@ -133,13 +129,13 @@ heart <- function(formula, baselinepieces, data, subset, na.action,
   ## friendly version of baseline pieces to print out
   print_blpieces <- int_baseline(baselinepieces = baselinepieces)
   attr(baselinepieces, "name") <- print_blpieces
-  
+  ## 'control' and 'start' values for 'nlm'
   startlist <- c(start, nbeta = nbeta, nalpha = nalpha)
   start <- do.call("heart_start", startlist)
   control <- do.call("heart_control", control)
   ini <- do.call("c", start)
   length_par <- length(ini)
-  
+  ## log likelihood
   fit <- nlm(logL_heart, ini, data = dat, 
              baselinepieces = baselinepieces, hessian = TRUE,
              gradtol = control$gradtol, stepmax = control$stepmax,

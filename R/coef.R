@@ -59,8 +59,7 @@ setMethod(f = "coef", signature = "heart",
 #' based on Fisher information matrix and estimates of coefficients. 
 #' See \emph{Fu et al. (2014)} for more details.
 #' 
-#' @usage 
-#' confint(object, parm, level = 0.95, ...)
+#' @usage confint(object, parm, level = 0.95, ...)
 #' @param object heart object.
 #' @param parm a specification of which parameters are 
 #' to be given confidence intervals, 

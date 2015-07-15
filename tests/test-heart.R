@@ -102,17 +102,18 @@ for (i in 1:200) {
                               x = rbind(ifelse(i <= 100, 0, 1), rnorm(1))))
 }
 simuDat$X2 <- round(simuDat$X2, digits = 2)
-simuDat$X1 <- factor(simuDat$X1, levels = c(0, 1), labels = c("Contr", "Treat"))
+simuDat$X1 <- factor(simuDat$X1, levels = c(0, 1), labels = c("Treat", "Contr"))
 colnames(simuDat)[4:5] <- c("group", "X1")
 save(simuDat, file = "data/simuDat.RData")
 simuFit <- heart(formula = survrec::Survr(ID, time, event) ~ X1 + group, 
-                  data = simuDat, baselinepieces = seq(28, 168, length = 5))
+                  data = simuDat, baselinepieces = seq(28, 168, length = 6))
 show(simuFit) 
 summary(simuFit)
 coef(simuFit)
 confint(simuFit)
 baseline(simuFit)
-plot.baseline(simuFit)
+MCF <- sample_MCF(survrec::Survr(ID, time, event) ~ patgroup, data = simuDat)
+plot_sampleMCF(simuFit)
 
 ## dataset: colon from package survrec
 # require(survrec)
