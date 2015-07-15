@@ -56,10 +56,19 @@ The model is named after the paper title of \emph{Fu et al. (2014)},
 Hypoglycemic Events Analysis via Recurrent Time-to-Event (HEART) Models
 }
 \examples{
-library(survrec)
-heartfit <- heart(formula = Survr(ID, Time, Event) ~ X1 + X2, data = testdat, 
-    subset = ID \%in\% 1:4, na.action = na.omit, contrasts = list("contr.sum"), 
-    baselinepieces = c(50, 100), start = list(beta = c(0.3, 1), theta = 0.5, 
-        alpha = c(0.15, 0.16)), control = list(gradtol = 1e-06, stepmax = 1e+05, 
-        steptol = 1e-06, iterlim = 100))
+data(simuDat)
+heartfit <- heart(formula = Survr(ID, time, event) ~ X1 + group, data = simuDat, 
+    baselinepieces = seq(28, 168, length = 6))
+str(heartfit)
+show(heartfit)  # or simply call heartfit
+summary(heartfit)
+coef(heartfit)
+confint(heartfit)
+baseline(heartfit)
+plot_MCF(heartfit)
+}
+\references{
+Fu, Haoda, Junxiang Luo, and Yongming Qu. (2014),
+"Hypoglycemic Events Analysis via Recurrent Time-to-Event (HEART) Models,"
+\emph{Journal of biopharmaceutical statistics}, 2014 Dec 1, Epub 2014 Dec 1.
 }
