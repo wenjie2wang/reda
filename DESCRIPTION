@@ -13,7 +13,7 @@ Description: Companion of Hypoglycemic Events Analysis via
     Journal of Biopharmaceutical Statistics, 2015.
 Imports: utils, methods, stats, survrec, ggplot2
 Suggests: knitr
-Depends: R (>= 3.2.0), survrec
+Depends: R (>= 3.2.0)
 License: GPL (>= 3)
 LazyData: true
 VignetteBuilder: knitr

@@ -34,11 +34,11 @@
 #' @format data frame
 #' @references 
 #' Lewis, P. and Shedler, G. (1979), 
-#' “Simulation of nonhomogeneous Poisson processes by thinning,” 
+#' ``Simulation of nonhomogeneous Poisson processes by thinning,''
 #' \emph{Naval Research Logistics Quarterly}, 26, 403–413.
 #' 
 #' Fu, Haoda, Junxiang Luo, and Yongming Qu. (2014),
-#' "Hypoglycemic Events Analysis via Recurrent Time-to-Event (HEART) Models," 
+#' ``Hypoglycemic Events Analysis via Recurrent Time-to-Event (HEART) Models,''
 #' \emph{Journal of biopharmaceutical statistics}, 2014 Dec 1, Epub 2014 Dec 1.
 #' @importFrom utils head 
 #' @examples 
