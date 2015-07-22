@@ -20,6 +20,7 @@
 ##
 ################################################################################
 
+
 #' Extract coefficients estiamtes from HEART model.
 #'
 #' \code{coef} is a S4 class generic function 
@@ -27,15 +28,11 @@
 #' function \code{heart}. 
 #'
 #' @usage 
-#' coef(object)
+#' coef(object, ...)
 #' @param object heart object.
 #' @param ... other arguments.
 #' @return A named numeric vector.
-#' @examples
-#' data(simuDat)
-#' heartfit <- heart(formula = Survr(ID, time, event) ~ X1 + group, 
-#'                  data = simuDat, baselinepieces = seq(28, 168, length = 5))
-#' coef(heartfit)
+#' @importFrom stats coef
 #' @export
 setMethod(f = "coef", signature = "heart",
           definition = function(object, ...) {
@@ -44,7 +41,6 @@ setMethod(f = "coef", signature = "heart",
             ## return
             beta
           })
-
 
 
 #' Confidence Intervals for HEART Model Coefficients
@@ -76,11 +72,7 @@ setMethod(f = "coef", signature = "heart",
 #' Fu, Haoda, Junxiang Luo, and Yongming Qu. (2014),
 #' "Hypoglycemic Events Analysis via Recurrent Time-to-Event (HEART) Models," 
 #' \emph{Journal of biopharmaceutical statistics}, 2014 Dec 1, Epub 2014 Dec 1.
-#' @examples
-#' data(simuDat)
-#' heartfit <- heart(formula = Survr(ID, time, event) ~ X1 + group, 
-#'                   data = simuDat, baselinepieces = seq(28, 168, length = 5))
-#' confint(heartfit)
+#' @importFrom stats confint qnorm 
 #' @export
 setMethod(f = "confint", signature = "heart",
           definition = function(object, parm, level = 0.95, ...) {

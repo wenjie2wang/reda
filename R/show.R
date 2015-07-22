@@ -20,16 +20,22 @@
 ##
 ################################################################################
 
-#' \code{show} prints heart objects.
-#'  
-#' S4 class function to print \code{heart} objects 
-#' generated from function \code{heart}.
+
+#' Show an object.
 #' 
-#' The contents printed by this function \code{show} is
-#' a brief summary of the \code{heart} object.
+#' An S4 class generic function to display certain objects.
 #' 
-#' @param object object from class \code{heart}
-#' @seealso \code{\link[heart]{heart}}
+#' @usage show(object)
+#' @param object certain R objects generated from heart package.
+#' @name show
+#' @seealso \code{\link[heart]{heart}} \code{\link[heart]{summary}} 
+#' \code{\link[methods]{show}}
+NULL
+
+#' For heart object, it prints brief summary of the \code{heart} object.
+#' @rdname show 
+#' @aliases show
+#' @importFrom methods show
 #' @export
 setMethod(f = "show", signature = "heart",
           definition = function(object) {
@@ -50,16 +56,11 @@ setMethod(f = "show", signature = "heart",
             print(alpha)
           })
 
-#' \code{show} prints summary.heart objects.
-#'  
-#' S4 class function to print \code{summary.heart} objects 
-#' generated from function \code{summary}.
-#' 
-#' The contents printed by this function \code{show} is
-#' a summary of the \code{summary.heart} object.
-#' 
-#' @param object object from class \code{summary.heart}
-#' @seealso \code{\link[heart]{heart}}, \code{\link[heart]{summary}}, 
+#' For summary.heart object, 
+#' it prints summary of the \code{summary.heart} object
+#' @rdname show 
+#' @aliases show
+#' @importFrom methods show
 #' @export
 setMethod(f = "show", signature = "summary.heart",
           definition = function(object) {

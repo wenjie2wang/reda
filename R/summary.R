@@ -20,7 +20,14 @@
 ##
 ################################################################################
 
+
 ## create S4 Class called "summary.heart" for summary.heart object from summary
+#' An S4 class to represent summary of heart object
+#' @slot call call
+#' @slot baselinepieces numeric vector
+#' @slot coefficients numeric matrix
+#' @slot theta numeric matrix
+#' @slot baseline numeric matrix 
 #' @export
 setClass(Class = "summary.heart", 
          slots = c(call = "call", 
@@ -47,11 +54,7 @@ setClass(Class = "summary.heart",
 #' (round) for estimates. Negative values are allowed 
 #' (\code{help(round)} for more details).
 #' @return summary.heart object
-#' @examples
-#' data(simuDat)
-#' heartfit <- heart(formula = Survr(ID, time, event) ~ X1 + group, 
-#'                  data = simuDat, baselinepieces = seq(28, 168, length = 5))
-#' summary(heartfit)
+#' @importFrom methods new
 #' @export
 setMethod(f = "summary", signature = "heart",
           definition = function(object, showcall = TRUE, showpieces = TRUE, 

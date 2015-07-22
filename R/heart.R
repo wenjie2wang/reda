@@ -20,6 +20,7 @@
 ##
 ################################################################################
 
+
 #' Parametric Recurrent Event Analysis by HEART Model.
 #' 
 #' The heart package provides functions to fit HEART model for recurrent event
@@ -27,6 +28,5 @@
 #' 
 #' @docType package
 #' @name heart
-#' @import survrec
 NULL
 
