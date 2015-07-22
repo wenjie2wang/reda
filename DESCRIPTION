@@ -3,16 +3,17 @@ Title: Parametric Recurrent Event Analysis
 Version: 0.0.0.9000
 Date: 2015-07-10
 Authors@R: c(person(given = "Haoda", family = "Fu", email = "fu_haoda@lily.com",
-             role = c("aut")),
-             person(given = "Jun", family = "Yan", role = "ctb"),
+                    role = c("aut")),
              person(given = "Wenjie", family = "Wang", 
-             email = "wenjie.2.wang@uconn.edu",
-             role = c("ctb","cre")))
+                    email = "wenjie.2.wang@uconn.edu",
+                    role = c("ctb","cre")),
+             person(given = "Jun", family = "Yan", role = "ctb"))
 Description: Companion of Hypoglycemic Events Analysis via 
     Recurrent Time-to-Event (HEART) Models, 
     Journal of Biopharmaceutical Statistics, 2015.
-Imports: survrec, ggplot2
-Depends: R (>= 3.2.1)
+Imports: utils, methods, stats, survrec, ggplot2
+Suggests: knitr
+Depends: R (>= 3.2.0), survrec
 License: GPL (>= 3)
 LazyData: true
 VignetteBuilder: knitr
