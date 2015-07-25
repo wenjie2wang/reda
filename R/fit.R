@@ -21,84 +21,49 @@
 ################################################################################
 
 
-## create S4 Class called "heart" for heart object from function heart
-#' An S4 class to represent a fitted HEART model.
-#' @slot call call
-#' @slot formula formula
-#' @slot baselinepieces numeric vector
-#' @slot estimates list 
-#' @slot control list
-#' @slot start list
-#' @slot na.action length-one character vector
-#' @slot xlevels list
-#' @slot contrasts list
-#' @slot convergence an integer
-#' @slot hessian numeric matrix
-#' @export
-setClass(Class = "heart", 
-         slots = c(call = "call", 
-                   formula = "formula", 
-                   baselinepieces = "numeric",
-                   estimates = "list",
-                   control = "list",
-                   start = "list",
-                   na.action = "character",
-                   xlevels = "list",
-                   contrasts = "list",
-                   convergence = "integer", 
-                   hessian = "matrix"))
+## collation after class.R
+#' @include class.R
+NULL
 
 
 #' Fitting HEART Model
 #'
 #' @description \code{heart} returns fitted model results.
-#'
 #' @details HEART model is a piece-wise Gamma frailty model 
 #' for recurrent events. 
 #' The model is named after the paper title of \emph{Fu et al. (2014)},  
 #' Hypoglycemic Events Analysis via Recurrent Time-to-Event (HEART) Models
 #'
 #' @param formula Survr object from function \code{Survr} in package survrec.
-#' 
 #' @param baselinepieces an optional numeric vector consisting of
 #' all the right endpoints of baseline pieces.
-#' 
 #' @param data an optional data frame, list or environment containing
 #' the variables in the model.  If not found in data, the variables are taken 
 #' from \code{environment(formula)}, usually the environment from which 
 #' \code{heart} is called.
-#' 
 #' @param subset an optional vector specifying a subset of observations 
 #' to be used in the fitting process.
-#' 
 #' @param na.action function which indicates what should the procedure do 
 #' if the data contains NAs.  The default is set by the 
 #' na.action setting of \code{\link[base]{options}} and is na.fail if that is 
 #' not set.  The "factory-fresh" default is \code{\link[stats]{na.omit}}.
 #' Another possible value is NULL, no action. 
 #' \code{\link[stats]{na.exclude}} can be useful. 
-#' 
 #' @param start an optional list of starting values for the parameters
 #' to be estimated in the model.
-#' 
 #' @param control an optional list of parameters for controlling the likelihood 
 #' function maximization process. For more detail, users may \code{help(nlm)}.
-#'  
 #' @param contrasts an optional list, whose entries are values 
 #' (numeric matrices or character strings naming functions) to be used 
 #' as replacement values for the contrasts replacement function and 
 #' whose names are the names of columns of data containing factors.
 #' See the \code{contrasts.arg} of \code{model.matrix.default} for more detail.
-#' 
 #' @param ... further arguments.
-#' 
 #' @return a heart object.
-#' 
 #' @references 
 #' Fu, Haoda, Junxiang Luo, and Yongming Qu. (2014),
 #' "Hypoglycemic Events Analysis via Recurrent Time-to-Event (HEART) Models," 
 #' \emph{Journal of biopharmaceutical statistics}, 2014 Dec 1, Epub 2014 Dec 1.
-#' 
 #' @examples
 #' library(heart)
 #' data(simuDat)
@@ -110,13 +75,9 @@ setClass(Class = "heart",
 #' coef(heartfit)
 #' confint(heartfit)
 #' baseline(heartfit)
-#' 
-#' @docType methods
-#' 
 #' @importFrom methods new
 #' @importFrom stats model.matrix nlm pnorm na.fail na.omit na.exclude na.pass
 #' @importFrom survrec Survr
-#' 
 #' @export
 heart <- function(formula, baselinepieces, data, subset, na.action, 
                   start = list(), control = list(), contrasts = NULL, ...) {
@@ -153,7 +114,7 @@ heart <- function(formula, baselinepieces, data, subset, na.action,
   if(missing(baselinepieces)) {
     warning("Baseline pieces are splitted by median event time.")
     baselinepieces <- as.vector(round(quantile(dat$time, c(0.5, 1)), 
-                                digits = 1))
+                                      digits = 1))
   } 
   ## number of baseline pieces or rate functions
   nalpha <- length(baselinepieces)
@@ -172,10 +133,10 @@ heart <- function(formula, baselinepieces, data, subset, na.action,
   length_par <- length(ini)
   ## log likelihood
   fit <- stats::nlm(logL_heart, ini, data = dat, 
-             baselinepieces = baselinepieces, hessian = TRUE,
-             gradtol = control$gradtol, stepmax = control$stepmax,
-             steptol = control$steptol, iterlim = control$iterlim)
-
+                    baselinepieces = baselinepieces, hessian = TRUE,
+                    gradtol = control$gradtol, stepmax = control$stepmax,
+                    steptol = control$steptol, iterlim = control$iterlim)
+  
   est_beta <- matrix(NA, nrow = nbeta, ncol = 3)
   colnames(est_beta) <- c("coef", "se", "Pr(>|z|)")
   rownames(est_beta) <- covar_names

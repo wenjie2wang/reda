@@ -21,27 +21,16 @@
 ################################################################################
 
 
-## create S4 Class called "summary.heart" for summary.heart object from summary
-#' An S4 class to represent summary of heart object
-#' @slot call call
-#' @slot baselinepieces numeric vector
-#' @slot coefficients numeric matrix
-#' @slot theta numeric matrix
-#' @slot baseline numeric matrix 
-#' @export
-setClass(Class = "summary.heart", 
-         slots = c(call = "call", 
-                   baselinepieces = "numeric",
-                   coefficients = "matrix",
-                   theta = "matrix",
-                   baseline = "matrix"))
+## collation after class.R
+#' @include class.R 
+NULL
 
 
 #' Summarizing HEART Model Fits
 #'
 #' \code{summary} returns summary of estimates from HEART model.
 #'
-#' These are details.
+#' These are details. \strong{FIX ME}
 #'
 #' @param object heart object from \code{heart}.
 #' @param showcall logic value (TRUE or FALSE) with dafault as TRUE,
@@ -77,3 +66,4 @@ setMethod(f = "summary", signature = "heart",
             ## return
             results
           })
+

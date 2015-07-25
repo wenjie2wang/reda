@@ -21,34 +21,26 @@
 ################################################################################
 
 
-## define new generic function to plot MCF
-#' An S4 class generic function.
+#' Plot Mean Cumulative Function (MCF)
 #' 
-#' Plot mean cumulative function (MCF). 
+#' An S4 class generic function dispatched to a certain method 
+#' to plot mean cumulative function by using ggplot2 plotting system. 
+#' So the plots generated are able to be further customized properly.
 #' 
-#' @usage plotMCF(object, ...)
 #' @param object empirMCF or heartMCF object.
+#' @param conf.int logical indicating whether to plot confidence interval.
 #' @param ... further arguments.
+#' @param linetypes line types specified to different groups. \strong{FIX ME}
+#' @param linecolors line colors specified to different groups. \strong{FIX ME}
+#' @return ggplot object.
 #' @export
 setGeneric(name = "plotMCF",
-           def = function(object, ...) {
+           def = function(object, conf.int = FALSE, ...) {
              standardGeneric("plotMCF")
            })
 
 
-#' Plot Empirical Mean Cumulative Function (MCF)
-#' 
-#' The function plots empirical mean cumulative function from empirMCF object
-#' by using ggplot2 plotting system.  
-#' So the plots generated are able to be further customized properly.
-#' 
-#' @param object empirMCF object.
-#' @param conf.int logical value to specify whether to include confidence
-#' interval in the plot. The default is FALSE.
-#' @param linetypes line types specified to different groups. \strong{FIX ME}
-#' @param linecolors line colors specified to different groups. \strong{FIX ME}
-#' @param ... further arguments.
-#' @return ggplot object.
+#' @describeIn plotMCF Plot empirical mean cumulative function (MCF)
 #' @importFrom utils tail
 #' @importFrom stats setNames
 #' @importFrom ggplot2 ggplot geom_step aes aes_string scale_color_manual
@@ -103,18 +95,8 @@ setMethod(f = "plotMCF", signature = "empirMCF",
           })
 
 
-#' Plot Estimated Mean Cumulative Function (MCF) of Baseline Rate Function
-#' 
-#' The function plots estimated mean cumulative function (MCF)
-#' from heartMCF object by using ggplot2 plotting system.  
-#' So the plots generated are able to be further customized properly.
-#' @param object heartMCF object.
-#' @param conf.int logical value to specify whether to include confidence
-#' interval in the plot. The default is FALSE.
-#' @param linetypes numeric. \strong{FIX ME}
-#' @param linecolors colors. \strong{FIX ME}
-#' @param ... further arguments.
-#' @return ggplot object
+#' @describeIn plotMCF Estimated mean cumulative function (MCF) 
+#' for baseline rate function.
 #' @importFrom stats setNames
 #' @importFrom ggplot2 ggplot geom_line aes aes_string scale_color_manual
 #' scale_linetype_manual ylab ggtitle 
@@ -184,4 +166,5 @@ setMethod(f = "plotMCF", signature = "heartMCF",
               ggplot2::ggtitle("Estimated Mean Cumulative Function")
             return(p)
           })
+
 

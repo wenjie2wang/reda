@@ -21,14 +21,19 @@
 ################################################################################
 
 
-## define new generic function named 'baseline'
-#' An S4 class generic function.
+## collation after class.R
+#' @include class.R 
+NULL
+
+
+#' Estimated Baseline Rate Function
 #' 
-#' Estimated baseline rate function. 
+#' An S4 class generic function to extract the estimated baseline rate function 
+#' from HEART model. 
 #' 
-#' @usage baseline(object, ...)
 #' @param object heart object.
 #' @param ... further arguments.
+#' @return a named vector.
 #' @export
 setGeneric(name = "baseline",
            def = function(object, ...) {
@@ -38,7 +43,6 @@ setGeneric(name = "baseline",
 
 #' @describeIn baseline Extract estiamted baseline rate function 
 #' from heart object.
-#' @return a named vector.
 #' @export
 setMethod(f = "baseline", signature = "heart",
           definition = function(object, ...) {
@@ -47,5 +51,6 @@ setMethod(f = "baseline", signature = "heart",
             ## return
             alpha
           })
+
 
 

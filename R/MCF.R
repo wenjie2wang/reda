@@ -21,14 +21,25 @@
 ################################################################################
 
 
+## collation after class.R
+#' @include class.R 
+NULL
+
+
 #' Mean Cumulative Function (MCF)
 #' 
 #' S4 class generic function to compute mean empirical cumulative function (MCF)
 #' from sample data or estimated MCF from HEART model.
 #' 
-#' @usage MCF(object, ...)
+#' For Survr object from function \code{Survr} in package survrec, 
+#' The covariate specified in the rhs of the formula can either be 1 or 
+#' any one factor variable in the data.  The former computes the overall 
+#' empirical MCF from sample.  The latter computes the empirical MCF for each 
+#' level of the factor variable specified respectively.
+#' 
 #' @param object an object used to dispatch a method.
 #' @param ... further arguments passed to or from other methods.
+#' 
 #' @export
 setGeneric(name = "MCF",
            def = function(object, ...) {
@@ -36,27 +47,11 @@ setGeneric(name = "MCF",
            })
 
 
-#' An S4 class to represent computed empirical MCF
-#' @slot formula formula 
-#' @slot MCF data.frame
-#' @slot multigroup logical value
-#' @importFrom methods setClass
-#' @export
-setClass(Class = "empirMCF", 
-         slots = c(formula = "formula", MCF = "data.frame", 
-                   multigroup = "logical"))
-
-
 #' @describeIn MCF Empirical mean cumulative function (MCF)
 #' 
 #' \code{MCF} computes empirical mean cumulative function (MCF) on every
 #' time point from recurrent event sample data.  
 #' It does not assume any particular underlying model. 
-#' @param object Survr object from function \code{Survr} in package survrec.
-#' The covariate specified in the rhs of the formula can either be 1 or 
-#' any one factor variable in the data.  The former computes the overall 
-#' empirical MCF from sample.  The latter computes the empirical MCF for each 
-#' level of the factor variable specified respectively.
 #' @param data an optional data frame, list or environment containing
 #' the variables in the model.  If not found in data, the variables are taken 
 #' from \code{environment(formula)}, usually the environment from which 
@@ -69,7 +64,6 @@ setClass(Class = "empirMCF",
 #' not set.  The "factory-fresh" default is \code{\link[stats]{na.omit}}.
 #' Another possible value is NULL, no action.  
 #' Value \code{\link[stats]{na.exclude}} can be useful. 
-#' @param ... further arguments.
 #' @return empirMCF object
 #' @importFrom utils head 
 #' @importFrom methods new
@@ -190,33 +184,13 @@ setMethod(f = "MCF", signature = "formula",
           })
 
 
-#' An S4 class to represent estimated MCF from HEART model
-#' @slot formula formula
-#' @slot baselinepieces numeric vector.
-#' @slot newdata numeric matrix.
-#' @slot MCF data.frame.
-#' @slot level a numeric value within (0, 1).
-#' @slot na.action a length-one character vector.
-#' @slot control list.
-#' @slot multigroup logical. 
-#' @export
-setClass(Class = "heartMCF", 
-         slots = c(formula = "formula", baselinepieces = "numeric",
-                   newdata = "matrix", MCF = "data.frame", level = "numeric", 
-                   na.action = "character", control = "list", 
-                   multigroup = "logical"))
-
-
 #' @describeIn MCF Estimated Mean Cumulative Function (MCF) from HEART Model
 #' 
-#' @param object heart object.
 #' @param newdata data.frame.
 #' @param groupname a length-one charactor vector.
 #' @param grouplevels a charactor vector.
 #' @param level a length-one numeric vector.
-#' @param na.action function.
 #' @param control list.
-#' @param ... further arguments.
 #' @importFrom methods new
 #' @importFrom stats terms na.fail na.omit na.exclude na.pass qnorm model.matrix
 #' model.frame delete.response 
@@ -338,3 +312,4 @@ heart_MCF_control <- function (grid, numgrid = 1000, from, to,
   ## return
   list(grid = grid, numgrid = numgrid, from = from, to = to)
 }
+

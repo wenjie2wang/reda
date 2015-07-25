@@ -21,20 +21,29 @@
 ################################################################################
 
 
+## collation after class.R
+#' @include class.R 
+NULL
+
+
 #' Show an object.
 #' 
-#' An S4 class generic function to display certain objects.
+#' An S4 class generic function to display certain object.
 #' 
-#' @usage show(object)
+#' \itemize{
+#'   \item For heart object, it prints brief summary of the \code{heart} object.
+#'   \item For summary.heart object, it prints summary 
+#'   of the \code{summary.heart} object.
+#' }
+#' 
 #' @param object certain R objects generated from heart package.
 #' @name show
-#' @seealso \code{\link[heart]{heart}} \code{\link[heart]{summary}} 
+#' @seealso \code{\link{heart}} \code{\link{summary}} 
 #' \code{\link[methods]{show}}
 NULL
 
-#' For heart object, it prints brief summary of the \code{heart} object.
+
 #' @rdname show 
-#' @aliases show
 #' @importFrom methods show
 #' @export
 setMethod(f = "show", signature = "heart",
@@ -56,10 +65,8 @@ setMethod(f = "show", signature = "heart",
             print(alpha)
           })
 
-#' For summary.heart object, 
-#' it prints summary of the \code{summary.heart} object
+
 #' @rdname show 
-#' @aliases show
 #' @importFrom methods show
 #' @export
 setMethod(f = "show", signature = "summary.heart",
@@ -82,3 +89,4 @@ setMethod(f = "show", signature = "summary.heart",
             cat("\nbaseline rate functions: \n")
             print(object@baseline)
           })
+

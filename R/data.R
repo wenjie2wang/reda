@@ -23,7 +23,7 @@
 
 #' Simulated Dataset for Demonstration
 #'
-#' A data frame with covariates named 
+#' A simulated data frame with covariates named 
 #' 'ID', 'time', 'event', 'group' and 'X1'.
 #' 
 #' The dataset is simulated by the thinning method developed 
@@ -31,11 +31,11 @@
 #' See \emph{Fu et al. (2014)} for more details.
 #' @docType data
 #' @name simuDat
-#' @format data frame
+#' @format A data frame with 5537 rows and 5 variables.
 #' @references 
 #' Lewis, P. and Shedler, G. (1979), 
-#' ``Simulation of nonhomogeneous Poisson processes by thinning,''
-#' \emph{Naval Research Logistics Quarterly}, 26, 403–413.
+#' ``Simulation of nonhomogeneous Poisson processes by thinning,'' 
+#' \emph{Naval Research Logistics Quarterly}, 26, 403--413.
 #' 
 #' Fu, Haoda, Junxiang Luo, and Yongming Qu. (2014),
 #' ``Hypoglycemic Events Analysis via Recurrent Time-to-Event (HEART) Models,''
@@ -46,3 +46,4 @@
 #' head(simuDat)
 #' str(simuDat)
 NULL
+

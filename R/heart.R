@@ -23,10 +23,14 @@
 
 #' Parametric Recurrent Event Analysis by HEART Model.
 #' 
-#' The heart package provides functions to fit HEART model for recurrent event
-#' analysis.
+#' The heart package mainly provides function called \code{\link{heart}}
+#' to fit HEART model and other related handy functions
+#' for recurrent event analysis.
+#' 
+#' See vignettes for demonstration.  
 #' 
 #' @docType package
-#' @name heart
+#' @name heart-package
 NULL
+
 
