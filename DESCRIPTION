@@ -1,19 +1,39 @@
 Package: heart
-Title: Parametric Recurrent Event Analysis
+Title: Parametric Recurrent Event Analysis via HEART Model
 Version: 0.0.0.9000
-Date: 2015-07-10
+Date: 2015-07-24
 Authors@R: c(person(given = "Haoda", family = "Fu", email = "fu_haoda@lily.com",
                     role = c("aut")),
              person(given = "Wenjie", family = "Wang", 
                     email = "wenjie.2.wang@uconn.edu",
-                    role = c("ctb","cre")),
+                    role = c("aut","cre")),
              person(given = "Jun", family = "Yan", role = "ctb"))
-Description: Companion of Hypoglycemic Events Analysis via 
-    Recurrent Time-to-Event (HEART) Models, 
+Description: Companion of Hypoglycemic Events Analysis via
+    Recurrent Time-to-Event (HEART) Models,
     Journal of Biopharmaceutical Statistics, 2015.
-Imports: utils, methods, stats, survrec, ggplot2
-Suggests: knitr
-Depends: R (>= 3.2.0)
+URL: https://github.com/wenjie2wang/heart
+BugReports: https://github.com/wenjie2wang/heart/issues
+Imports:
+    utils,
+    methods,
+    stats,
+    survrec,
+    ggplot2
+Suggests:
+    knitr
+Depends:
+    R (>= 3.2.0)
 License: GPL (>= 3)
 LazyData: true
 VignetteBuilder: knitr
+Collate:
+    'class.R'
+    'MCF.R'
+    'baseline.R'
+    'coef.R'
+    'data.R'
+    'fit.R'
+    'heart.R'
+    'plot.R'
+    'show.R'
+    'summary.R'
