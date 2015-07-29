@@ -22,18 +22,25 @@
 
 
 ## create S4 Class called "heart" for heart object from function heart
-#' An S4 class to represent a fitted HEART model.
-#' @slot call call
-#' @slot formula formula
-#' @slot baselinepieces a numeric vector
-#' @slot estimates list 
-#' @slot control list
-#' @slot start list
-#' @slot na.action a length-one character vector
-#' @slot xlevels list
-#' @slot contrasts list
-#' @slot convergence an integer
-#' @slot hessian a numeric matrix
+#' An S4 Class to Represent a Fitted HEART Model
+#' 
+#' heart-class is an S4 class to represent a HEART model fits. 
+#' \code{\link{heart}} produces objects of this class.  
+#' See ``Slots'' for details.
+#' 
+#' @slot call function call.
+#' @slot formula formula.
+#' @slot baselinepieces a numeric vector.
+#' @slot estimates list.
+#' @slot control list.
+#' @slot start list.
+#' @slot na.action a length-one character vector.
+#' @slot xlevels list.
+#' @slot contrasts list.
+#' @slot convergence an integer.
+#' @slot hessian a numeric matrix.
+#' @aliases heart-class
+#' @seealso \code{\link{heart}}
 #' @export
 setClass(Class = "heart", 
          slots = c(call = "call", 
@@ -50,12 +57,19 @@ setClass(Class = "heart",
 
 
 ## create S4 Class called "summary.heart" for summary.heart object from summary
-#' An S4 class to represent summary of heart object
-#' @slot call call
-#' @slot baselinepieces numeric vector
-#' @slot coefficients numeric matrix
-#' @slot theta numeric matrix
-#' @slot baseline numeric matrix 
+#' An S4 Class to Represent Summary of heart-class Object
+#' 
+#' summary.heart-class is an S4 class with selective slots 
+#' of heart-class object.  See ``Slots'' for details.  
+#' \code{\link{summary}} produces objects of this class. 
+#'  
+#' @slot call function call.
+#' @slot baselinepieces a numeric vector.
+#' @slot coefficients a numeric matrix.
+#' @slot theta numeric a matrix.
+#' @slot baseline a numeric matrix.
+#' @aliases summary.heart-class
+#' @seealso \code{\link{summary,heart-method}} 
 #' @export
 setClass(Class = "summary.heart", 
          slots = c(call = "call", 
@@ -65,26 +79,39 @@ setClass(Class = "summary.heart",
                    baseline = "matrix"))
 
 
-#' An S4 class to represent computed empirical MCF
-#' @slot formula formula 
-#' @slot MCF data.frame
-#' @slot multigroup logical value
+#' An S4 Class to Represent Computed Empirical MCF
+#' 
+#' An S4 class to represent computed empirical mean cumulative function (MCF).
+#' \code{\link{MCF}} produces objects of this class.  
+#' @slot call function call
+#' @slot formula formula. 
+#' @slot MCF a data.frame.
+#' @slot multigroup a logical value.
+#' @aliases empirMCF-class
+#' @seealso \code{\link{MCF,formula-method}}
 #' @importFrom methods setClass
 #' @export
 setClass(Class = "empirMCF", 
-         slots = c(formula = "formula", MCF = "data.frame", 
+         slots = c(call = "call", formula = "formula", MCF = "data.frame", 
                    multigroup = "logical"))
 
 
-#' An S4 class to represent estimated MCF from HEART model
-#' @slot formula formula
-#' @slot baselinepieces numeric vector.
-#' @slot newdata numeric matrix.
-#' @slot MCF data.frame.
-#' @slot level a numeric value within (0, 1).
+#' An S4 Class to Represent Estimated MCF from HEART Model
+#' 
+#' An S4 class to represent estimated mean cumulative function (MCF) 
+#' from HEART Model.
+#' \code{\link{MCF}} produces objects of this class.  
+#' 
+#' @slot formula formula.
+#' @slot baselinepieces a numeric vector.
+#' @slot newdata a numeric matrix.
+#' @slot MCF a data.frame.
+#' @slot level a numeric value between 0 and 1.
 #' @slot na.action a length-one character vector.
 #' @slot control list.
-#' @slot multigroup logical. 
+#' @slot multigroup a logical value. 
+#' @aliases heartMCF-class
+#' @seealso \code{\link{MCF,heart-method}}
 #' @export
 setClass(Class = "heartMCF", 
          slots = c(formula = "formula", baselinepieces = "numeric",

@@ -30,19 +30,24 @@ NULL
 #'
 #' \code{summary} returns summary of estimates from HEART model.
 #'
-#' These are details. \strong{FIX ME}
+#' To be specific, \code{summary} returns a \code{\link{summary.heart-class}}
+#' object which can be printed by \code{\link{show,summary.heart-method}}. 
 #'
 #' @param object heart object from \code{heart}.
-#' @param showcall logic value (TRUE or FALSE) with dafault as TRUE,
-#' indicating whether method \code{show} for object summary.heart prints out 
+#' @param showcall a logic value with dafault as TRUE,
+#' indicating whether method \code{\link{show,summary.heart-method}} prints out 
 #' the call information of original call of \code{heart}.
-#' @param showpieces logic value (TRUE or FALSE) with default as TRUE, 
-#' indicating whether method \code{show} for object summary.heart prints out 
+#' @param showpieces a logic value with default as TRUE, 
+#' indicating whether method \code{\link{show,summary.heart-method}} prints out 
 #' the baseline pieces.
 #' @param digits, an interger specifying the desired number of decimal places 
 #' (round) for estimates. Negative values are allowed 
 #' (\code{help(round)} for more details).
-#' @return summary.heart object
+#' @return summary.heart-class object
+#' @aliases summary,heart-method
+#' @seealso \code{\link{heart}} \code{\link{coef,heart-method}}
+#' \code{\link{confint,heart-method}} \code{\link{baseline,heart-method}}
+#' \code{\link{MCF}}
 #' @importFrom methods new
 #' @export
 setMethod(f = "summary", signature = "heart",

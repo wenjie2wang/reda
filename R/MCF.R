@@ -31,15 +31,39 @@ NULL
 #' S4 class generic function to compute mean empirical cumulative function (MCF)
 #' from sample data or estimated MCF from HEART model.
 #' 
-#' For Survr object from function \code{Survr} in package survrec, 
-#' The covariate specified in the rhs of the formula can either be 1 or 
+#' For formula with \code{\link[survrec]{Survr}} object as response, 
+#' the covariate specified in the rhs of the formula can either be 1 or 
 #' any one factor variable in the data.  The former computes the overall 
 #' empirical MCF from sample.  The latter computes the empirical MCF for each 
 #' level of the factor variable specified respectively.
+#' \code{MCF} computes empirical mean cumulative function (MCF) on every unique
+#' time point from recurrent event sample data.  
+#' It does not assume any particular underlying model. 
+#' 
+#' For \code{\link{heart-class}} object, 
+#' \code{MCF} estimates the MCF of baseline rate function.
 #' 
 #' @param object an object used to dispatch a method.
-#' @param ... further arguments passed to or from other methods.
+#' @param ... other arguments for future usage.
+#' @seealso \code{\link{heart}} \code{\link{plotMCF}}
+#' @examples 
+#' library(heart)
+#' data(simuDat)
 #' 
+#' ## empirical MCF
+#' sampleMCF <- MCF(Survr(ID, time, event) ~ group, data = simuDat)
+#' 
+#' MCF(Survr(ID, time, event) ~ group, data = simuDat, 
+#' subset = ID %in% 100:101, na.action = na.omit)
+#' 
+#' ## estimated MCF for baseline rate function from HEART model
+#' heartfit <- heart(formula = Survr(ID, time, event) ~ X1 + group, 
+#'                   data = simuDat, subset = ID %in% 75:125,
+#'                   baselinepieces = seq(28, 168, length = 6))
+#' baselineMCF <- MCF(heartfit)
+#' 
+#' MCF(heartfit, level = 0.9, control = list(length.out = 500))
+#'  
 #' @export
 setGeneric(name = "MCF",
            def = function(object, ...) {
@@ -49,9 +73,6 @@ setGeneric(name = "MCF",
 
 #' @describeIn MCF Empirical mean cumulative function (MCF)
 #' 
-#' \code{MCF} computes empirical mean cumulative function (MCF) on every
-#' time point from recurrent event sample data.  
-#' It does not assume any particular underlying model. 
 #' @param data an optional data frame, list or environment containing
 #' the variables in the model.  If not found in data, the variables are taken 
 #' from \code{environment(formula)}, usually the environment from which 
@@ -64,7 +85,8 @@ setGeneric(name = "MCF",
 #' not set.  The "factory-fresh" default is \code{\link[stats]{na.omit}}.
 #' Another possible value is NULL, no action.  
 #' Value \code{\link[stats]{na.exclude}} can be useful. 
-#' @return empirMCF object
+#' @return \code{\link{empirMCF-class}} or \code{\link{heartMCF-class}} object
+#' @aliases MCF,formula-method 
 #' @importFrom utils head 
 #' @importFrom methods new
 #' @importFrom stats na.fail na.omit na.exclude na.pass
@@ -77,7 +99,14 @@ setMethod(f = "MCF", signature = "formula",
             names(Call) <- sub(pattern = "object", 
                                replacement = "formula", names(Call))
             mfnames <- c("formula", "data", "subset", "na.action")
-            mcall <- Call[c(1, match(mfnames, names(Call), nomatch = 0L))]
+            mfind <- match(mfnames, names(Call), nomatch = 0L)
+            Call$formula <- eval(object)
+            Call$data <- eval(substitute(alist(data)))[[1]]
+            Call$subset <- eval(substitute(alist(subset)))[[1]]
+            Call$na.action <- eval(substitute(alist(na.action)))[[1]]
+            mcall <- Call[c(1, mfind)]
+            ## Call to return
+            Call <- mcall
             ## drop unused levels in factors 
             mcall$drop.unused.levels <- TRUE
             ## Prepare data: ID, time, event ~ X
@@ -87,8 +116,11 @@ setMethod(f = "MCF", signature = "formula",
             } else { 
               mm <- eval(mcall, sys.parent()) 
             }
-            if (! inherits(mm[, 1], "Survr")) {
-              stop("Response must be a survival recurrent object.")
+            if(missing(data)) {
+              data <- environment(object)
+            }
+            if (! with(data, inherits(eval(object[[2]]), "Survr"))) {
+              stop("Response in formula must be a survival recurrent object.")
             }
             Terms <- terms(object)
             ord <- attr(Terms, "order")
@@ -177,7 +209,7 @@ setMethod(f = "MCF", signature = "formula",
               }
               colnames(outdat) <- c("time", "fails", "risk", 
                                     "increment", "MCF", covar_names)
-              out <- methods::new("empirMCF", formula = object, 
+              out <- methods::new("empirMCF", call = Call, formula = object, 
                                   MCF = outdat, multigroup = TRUE)
               return(out)
             }
@@ -186,11 +218,28 @@ setMethod(f = "MCF", signature = "formula",
 
 #' @describeIn MCF Estimated Mean Cumulative Function (MCF) from HEART Model
 #' 
-#' @param newdata data.frame.
-#' @param groupname a length-one charactor vector.
-#' @param grouplevels a charactor vector.
-#' @param level a length-one numeric vector.
-#' @param control list.
+#' @param newdata an optional data.frame. 
+#' \strong{(experimental arugment needs updating)}
+#' @param groupname an optional length-one charactor vector. 
+#' \strong{(experimental arugment needs updating)}
+#' @param grouplevels an optional charactor vector.
+#' \strong{(experimental arugment needs updating)}
+#' @param level a optional numeric value between 0 and 1 indicating 
+#' the confidence level required.  The default value is 0.95.
+#' @param control an optional list to specify the time grid 
+#' where the MCF are estimated.
+#' The possible elements of the control list include 
+#' \code{grid}, \code{length.out}, \code{from} and \code{to}.
+#' The time grid can be directly specified via element \code{grid}.
+#' \code{length.out} represents the length of grid points. 
+#' The dafault value is 1000.
+#' \code{from} means the starting point of grid. It takes 0 as default.
+#' \code{to} means the endpoint of grid. 
+#' It takes the endpoint of baseline pieces as default.
+#' When \code{grid} is missing, the grid will be generated 
+#' via \code{\link{seq}} with arguments \code{from}, \code{to} 
+#' and \code{length.out}
+#' @aliases MCF,heart-method
 #' @importFrom methods new
 #' @importFrom stats terms na.fail na.omit na.exclude na.pass qnorm model.matrix
 #' model.frame delete.response 
@@ -207,7 +256,7 @@ setMethod(f = "MCF", signature = "heart",
             controlist <- c(control, 
                             list("baselinepieces" = as.numeric(baselinepieces)))
             control <- do.call("heart_MCF_control", controlist)
-            n_xx <- control$numgrid
+            n_xx <- control$length.out
             n_pieces <- length(baselinepieces)
             BL_segments <- c(baselinepieces[1], diff(baselinepieces))
             xx <- control$grid
@@ -287,7 +336,7 @@ setMethod(f = "MCF", signature = "heart",
           
 
 ## internal function ===========================================================
-heart_MCF_control <- function (grid, numgrid = 1000, from, to, 
+heart_MCF_control <- function (grid, length.out = 1000, from, to, 
                                baselinepieces) {
   ## controls for function MCF with signiture heart
   if (missing(from)) {
@@ -300,16 +349,16 @@ heart_MCF_control <- function (grid, numgrid = 1000, from, to,
     if (! is.numeric(grid) || is.unsorted(grid)) {
       stop("'grid' specified must be a increasing numeric vector.")
     }
-    numgrid <- length(grid)
+    length.out <- length(grid)
     from <- min(grid)
     to <- max(grid)  
   } else {
-    grid <- seq(from = from, to = to, length.out = numgrid)
+    grid <- seq(from = from, to = to, length.out = length.out)
   }
   if (min(grid) < 0 || max(grid) > max(baselinepieces)) {
     stop("'grid' must be within the coverage of baseline pieces.")
   }
   ## return
-  list(grid = grid, numgrid = numgrid, from = from, to = to)
+  list(grid = grid, length.out = length.out, from = from, to = to)
 }
 

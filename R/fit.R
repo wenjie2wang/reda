@@ -34,13 +34,13 @@ NULL
 #' The model is named after the paper title of \emph{Fu et al. (2014)},  
 #' Hypoglycemic Events Analysis via Recurrent Time-to-Event (HEART) Models
 #'
-#' @param formula Survr object from function \code{Survr} in package survrec.
+#' @param formula Survr object from function \code{\link[survrec]{Survr}}. 
 #' @param baselinepieces an optional numeric vector consisting of
 #' all the right endpoints of baseline pieces.
 #' @param data an optional data frame, list or environment containing
 #' the variables in the model.  If not found in data, the variables are taken 
 #' from \code{environment(formula)}, usually the environment from which 
-#' \code{heart} is called.
+#' \code{\link{heart}} is called.
 #' @param subset an optional vector specifying a subset of observations 
 #' to be used in the fitting process.
 #' @param na.action function which indicates what should the procedure do 
@@ -57,9 +57,10 @@ NULL
 #' (numeric matrices or character strings naming functions) to be used 
 #' as replacement values for the contrasts replacement function and 
 #' whose names are the names of columns of data containing factors.
-#' See the \code{contrasts.arg} of \code{model.matrix.default} for more detail.
-#' @param ... further arguments.
-#' @return a heart object.
+#' See the \code{contrasts.arg} of 
+#' \code{\link[stats]{model.matrix.default}} for more details.
+#' @param ... other arguments for future usage.
+#' @return a \code{\link{heart-class}} object.
 #' @references 
 #' Fu, Haoda, Junxiang Luo, and Yongming Qu. (2014),
 #' "Hypoglycemic Events Analysis via Recurrent Time-to-Event (HEART) Models," 
@@ -67,14 +68,18 @@ NULL
 #' @examples
 #' library(heart)
 #' data(simuDat)
-#' heartfit <- heart(formula = survrec::Survr(ID, time, event) ~ X1 + group, 
-#'                   data = simuDat, baselinepieces = seq(28, 168, length = 6))
+#' heartfit <- heart(formula = Survr(ID, time, event) ~ X1 + group, 
+#'                   data = simuDat, subset = ID %in% 75:125,
+#'                   baselinepieces = seq(28, 168, length = 6))
 #' str(heartfit)
 #' show(heartfit) # or simply call heartfit
 #' summary(heartfit)
 #' coef(heartfit)
 #' confint(heartfit)
 #' baseline(heartfit)
+#' @seealso \code{\link{summary,heart-method}} \code{\link{coef,heart-method}}
+#' \code{\link{confint,heart-method}} \code{\link{baseline,heart-method}}
+#' \code{\link{MCF,heart-method}}
 #' @importFrom methods new
 #' @importFrom stats model.matrix nlm pnorm na.fail na.omit na.exclude na.pass
 #' @importFrom survrec Survr

@@ -31,19 +31,27 @@ NULL
 #' An S4 class generic function to display certain object.
 #' 
 #' \itemize{
-#'   \item For heart object, it prints brief summary of the \code{heart} object.
-#'   \item For summary.heart object, it prints summary 
-#'   of the \code{summary.heart} object.
+#'   \item For \code{\link{heart-class}} object, 
+#'   it prints brief summary of the fitted HEART model.
+#'   \item For \code{\link{summary.heart-class}} object, 
+#'   it prints summary of the fitted HEART model.
+#'   \item For \code{\link{empirMCF-class}} object,
+#'   it prints formula and the first 100 rows of the computed MCF data frame.
+#'   \item For \code{\link{heartMCF-class}} object,
+#'   it prints formula, baseline pieces and the first 100 rows of the estimated
+#'   MCF data frame.
 #' }
 #' 
-#' @param object certain R objects generated from heart package.
+#' @param object certain R object generated from heart package.
 #' @name show
-#' @seealso \code{\link{heart}} \code{\link{summary}} 
-#' \code{\link[methods]{show}}
+#' @seealso \code{\link{heart}} \code{\link{summary,heart-method}}
+#' \code{\link{MCF}}
 NULL
 
 
 #' @rdname show 
+#' @aliases show,heart-method
+
 #' @importFrom methods show
 #' @export
 setMethod(f = "show", signature = "heart",
@@ -67,6 +75,7 @@ setMethod(f = "show", signature = "heart",
 
 
 #' @rdname show 
+#' @aliases show,summary.heart-method
 #' @importFrom methods show
 #' @export
 setMethod(f = "show", signature = "summary.heart",
@@ -90,3 +99,48 @@ setMethod(f = "show", signature = "summary.heart",
             print(object@baseline)
           })
 
+
+#' @rdname show 
+#' @aliases show,empirMCF-method 
+#' @importFrom methods show 
+#' @importFrom utils head
+#' @export
+setMethod(f = "show", signature = "empirMCF",
+          definition = function(object) {
+            cat("\ncall: \n")
+            print(object@call)
+            cat("\nformula:\n")
+            print(object@formula)
+            cat("\nMCF:\n")
+            if (nrow(object@MCF) <= 100) {
+              print(object@MCF)
+              cat("\n")
+            } else {
+              print(head(object@MCF, 100))
+              cat("...\n\n")
+              cat("Only the first 100 rows are printed.\n")
+            }
+          })
+
+
+#' @rdname show 
+#' @aliases show,heartMCF-method
+#' @importFrom methods show 
+#' @importFrom utils head
+#' @export
+setMethod(f = "show", signature = "heartMCF",
+          definition = function(object) {
+            cat("formula:\n")
+            print(object@formula)
+            cat("\nbaseline pieces:\n")
+            print(attr(object@baselinepieces, "name"))
+            cat("\nMCF:\n")
+            if (nrow(object@MCF) <= 100) {
+              print(object@MCF)
+              cat("\n")
+            } else {
+              print(head(object@MCF, 100))
+              cat("...\n\n")
+              cat("Only the first 100 rows are printed.\n")
+            }
+          })

@@ -20,25 +20,38 @@
 ##
 ################################################################################
 
+
 ## collation after class.R
 #' @include class.R 
 NULL
 
 
-#' Extract coefficients estiamtes from HEART model.
+#' Extract Coefficients Estiamtes from HEART Model
 #'
-#' \code{coef} is a S4 class generic function 
-#' which extracts model coefficients from the heart object returned by modeling 
-#' function \code{heart}. 
+#' \code{coef} is a S4 class method which extracts model coefficients 
+#' from the \code{\link{heart-class}} object 
+#' produced by \code{\link{heart}}.
 #'
-#' @param object heart object.
-#' @param ... other arguments.
-#' @return A named numeric vector.
+#' @param object heart-class object.
+#' @param digits an integer indicating the number of decimal places to be used. 
+#' Negative values are allowed (see 'Details' of \code{\link{round}}).
+#' The default value is 3.
+#' @param ... other arguments for future usage.
+#' @return a named numeric vector.
+#' @aliases coef,heart-method
+#' @seealso \code{\link{heart}} \code{\link{summary,heart-method}}
+#' @examples 
+#' library(heart)
+#' data(simuDat)
+#' heartfit <- heart(formula = Survr(ID, time, event) ~ X1 + group, 
+#'                   data = simuDat, subset = ID %in% 75:125,
+#'                   baselinepieces = seq(28, 168, length = 6))
+#' coef(heartfit)
 #' @importFrom stats coef
 #' @export
 setMethod(f = "coef", signature = "heart",
-          definition = function(object, ...) {
-            beta <- round(object@estimates$beta[, "coef"], digits = 3)
+          definition = function(object, digits = 3, ...) {
+            beta <- round(object@estimates$beta[, "coef"], digits = digits)
             names(beta) <- rownames(object@estimates$beta)
             ## return
             beta
@@ -57,26 +70,40 @@ setMethod(f = "coef", signature = "heart",
 #' based on Fisher information matrix and estimates of coefficients. 
 #' See \emph{Fu et al. (2014)} for more details.
 #' 
-#' @param object heart object.
+#' @param object heart-class object.
 #' @param parm a specification of which parameters are 
 #' to be given confidence intervals, 
 #' either a vector of numbers or a vector of names. 
 #' If missing, all parameters are considered.
 #' @param level the confidence level required.
-#' @param ... additional argument(s).
-#' @return A numeric matrix with rownames and colnames.
+#' @param digits an integer indicating the number of decimal places to be used. 
+#' Negative values are allowed (see 'Details' of \code{\link{round}}).
+#' The default value is 3.
+#' @param ... other arguments for future usage.
+#' @return a numeric matrix with rownames and colnames.
+#' @aliases confint,heart-method
+#' @seealso \code{\link{heart}} \code{\link{coef,heart-method}}
 #' @references 
+#' Fu, Haoda, Junxiang Luo, and Yongming Qu. (2014),
+#' "Hypoglycemic Events Analysis via Recurrent Time-to-Event (HEART) Models," 
+#' 
 #' Shao, J. (2003), 
 #' \emph{Mathematical statistics}, Springer texts in statistics, 
 #' New York: Springer, 2nd edition.
-#' 
-#' Fu, Haoda, Junxiang Luo, and Yongming Qu. (2014),
-#' "Hypoglycemic Events Analysis via Recurrent Time-to-Event (HEART) Models," 
 #' \emph{Journal of biopharmaceutical statistics}, 2014 Dec 1, Epub 2014 Dec 1.
+#' @examples 
+#' library(heart)
+#' data(simuDat)
+#' heartfit <- heart(formula = Survr(ID, time, event) ~ X1 + group, 
+#'                   data = simuDat, subset = ID %in% 75:125,
+#'                   baselinepieces = seq(28, 168, length = 6))
+#' confint(heartfit)
+#' confint(heartfit, "X1")
+#' confint(heartfit, 2)
 #' @importFrom stats confint qnorm 
 #' @export
 setMethod(f = "confint", signature = "heart",
-          definition = function(object, parm, level = 0.95, ...) {
+          definition = function(object, parm, level = 0.95, digits = 3, ...) {
             ## internal function
             format.perc <- function (probs, digits){
               paste(format(100 * probs, trim = TRUE, scientific = FALSE, 
@@ -97,12 +124,12 @@ setMethod(f = "confint", signature = "heart",
             a <- (1 - level)/2
             a <- c(a, 1 - a)
             fac <- qnorm(a)
-            pct <- format.perc(a, 3)
+            pct <- format.perc(a, digits = digits)
             ci <- array(NA, dim = c(length(parm), 2L), 
                         dimnames = list(parm, pct))
             ses <- betamat[parm, 2]
             ci[] <- cf[parm] + ses %o% fac
-            ci <- round(ci, digits = 3)
+            ci <- round(ci, digits = digits)
             rownames(ci) <- pnames[parm]
             ## return
             ci

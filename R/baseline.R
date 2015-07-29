@@ -31,9 +31,21 @@ NULL
 #' An S4 class generic function to extract the estimated baseline rate function 
 #' from HEART model. 
 #' 
-#' @param object heart object.
-#' @param ... further arguments.
+#' @param object heart-class object.
+#' @param digits an integer indicating the number of decimal places to be used. 
+#' Negative values are allowed (see 'Details' of \code{\link{round}}).
+#' The default value is 3.
+#' @param ... other arguments for future usage.
 #' @return a named vector.
+#' @aliases baseline,heart-method
+#' @examples 
+#' library(heart)
+#' data(simuDat)
+#' heartfit <- heart(formula = Survr(ID, time, event) ~ X1 + group, 
+#'                   data = simuDat, subset = ID %in% 75:125,
+#'                   baselinepieces = seq(28, 168, length = 6))
+#' baseline(heartfit)
+#' @seealso \code{\link{heart}} \code{\link{summary,heart-method}}
 #' @export
 setGeneric(name = "baseline",
            def = function(object, ...) {
@@ -42,11 +54,11 @@ setGeneric(name = "baseline",
 
 
 #' @describeIn baseline Extract estiamted baseline rate function 
-#' from heart object.
+#' from heart-class object.
 #' @export
 setMethod(f = "baseline", signature = "heart",
-          definition = function(object, ...) {
-            alpha <- round(object@estimates$alpha[, "alpha"], digits = 3)
+          definition = function(object, digits = 3, ...) {
+            alpha <- round(object@estimates$alpha[, "alpha"], digits = digits)
             names(alpha) <- rownames(object@estimates$alpha)
             ## return
             alpha

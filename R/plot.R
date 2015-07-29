@@ -27,12 +27,34 @@
 #' to plot mean cumulative function by using ggplot2 plotting system. 
 #' So the plots generated are able to be further customized properly.
 #' 
-#' @param object empirMCF or heartMCF object.
+#' @param object \code{\link{empirMCF-class}} or 
+#' \code{\link{heartMCF-class}} object.
 #' @param conf.int logical indicating whether to plot confidence interval.
-#' @param ... further arguments.
-#' @param linetypes line types specified to different groups. \strong{FIX ME}
-#' @param linecolors line colors specified to different groups. \strong{FIX ME}
+#' The default value is FALSE.
+#' @param ... other arguments for further usage.
+#' @param linetypes an optional numeric vector indicating
+#' line types specified to different groups with 
+#' 0 = blank, 1 = solid, 2 = dashed, 3 = dotted, 
+#' 4 = dotdash, 5 = longdash, 6 = twodash.
+#' @param linecolors an optional character vector indicating
+#' line colors specified to different groups. 
 #' @return ggplot object.
+#' @seealso \code{\link{MCF}} 
+#' @examples 
+#' library(heart)
+#' data(simuDat)
+#' 
+#' ## empirical MCF
+#' sampleMCF <- MCF(Survr(ID, time, event) ~ group, data = simuDat)
+#' plotMCF(sampleMCF, linetypes = c(1, 3), linecolors = c("orange", "navy"))
+#' 
+#' ## estimated MCF for baseline rate function from HEART model
+#' heartfit <- heart(formula = Survr(ID, time, event) ~ X1 + group, 
+#'                   data = simuDat, subset = ID %in% 75:125,
+#'                   baselinepieces = seq(28, 168, length = 6))
+#' baselineMCF <- MCF(heartfit)
+#' plotMCF(baselineMCF, conf.int = TRUE, linecolors = "blueviolet") + 
+#'   ggplot2::theme_bw()
 #' @export
 setGeneric(name = "plotMCF",
            def = function(object, conf.int = FALSE, ...) {
@@ -41,6 +63,7 @@ setGeneric(name = "plotMCF",
 
 
 #' @describeIn plotMCF Plot empirical mean cumulative function (MCF)
+#' @aliases plotMCF,empirMCF-method
 #' @importFrom utils tail
 #' @importFrom stats setNames
 #' @importFrom ggplot2 ggplot geom_step aes aes_string scale_color_manual
@@ -97,6 +120,7 @@ setMethod(f = "plotMCF", signature = "empirMCF",
 
 #' @describeIn plotMCF Estimated mean cumulative function (MCF) 
 #' for baseline rate function.
+#' @aliases plotMCF,heartMCF-method
 #' @importFrom stats setNames
 #' @importFrom ggplot2 ggplot geom_line aes aes_string scale_color_manual
 #' scale_linetype_manual ylab ggtitle 
