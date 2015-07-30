@@ -1,26 +1,28 @@
-prep:
-	rm -fr ../heart; \
-	mkdir ../heart; \
-	cp -pr data ../heart; \
-	cp -p DESCRIPTION ../heart; \
-	cp -pr R ../heart; \
-	cp -pr vignettes ../heart; \
-	cd ../heart; \
-	Rscript -e "library(devtools); library(methods); document();"; \
+# prep:
+#	rm -fr ../heart; \
+#	mkdir ../heart; \
+#	cp -pr data ../heart; \
+#	cp -p DESCRIPTION ../heart; \
+#	cp -pr R ../heart; \
+#	cp -pr vignettes ../heart; \
+#	cd ../heart; \
+#	Rscript -e "library(methods); devtools::document();"; \
 
-# Rpkg: 
-# 	make build
-# 	make check
-# 	make INSTALL
+Rpkg: Rd build  
+	make check 
+	make INSTALL
 
-# build:  ../heart
-# 	R CMD build -v; Rscript -e "Rd2roxygen::rab(install=TRUE)" ../heart
+Rd: 
+	Rscript -e "library(methods); devtools::document();" 
 
-# check: heart_*.tar.gz
-# 	R CMD check --as-cran heart_*.tar.gz
+build:  
+	R CMD build ../heart
 
-# INSTALL: heart_*.tar.gz
-# 	R CMD INSTALL --build heart_*.tar.gz
+check: heart_*.tar.gz
+	R CMD check --as-cran heart_*.tar.gz
 
-# clean: 
-# 	rm -rf *~ .*~ */*.Rd NAMESPACE *.tar.gz *.Rcheck/
+INSTALL: heart_*.tar.gz
+	R CMD INSTALL --build heart_*.tar.gz
+
+clean: 
+	rm -rf *~ .*~ */*.Rd NAMESPACE *.tar.gz *.Rcheck/
