@@ -31,7 +31,7 @@ NULL
 #' S4 class generic function to compute mean empirical cumulative function (MCF)
 #' from sample data or estimated MCF from HEART model.
 #' 
-#' For formula with \code{\link[survrec]{Survr}} object as response, 
+#' For formula with \code{\link{Survr-class}} object as response, 
 #' the covariate specified in the rhs of the formula can either be 1 or 
 #' any one factor variable in the data.  The former computes the overall 
 #' empirical MCF from sample.  The latter computes the empirical MCF for each 
@@ -45,6 +45,10 @@ NULL
 #' 
 #' @param object an object used to dispatch a method.
 #' @param ... other arguments for future usage.
+#' @param level a optional numeric value 
+#' indicating the confidence level required. 
+#' For \code{formula-method}, it must be between 0.5 and 1.
+#' The default value is 0.95.
 #' @seealso \code{\link{heart}} \code{\link{plotMCF}}
 #' @examples 
 #' library(heart)
@@ -90,9 +94,11 @@ setGeneric(name = "MCF",
 #' @importFrom utils head 
 #' @importFrom methods new
 #' @importFrom stats na.fail na.omit na.exclude na.pass
+#' @importFrom plyr ddply
 #' @export
 setMethod(f = "MCF", signature = "formula", 
-          definition = function(object, data, subset, na.action, ...) {
+          definition = function(object, data, subset, na.action, 
+                                level = 0.95, ...) {
             ## record the function call 
             Call <- match.call()
             Call[[1]] <- as.name("MCF")
@@ -127,45 +133,53 @@ setMethod(f = "MCF", signature = "formula",
             if (length(ord) & any(ord != 1)) {
               stop("Interaction terms are not valid for this function")
             }
+            ## check for confidence level: 0.5 < level < 1 
+            if (level <= 0.5 | level >= 1) {
+              stop("Confidence level specified must be between 0.5 and 1.")
+            }
             ## number of covariates excluding intercept
             nbeta <- ncol(mm) - 1 
             nsample <- nrow(mm)
-            X <- if (nbeta == 0) { 
-              factor(rep(1, nsample)) 
+            if (nbeta == 0) { 
+              X <- covar_names <-NULL
             } else {
-              mm[, 2]
+              X <- mm[, 2]
+              ## covariates' names
+              covar_names <- attr(Terms, "term.labels")
             }
-            ## covariates' names
-            covar_names <- attr(Terms, "term.labels")
             ## data 
             dat <- as.data.frame(cbind(mm[, 1], X))
             colnames(dat) <- c("ID", "time", "event", covar_names)
+            
             ## compute sample MCF 
-            if (nbeta == 0) {
-              num_pat <- length(unique(dat$ID))
-              unitimes <- sort(unique(dat$time), decreasing = FALSE)
-              unitimes <- head(unitimes, length(unitimes) - 1)
-              num_at_risk <- apply(array(unitimes), 1, 
+            ### function part
+            sMCF <- function(inpdat) {
+              outdat <- plyr::ddply(inpdat, "time", function(a){
+                a[order(a$event, decreasing = TRUE), c("ID", "time", "event")]
+              })
+              nsample <- nrow(outdat)
+              num_pat <- length(unique(outdat$ID))
+              num_at_risk <- apply(array(seq(nsample)), 1, 
                                    function(a) {
-                                     with(base::subset(dat, time <= a), 
+                                     with(outdat[seq(a), ], 
                                           num_pat - sum(event == 0))
                                    })
-              num_fails <- apply(array(unitimes), 1, 
-                                 function(a) {
-                                   with(base::subset(dat, time <= a), 
-                                        sum(event == 1))
-                                 })
-              increment <- num_fails / num_at_risk
-              sMCF <- cumsum(increment)
-              ## data.frame to return
-              num_at_risk <- c(length(unique(dat$ID)), num_at_risk)
-              num_fails <- c(0, num_fails)
-              increment <- c(0, increment)
-              sMCF <- c(0, sMCF)
-              unitimes <- c(0, unitimes)
-              outdat <- data.frame(time = unitimes, fails = num_fails, 
-                                   risk = num_at_risk, increment = increment, 
-                                   MCF = sMCF)
+              increment <- ifelse(outdat$event == 1, 1/num_at_risk, 0)
+              smcf <- cumsum(increment)
+              incre_var <- ifelse(outdat$event == 0, 0, 
+                                  increment^2 * 
+                                    ((1 - increment)^2 + 
+                                       (num_at_risk - 1) * increment^2))
+              var_smcf <- cumsum(incre_var)
+              wtonexp <- qnorm(level) * sqrt(var_smcf) / smcf
+              upper <- smcf * exp(wtonexp)
+              lower <- smcf * exp(-wtonexp)
+              # return
+              data.frame(outdat, MCF = smcf, var = var_smcf, lower, upper)
+            }
+            
+            if (nbeta == 0) {
+              outdat <- sMCF(dat)
               out <- new("empirMCF", formula = object, 
                          MCF = outdat, multigroup = FALSE)
               return(out)
@@ -182,33 +196,11 @@ setMethod(f = "MCF", signature = "formula",
               outdat <- NULL
               for (i in seq(num_levels)) {
                 subdat <- base::subset(dat, subset = X %in% levels(X)[i])
-                num_pat <- length(unique(subdat$ID))
-                unitimes <- sort(unique(subdat$time), decreasing = FALSE)
-                unitimes <- head(unitimes, length(unitimes) - 1)
-                num_at_risk <- apply(array(unitimes), 1, 
-                                     function(a) {
-                                       with(base::subset(subdat, time <= a), 
-                                            num_pat - sum(event == 0))
-                                     })
-                num_fails <- apply(array(unitimes), 1, 
-                                   function(a) {
-                                     with(base::subset(subdat, time <= a), 
-                                          sum(event == 1))
-                                   })
-                increment <- num_fails / num_at_risk
-                sMCF <- cumsum(increment)
+                resdat <- data.frame(sMCF(subdat), levels(X)[i])
                 ## subdata.frame to return
-                num_at_risk <- c(length(unique(subdat$ID)), num_at_risk)
-                num_fails <- c(0, num_fails)
-                increment <- c(0, increment)
-                sMCF <- c(0, sMCF)
-                unitimes <- c(0, unitimes)
-                outdat <- rbind(outdat, data.frame(unitimes, num_fails, 
-                                                   num_at_risk, increment, 
-                                                   sMCF, levels(X)[i]))
+                outdat <- rbind(outdat, resdat)
               }
-              colnames(outdat) <- c("time", "fails", "risk", 
-                                    "increment", "MCF", covar_names)
+              colnames(outdat)[ncol(outdat)] <- covar_names
               out <- methods::new("empirMCF", call = Call, formula = object, 
                                   MCF = outdat, multigroup = TRUE)
               return(out)
@@ -224,8 +216,6 @@ setMethod(f = "MCF", signature = "formula",
 #' \strong{(experimental arugment needs updating)}
 #' @param grouplevels an optional charactor vector.
 #' \strong{(experimental arugment needs updating)}
-#' @param level a optional numeric value between 0 and 1 indicating 
-#' the confidence level required.  The default value is 0.95.
 #' @param control an optional list to specify the time grid 
 #' where the MCF are estimated.
 #' The possible elements of the control list include 
