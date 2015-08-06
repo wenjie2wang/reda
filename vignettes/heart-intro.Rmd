@@ -51,7 +51,8 @@ sampleMCF <- MCF(Survr(ID, time, event) ~ group, data = simuDat)
 ```
 
 ```{r plotempir, fig.height=6, fig.width=7}
-plotMCF(sampleMCF, linetypes = c(1, 3), linecolors = c("orange", "navy"))
+plotMCF(sampleMCF, conf.int = TRUE, mark.time = TRUE, 
+        lty = c(1, 3), col = c("orange", "navy"))
 ```
 
 ## Estimated MCF for baseline rate function from the HEART Model
@@ -61,7 +62,7 @@ further customized properly.
 
 ```{r heartMCF, fig.height=6, fig.width=7}
 baselineMCF <- MCF(heartfit)
-plotMCF(baselineMCF, conf.int = TRUE, linecolors = "blueviolet") +
+plotMCF(baselineMCF, conf.int = TRUE, col = "royalblue") +
   ggplot2::theme_bw()
 ```
 
