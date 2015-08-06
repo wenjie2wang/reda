@@ -28,15 +28,17 @@ NULL
 
 #' Fitting HEART Model
 #'
-#' @description \code{heart} returns fitted model results.
-#' @details HEART model is a piece-wise Gamma frailty model 
+#' \code{heart} returns fitted model results.
+#' HEART model is a piece-wise Gamma frailty model 
 #' for recurrent events. 
 #' The model is named after the paper title of \emph{Fu et al. (2014)},  
 #' Hypoglycemic Events Analysis via Recurrent Time-to-Event (HEART) Models
 #'
-#' @param formula Survr object from function \code{\link[survrec]{Survr}}. 
+#' @param formula Survr object from function \code{\link{Survr-class}}. 
 #' @param baselinepieces an optional numeric vector consisting of
-#' all the right endpoints of baseline pieces.
+#' all the right endpoints of baseline pieces.  The default is maximum of time.
+#' The default model is of one baseline piece, which  is equivalent to 
+#' the negative binomial regression model.
 #' @param data an optional data frame, list or environment containing
 #' the variables in the model.  If not found in data, the variables are taken 
 #' from \code{environment(formula)}, usually the environment from which 
@@ -82,7 +84,6 @@ NULL
 #' \code{\link{MCF,heart-method}}
 #' @importFrom methods new
 #' @importFrom stats model.matrix nlm pnorm na.fail na.omit na.exclude na.pass
-#' @importFrom survrec Survr
 #' @export
 heart <- function(formula, baselinepieces, data, subset, na.action, 
                   start = list(), control = list(), contrasts = NULL, ...) {
@@ -117,9 +118,7 @@ heart <- function(formula, baselinepieces, data, subset, na.action,
   colnames(dat) <- c("ID", "time", "event", covar_names)
   ## baselinepieces
   if(missing(baselinepieces)) {
-    warning("Baseline pieces are splitted by median event time.")
-    baselinepieces <- as.vector(round(quantile(dat$time, c(0.5, 1)), 
-                                      digits = 1))
+    baselinepieces <- as.numeric(max(dat$time))
   } 
   ## number of baseline pieces or rate functions
   nalpha <- length(baselinepieces)
