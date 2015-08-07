@@ -32,7 +32,7 @@
 #' @param conf.int logical indicating whether to plot confidence interval.
 #' The default value is FALSE.
 #' @param ... other arguments for further usage.
-#' #' @param mark.time logical value controls the labeling of the curves. 
+#' @param mark.time logical value controls the labeling of the curves. 
 #' If set to FALSE, no labeling is done. 
 #' If TRUE, then curves are marked at each censoring time 
 #' which is not also a death time.

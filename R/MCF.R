@@ -31,7 +31,7 @@ NULL
 #' S4 class generic function to compute mean empirical cumulative function (MCF)
 #' from sample data or estimated MCF from HEART model.
 #' 
-#' For formula with \code{\link{Survr-class}} object as response, 
+#' For formula with \code{\link{Survr}} object as response, 
 #' the covariate specified in the rhs of the formula can either be 1 or 
 #' any one factor variable in the data.  The former computes the overall 
 #' empirical MCF from sample.  The latter computes the empirical MCF for each 

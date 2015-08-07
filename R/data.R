@@ -31,7 +31,7 @@
 #' See \emph{Fu et al. (2014)} for more details.
 #' @docType data
 #' @name simuDat
-#' @format A data frame with 5537 rows and 5 variables.
+#' @format A data frame with 2403 rows and 5 variables.
 #' @references 
 #' Lewis, P. and Shedler, G. (1979), 
 #' ``Simulation of nonhomogeneous Poisson processes by thinning,'' 
