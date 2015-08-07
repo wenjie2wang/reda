@@ -34,7 +34,7 @@ NULL
 #' The model is named after the paper title of \emph{Fu et al. (2014)},  
 #' Hypoglycemic Events Analysis via Recurrent Time-to-Event (HEART) Models
 #'
-#' @param formula Survr object from function \code{\link{Survr-class}}. 
+#' @param formula Survr object from function \code{\link{Survr}}. 
 #' @param baselinepieces an optional numeric vector consisting of
 #' all the right endpoints of baseline pieces.  The default is maximum of time.
 #' The default model is of one baseline piece, which  is equivalent to 
@@ -116,6 +116,14 @@ heart <- function(formula, baselinepieces, data, subset, na.action,
   ## data 
   dat <- as.data.frame(cbind(mf[, 1][, 1:3], mm[, -1]))
   colnames(dat) <- c("ID", "time", "event", covar_names)
+  ## check the impact caused by missing value
+  ## if there is missing value removed
+  if (max(as.numeric(rownames(dat))) > nrow(dat)) {
+    message("Observations with missing values on covariates are removed.") 
+    message("Checking new data set again ... ", appendLF = FALSE)
+    check_Survr(dat)
+    message("done.")
+  }
   ## baselinepieces
   if(missing(baselinepieces)) {
     baselinepieces <- as.numeric(max(dat$time))
@@ -208,12 +216,13 @@ mu0 <- function(par_BaselinePW, baselinepieces, Tvec) {
 }
 
 dmu0_alpha <- function(tt, baselinepieces) {
-  BL_segments <- c(baselinepieces[1], diff(baselinepieces))
   indx <- min(which(tt <= baselinepieces))
-  value <- BL_segments
+  ## BL_segments 
+  value <- diff(c(0, baselinepieces))
   n_pieces <- length(baselinepieces)
   if (indx == n_pieces) {
-    value[n_pieces] <- tt - baselinepieces[n_pieces - 1]
+    value[n_pieces] <- ifelse(n_pieces == 1, tt, 
+                              tt - baselinepieces[n_pieces - 1])
   } else if (indx > 1) {
     value[(indx + 1):n_pieces] <- 0
     value[indx] <- tt - baselinepieces[indx - 1]
@@ -288,9 +297,13 @@ logL_heart <- function(par, data, baselinepieces) {
   }
   indx_taui <- apply(as.array(data$time[data$event == 0]), 1, 
                      whereT, baselinepieces)
+  ## reform dimension by 'array' for one-piece baseline 
+  dim_n1 <- length(baselinepieces)
+  dim_n2 <- length(data$time[data$event == 0])
+  tempart2 <- array(apply(array(data$time[data$event == 0]), 1, 
+                    dmu0_alpha, baselinepieces), c(dim_n1, dim_n2))
   dl_dalpha_part2 <- diag((n_ij + par_theta) / (par_theta + mui) * 
-                            expXBeta[data$event == 0]) %*% 
-    t(apply(array(data$time[data$event == 0]), 1, dmu0_alpha, baselinepieces))
+                            expXBeta[data$event == 0]) %*% t(tempart2)
   dl_dalpha <- 1 / par_alpha * table(indx) - apply(dl_dalpha_part2, 2, sum)
   attr(negLH, "gradient") <- -c(dl_dbeta, dl_dtheta, dl_dalpha)
   ## return
@@ -324,8 +337,8 @@ heart_start <- function(beta, theta = 0.5, alpha, nbeta, nalpha) {
   if (missing(beta)) {
     beta <- rep(1, nbeta)
   } else if (length(beta) != nbeta) {
-    stop("number of starting values for coefficients of covariates 
-           does not match with the specified formula")
+    stop(paste("number of starting values for coefficients of covariates",
+               "does not match with the specified formula"))
   }
   if (theta <= 0) {
     stop("value of parameter for random effects must be > 0")
