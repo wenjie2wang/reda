@@ -76,6 +76,9 @@ setGeneric(name = "plotMCF",
 setMethod(f = "plotMCF", signature = "empirMCF", 
           definition = function(object, conf.int = FALSE, 
                                 mark.time = FALSE, lty, col, ...) {
+            ## nonsense, just to suppress Note from R CMD check --as-cran
+            event <- lower <- upper <- design <- NULL
+            
             MCFdat <- object@MCF
             ## add starting point at time 0
             MCFdat <- rbind(MCFdat[1, ], MCFdat)
@@ -178,6 +181,9 @@ setMethod(f = "plotMCF", signature = "empirMCF",
 setMethod(f = "plotMCF", signature = "heartMCF", 
           definition = function(object, conf.int = FALSE, 
                                 lty, col, ...) {
+            ## nonsense, just to suppress Note from R CMD check --as-cran
+            lower <- upper <- NULL
+            
             MCFdat <- object@MCF
             ## if MCF is just for one certain group
             if (! object@multigroup) {
