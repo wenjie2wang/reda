@@ -46,7 +46,7 @@ summary(heartfit)
 
 ```{r empirMCF}
 MCF(Survr(ID, time, event) ~ group, data = simuDat,
-    subset = ID %in% 100:101, na.action = na.omit)
+    subset = ID %in% 100:101, na.action = na.omit, level = 0.9)
 sampleMCF <- MCF(Survr(ID, time, event) ~ group, data = simuDat)
 ```
 
@@ -55,14 +55,28 @@ plotMCF(sampleMCF, conf.int = TRUE, mark.time = TRUE,
         lty = c(1, 3), col = c("orange", "navy"))
 ```
 
-## Estimated MCF for baseline rate function from the HEART Model
+## Estimated MCF from the HEART Model
 
 Note that function 'plotMCF' returns 'ggplot' object so that the plot can be 
 further customized properly.
 
-```{r heartMCF, fig.height=6, fig.width=7}
+### Baseline MCF 
+
+```{r baselineMCF, fig.height=6, fig.width=7}
 baselineMCF <- MCF(heartfit)
 plotMCF(baselineMCF, conf.int = TRUE, col = "royalblue") +
   ggplot2::theme_bw()
 ```
 
+### MCF for certain group(s)
+
+```{r heartMCF, fig.height=6, fig.width=7}
+estmcf <- MCF(heartfit, 
+              newdata = data.frame(
+                X1 = c(0.1, 0.1), 
+                group = gl(2, 1, labels = c("Treat", "Contr"))), 
+              groupname = "Group", 
+              grouplevels = c("Treatment", "Control"))
+plotMCF(estmcf, conf.int = TRUE, col = c("royalblue", "red")) +
+  ggplot2::theme_bw()
+```
