@@ -221,8 +221,8 @@ setMethod(f = "MCF", signature = "formula",
 #' The possible elements of the control list include 
 #' \code{grid}, \code{length.out}, \code{from} and \code{to}.
 #' The time grid can be directly specified via element \code{grid}.
-#' \code{length.out} represents the length of grid points. 
-#' The dafault value is 1000.
+#' \code{length.out} represents the length of grid points.
+#' The dafault value is 200.
 #' \code{from} means the starting point of grid. It takes 0 as default.
 #' \code{to} means the endpoint of grid. 
 #' It takes the endpoint of baseline pieces as default.
@@ -239,6 +239,7 @@ setMethod(f = "MCF", signature = "heart",
                                 level = 0.95, na.action, control = list(), 
                                 ...) {
             beta <- object@estimates$beta[, 1]
+            alpha <- object@estimates$alpha[, 1]
             fcovnames <- as.character(object@call[[2]][[3]])
             covnames <- fcovnames[fcovnames != "+"]
             nbeta <- length(beta)
@@ -259,8 +260,13 @@ setMethod(f = "MCF", signature = "heart",
             CMF_B4_indx <- c(0, baselinepieces)[indx]
             LinCom_M[(indx - 1) * n_xx + 1:n_xx] <- xx - CMF_B4_indx
             n_par <- nrow(object@hessian)
-            Cov_M <- solve(object@hessian)[c((n_par - n_pieces + 1):n_par), 
-                                           c((n_par - n_pieces + 1):n_par)]
+            ## covariance matrix of beta and alpha
+            Cov_ind <- c(seq(nbeta), (n_par - n_pieces + 1):n_par)
+            Cov_par <- solve(object@hessian)[Cov_ind, Cov_ind]
+
+            ## nonsense, just to suppress Note from R CMD check --as-cran
+            `(Intercept)` <- NULL
+            
             ## about newdata
             tt <- terms(object@formula)
             Terms <- delete.response(tt)
@@ -290,13 +296,16 @@ setMethod(f = "MCF", signature = "heart",
             }
             ndesign <- nrow(X)
             multigroup <- ifelse(ndesign == 1, FALSE, TRUE)
-            coveff <- as.numeric(exp(crossprod(X, beta)))
+            coveff <- as.numeric(exp(X %*% beta))
             outdat <- NULL
             for (i in seq(ndesign)) {
+              ## Delta-method
+              grad <- cbind(alpha %o% X[i, ], diag(rep(1, n_pieces))) * 
+                coveff[i]
+              Cov_M <- grad %*% Cov_par %*% t(grad)
               CI_band <- qnorm((1 + level)/2) * 
-                sqrt(diag(LinCom_M %*% Cov_M %*% t(LinCom_M))) * coveff[i]
-              baseline_mean <- LinCom_M %*% 
-                object@estimates$alpha[, 1] * coveff[i]
+                sqrt(diag(LinCom_M %*% Cov_M %*% t(LinCom_M))) 
+              baseline_mean <- LinCom_M %*% alpha * coveff[i]
               lower <- baseline_mean - CI_band
               upper <- baseline_mean + CI_band
               outdat <- rbind(outdat, data.frame(time = xx, MCF = baseline_mean, 
@@ -326,7 +335,7 @@ setMethod(f = "MCF", signature = "heart",
           
 
 ## internal function ===========================================================
-heart_MCF_control <- function (grid, length.out = 1000, from, to, 
+heart_MCF_control <- function (grid, length.out = 200, from, to, 
                                baselinepieces) {
   ## controls for function MCF with signiture heart
   if (missing(from)) {
