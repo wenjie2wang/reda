@@ -64,7 +64,7 @@ Survr <- function (ID, time, event) {
 #' @slot xlevels list.
 #' @slot contrasts list.
 #' @slot convergence an integer.
-#' @slot hessian a numeric matrix.
+#' @slot fisher a numeric matrix.
 #' @aliases heart-class
 #' @seealso \code{\link{heart}}
 #' @export
@@ -79,7 +79,7 @@ setClass(Class = "heart",
                    xlevels = "list",
                    contrasts = "list",
                    convergence = "integer", 
-                   hessian = "matrix"))
+                   fisher = "matrix"))
 
 
 ## create S4 Class called "summary.heart" for summary.heart object from summary
@@ -108,13 +108,13 @@ setClass(Class = "summary.heart",
 #' An S4 Class to Represent Computed Empirical MCF
 #' 
 #' An S4 class to represent computed empirical mean cumulative function (MCF).
-#' \code{\link{MCF}} produces objects of this class.  
+#' \code{\link{mcf}} produces objects of this class.  
 #' @slot call function call
 #' @slot formula formula. 
 #' @slot MCF a data.frame.
 #' @slot multigroup a logical value.
 #' @aliases empirMCF-class
-#' @seealso \code{\link{MCF,formula-method}}
+#' @seealso \code{\link{mcf,formula-method}}
 #' @importFrom methods setClass
 #' @export
 setClass(Class = "empirMCF", 
@@ -126,7 +126,7 @@ setClass(Class = "empirMCF",
 #' 
 #' An S4 class to represent estimated mean cumulative function (MCF) 
 #' from HEART Model.
-#' \code{\link{MCF}} produces objects of this class.  
+#' \code{\link{mcf}} produces objects of this class.  
 #' 
 #' @slot formula formula.
 #' @slot baselinepieces a numeric vector.
@@ -137,7 +137,7 @@ setClass(Class = "empirMCF",
 #' @slot control list.
 #' @slot multigroup a logical value. 
 #' @aliases heartMCF-class
-#' @seealso \code{\link{MCF,heart-method}}
+#' @seealso \code{\link{mcf,heart-method}}
 #' @export
 setClass(Class = "heartMCF", 
          slots = c(formula = "formula", baselinepieces = "numeric",

@@ -81,7 +81,7 @@ NULL
 #' baseline(heartfit)
 #' @seealso \code{\link{summary,heart-method}} \code{\link{coef,heart-method}}
 #' \code{\link{confint,heart-method}} \code{\link{baseline,heart-method}}
-#' \code{\link{MCF,heart-method}}
+#' \code{\link{mcf,heart-method}}
 #' @importFrom methods new
 #' @importFrom stats model.matrix nlm pnorm na.fail na.omit na.exclude na.pass
 #' @export
@@ -109,6 +109,10 @@ heart <- function(formula, baselinepieces, data, subset, na.action,
   mf <- eval(mcall, parent.frame())
   mt <- attr(mf, "terms")
   mm <- stats::model.matrix(formula, data = mf, contrasts.arg = contrasts)
+  ## get data.frame if na.action = NULL
+  mcall$na.action <- NULL
+  mf_na <- eval(mcall, parent.frame())
+  mm_na <- stats::model.matrix(formula, data = mf_na, contrasts.arg = contrasts)
   ## number of covariates excluding intercept
   nbeta <- ncol(mm) - 1 
   ## covariates' names
@@ -118,7 +122,7 @@ heart <- function(formula, baselinepieces, data, subset, na.action,
   colnames(dat) <- c("ID", "time", "event", covar_names)
   ## check the impact caused by missing value
   ## if there is missing value removed
-  if (max(as.numeric(rownames(dat))) > nrow(dat)) {
+  if (nrow(mm_na) > nrow(dat)) {
     message("Observations with missing values on covariates are removed.") 
     message("Checking new data set again ... ", appendLF = FALSE)
     check_Survr(dat)
@@ -188,7 +192,7 @@ heart <- function(formula, baselinepieces, data, subset, na.action,
                           xlevels = .getXlevels(mt, mf),
                           contrasts = contrasts,
                           convergence = fit$code, 
-                          hessian = fit$hessian)
+                          fisher = fit$hessian)
   ## return
   results
 }
@@ -209,7 +213,7 @@ rho_0 <- function(par_BaselinePW, baselinepieces, Tvec) {
 mu0 <- function(par_BaselinePW, baselinepieces, Tvec) {
   indx <- apply(as.array(Tvec), 1, whereT, baselinepieces)
   BL_segments <- c(baselinepieces[1], diff(baselinepieces))
-  ## The CMF at each time point  
+  ## The MCF at each time point  
   CumMean_Pieces <- diffinv(BL_segments * par_BaselinePW)[-1]  
   ## return
   CumMean_Pieces[indx] - (baselinepieces[indx] - Tvec) * par_BaselinePW[indx]
@@ -349,5 +353,4 @@ heart_start <- function(beta, theta = 0.5, alpha, nbeta, nalpha) {
   ## return
   list(beta = beta, theta = theta, alpha = alpha)
 }
-
 

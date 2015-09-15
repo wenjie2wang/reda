@@ -43,20 +43,20 @@
 #' @param col an optional character vector indicating
 #' line colors specified to different groups. 
 #' @return ggplot object.
-#' @seealso \code{\link{MCF}} 
+#' @seealso \code{\link{mcf}} 
 #' @examples 
 #' library(heart)
 #' data(simuDat)
 #' 
 #' ## empirical MCF
-#' sampleMCF <- MCF(Survr(ID, time, event) ~ group, data = simuDat)
+#' sampleMCF <- mcf(Survr(ID, time, event) ~ group, data = simuDat)
 #' plotMCF(sampleMCF, lty = c(1, 3), col = c("orange", "navy"))
 #' 
 #' ## estimated MCF for baseline rate function from HEART model
 #' heartfit <- heart(formula = Survr(ID, time, event) ~ X1 + group, 
 #'                   data = simuDat, subset = ID %in% 75:125,
 #'                   baselinepieces = seq(28, 168, length = 6))
-#' baselineMCF <- MCF(heartfit)
+#' baselineMCF <- mcf(heartfit)
 #' plotMCF(baselineMCF, conf.int = TRUE, col = "blueviolet") + 
 #'   ggplot2::theme_bw()
 #' @export
@@ -77,7 +77,7 @@ setMethod(f = "plotMCF", signature = "empirMCF",
           definition = function(object, conf.int = FALSE, 
                                 mark.time = FALSE, lty, col, ...) {
             ## nonsense, just to suppress Note from R CMD check --as-cran
-            event <- lower <- upper <- design <- NULL
+            MCF <- event <- lower <- upper <- design <- NULL
             
             MCFdat <- object@MCF
             ## add starting point at time 0
@@ -182,7 +182,7 @@ setMethod(f = "plotMCF", signature = "heartMCF",
           definition = function(object, conf.int = FALSE, 
                                 lty, col, ...) {
             ## nonsense, just to suppress Note from R CMD check --as-cran
-            lower <- upper <- NULL
+            MCF <- lower <- upper <- NULL
             
             MCFdat <- object@MCF
             ## if MCF is just for one certain group

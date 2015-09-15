@@ -47,7 +47,7 @@ NULL
 #' @aliases summary,heart-method
 #' @seealso \code{\link{heart}} \code{\link{coef,heart-method}}
 #' \code{\link{confint,heart-method}} \code{\link{baseline,heart-method}}
-#' \code{\link{MCF}}
+#' \code{\link{mcf}}
 #' @importFrom methods new
 #' @export
 setMethod(f = "summary", signature = "heart",

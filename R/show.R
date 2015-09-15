@@ -45,7 +45,7 @@ NULL
 #' @param object certain R object generated from heart package.
 #' @name show
 #' @seealso \code{\link{heart}} \code{\link{summary,heart-method}}
-#' \code{\link{MCF}}
+#' \code{\link{mcf}}
 NULL
 
 
