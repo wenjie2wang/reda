@@ -45,9 +45,9 @@ summary(heartfit)
 ## Empirical MCF
 
 ```{r empirMCF}
-MCF(Survr(ID, time, event) ~ group, data = simuDat,
+mcf(Survr(ID, time, event) ~ group, data = simuDat,
     subset = ID %in% 100:101, na.action = na.omit, level = 0.9)
-sampleMCF <- MCF(Survr(ID, time, event) ~ group, data = simuDat)
+sampleMCF <- mcf(Survr(ID, time, event) ~ group, data = simuDat)
 ```
 
 ```{r plotempir, fig.height=6, fig.width=7}
@@ -63,7 +63,7 @@ further customized properly.
 ### Baseline MCF 
 
 ```{r baselineMCF, fig.height=6, fig.width=7}
-baselineMCF <- MCF(heartfit)
+baselineMCF <- mcf(heartfit)
 plotMCF(baselineMCF, conf.int = TRUE, col = "royalblue") +
   ggplot2::theme_bw()
 ```
@@ -71,7 +71,7 @@ plotMCF(baselineMCF, conf.int = TRUE, col = "royalblue") +
 ### MCF for certain group(s)
 
 ```{r heartMCF, fig.height=6, fig.width=7}
-estmcf <- MCF(heartfit, 
+estmcf <- mcf(heartfit, 
               newdata = data.frame(
                 X1 = c(0.1, 0.1), 
                 group = gl(2, 1, labels = c("Treat", "Contr"))), 
