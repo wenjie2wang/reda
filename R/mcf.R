@@ -36,18 +36,18 @@ NULL
 #' any one factor variable in the data.  The former computes the overall 
 #' empirical MCF from sample.  The latter computes the empirical MCF for each 
 #' level of the factor variable specified respectively.
-#' \code{MCF} computes empirical mean cumulative function (MCF) on every unique
+#' \code{mcf} computes empirical mean cumulative function (MCF) on every unique
 #' time point from recurrent event sample data.  
 #' It does not assume any particular underlying model. 
 #' 
 #' For \code{\link{heart-class}} object, 
-#' \code{MCF} estimates the MCF of baseline rate function.
+#' \code{mcf} estimates the MCF of baseline rate function.
 #' 
 #' @param object an object used to dispatch a method.
 #' @param ... other arguments for future usage.
 #' @param level a optional numeric value 
 #' indicating the confidence level required. 
-#' For \code{formula-method}, it must be between 0.5 and 1.
+#' For \code{mcf,formula-method}, it must be between 0.5 and 1.
 #' The default value is 0.95.
 #' @seealso \code{\link{heart}} \code{\link{plotMCF}}
 #' @examples 
@@ -55,27 +55,27 @@ NULL
 #' data(simuDat)
 #' 
 #' ## empirical MCF
-#' sampleMCF <- MCF(Survr(ID, time, event) ~ group, data = simuDat)
+#' sampleMCF <- mcf(Survr(ID, time, event) ~ group, data = simuDat)
 #' 
-#' MCF(Survr(ID, time, event) ~ group, data = simuDat, 
+#' mcf(Survr(ID, time, event) ~ group, data = simuDat, 
 #' subset = ID %in% 100:101, na.action = na.omit)
 #' 
 #' ## estimated MCF for baseline rate function from HEART model
 #' heartfit <- heart(formula = Survr(ID, time, event) ~ X1 + group, 
 #'                   data = simuDat, subset = ID %in% 75:125,
 #'                   baselinepieces = seq(28, 168, length = 6))
-#' baselineMCF <- MCF(heartfit)
+#' baselineMCF <- mcf(heartfit)
 #' 
-#' MCF(heartfit, level = 0.9, control = list(length.out = 500))
+#' mcf(heartfit, level = 0.9, control = list(length.out = 500))
 #'  
 #' @export
-setGeneric(name = "MCF",
+setGeneric(name = "mcf",
            def = function(object, ...) {
-             standardGeneric("MCF")
+             standardGeneric("mcf")
            })
 
 
-#' @describeIn MCF Empirical mean cumulative function (MCF)
+#' @describeIn mcf Empirical mean cumulative function (MCF)
 #' 
 #' @param data an optional data frame, list or environment containing
 #' the variables in the model.  If not found in data, the variables are taken 
@@ -90,18 +90,18 @@ setGeneric(name = "MCF",
 #' Another possible value is NULL, no action.  
 #' Value \code{\link[stats]{na.exclude}} can be useful. 
 #' @return \code{\link{empirMCF-class}} or \code{\link{heartMCF-class}} object
-#' @aliases MCF,formula-method 
+#' @aliases mcf,formula-method 
 #' @importFrom utils head 
 #' @importFrom methods new
 #' @importFrom stats na.fail na.omit na.exclude na.pass
 #' @importFrom plyr ddply
 #' @export
-setMethod(f = "MCF", signature = "formula", 
+setMethod(f = "mcf", signature = "formula", 
           definition = function(object, data, subset, na.action, 
                                 level = 0.95, ...) {
             ## record the function call 
             Call <- match.call()
-            Call[[1]] <- as.name("MCF")
+            Call[[1]] <- as.name("mcf")
             names(Call) <- sub(pattern = "object", 
                                replacement = "formula", names(Call))
             mfnames <- c("formula", "data", "subset", "na.action")
@@ -208,14 +208,11 @@ setMethod(f = "MCF", signature = "formula",
           })
 
 
-#' @describeIn MCF Estimated Mean Cumulative Function (MCF) from HEART Model
+#' @describeIn mcf Estimated Mean Cumulative Function (MCF) from HEART Model
 #' 
 #' @param newdata an optional data.frame. 
-#' \strong{(experimental arugment needs updating)}
 #' @param groupname an optional length-one charactor vector. 
-#' \strong{(experimental arugment needs updating)}
 #' @param grouplevels an optional charactor vector.
-#' \strong{(experimental arugment needs updating)}
 #' @param control an optional list to specify the time grid 
 #' where the MCF are estimated.
 #' The possible elements of the control list include 
@@ -229,12 +226,12 @@ setMethod(f = "MCF", signature = "formula",
 #' When \code{grid} is missing, the grid will be generated 
 #' via \code{\link{seq}} with arguments \code{from}, \code{to} 
 #' and \code{length.out}
-#' @aliases MCF,heart-method
+#' @aliases mcf,heart-method
 #' @importFrom methods new
 #' @importFrom stats terms na.fail na.omit na.exclude na.pass qnorm model.matrix
 #' model.frame delete.response 
 #' @export
-setMethod(f = "MCF", signature = "heart", 
+setMethod(f = "mcf", signature = "heart", 
           definition = function(object, newdata, groupname, grouplevels, 
                                 level = 0.95, na.action, control = list(), 
                                 ...) {
@@ -246,7 +243,7 @@ setMethod(f = "MCF", signature = "heart",
             baselinepieces <- object@baselinepieces
             controlist <- c(control, 
                             list("baselinepieces" = as.numeric(baselinepieces)))
-            control <- do.call("heart_MCF_control", controlist)
+            control <- do.call("heart_mcf_control", controlist)
             n_xx <- control$length.out
             n_pieces <- length(baselinepieces)
             BL_segments <- c(baselinepieces[1], diff(baselinepieces))
@@ -259,10 +256,10 @@ setMethod(f = "MCF", signature = "heart",
                                 }))
             CMF_B4_indx <- c(0, baselinepieces)[indx]
             LinCom_M[(indx - 1) * n_xx + 1:n_xx] <- xx - CMF_B4_indx
-            n_par <- nrow(object@hessian)
+            n_par <- nrow(object@fisher)
             ## covariance matrix of beta and alpha
             Cov_ind <- c(seq(nbeta), (n_par - n_pieces + 1):n_par)
-            Cov_par <- solve(object@hessian)[Cov_ind, Cov_ind]
+            Cov_par <- solve(object@fisher)[Cov_ind, Cov_ind]
 
             ## nonsense, just to suppress Note from R CMD check --as-cran
             `(Intercept)` <- NULL
@@ -335,7 +332,7 @@ setMethod(f = "MCF", signature = "heart",
           
 
 ## internal function ===========================================================
-heart_MCF_control <- function (grid, length.out = 200, from, to, 
+heart_mcf_control <- function (grid, length.out = 200, from, to, 
                                baselinepieces) {
   ## controls for function MCF with signiture heart
   if (missing(from)) {
