@@ -1,7 +1,7 @@
 Package: heart
 Title: Parametric Recurrent Event Analysis via HEART Model
-Version: 0.0.0.9000
-Date: 2015-07-28
+Version: 0.0.0.9010
+Date: 2015-09-14
 Authors@R: c(person(given = "Haoda", family = "Fu", email = "fu_haoda@lily.com",
                     role = c("aut")),
              person(given = "Wenjie", family = "Wang", 
@@ -26,12 +26,12 @@ LazyData: true
 VignetteBuilder: knitr
 Collate:
     'class.R'
-    'MCF.R'
     'baseline.R'
     'coef.R'
     'data.R'
     'fit.R'
     'heart.R'
+    'mcf.R'
     'plot.R'
     'show.R'
     'summary.R'
