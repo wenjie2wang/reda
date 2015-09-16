@@ -55,6 +55,82 @@ simuDat$X1 <- factor(simuDat$X1, levels = c(0, 1), labels = c("Treat", "Contr"))
 colnames(simuDat)[4:5] <- c("group", "X1")
 ## save(simuDat, file = "data/simuDat.RData")
 
+## simulation verification for variance of mcf
+### function part
+## beta should be length 2
+verf1 <- function(npat = 200, beta = c(0.5, 0.3), ...) {
+  nbeta <- length(beta)
+  datlist <- vector(mode = "list", length = npat)
+  for (i in seq(npat)) {
+      datlist[[i]] <- simu1_fun(ID = i, beta = beta, alpha = 0.06,
+                           x = rbind(ifelse(i <= npat/2, 0, 1), rnorm(1)))
+  }
+  dat <- data.frame(do.call(rbind, datlist))
+  colnames(dat) <- c("ID", "time", "event", "group", "X1")
+  dat$group <- factor(dat$group,
+                      levels = c(0, 1), labels = c("Treat", "Contr"))
+  fit <- heart(formula = Survr(ID, time, event) ~ group + X1,
+               data = dat, baselinepieces = seq(28, 168, length = 6))
+  est_beta <- coef(fit)
+  est_se <- summary(fit)@coefficients[, 2]
+  mcf_base <- mcf(fit)@MCF
+  mcf_newdat <- mcf(fit, newdata = data.frame(X1 = rep(0.1, 2), 
+                             group = gl(2, 1, labels = c("Treat", "Contr"))),
+                    grouplevels = c("Treat", "Contr"))@MCF
+  ## return
+  list(est_beta = est_beta, est_se = est_se,
+       mcf_base = mcf_base, mcf_newdat = mcf_newdat)
+}
+## nrep > 1
+summerz <- function(nrep = 200, beta = c(0.5, 0.3), ...) {
+  est <- matrix(NA, nrow = nrep, ncol = 4)
+  MCF_base <- MCF_newdat <- NULL
+  for (i in seq(nrep)) {
+    temp <- verf1(beta = beta, ...)
+    est[i, ] <- c(temp$est_beta, temp$est_se)
+    MCF_base <- rbind(MCF_base, cbind(temp$mcf_base, simu = i))
+    MCF_newdat <- rbind(MCF_newdat, cbind(temp$mcf_newdat, simu = i))
+  }
+  ## beta, bar(beta), se(hat(beta)), bar(hat(se(beta)))
+  bars <- colMeans(est)
+  bar_beta <- bars[1:2]
+  bar_se_beta <- bars[3:4]
+  se_hat_beta <- sqrt(diag(var(est[, 1:2])))
+  out1 <- c(nrep, beta, bar_beta, se_hat_beta, bar_se_beta)
+  names(out1) <- c("rep.", "group", "X1", "est_group", "est_X1",
+                  "se_est_group", "se_est_X1", "bar_se_group", "bar_se_X1")
+  ## return
+  list(betab = out1, MCF_base = MCF_base, MCF_newdat = MCF_newdat)
+}
+
+### for estimation of beta
+library(heart)
+set.seed(1216)
+simures50 <- summerz(50)
+simures50$betab
+##       rep.        group           X1    est_group       est_X1 se_est_group 
+## 50.0000000    0.5000000    0.3000000    0.4856200    0.2749800    0.2000803 
+##  se_est_X1 bar_se_group    bar_se_X1 
+##  0.1064778    0.2055400    0.1017600 
+
+set.seed(1216)
+simures100 <- summerz(100)
+simures100$betab
+##       rep.        group           X1    est_group       est_X1 se_est_group 
+## 100.0000000    0.5000000    0.3000000    0.4613900    0.2680900    0.1845496 
+##   se_est_X1 bar_se_group    bar_se_X1 
+##   0.0976210    0.2051700    0.1008600
+
+set.seed(1216)
+simures200 <- summerz(200)
+simures200$betab
+##         rep.        group           X1    est_group       est_X1 se_est_group 
+## 200.00000000   0.50000000   0.30000000   0.45154000   0.26878000   0.18728614 
+##    se_est_X1 bar_se_group    bar_se_X1 
+##   0.09362135   0.20497000   0.10125000 
+
+
+#### needs updating ============================================================
 ### baseline
  pdf("./test_mcf1.pdf", width = 7, height = 5)
 plot(MCF ~ time, data = MCF_null1, type = "l", col = "red",
