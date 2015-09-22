@@ -51,7 +51,7 @@ NULL
 #' The default value is 0.95.
 #' @seealso \code{\link{heart}} \code{\link{plotMCF}}
 #' @examples 
-#' library(heart)
+#' library(reda)
 #' data(simuDat)
 #' 
 #' ## empirical MCF

@@ -39,7 +39,7 @@ NULL
 #' @return a named vector.
 #' @aliases baseline,heart-method
 #' @examples 
-#' library(heart)
+#' library(reda)
 #' data(simuDat)
 #' heartfit <- heart(formula = Survr(ID, time, event) ~ X1 + group, 
 #'                   data = simuDat, subset = ID %in% 75:125,

@@ -41,7 +41,7 @@ NULL
 #' @aliases coef,heart-method
 #' @seealso \code{\link{heart}} \code{\link{summary,heart-method}}
 #' @examples 
-#' library(heart)
+#' library(reda)
 #' data(simuDat)
 #' heartfit <- heart(formula = Survr(ID, time, event) ~ X1 + group, 
 #'                   data = simuDat, subset = ID %in% 75:125,
@@ -92,7 +92,7 @@ setMethod(f = "coef", signature = "heart",
 #' New York: Springer, 2nd edition.
 #' \emph{Journal of biopharmaceutical statistics}, 2014 Dec 1, Epub 2014 Dec 1.
 #' @examples 
-#' library(heart)
+#' library(reda)
 #' data(simuDat)
 #' heartfit <- heart(formula = Survr(ID, time, event) ~ X1 + group, 
 #'                   data = simuDat, subset = ID %in% 75:125,

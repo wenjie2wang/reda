@@ -30,9 +30,9 @@ Collate:
     'coef.R'
     'data.R'
     'fit.R'
-    'reda.R'
     'mcf.R'
     'plot.R'
+    'reda.R'
     'show.R'
     'summary.R'
 URL: https://github.com/wenjie2wang/reda

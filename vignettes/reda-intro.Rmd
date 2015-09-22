@@ -1,5 +1,5 @@
 ---
-title: "Introduction to 'heart' via examples"
+title: "Introduction to 'reda' via examples"
 author: Wenjie Wang
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
@@ -14,7 +14,7 @@ vignette: >
 ## Model Fitting
 
 ```{r fits, message=FALSE}
-library(heart)
+library(reda)
 data(simuDat)
 heartfit <- heart(formula = Survr(ID, time, event) ~ X1 + group, 
                   data = simuDat, baselinepieces = seq(28, 168, length = 6))

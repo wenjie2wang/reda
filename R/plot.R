@@ -45,7 +45,7 @@
 #' @return ggplot object.
 #' @seealso \code{\link{mcf}} 
 #' @examples 
-#' library(heart)
+#' library(reda)
 #' data(simuDat)
 #' 
 #' ## empirical MCF

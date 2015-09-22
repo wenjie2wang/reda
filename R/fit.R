@@ -68,7 +68,7 @@ NULL
 #' "Hypoglycemic Events Analysis via Recurrent Time-to-Event (HEART) Models," 
 #' \emph{Journal of biopharmaceutical statistics}, 2014 Dec 1, Epub 2014 Dec 1.
 #' @examples
-#' library(heart)
+#' library(reda)
 #' data(simuDat)
 #' heartfit <- heart(formula = Survr(ID, time, event) ~ X1 + group, 
 #'                   data = simuDat, subset = ID %in% 75:125,
