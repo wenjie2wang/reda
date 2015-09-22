@@ -8,7 +8,7 @@
 # 
 # ## generate event times for each process 
 # ## which depends on random seed by myseed and covariate by x
-simu1_fun <- function(ID = "1", beta = 0.3, theta = 0.5, alpha = 0.06, 
+simu1_fun <- function(ID = 1, beta = 0.3, theta = 0.5, alpha = 0.06, 
                       baselinepieces = 168, x = 0, tau = 168) {
   whereT <- function(tt, baselinepieces) {
     ## return
@@ -32,8 +32,8 @@ simu1_fun <- function(ID = "1", beta = 0.3, theta = 0.5, alpha = 0.06,
   ## step 4
   tempn <- length(timeinter)
   U <- runif(n = tempn, min = 0, max = 1)
-  rho_t <- apply(as.array(timeinter), 1, 
-                 whereT, baselinepieces = baselinepieces)
+  rho_t <- rho[apply(as.array(timeinter), 1, 
+                 whereT, baselinepieces = baselinepieces)]
   ind <- U <= rho_t / rho_m
   timeout <- c(timeinter[ind], tau)
   eventout <- c(rep(1, length(timeout) - 1), 0)
@@ -70,7 +70,7 @@ verf1 <- function(npat = 200, beta = c(0.5, 0.3), ...) {
   dat$group <- factor(dat$group,
                       levels = c(0, 1), labels = c("Treat", "Contr"))
   fit <- heart(formula = Survr(ID, time, event) ~ group + X1,
-               data = dat, baselinepieces = seq(28, 168, length = 6))
+               data = dat, baselinepieces = 168)
   est_beta <- coef(fit)
   est_se <- summary(fit)@coefficients[, 2]
   mcf_base <- mcf(fit)@MCF
@@ -82,7 +82,7 @@ verf1 <- function(npat = 200, beta = c(0.5, 0.3), ...) {
        mcf_base = mcf_base, mcf_newdat = mcf_newdat)
 }
 ## nrep > 1
-summerz <- function(nrep = 200, beta = c(0.5, 0.3), ...) {
+summerz <- function(nrep = 1000, beta = c(0.5, 0.3), ...) {
   est <- matrix(NA, nrow = nrep, ncol = 4)
   MCF_base <- MCF_newdat <- NULL
   for (i in seq(nrep)) {
