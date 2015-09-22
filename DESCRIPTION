@@ -1,5 +1,5 @@
-Package: heart
-Title: Parametric Recurrent Event Analysis via HEART Model
+Package: reda
+Title: Recurrent Event Data Analysis
 Version: 0.0.0.9010
 Date: 2015-09-14
 Authors@R: c(person(given = "Haoda", family = "Fu", email = "fu_haoda@lily.com",
@@ -30,10 +30,10 @@ Collate:
     'coef.R'
     'data.R'
     'fit.R'
-    'heart.R'
+    'reda.R'
     'mcf.R'
     'plot.R'
     'show.R'
     'summary.R'
-URL: https://github.com/wenjie2wang/heart
-BugReports: https://github.com/wenjie2wang/heart/issues
+URL: https://github.com/wenjie2wang/reda
+BugReports: https://github.com/wenjie2wang/reda/issues
