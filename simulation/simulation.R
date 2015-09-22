@@ -104,7 +104,7 @@ summerz <- function(nrep = 1000, beta = c(0.5, 0.3), ...) {
 }
 
 ### for estimation of beta
-library(heart)
+library(reda)
 set.seed(1216)
 simures50 <- summerz(50)
 simures50$betab
