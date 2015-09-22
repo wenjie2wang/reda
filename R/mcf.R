@@ -249,11 +249,11 @@ setMethod(f = "mcf", signature = "heart",
             BL_segments <- c(baselinepieces[1], diff(baselinepieces))
             xx <- control$grid
             indx <- sapply(xx, whereT, baselinepieces = baselinepieces)
-            LinCom_M <- t(apply(array(indx), 1, 
-                                function(ind_indx) {
-                                  c(BL_segments[1:ind_indx], 
-                                    rep(0, n_pieces - ind_indx))
-                                }))
+            LinCom_M <- NULL
+            for (ind_indx in indx) {
+                 LinCom_M <- rbind(LinCom_M, c(BL_segments[1:ind_indx], 
+                                               rep(0, n_pieces - ind_indx)))
+            }
             CMF_B4_indx <- c(0, baselinepieces)[indx]
             LinCom_M[(indx - 1) * n_xx + 1:n_xx] <- xx - CMF_B4_indx
             n_par <- nrow(object@fisher)
@@ -293,16 +293,16 @@ setMethod(f = "mcf", signature = "heart",
             }
             ndesign <- nrow(X)
             multigroup <- ifelse(ndesign == 1, FALSE, TRUE)
-            coveff <- as.numeric(exp(X %*% beta))
+            coveff <- as.numeric(exp(crossprod(t(X), beta)))
             outdat <- NULL
             for (i in seq(ndesign)) {
               ## Delta-method
               grad <- cbind(alpha %o% X[i, ], diag(rep(1, n_pieces))) * 
                 coveff[i]
-              Cov_M <- grad %*% Cov_par %*% t(grad)
+              Cov_M <- tcrossprod(crossprod(t(grad), Cov_par), grad)
               CI_band <- qnorm((1 + level)/2) * 
-                sqrt(diag(LinCom_M %*% Cov_M %*% t(LinCom_M))) 
-              baseline_mean <- LinCom_M %*% alpha * coveff[i]
+                sqrt(diag(tcrossprod(crossprod(t(LinCom_M), Cov_M), LinCom_M))) 
+              baseline_mean <- crossprod(t(LinCom_M), alpha) * coveff[i]
               lower <- baseline_mean - CI_band
               upper <- baseline_mean + CI_band
               outdat <- rbind(outdat, data.frame(time = xx, MCF = baseline_mean, 
