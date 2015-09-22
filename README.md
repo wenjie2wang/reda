@@ -1,4 +1,4 @@
-# R Package heart 
+# R Package reda 
 
 ## To-do-list
 
@@ -20,4 +20,6 @@
 
 * Setup repository on Github for issue or bug report.
 
+* Add more handy functions for recurrent event analysis.
 
+* Write up manuscript for JSS.
