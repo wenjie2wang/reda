@@ -62,7 +62,7 @@
 #' @export
 setGeneric(name = "plotMCF",
            def = function(object, conf.int = FALSE, ...) {
-             standardGeneric("plotMCF")
+               standardGeneric("plotMCF")
            })
 
 
@@ -76,98 +76,99 @@ setGeneric(name = "plotMCF",
 setMethod(f = "plotMCF", signature = "empirMCF", 
           definition = function(object, conf.int = FALSE, 
                                 mark.time = FALSE, lty, col, ...) {
-            ## nonsense, just to suppress Note from R CMD check --as-cran
-            MCF <- event <- lower <- upper <- design <- NULL
-            
-            MCFdat <- object@MCF
-            ## add starting point at time 0
-            MCFdat <- rbind(MCFdat[1, ], MCFdat)
-            MCFdat[1, 2:7] <- c(0, 1, 0, 0, 0, 0)
-            ## if MCF is just for one certain group
-            if (! object@multigroup) {
-              if (missing(lty)) lty <- 1
-              if (missing(col)) col <- "black"
-              p <- ggplot2::ggplot(data = MCFdat, 
-                                   ggplot2::aes_string(x = "Time")) + 
-                ggplot2::geom_step(mapping = ggplot2::aes(x = time, y = MCF), 
-                                   linetype = lty, color = col) 
-              if (mark.time) {
-                p <- p + 
-                  ggplot2::geom_text(data = base::subset(MCFdat, 
-                                                         time > 0 & event == 0), 
-                                     ggplot2::aes(label = "+", 
-                                                  x = time, y = MCF),
-                                     vjust = 0.3, hjust = 0.5, 
-                                     linetype = lty, color = col, 
-                                     show_guide  = FALSE)
-              }
-              if (conf.int) {
-                p <- p + ggplot2::geom_step(mapping = ggplot2::aes(x = time, 
-                                                                   y = lower), 
-                                            linetype = "3313", color = col) +
-                  ggplot2::geom_step(mapping = ggplot2::aes(x = time, 
-                                                            y = upper), 
-                                     linetype = "3313", color = col)
-              }
-            } else {
-              ## function to emulate the default colors used in ggplot2
-              gg_color_hue <- function(n){
-                hues = seq(15, 375, length=n+1)
-                return(hcl(h=hues, l=65, c=100)[1:n])
-              }
+              ## nonsense, just to suppress Note from R CMD check --as-cran
+              MCF <- event <- lower <- upper <- design <- NULL
               
-              legendname <- utils::tail(colnames(MCFdat), n = 1)
-              MCFdat$design <- MCFdat[, legendname]
-              Design <- factor(MCFdat$design)
-              ndesign = length(levels(Design))
-              
-              ## about lty
-              # 0 = blank, 1 = solid, 2 = dashed, 3 = dotted, 
-              # 4 = dotdash, 5 = longdash, 6 = twodash
-              ## set line types and colors
-              if(missing(lty)){
-                lts <- stats::setNames(rep(1, ndesign), levels(Design)) 
-              }else{
-                lts <- stats::setNames(lty[seq(ndesign)], levels(Design))
+              MCFdat <- object@MCF
+              ## add starting point at time 0
+              MCFdat <- rbind(MCFdat[1, ], MCFdat)
+              MCFdat[1, 2:7] <- c(0, 1, 0, 0, 0, 0)
+              ## if MCF is just for one certain group
+              if (! object@multigroup) {
+                  if (missing(lty)) lty <- 1
+                  if (missing(col)) col <- "black"
+                  p <- ggplot2::ggplot(data = MCFdat, 
+                                       ggplot2::aes_string(x = "Time")) + 
+                      ggplot2::geom_step(mapping = ggplot2::aes(x = time,
+                                                                y = MCF), 
+                                         linetype = lty, color = col) 
+                  if (mark.time) {
+                      p <- p + 
+                          ggplot2::geom_text(data = base::subset(MCFdat, 
+                                                                 time > 0 & event == 0), 
+                                             ggplot2::aes(label = "+", 
+                                                          x = time, y = MCF),
+                                             vjust = 0.3, hjust = 0.5, 
+                                             linetype = lty, color = col, 
+                                             show_guide  = FALSE)
+                  }
+                  if (conf.int) {
+                      p <- p + ggplot2::geom_step(mapping = ggplot2::aes(x = time, 
+                                                                         y = lower), 
+                                                  linetype = "3313", color = col) +
+                          ggplot2::geom_step(mapping = ggplot2::aes(x = time, 
+                                                                    y = upper), 
+                                             linetype = "3313", color = col)
+                  }
+              } else {
+                  ## function to emulate the default colors used in ggplot2
+                  gg_color_hue <- function(n){
+                      hues = seq(15, 375, length=n+1)
+                      return(hcl(h=hues, l=65, c=100)[1:n])
+                  }
+                  
+                  legendname <- utils::tail(colnames(MCFdat), n = 1)
+                  MCFdat$design <- MCFdat[, legendname]
+                  Design <- factor(MCFdat$design)
+                  ndesign = length(levels(Design))
+                  
+                  ## about lty
+                                        # 0 = blank, 1 = solid, 2 = dashed, 3 = dotted, 
+                                        # 4 = dotdash, 5 = longdash, 6 = twodash
+                                        ## set line types and colors
+                  if(missing(lty)){
+                      lts <- stats::setNames(rep(1, ndesign), levels(Design)) 
+                  }else{
+                      lts <- stats::setNames(lty[seq(ndesign)], levels(Design))
+                  }
+                  if(missing(col)){
+                      lcs <- stats::setNames(gg_color_hue(ndesign), levels(Design))
+                  }else{
+                      lcs <- stats::setNames(col[seq(ndesign)], levels(Design))
+                  }
+                  p <- ggplot2::ggplot(data = MCFdat, 
+                                       ggplot2::aes_string(x = "Time")) +
+                      ggplot2::geom_step(mapping = ggplot2::aes(x = time, y = MCF, 
+                                                                color = design, 
+                                                                linetype = design))
+                  
+                  p <- p +
+                      ggplot2::scale_color_manual(values = lcs, name = legendname) +
+                      ggplot2::scale_linetype_manual(values= lts, name = legendname)
+                  if (mark.time) {
+                      p <- p + 
+                          ggplot2::geom_text(data = base::subset(MCFdat, 
+                                                                 time > 0 & event == 0), 
+                                             ggplot2::aes(label = "+", 
+                                                          x = time, y = MCF, 
+                                                          linetype = design, 
+                                                          color = design),
+                                             vjust = 0.3, hjust = 0.5, 
+                                             show_guide  = FALSE)
+                  }
+                  if (conf.int) {2
+                      p <- p + 
+                          ggplot2::geom_step(mapping = ggplot2::aes(x = time, y = lower, 
+                                                                    color = design), 
+                                             linetype = "3313") +
+                          ggplot2::geom_step(mapping = ggplot2::aes(x = time, y = upper, 
+                                                                    color = design), 
+                                             linetype = "3313")
+                  }
               }
-              if(missing(col)){
-                lcs <- stats::setNames(gg_color_hue(ndesign), levels(Design))
-              }else{
-                lcs <- stats::setNames(col[seq(ndesign)], levels(Design))
-              }
-              p <- ggplot2::ggplot(data = MCFdat, 
-                                   ggplot2::aes_string(x = "Time")) +
-                ggplot2::geom_step(mapping = ggplot2::aes(x = time, y = MCF, 
-                                                          color = design, 
-                                                          linetype = design))
-              
-              p <- p +
-                ggplot2::scale_color_manual(values = lcs, name = legendname) +
-                ggplot2::scale_linetype_manual(values= lts, name = legendname)
-              if (mark.time) {
-                p <- p + 
-                  ggplot2::geom_text(data = base::subset(MCFdat, 
-                                                         time > 0 & event == 0), 
-                                     ggplot2::aes(label = "+", 
-                                                  x = time, y = MCF, 
-                                                  linetype = design, 
-                                                  color = design),
-                                     vjust = 0.3, hjust = 0.5, 
-                                     show_guide  = FALSE)
-              }
-              if (conf.int) {2
-                p <- p + 
-                  ggplot2::geom_step(mapping = ggplot2::aes(x = time, y = lower, 
-                                                            color = design), 
-                                     linetype = "3313") +
-                  ggplot2::geom_step(mapping = ggplot2::aes(x = time, y = upper, 
-                                                            color = design), 
-                                     linetype = "3313")
-              }
-            }
-            p <- p + ggplot2::ylab("MCF") + 
-              ggplot2::ggtitle("Empirical Mean Cumulative Function")
-            return(p)
+              p <- p + ggplot2::ylab("MCF") + 
+                  ggplot2::ggtitle("Empirical Mean Cumulative Function")
+              return(p)
           })
 
 
@@ -181,73 +182,73 @@ setMethod(f = "plotMCF", signature = "empirMCF",
 setMethod(f = "plotMCF", signature = "heartMCF", 
           definition = function(object, conf.int = FALSE, 
                                 lty, col, ...) {
-            ## nonsense, just to suppress Note from R CMD check --as-cran
-            MCF <- lower <- upper <- NULL
-            
-            MCFdat <- object@MCF
-            ## if MCF is just for one certain group
-            if (! object@multigroup) {
-              if (missing(lty)) lty <- 1
-              if (missing(col)) col <- "black"
-              p <- ggplot2::ggplot(data = MCFdat, 
-                                   ggplot2::aes_string(x = "Time")) + 
-                ggplot2::geom_line(mapping = ggplot2::aes(x = time, y = MCF), 
-                                   linetype = lty, color = col)
-              if (conf.int) {
-                p <- p + 
-                  ggplot2::geom_line(
-                    mapping = ggplot2::aes(x = time, y = lower), 
-                    linetype = "3313", color = col) +
-                  ggplot2::geom_line(
-                    mapping = ggplot2::aes(x = time, y = upper), 
-                    linetype = "3313", color = col)
-              }
-            } else {
-              ## function to emulate the default colors used in ggplot2
-              gg_color_hue <- function(n){
-                hues = seq(15, 375, length=n+1)
-                return(hcl(h=hues, l=65, c=100)[1:n])
-              }
+              ## nonsense, just to suppress Note from R CMD check --as-cran
+              MCF <- lower <- upper <- NULL
               
-              legendname <- tail(colnames(MCFdat), n = 1)
-              MCFdat$Design <- MCFdat[, legendname]
-              Design <- factor(MCFdat$Design)
-              ndesign = length(levels(Design))
-              
-              ## about lty
-              # 0 = blank, 1 = solid, 2 = dashed, 3 = dotted, 
-              # 4 = dotdash, 5 = longdash, 6 = twodash
-              ## set line types and colors
-              if(missing(lty)){
-                lts <- stats::setNames(rep(1, ndesign), levels(Design)) 
-              }else{
-                lts <- stats::setNames(lty[seq(ndesign)], levels(Design))
+              MCFdat <- object@MCF
+              ## if MCF is just for one certain group
+              if (! object@multigroup) {
+                  if (missing(lty)) lty <- 1
+                  if (missing(col)) col <- "black"
+                  p <- ggplot2::ggplot(data = MCFdat, 
+                                       ggplot2::aes_string(x = "Time")) + 
+                      ggplot2::geom_line(mapping = ggplot2::aes(x = time, y = MCF), 
+                                         linetype = lty, color = col)
+                  if (conf.int) {
+                      p <- p + 
+                          ggplot2::geom_line(
+                              mapping = ggplot2::aes(x = time, y = lower), 
+                              linetype = "3313", color = col) +
+                          ggplot2::geom_line(
+                              mapping = ggplot2::aes(x = time, y = upper), 
+                              linetype = "3313", color = col)
+                  }
+              } else {
+                  ## function to emulate the default colors used in ggplot2
+                  gg_color_hue <- function(n){
+                      hues = seq(15, 375, length=n+1)
+                      return(hcl(h=hues, l=65, c=100)[1:n])
+                  }
+                  
+                  legendname <- tail(colnames(MCFdat), n = 1)
+                  MCFdat$Design <- MCFdat[, legendname]
+                  Design <- factor(MCFdat$Design)
+                  ndesign = length(levels(Design))
+                  
+                  ## about lty
+                  ## 0 = blank, 1 = solid, 2 = dashed, 3 = dotted, 
+                  ## 4 = dotdash, 5 = longdash, 6 = twodash
+                  ## set line types and colors
+                  if(missing(lty)){
+                      lts <- stats::setNames(rep(1, ndesign), levels(Design)) 
+                  }else{
+                      lts <- stats::setNames(lty[seq(ndesign)], levels(Design))
+                  }
+                  if(missing(col)){
+                      lcs <- stats::setNames(gg_color_hue(ndesign), levels(Design))
+                  }else{
+                      lcs <- stats::setNames(col[seq(ndesign)], levels(Design))
+                  }
+                  p <- ggplot2::ggplot(data = MCFdat, 
+                                       ggplot2::aes_string(x = "Time")) +
+                      ggplot2::geom_line(mapping = ggplot2::aes(x = time, y = MCF, 
+                                                                color = Design, 
+                                                                linetype = Design)) +
+                      ggplot2::scale_color_manual(values = lcs, name = legendname) +
+                      ggplot2::scale_linetype_manual(values= lts, name = legendname)
+                  if (conf.int) {
+                      p <- p + 
+                          ggplot2::geom_line(
+                              mapping = ggplot2::aes(x = time, y = lower, color = Design), 
+                              linetype = "3313") +
+                          ggplot2::geom_line(
+                              mapping = ggplot2::aes(x = time, y = upper, color = Design), 
+                              linetype = "3313")
+                  }
               }
-              if(missing(col)){
-                lcs <- stats::setNames(gg_color_hue(ndesign), levels(Design))
-              }else{
-                lcs <- stats::setNames(col[seq(ndesign)], levels(Design))
-              }
-              p <- ggplot2::ggplot(data = MCFdat, 
-                                   ggplot2::aes_string(x = "Time")) +
-                ggplot2::geom_line(mapping = ggplot2::aes(x = time, y = MCF, 
-                                                          color = Design, 
-                                                          linetype = Design)) +
-                ggplot2::scale_color_manual(values = lcs, name = legendname) +
-                ggplot2::scale_linetype_manual(values= lts, name = legendname)
-              if (conf.int) {
-                p <- p + 
-                  ggplot2::geom_line(
-                    mapping = ggplot2::aes(x = time, y = lower, color = Design), 
-                    linetype = "3313") +
-                  ggplot2::geom_line(
-                    mapping = ggplot2::aes(x = time, y = upper, color = Design), 
-                    linetype = "3313")
-              }
-            }
-            p <- p + ggplot2::ylab("MCF") + 
-              ggplot2::ggtitle("Estimated Mean Cumulative Function")
-            return(p)
+              p <- p + ggplot2::ylab("MCF") + 
+                  ggplot2::ggtitle("Estimated Mean Cumulative Function")
+              return(p)
           })
 
 

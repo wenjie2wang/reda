@@ -56,21 +56,21 @@ NULL
 #' @export
 setMethod(f = "show", signature = "heart",
           definition = function(object) {
-            beta <- round(object@estimates$beta[, "coef"], digits = 3)
-            names(beta) <- rownames(object@estimates$beta)
-            theta <- round(object@estimates$theta[, "theta"], digits = 3)
-            names(theta) <- NULL
-            alpha <- round(object@estimates$alpha[, "alpha"], digits = 3)
-            names(alpha) <- rownames(object@estimates$alpha)
-            cat("\ncall: \n")
-            print(object@call)
-            cat("\nbaseline pieces: \n")
-            cat(attr(object@baselinepieces, "name"), "\n")
-            cat("\ncoefficients: \n") 
-            print(beta)
-            cat("\ntheta: ", theta, "\n")
-            cat("\nbaseline rate functions: \n")
-            print(alpha)
+              beta <- round(object@estimates$beta[, "coef"], digits = 3)
+              names(beta) <- rownames(object@estimates$beta)
+              theta <- round(object@estimates$theta[, "theta"], digits = 3)
+              names(theta) <- NULL
+              alpha <- round(object@estimates$alpha[, "alpha"], digits = 3)
+              names(alpha) <- rownames(object@estimates$alpha)
+              cat("\ncall: \n")
+              print(object@call)
+              cat("\nbaseline pieces: \n")
+              cat(attr(object@baselinepieces, "name"), "\n")
+              cat("\ncoefficients: \n") 
+              print(beta)
+              cat("\ntheta: ", theta, "\n")
+              cat("\nbaseline rate functions: \n")
+              print(alpha)
           })
 
 
@@ -80,23 +80,23 @@ setMethod(f = "show", signature = "heart",
 #' @export
 setMethod(f = "show", signature = "summary.heart",
           definition = function(object) {
-            if (attr(object@call, "show")) {
-              Call <- object@call
-              attr(Call, "show") <- NULL
-              cat("\ncall: \n")
-              print(Call)
-            }
-            if (attr(object@baselinepieces, "show")) {
-              cat("\nbaseline pieces: \n")
-              cat(attr(object@baselinepieces, "name"), "\n")
-            }
-            cat("\ncoefficients: \n") 
-            printCoefmat(object@coefficients)
-            theta <- as.data.frame(object@theta)
-            cat("\ntheta: \n")
-            print(theta, row.names = FALSE)
-            cat("\nbaseline rate functions: \n")
-            print(object@baseline)
+              if (attr(object@call, "show")) {
+                  Call <- object@call
+                  attr(Call, "show") <- NULL
+                  cat("\ncall: \n")
+                  print(Call)
+              }
+              if (attr(object@baselinepieces, "show")) {
+                  cat("\nbaseline pieces: \n")
+                  cat(attr(object@baselinepieces, "name"), "\n")
+              }
+              cat("\ncoefficients: \n") 
+              printCoefmat(object@coefficients)
+              theta <- as.data.frame(object@theta)
+              cat("\ntheta: \n")
+              print(theta, row.names = FALSE)
+              cat("\nbaseline rate functions: \n")
+              print(object@baseline)
           })
 
 
@@ -107,19 +107,19 @@ setMethod(f = "show", signature = "summary.heart",
 #' @export
 setMethod(f = "show", signature = "empirMCF",
           definition = function(object) {
-            cat("\ncall: \n")
-            print(object@call)
-            cat("\nformula:\n")
-            print(object@formula)
-            cat("\nMCF:\n")
-            if (nrow(object@MCF) <= 100) {
-              print(object@MCF)
-              cat("\n")
-            } else {
-              print(head(object@MCF, 100))
-              cat("...\n\n")
-              cat("Only the first 100 rows are printed.\n")
-            }
+              cat("\ncall: \n")
+              print(object@call)
+              cat("\nformula:\n")
+              print(object@formula)
+              cat("\nMCF:\n")
+              if (nrow(object@MCF) <= 100) {
+                  print(object@MCF)
+                  cat("\n")
+              } else {
+                  print(head(object@MCF, 100))
+                  cat("...\n\n")
+                  cat("Only the first 100 rows are printed.\n")
+              }
           })
 
 
@@ -130,17 +130,17 @@ setMethod(f = "show", signature = "empirMCF",
 #' @export
 setMethod(f = "show", signature = "heartMCF",
           definition = function(object) {
-            cat("formula:\n")
-            print(object@formula)
-            cat("\nbaseline pieces:\n")
-            print(attr(object@baselinepieces, "name"))
-            cat("\nMCF:\n")
-            if (nrow(object@MCF) <= 100) {
-              print(object@MCF)
-              cat("\n")
-            } else {
-              print(head(object@MCF, 100))
-              cat("...\n\n")
-              cat("Only the first 100 rows are printed.\n")
-            }
+              cat("formula:\n")
+              print(object@formula)
+              cat("\nbaseline pieces:\n")
+              print(attr(object@baselinepieces, "name"))
+              cat("\nMCF:\n")
+              if (nrow(object@MCF) <= 100) {
+                  print(object@MCF)
+                  cat("\n")
+              } else {
+                  print(head(object@MCF, 100))
+                  cat("...\n\n")
+                  cat("Only the first 100 rows are printed.\n")
+              }
           })

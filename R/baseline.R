@@ -49,7 +49,7 @@ NULL
 #' @export
 setGeneric(name = "baseline",
            def = function(object, ...) {
-             standardGeneric("baseline")
+               standardGeneric("baseline")
            })
 
 
@@ -58,10 +58,10 @@ setGeneric(name = "baseline",
 #' @export
 setMethod(f = "baseline", signature = "heart",
           definition = function(object, digits = 3, ...) {
-            alpha <- round(object@estimates$alpha[, "alpha"], digits = digits)
-            names(alpha) <- rownames(object@estimates$alpha)
-            ## return
-            alpha
+              alpha <- round(object@estimates$alpha[, "alpha"], digits = digits)
+              names(alpha) <- rownames(object@estimates$alpha)
+              ## return
+              alpha
           })
 
 

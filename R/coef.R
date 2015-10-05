@@ -51,10 +51,10 @@ NULL
 #' @export
 setMethod(f = "coef", signature = "heart",
           definition = function(object, digits = 3, ...) {
-            beta <- round(object@estimates$beta[, "coef"], digits = digits)
-            names(beta) <- rownames(object@estimates$beta)
-            ## return
-            beta
+              beta <- round(object@estimates$beta[, "coef"], digits = digits)
+              names(beta) <- rownames(object@estimates$beta)
+              ## return
+              beta
           })
 
 
@@ -104,35 +104,35 @@ setMethod(f = "coef", signature = "heart",
 #' @export
 setMethod(f = "confint", signature = "heart",
           definition = function(object, parm, level = 0.95, digits = 3, ...) {
-            ## internal function
-            format.perc <- function (probs, digits){
-              paste(format(100 * probs, trim = TRUE, scientific = FALSE, 
-                           digits = digits), "%")
-            }
-            betamat <- object@estimates$beta
-            cf <- betamat[, 1]
-            pnames <- attr(betamat, "dimnames")[[1]]
-            if (missing(parm)) {
-              parm <- seq(nrow(betamat))
-            } else if (is.numeric(parm)) { 
-              parm <- intersect(seq(nrow(betamat)), parm) 
-            } else if (is.character(parm)) {
-              parm <- match(parm, pnames, nomatch = NULL)
-            } else {
-              stop("invalid argument param")
-            }
-            a <- (1 - level)/2
-            a <- c(a, 1 - a)
-            fac <- qnorm(a)
-            pct <- format.perc(a, digits = digits)
-            ci <- array(NA, dim = c(length(parm), 2L), 
-                        dimnames = list(parm, pct))
-            ses <- betamat[parm, 2]
-            ci[] <- cf[parm] + ses %o% fac
-            ci <- round(ci, digits = digits)
-            rownames(ci) <- pnames[parm]
-            ## return
-            ci
+              ## internal function
+              format.perc <- function (probs, digits){
+                  paste(format(100 * probs, trim = TRUE, scientific = FALSE, 
+                               digits = digits), "%")
+              }
+              betamat <- object@estimates$beta
+              cf <- betamat[, 1]
+              pnames <- attr(betamat, "dimnames")[[1]]
+              if (missing(parm)) {
+                  parm <- seq(nrow(betamat))
+              } else if (is.numeric(parm)) { 
+                  parm <- intersect(seq(nrow(betamat)), parm) 
+              } else if (is.character(parm)) {
+                  parm <- match(parm, pnames, nomatch = NULL)
+              } else {
+                  stop("invalid argument param")
+              }
+              a <- (1 - level)/2
+              a <- c(a, 1 - a)
+              fac <- qnorm(a)
+              pct <- format.perc(a, digits = digits)
+              ci <- array(NA, dim = c(length(parm), 2L), 
+                          dimnames = list(parm, pct))
+              ses <- betamat[parm, 2]
+              ci[] <- cf[parm] + ses %o% fac
+              ci <- round(ci, digits = digits)
+              rownames(ci) <- pnames[parm]
+              ## return
+              ci
           })
 
 

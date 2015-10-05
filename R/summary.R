@@ -53,22 +53,22 @@ NULL
 setMethod(f = "summary", signature = "heart",
           definition = function(object, showcall = TRUE, showpieces = TRUE, 
                                 digits = 3) {
-            Call <- object@call
-            attr(Call, "show") <- showcall
-            blpieces <- object@baselinepieces
-            attr(blpieces, "show") <- showpieces
-            beta <- round(object@estimates$beta, digits = digits)
-            theta <- round(object@estimates$theta, digits = digits)
-            alpha <- round(object@estimates$alpha, digits = digits)
-            colnames(beta)[1] <- colnames(theta)[1] <- 
-              colnames(alpha)[1] <- "estimates"
-            results <- new("summary.heart", 
-                           call = Call,
-                           baselinepieces = blpieces,
-                           coefficients = beta,
-                           theta = theta, 
-                           baseline = alpha)
-            ## return
-            results
+              Call <- object@call
+              attr(Call, "show") <- showcall
+              blpieces <- object@baselinepieces
+              attr(blpieces, "show") <- showpieces
+              beta <- round(object@estimates$beta, digits = digits)
+              theta <- round(object@estimates$theta, digits = digits)
+              alpha <- round(object@estimates$alpha, digits = digits)
+              colnames(beta)[1] <- colnames(theta)[1] <- 
+                  colnames(alpha)[1] <- "estimates"
+              results <- new("summary.heart", 
+                             call = Call,
+                             baselinepieces = blpieces,
+                             coefficients = beta,
+                             theta = theta, 
+                             baseline = alpha)
+              ## return
+              results
           })
 
