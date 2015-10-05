@@ -26,11 +26,7 @@
 #' 
 #' \code{Survr} is an S3 class to represent 
 #' formula response for recurrent event data. 
-#' @param ID numeric identificator of each subject. 
-#' For character 'ID', please use \code{\link[stats]{setNames}} to 
-#' create a named numeric vector. For example, if original 'ID' is 
-#' \code{c("A", "B", "C")}, use 
-#' \code{ID <- setNames(1:3, LETTERS[1:3])} as new numeric 'ID'.
+#' @param ID identificator of each subject. 
 #' @param time time of reccurence. For each subject the last time are censored.
 #' @param event the status indicator, 
 #' 0 = censored, 1 = recurrent event. 
@@ -39,11 +35,11 @@
 #' @importFrom plyr ddply
 #' @export
 Survr <- function (ID, time, event) {
-  dat <- data.frame(ID, time, event)
-  check_Survr(dat)
-  ans <- as.matrix(cbind(ID, time, event))
-  oldClass(ans) <- "Survr"
-  invisible(ans)
+    inpdat <- data.frame(ID, time, event)
+    dat <- check_Survr(inpdat)
+    outdat <- with(dat, as.matrix(cbind(ID, time, event)))
+    oldClass(outdat) <- "Survr"
+    invisible(outdat)
 }
 
 
@@ -148,66 +144,72 @@ setClass(Class = "heartMCF",
 
 ### internal function ========================================================== 
 check_Survr <- function(dat) {
-  ## check missing value on 'ID'
-  if (any(is.na(dat$ID))) {
-    stop("'ID' cannot be missing.")
-  }
-  ## check coding and missing value on 'event'
-  if (any(! dat$event %in% 0:1)) {
-    stop("'event' must be coded as 0 (censoring) or 1 (event).")
-  }
-  ## nonsense, just to suppress Note from R CMD check --as-cran
-  mis_time1 <- mis_time0 <- censor1 <- censor2 <- event <- NULL
-  ## check function
-  check_ddply <- function (subdat) {
-    subdat <- subdat[order(subdat$time), ]
-    ## check missing values on 'time'
-    time1 <- with(subset(subdat, event == 1), time)
-    time0 <- with(subset(subdat, event == 0), time)
-    mis_time1 <- if (length(time1) > 0) {
-      ## missing indicator of time for event == 1
-      ifelse(any(is.na(time1)), 1, 0)
-    } else { 2 }
-    mis_time0 <- if (length(time0) > 0) {
-      ## missing indicator of time for event == 0
-      ifelse(any(is.na(time0)), 1, 0)
-    } else { 2 }
-    ## issue #1: without censoring time or more than one censoring time
-    censor1 <- ifelse(sum(subdat$event == 0, na.rm = TRUE) != 1, 1, 0)
-    ## issue #2: event time after censoring time
-    censor2 <- if (mis_time1 == 0 && mis_time0 == 0) {
-      ifelse(max(time1) >= min(time0), 1, 0)
-    } else { 2 }
+    ## check missing value on 'ID'
+    if (any(is.na(dat$ID))) {
+        stop("'ID' cannot be missing.")
+    }
+    ## check coding and missing value on 'event'
+    if (any(! dat$event %in% 0:1)) {
+        stop("'event' must be coded as 0 (censoring) or 1 (event).")
+    }
+    ## check whether 'ID' is numeric or not. convert if not.
+    factorID <- factor(dat$ID, levels = unique(dat$ID),
+                       labels = unique(dat$ID))
+    dat$ID <- as.numeric(factorID)
+    dat$IDnam <- factorID
+    ## nonsense, just to suppress Note from R CMD check --as-cran
+    mis_time1 <- mis_time0 <- censor1 <- censor2 <- event <- NULL
+    ## check function
+    check_ddply <- function (subdat) {
+        subdat <- subdat[order(subdat$time), ]
+        ## check missing values on 'time'
+        time1 <- with(subset(subdat, event == 1), time)
+        time0 <- with(subset(subdat, event == 0), time)
+        mis_time1 <- if (length(time1) > 0) {
+            ## missing indicator of time for event == 1
+            ifelse(any(is.na(time1)), 1, 0)
+        } else {2}
+        mis_time0 <- if (length(time0) > 0) {
+            ## missing indicator of time for event == 0
+            ifelse(any(is.na(time0)), 1, 0)
+        } else {2}
+        ## issue #1: without censoring time or more than one censoring time
+        censor1 <- ifelse(sum(subdat$event == 0, na.rm = TRUE) != 1, 1, 0)
+        ## issue #2: event time after censoring time
+        censor2 <- if (mis_time1 == 0 && mis_time0 == 0) {
+            ifelse(max(time1) >= min(time0), 1, 0)
+        } else {2}
+        ## return
+        cbind(subdat, mis_time1, mis_time0, censor1, censor2)
+    }
+    outdat <- plyr::ddply(dat, "ID", check_ddply)
+    ## stop if missing value of 'time' for event == 1
+    ID_mis_time1 <- with(subset(outdat, mis_time1 == 1), unique(IDnam))
+    if (length(ID_mis_time1) > 0) {
+        stop(paste("There is missing value on event time for subject:", 
+                   paste0(ID_mis_time1, collapse = ", ")))
+    }
+    ## stop if missing value of 'time' for event == 0
+    ID_mis_time0 <- with(subset(outdat, mis_time0 == 1), unique(IDnam))
+    if (length(ID_mis_time0) > 0) {
+        stop(paste("Censoring time is missing for subject:", 
+                   paste0(ID_mis_time0, collapse = ", ")))
+    }
+    ## stop if no censoring time or more than one censoring time
+    ID_censor1 <- with(subset(outdat, censor1 == 1), unique(IDnam))
+    if (length(ID_censor1) > 0) {
+        stop(paste(
+            "Every subject must have one (and only one) censored time.",
+            "Check subject: ",
+            paste0(ID_censor1, collapse = ", ")))
+    }
+    ## stop if event time after censoring time
+    ID_censor2 <- with(subset(outdat, censor2 == 1), unique(IDnam))
+    if (length(ID_censor2) > 0) {
+        stop(paste(
+            "Event time should be earlier than censoring time. Check subject:",
+            paste0(ID_censor2, collapse = ", ")))
+    }
     ## return
-    cbind(subdat, mis_time1, mis_time0, censor1, censor2)
-  }
-  outdat <- plyr::ddply(dat, "ID", check_ddply)
-  ## stop if missing value of 'time' for event == 1
-  ID_mis_time1 <- with(subset(outdat, mis_time1 == 1), unique(ID))
-  if (length(ID_mis_time1) > 0) {
-    stop(paste("There is missing value on event time for subject:", 
-               paste0(ID_mis_time1, collapse = ", ")))
-  }
-  ## stop if missing value of 'time' for event == 0
-  ID_mis_time0 <- with(subset(outdat, mis_time0 == 1), unique(ID))
-  if (length(ID_mis_time0) > 0) {
-    stop(paste("Censoring time is missing for subject:", 
-               paste0(ID_mis_time0, collapse = ", ")))
-  }
-  ## stop if no censoring time or more than one censoring time
-  ID_censor1 <- with(subset(outdat, censor1 == 1), unique(ID))
-  if (length(ID_censor1) > 0) {
-    stop(paste(
-      "Every subject must have one (and only one) censored time. Check subject:",
-      paste0(ID_censor1, collapse = ", ")))
-  }
-  ## stop if event time after censoring time
-  ID_censor2 <- with(subset(outdat, censor2 == 1), unique(ID))
-  if (length(ID_censor2) > 0) {
-    stop(paste(
-      "Event time should be earlier than censoring time. Check subject:",
-      paste0(ID_censor2, collapse = ", ")))
-  }
-  ## return
-  return(NULL)
+    invisible(outdat[, c("ID", "time", "event")])
 }
