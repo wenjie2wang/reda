@@ -1,6 +1,6 @@
 Package: reda
 Title: Recurrent Event Data Analysis
-Version: 0.0.0.9010
+Version: 0.1.0
 Date: 2015-10-05
 Authors@R: c(person(given = "Haoda", family = "Fu", email = "fu_haoda@lily.com",
                     role = c("aut")),
@@ -11,8 +11,9 @@ Authors@R: c(person(given = "Haoda", family = "Fu", email = "fu_haoda@lily.com",
 Description: This package mainly provides functions
     to fit gamma frailty model with a piecewise constant baseline rate function
     (or simply called 'HEART' model) for recurrent event data.
-    Some handy functions to compute and plot nonparametric mean
+    Handy function to compute and plot nonparametric mean
     cumulative function (MCF) are implemented as well.
+    The most functions are S4 methods that produce S4 class objects.
 Imports:
     utils,
     methods,
