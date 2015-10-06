@@ -27,8 +27,8 @@
 #' to plot mean cumulative function by using ggplot2 plotting system. 
 #' So the plots generated are able to be further customized properly.
 #' 
-#' @param object \code{\link{empirMCF-class}} or 
-#' \code{\link{heartMCF-class}} object.
+#' @param object \code{\link{empirMcf-class}} or 
+#' \code{\link{heartMcf-class}} object.
 #' @param conf.int logical indicating whether to plot confidence interval.
 #' The default value is FALSE.
 #' @param ... other arguments for further usage.
@@ -46,34 +46,33 @@
 #' @seealso \code{\link{mcf}} 
 #' @examples 
 #' library(reda)
-#' data(simuDat)
-#' 
+#'  
 #' ## empirical MCF
 #' sampleMCF <- mcf(Survr(ID, time, event) ~ group, data = simuDat)
-#' plotMCF(sampleMCF, lty = c(1, 3), col = c("orange", "navy"))
+#' plotMcf(sampleMCF, lty = c(1, 3), col = c("orange", "navy"))
 #' 
 #' ## estimated MCF for baseline rate function from HEART model
-#' heartfit <- heart(formula = Survr(ID, time, event) ~ X1 + group, 
+#' heartFit <- heart(formula = Survr(ID, time, event) ~ x1 + group, 
 #'                   data = simuDat, subset = ID %in% 75:125,
-#'                   baselinepieces = seq(28, 168, length = 6))
-#' baselineMCF <- mcf(heartfit)
-#' plotMCF(baselineMCF, conf.int = TRUE, col = "blueviolet") + 
+#'                   baselinePieces = seq(28, 168, length = 6))
+#' baselineMCF <- mcf(heartFit)
+#' plotMcf(baselineMCF, conf.int = TRUE, col = "blueviolet") + 
 #'   ggplot2::theme_bw()
 #' @export
-setGeneric(name = "plotMCF",
+setGeneric(name = "plotMcf",
            def = function(object, conf.int = FALSE, ...) {
-               standardGeneric("plotMCF")
+               standardGeneric("plotMcf")
            })
 
 
-#' @describeIn plotMCF Plot empirical mean cumulative function (MCF)
-#' @aliases plotMCF,empirMCF-method
+#' @describeIn plotMcf Plot empirical mean cumulative function (MCF)
+#' @aliases plotMcf,empirMcf-method
 #' @importFrom utils tail
 #' @importFrom stats setNames
 #' @importFrom ggplot2 ggplot geom_step aes aes_string scale_color_manual
 #' scale_linetype_manual ylab ggtitle geom_text
 #' @export
-setMethod(f = "plotMCF", signature = "empirMCF", 
+setMethod(f = "plotMcf", signature = "empirMcf", 
           definition = function(object, conf.int = FALSE, 
                                 mark.time = FALSE, lty, col, ...) {
               
@@ -85,7 +84,7 @@ setMethod(f = "plotMCF", signature = "empirMCF",
               MCFdat <- rbind(MCFdat[1, ], MCFdat)
               MCFdat[1, 2:7] <- c(0, 1, 0, 0, 0, 0)
               ## if MCF is just for one certain group
-              if (! object@multigroup) {
+              if (! object@multiGroup) {
                   if (missing(lty)) lty <- 1
                   if (missing(col)) col <- "black"
                   p <- ggplot(data = MCFdat, aes_string(x = "Time")) + 
@@ -168,14 +167,14 @@ setMethod(f = "plotMCF", signature = "empirMCF",
           })
 
 
-#' @describeIn plotMCF Estimated mean cumulative function (MCF) 
+#' @describeIn plotMcf Estimated mean cumulative function (MCF) 
 #' for baseline rate function.
-#' @aliases plotMCF,heartMCF-method
+#' @aliases plotMcf,heartMcf-method
 #' @importFrom stats setNames
 #' @importFrom ggplot2 ggplot geom_line aes aes_string scale_color_manual
 #' scale_linetype_manual ylab ggtitle 
 #' @export
-setMethod(f = "plotMCF", signature = "heartMCF", 
+setMethod(f = "plotMcf", signature = "heartMcf", 
           definition = function(object, conf.int = FALSE, 
                                 lty, col, ...) {
 
@@ -184,7 +183,7 @@ setMethod(f = "plotMCF", signature = "heartMCF",
               
               MCFdat <- object@MCF
               ## if MCF is just for one certain group
-              if (! object@multigroup) {
+              if (! object@multiGroup) {
                   if (missing(lty)) lty <- 1
                   if (missing(col)) col <- "black"
                   p <- ggplot(data = MCFdat, 

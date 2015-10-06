@@ -52,7 +52,7 @@ Survr <- function (ID, time, event) {
 #' 
 #' @slot call function call.
 #' @slot formula formula.
-#' @slot baselinepieces a numeric vector.
+#' @slot baselinePieces a numeric vector.
 #' @slot estimates list.
 #' @slot control list.
 #' @slot start list.
@@ -67,7 +67,7 @@ Survr <- function (ID, time, event) {
 setClass(Class = "heart", 
          slots = c(call = "call", 
                    formula = "formula", 
-                   baselinepieces = "numeric",
+                   baselinePieces = "numeric",
                    estimates = "list",
                    control = "list",
                    start = "list",
@@ -78,24 +78,24 @@ setClass(Class = "heart",
                    fisher = "matrix"))
 
 
-## create S4 Class called "summary.heart" for summary.heart object from summary
+## create S4 Class called "summaryHeart" for summaryHeart object from summary
 #' An S4 Class to Represent Summary of heart-class Object
 #' 
-#' summary.heart-class is an S4 class with selective slots 
+#' summaryHeart-class is an S4 class with selective slots 
 #' of heart-class object.  See ``Slots'' for details.  
 #' \code{\link{summary}} produces objects of this class. 
 #'  
 #' @slot call function call.
-#' @slot baselinepieces a numeric vector.
+#' @slot baselinePieces a numeric vector.
 #' @slot coefficients a numeric matrix.
 #' @slot theta numeric a matrix.
 #' @slot baseline a numeric matrix.
-#' @aliases summary.heart-class
+#' @aliases summaryHeart-class
 #' @seealso \code{\link{summary,heart-method}} 
 #' @export
-setClass(Class = "summary.heart", 
+setClass(Class = "summaryHeart", 
          slots = c(call = "call", 
-                   baselinepieces = "numeric",
+                   baselinePieces = "numeric",
                    coefficients = "matrix",
                    theta = "matrix",
                    baseline = "matrix"))
@@ -108,14 +108,14 @@ setClass(Class = "summary.heart",
 #' @slot call function call
 #' @slot formula formula. 
 #' @slot MCF a data.frame.
-#' @slot multigroup a logical value.
-#' @aliases empirMCF-class
+#' @slot multiGroup a logical value.
+#' @aliases empirMcf-class
 #' @seealso \code{\link{mcf,formula-method}}
 #' @importFrom methods setClass
 #' @export
-setClass(Class = "empirMCF", 
+setClass(Class = "empirMcf", 
          slots = c(call = "call", formula = "formula", MCF = "data.frame", 
-                   multigroup = "logical"))
+                   multiGroup = "logical"))
 
 
 #' An S4 Class to Represent Estimated MCF from HEART Model
@@ -125,21 +125,21 @@ setClass(Class = "empirMCF",
 #' \code{\link{mcf}} produces objects of this class.  
 #' 
 #' @slot formula formula.
-#' @slot baselinepieces a numeric vector.
+#' @slot baselinePieces a numeric vector.
 #' @slot newdata a numeric matrix.
 #' @slot MCF a data.frame.
 #' @slot level a numeric value between 0 and 1.
 #' @slot na.action a length-one character vector.
 #' @slot control list.
-#' @slot multigroup a logical value. 
-#' @aliases heartMCF-class
+#' @slot multiGroup a logical value. 
+#' @aliases heartMcf-class
 #' @seealso \code{\link{mcf,heart-method}}
 #' @export
-setClass(Class = "heartMCF", 
-         slots = c(formula = "formula", baselinepieces = "numeric",
+setClass(Class = "heartMcf", 
+         slots = c(formula = "formula", baselinePieces = "numeric",
                    newdata = "matrix", MCF = "data.frame", level = "numeric", 
                    na.action = "character", control = "list", 
-                   multigroup = "logical"))
+                   multiGroup = "logical"))
 
 
 ### internal function ========================================================== 

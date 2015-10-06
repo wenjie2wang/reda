@@ -24,7 +24,7 @@
 #' Simulated Dataset for Demonstration
 #'
 #' A simulated data frame with covariates named 
-#' 'ID', 'time', 'event', 'group' and 'X1'.
+#' 'ID', 'time', 'event', 'group' and 'x1'.
 #' 
 #' The dataset is simulated by the thinning method developed 
 #' by \emph{Lewis and Shedler (1979)}. 

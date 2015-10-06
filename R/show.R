@@ -33,11 +33,11 @@ NULL
 #' \itemize{
 #'   \item For \code{\link{heart-class}} object, 
 #'   it prints brief summary of the fitted HEART model.
-#'   \item For \code{\link{summary.heart-class}} object, 
+#'   \item For \code{\link{summaryHeart-class}} object, 
 #'   it prints summary of the fitted HEART model.
-#'   \item For \code{\link{empirMCF-class}} object,
+#'   \item For \code{\link{empirMcf-class}} object,
 #'   it prints formula and the first 100 rows of the computed MCF data frame.
-#'   \item For \code{\link{heartMCF-class}} object,
+#'   \item For \code{\link{heartMcf-class}} object,
 #'   it prints formula, baseline pieces and the first 100 rows of the estimated
 #'   MCF data frame.
 #' }
@@ -65,7 +65,7 @@ setMethod(f = "show", signature = "heart",
               cat("\ncall: \n")
               print(object@call)
               cat("\nbaseline pieces: \n")
-              cat(attr(object@baselinepieces, "name"), "\n")
+              cat(attr(object@baselinePieces, "name"), "\n")
               cat("\ncoefficients: \n") 
               print(beta)
               cat("\ntheta: ", theta, "\n")
@@ -75,10 +75,10 @@ setMethod(f = "show", signature = "heart",
 
 
 #' @rdname show 
-#' @aliases show,summary.heart-method
+#' @aliases show,summaryHeart-method
 #' @importFrom methods show
 #' @export
-setMethod(f = "show", signature = "summary.heart",
+setMethod(f = "show", signature = "summaryHeart",
           definition = function(object) {
               if (attr(object@call, "show")) {
                   Call <- object@call
@@ -86,9 +86,9 @@ setMethod(f = "show", signature = "summary.heart",
                   cat("\ncall: \n")
                   print(Call)
               }
-              if (attr(object@baselinepieces, "show")) {
+              if (attr(object@baselinePieces, "show")) {
                   cat("\nbaseline pieces: \n")
-                  cat(attr(object@baselinepieces, "name"), "\n")
+                  cat(attr(object@baselinePieces, "name"), "\n")
               }
               cat("\ncoefficients: \n") 
               printCoefmat(object@coefficients)
@@ -101,11 +101,11 @@ setMethod(f = "show", signature = "summary.heart",
 
 
 #' @rdname show 
-#' @aliases show,empirMCF-method 
+#' @aliases show,empirMcf-method 
 #' @importFrom methods show 
 #' @importFrom utils head
 #' @export
-setMethod(f = "show", signature = "empirMCF",
+setMethod(f = "show", signature = "empirMcf",
           definition = function(object) {
               cat("\ncall: \n")
               print(object@call)
@@ -124,16 +124,16 @@ setMethod(f = "show", signature = "empirMCF",
 
 
 #' @rdname show 
-#' @aliases show,heartMCF-method
+#' @aliases show,heartMcf-method
 #' @importFrom methods show 
 #' @importFrom utils head
 #' @export
-setMethod(f = "show", signature = "heartMCF",
+setMethod(f = "show", signature = "heartMcf",
           definition = function(object) {
               cat("formula:\n")
               print(object@formula)
               cat("\nbaseline pieces:\n")
-              print(attr(object@baselinepieces, "name"))
+              print(attr(object@baselinePieces, "name"))
               cat("\nMCF:\n")
               if (nrow(object@MCF) <= 100) {
                   print(object@MCF)

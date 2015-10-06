@@ -35,7 +35,7 @@ NULL
 #' Hypoglycemic Events Analysis via Recurrent Time-to-Event (HEART) Models
 #'
 #' @param formula Survr object from function \code{\link{Survr}}. 
-#' @param baselinepieces an optional numeric vector consisting of
+#' @param baselinePieces an optional numeric vector consisting of
 #' all the right endpoints of baseline pieces.  The default is maximum of time.
 #' The default model is of one baseline piece, which  is equivalent to 
 #' the negative binomial regression model.
@@ -69,23 +69,24 @@ NULL
 #' \emph{Journal of biopharmaceutical statistics}, 2014 Dec 1, Epub 2014 Dec 1.
 #' @examples
 #' library(reda)
-#' data(simuDat)
-#' heartfit <- heart(formula = Survr(ID, time, event) ~ X1 + group, 
+#' ## data(simuDat)
+#' heartFit <- heart(formula = Survr(ID, time, event) ~ x1 + group, 
 #'                   data = simuDat, subset = ID %in% 75:125,
-#'                   baselinepieces = seq(28, 168, length = 6))
-#' str(heartfit)
-#' show(heartfit) # or simply call heartfit
-#' summary(heartfit)
-#' coef(heartfit)
-#' confint(heartfit)
-#' baseline(heartfit)
+#'                   baselinePieces = seq(28, 168, length = 6))
+#' ## str(heartFit)
+#' show(heartFit) # or simply call 'heartFit'
+#' summary(heartFit)
+#' coef(heartFit)
+#' confint(heartFit)
+#' baseline(heartFit)
 #' @seealso \code{\link{summary,heart-method}} \code{\link{coef,heart-method}}
 #' \code{\link{confint,heart-method}} \code{\link{baseline,heart-method}}
 #' \code{\link{mcf,heart-method}}
 #' @importFrom methods new
 #' @importFrom stats model.matrix nlm pnorm na.fail na.omit na.exclude na.pass
+#' .getXlevels
 #' @export
-heart <- function(formula, baselinepieces, data, subset, na.action, 
+heart <- function(formula, baselinePieces, data, subset, na.action, 
                   start = list(), control = list(), contrasts = NULL, ...) {
     ## record the function call to return
     Call <- match.call()
@@ -130,19 +131,19 @@ heart <- function(formula, baselinepieces, data, subset, na.action,
         check_Survr(dat)
         message("done.")
     }
-    ## baselinepieces
-    if(missing(baselinepieces)) {
-        baselinepieces <- as.numeric(max(dat$time))
+    ## baselinePieces
+    if(missing(baselinePieces)) {
+        baselinePieces <- as.numeric(max(dat$time))
     } 
     ## number of baseline pieces or rate functions
-    nalpha <- length(baselinepieces)
-    if (baselinepieces[nalpha] < max(dat$time)) {
-        baselinepieces[nalpha] <- max(dat$time) + 1e-08
+    nalpha <- length(baselinePieces)
+    if (baselinePieces[nalpha] < max(dat$time)) {
+        baselinePieces[nalpha] <- max(dat$time) + 1e-08
         warning("Baseline pieces is extended.")
     }
     ## friendly version of baseline pieces to print out
-    print_blpieces <- int_baseline(baselinepieces = baselinepieces)
-    attr(baselinepieces, "name") <- print_blpieces
+    print_blpieces <- int_baseline(baselinePieces = baselinePieces)
+    attr(baselinePieces, "name") <- print_blpieces
     ## 'control' and 'start' values for 'nlm'
     startlist <- c(start, nbeta = nbeta, nalpha = nalpha)
     start <- do.call("heart_start", startlist)
@@ -151,7 +152,7 @@ heart <- function(formula, baselinepieces, data, subset, na.action,
     length_par <- length(ini)
     ## log likelihood
     fit <- stats::nlm(logL_heart, ini, data = dat, 
-                      baselinepieces = baselinepieces, hessian = TRUE,
+                      baselinePieces = baselinePieces, hessian = TRUE,
                       gradtol = control$gradtol, stepmax = control$stepmax,
                       steptol = control$steptol, iterlim = control$iterlim)
     
@@ -192,7 +193,7 @@ heart <- function(formula, baselinepieces, data, subset, na.action,
     ## results to return
     results <- methods::new("heart", 
                             call = Call, formula = formula, 
-                            baselinepieces = baselinepieces,
+                            baselinePieces = baselinePieces,
                             estimates = list(beta = est_beta, 
                                              theta = est_theta, 
                                              alpha = est_alpha),
@@ -209,37 +210,37 @@ heart <- function(formula, baselinepieces, data, subset, na.action,
 
 
 ## internal functions ==========================================================
-whereT <- function(tt, baselinepieces) {
+whereT <- function(tt, baselinePieces) {
     ## return
-    min(which(tt <= baselinepieces))
+    min(which(tt <= baselinePieces))
 }
 
-rho_0 <- function(par_BaselinePW, baselinepieces, Tvec) {
-    indx <- apply(as.array(Tvec), 1, whereT, baselinepieces)
+rho_0 <- function(par_BaselinePW, baselinePieces, Tvec) {
+    indx <- apply(as.array(Tvec), 1, whereT, baselinePieces)
     ## return
     par_BaselinePW[indx]
 }
 
-mu0 <- function(par_BaselinePW, baselinepieces, Tvec) {
-    indx <- apply(as.array(Tvec), 1, whereT, baselinepieces)
-    BL_segments <- c(baselinepieces[1], diff(baselinepieces))
+mu0 <- function(par_BaselinePW, baselinePieces, Tvec) {
+    indx <- apply(as.array(Tvec), 1, whereT, baselinePieces)
+    BL_segments <- c(baselinePieces[1], diff(baselinePieces))
     ## The MCF at each time point  
     CumMean_Pieces <- diffinv(BL_segments * par_BaselinePW)[-1]  
     ## return
-    CumMean_Pieces[indx] - (baselinepieces[indx] - Tvec) * par_BaselinePW[indx]
+    CumMean_Pieces[indx] - (baselinePieces[indx] - Tvec) * par_BaselinePW[indx]
 }
 
-dmu0_alpha <- function(tt, baselinepieces) {
-    indx <- min(which(tt <= baselinepieces))
+dmu0_alpha <- function(tt, baselinePieces) {
+    indx <- min(which(tt <= baselinePieces))
     ## BL_segments 
-    value <- diff(c(0, baselinepieces))
-    n_pieces <- length(baselinepieces)
+    value <- diff(c(0, baselinePieces))
+    n_pieces <- length(baselinePieces)
     if (indx == n_pieces) {
         value[n_pieces] <- ifelse(n_pieces == 1, tt, 
-                                  tt - baselinepieces[n_pieces - 1])
+                                  tt - baselinePieces[n_pieces - 1])
     } else if (indx > 1) {
         value[(indx + 1):n_pieces] <- 0
-        value[indx] <- tt - baselinepieces[indx - 1]
+        value[indx] <- tt - baselinePieces[indx - 1]
     } else {
         value[(indx + 1):n_pieces] <- 0
         value[indx] <- tt
@@ -249,14 +250,14 @@ dmu0_alpha <- function(tt, baselinepieces) {
 }
 
 ## generate intervals from specified baseline pieces
-int_baseline <- function(baselinepieces){
-    nalpha <- length(baselinepieces)
+int_baseline <- function(baselinePieces){
+    nalpha <- length(baselinePieces)
     intervals <- rep(NA, nalpha)
-    intervals[1] <- paste0("[0, ", baselinepieces[1], "]", sep = "")
+    intervals[1] <- paste0("[0, ", baselinePieces[1], "]", sep = "")
     if (nalpha > 1) {
         for(i in 2:nalpha){
-            intervals[i] <- paste0("(", baselinepieces[i - 1], ", ", 
-                                   baselinepieces[i], "]", sep = "")
+            intervals[i] <- paste0("(", baselinePieces[i - 1], ", ", 
+                                   baselinePieces[i], "]", sep = "")
         }
     }
     ## return
@@ -264,16 +265,16 @@ int_baseline <- function(baselinepieces){
 }
 
 ## compute log likelihood
-logL_heart <- function(par, data, baselinepieces) {
+logL_heart <- function(par, data, baselinePieces) {
     nbeta <- ncol(data) - 3
     ## par = \THETA in the paper
-    par_beta <- par[1:nbeta]
+    par_beta <- par[1 : nbeta]
     par_theta <- par[nbeta + 1]
-    par_alpha <- par[(nbeta + 2):length(par)]
+    par_alpha <- par[(nbeta + 2) : length(par)]
     m <- length(unique(data$ID))
-    expXBeta <- exp(as.matrix(data[, 4:(3 + nbeta)]) %*% (as.matrix(par_beta)))
+    expXBeta <- exp(as.matrix(data[, 4 : (3 + nbeta)]) %*% as.matrix(par_beta))
     rho_0_ij <- rho_0(par_BaselinePW = par_alpha,
-                      baselinepieces = baselinepieces, 
+                      baselinePieces = baselinePieces, 
                       data$time[data$event == 1])
     rho_i <- expXBeta[data$event == 1] * rho_0_ij
     rho_i[rho_i < 1e-100] <- 1e-100
@@ -286,7 +287,7 @@ logL_heart <- function(par, data, baselinepieces) {
     theta_j_1 <- par_theta + sequence(n_ij) - 1  
     theta_j_1[theta_j_1 < 1e-100] <- 1e-100
     sum_log_theta_j_1 <- sum(log(theta_j_1))
-    mu0i <- mu0(par_BaselinePW = par_alpha, baselinepieces = baselinepieces, 
+    mu0i <- mu0(par_BaselinePW = par_alpha, baselinePieces = baselinePieces, 
                 data$time[data$event == 0])
     mui <- mu0i * expXBeta[data$event == 0]
     mui_theta <- par_theta + mui
@@ -306,17 +307,17 @@ logL_heart <- function(par, data, baselinepieces) {
         sum(1/(par_theta + sequence(n_ij) - 1)) - 
         sum((n_ij + par_theta)/(par_theta + mui)) - sum(log(mui_theta))
     indx <- apply(as.array(data$time[data$event == 1]), 1, 
-                  whereT, baselinepieces)
+                  whereT, baselinePieces)
     if (length(unique(indx)) < length(par_alpha)) {
         stop("Some segements have zero events!")
     }
     indx_taui <- apply(as.array(data$time[data$event == 0]), 1, 
-                       whereT, baselinepieces)
+                       whereT, baselinePieces)
     ## reform dimension by 'array' for one-piece baseline 
-    dim_n1 <- length(baselinepieces)
+    dim_n1 <- length(baselinePieces)
     dim_n2 <- length(data$time[data$event == 0])
     tempart2 <- array(apply(array(data$time[data$event == 0]), 1, 
-                            dmu0_alpha, baselinepieces), c(dim_n1, dim_n2))
+                            dmu0_alpha, baselinePieces), c(dim_n1, dim_n2))
     dl_dalpha_part2 <- diag((n_ij + par_theta) / (par_theta + mui) * 
                             expXBeta[data$event == 0]) %*% t(tempart2)
     dl_dalpha <- 1 / par_alpha * table(indx) - apply(dl_dalpha_part2, 2, sum)
