@@ -23,9 +23,9 @@
 
 #' Recurrent Event Data Analysis.
 #' 
-#' The package 'reda' provides function \code{\link{heart}}
+#' The package reda provides function \code{\link{heart}}
 #' to fit parametric gamma frailty model with a piecewise constant baseline
-#' rate function (so-called 'HEART' model) and other handy functions,
+#' rate function (so-called HEART model) and other handy functions,
 #' such as \code{\link{mcf}} for recurrent event data analysis.
 #'
 #' See vignettes for demonstration of usage.  

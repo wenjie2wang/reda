@@ -37,7 +37,6 @@ NULL
 #' @aliases baseline,heart-method
 #' @examples 
 #' library(reda)
-#' data(simuDat)
 #' heartFit <- heart(formula = Survr(ID, time, event) ~ x1 + group, 
 #'                   data = simuDat, subset = ID %in% 75:125,
 #'                   baselinePieces = seq(28, 168, length = 6))

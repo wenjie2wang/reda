@@ -30,7 +30,7 @@ NULL
 #'
 #' \code{coef} is a S4 class method which extracts model coefficients 
 #' from the \code{\link{heart-class}} object 
-#' produced by \code{\link{heart}}.
+#' produced by function \code{\link{heart}}.
 #'
 #' @param object heart-class object.
 #' @param ... other arguments for future usage.
@@ -39,7 +39,6 @@ NULL
 #' @seealso \code{\link{heart}} \code{\link{summary,heart-method}}
 #' @examples 
 #' library(reda)
-#' data(simuDat)
 #' heartFit <- heart(formula = Survr(ID, time, event) ~ x1 + group, 
 #'                   data = simuDat, subset = ID %in% 75:125,
 #'                   baselinePieces = seq(28, 168, length = 6))
@@ -79,12 +78,12 @@ setMethod(f = "coef", signature = "heart",
 #' @seealso \code{\link{heart}} \code{\link{coef,heart-method}}
 #' @references 
 #' Fu, Haoda, Junxiang Luo, and Yongming Qu. (2014),
-#' "Hypoglycemic Events Analysis via Recurrent Time-to-Event (HEART) Models," 
+#' "Hypoglycemic Events Analysis via Recurrent Time-to-Event (HEART) Models,"
+#'  \emph{Journal of biopharmaceutical statistics}, 2014 Dec 1, Epub 2014 Dec 1.
 #' 
 #' Shao, J. (2003), 
 #' \emph{Mathematical statistics}, Springer texts in statistics, 
 #' New York: Springer, 2nd edition.
-#' \emph{Journal of biopharmaceutical statistics}, 2014 Dec 1, Epub 2014 Dec 1.
 #' @examples 
 #' library(reda)
 #' heartFit <- heart(formula = Survr(ID, time, event) ~ x1 + group, 

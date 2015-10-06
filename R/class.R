@@ -25,7 +25,19 @@
 #' An S3 Class to Represent Formula Response for Recurrent Event Data
 #' 
 #' \code{Survr} is an S3 class to represent 
-#' formula response for recurrent event data. 
+#' formula response for recurrent event data.
+#'
+#' This is a similar function to \code{\link[survrec]{Survr}} in package
+#' \code{survrec}, but with a better checking procedure for recurrent event
+#' data. The checking rules include that
+#' \itemize{
+#'     \item identificator of each subject cannot be missing.
+#'     \item event indicator must be coded as 0 (censoring) or 1 (event).
+#'     \item event time and censoring time cannot be missing.
+#'     \item each subject must have one and only one censoring time.
+#'     \item event time cannot not be later than censoring time.
+#' }
+#'  
 #' @param ID identificator of each subject. 
 #' @param time time of reccurence. For each subject the last time are censored.
 #' @param event the status indicator, 
@@ -157,8 +169,10 @@ check_Survr <- function(dat) {
                        labels = unique(dat$ID))
     dat$ID <- as.numeric(factorID)
     dat$IDnam <- factorID
+
     ## nonsense, just to suppress Note from R CMD check --as-cran
     mis_time1 <- mis_time0 <- censor1 <- censor2 <- event <- NULL
+
     ## check function
     check_ddply <- function (subdat) {
         subdat <- subdat[order(subdat$time), ]

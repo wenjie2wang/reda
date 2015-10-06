@@ -29,11 +29,52 @@ NULL
 #' Fitting HEART Model
 #'
 #' \code{heart} returns fitted model results.
-#' HEART model is a piece-wise Gamma frailty model 
-#' for recurrent events. 
+#' HEART model is a gamma frailty model with a piecewise constant
+#' baseline rate function for recurrent event data. 
 #' The model is named after the paper title of \emph{Fu et al. (2014)},  
 #' Hypoglycemic Events Analysis via Recurrent Time-to-Event (HEART) Models
 #'
+#' In detail, function \code{heart} first constructs the design matrix from
+#' the specified arguments: \code{formula}, \code{data}, \code{subset},
+#' \code{na.action} and \code{constrasts} before fitting the HEART model.
+#' The constructed design matrix will be checked again to fit in the recurrent
+#' event data framework if any observation with missing covariates is removed.
+#' (see detail in \code{\link{Survr}} for checking rules).
+#' Subject's ID is pinpointed if its observations violate the checking rules.
+#' If the ID is not numerical, the appearing order of the subject in the data
+#' is pinpointed.
+#'
+#' The argument \code{start} is an optional list
+#' which allows users to specify the initial guess for
+#' the parameter values to be estimated.
+#' The possible vector elements in the list include
+#' \itemize{
+#'     \item \code{beta}: coefficient(s) of covariates
+#'         set to be 1 by default.
+#'     \item \code{theta}: coefficient of random effect
+#'         set to be 0.5  by default.
+#'     \item \code{alpha}: coefficient(s) of piece-wise constant baseline
+#'         rate function set to be 0.15 by default.
+#' }
+#'
+#' The argument \code{control} is an optional list
+#' which allows users to control the process of minimization of
+#' negative log likelihood function.
+#' The possible elements in the list include
+#' \itemize{
+#'     \item \code{gradtol}: a positive scalar giving the tolerance at
+#'         which the scaled gradient is considered close enough to zero
+#'         to terminate the algorithm. The default value is 1e-6.
+#'     \item \code{stepmax}: a positive scalar which gives the maximum
+#'         allowable scaled step length. The default value is 1e5.
+#'     \item \code{steptol}: A positive scalar providing the minimum
+#'         allowable relative step length. The default value is 1e-6.
+#'     \item \code{iterlim}: a positive integer specifying the maximum
+#'         number of iterations to be performed before
+#'         the program is terminated. The default value is 1e2.
+#' }
+#' For more details, \code{help(\link[stats]{nlm})}.
+#' 
 #' @param formula Survr object from function \code{\link{Survr}}. 
 #' @param baselinePieces an optional numeric vector consisting of
 #' all the right endpoints of baseline pieces.  The default is maximum of time.
@@ -42,7 +83,7 @@ NULL
 #' @param data an optional data frame, list or environment containing
 #' the variables in the model.  If not found in data, the variables are taken 
 #' from \code{environment(formula)}, usually the environment from which 
-#' \code{\link{heart}} is called.
+#' function \code{\link{heart}} is called.
 #' @param subset an optional vector specifying a subset of observations 
 #' to be used in the fitting process.
 #' @param na.action function which indicates what should the procedure do 
@@ -50,11 +91,12 @@ NULL
 #' na.action setting of \code{\link[base]{options}} and is na.fail if that is 
 #' not set.  The "factory-fresh" default is \code{\link[stats]{na.omit}}.
 #' Another possible value is NULL, no action. 
-#' \code{\link[stats]{na.exclude}} can be useful. 
+#' \code{\link[stats]{na.exclude}} can be used as well.
+#' \code{help(na.action)} for more details.
 #' @param start an optional list of starting values for the parameters
 #' to be estimated in the model.
 #' @param control an optional list of parameters for controlling the likelihood 
-#' function maximization process. For more detail, users may \code{help(nlm)}.
+#' function maximization process. For more details, users may \code{help(nlm)}.
 #' @param contrasts an optional list, whose entries are values 
 #' (numeric matrices or character strings naming functions) to be used 
 #' as replacement values for the contrasts replacement function and 
@@ -264,7 +306,7 @@ int_baseline <- function(baselinePieces){
     intervals
 }
 
-## compute log likelihood
+## compute negative log likelihood
 logL_heart <- function(par, data, baselinePieces) {
     nbeta <- ncol(data) - 3
     ## par = \THETA in the paper
