@@ -1,16 +1,18 @@
 Package: reda
 Title: Recurrent Event Data Analysis
 Version: 0.0.0.9010
-Date: 2015-09-14
+Date: 2015-10-05
 Authors@R: c(person(given = "Haoda", family = "Fu", email = "fu_haoda@lily.com",
                     role = c("aut")),
              person(given = "Wenjie", family = "Wang", 
                     email = "wenjie.2.wang@uconn.edu",
                     role = c("aut","cre")),
              person(given = "Jun", family = "Yan", role = "ctb"))
-Description: Companion of Hypoglycemic Events Analysis via
-    Recurrent Time-to-Event (HEART) Models,
-    Journal of Biopharmaceutical Statistics, 2015.
+Description: This package mainly provides functions
+    to fit gamma frailty model with a piecewise constant baseline rate function
+    (or simply called 'HEART' model) for recurrent event data.
+    Some handy functions to compute and plot nonparametric mean
+    cumulative function (MCF) are implemented as well.
 Imports:
     utils,
     methods,
