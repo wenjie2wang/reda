@@ -33,9 +33,6 @@ NULL
 #' produced by \code{\link{heart}}.
 #'
 #' @param object heart-class object.
-#' @param digits an integer indicating the number of decimal places to be used. 
-#' Negative values are allowed (see 'Details' of \code{\link{round}}).
-#' The default value is 3.
 #' @param ... other arguments for future usage.
 #' @return a named numeric vector.
 #' @aliases coef,heart-method
@@ -43,15 +40,15 @@ NULL
 #' @examples 
 #' library(reda)
 #' data(simuDat)
-#' heartfit <- heart(formula = Survr(ID, time, event) ~ X1 + group, 
+#' heartFit <- heart(formula = Survr(ID, time, event) ~ x1 + group, 
 #'                   data = simuDat, subset = ID %in% 75:125,
-#'                   baselinepieces = seq(28, 168, length = 6))
-#' coef(heartfit)
+#'                   baselinePieces = seq(28, 168, length = 6))
+#' coef(heartFit)
 #' @importFrom stats coef
 #' @export
 setMethod(f = "coef", signature = "heart",
-          definition = function(object, digits = 3, ...) {
-              beta <- round(object@estimates$beta[, "coef"], digits = digits)
+          definition = function(object, ...) {
+              beta <- object@estimates$beta[, "coef"]
               names(beta) <- rownames(object@estimates$beta)
               ## return
               beta
@@ -76,9 +73,6 @@ setMethod(f = "coef", signature = "heart",
 #' either a vector of numbers or a vector of names. 
 #' If missing, all parameters are considered.
 #' @param level the confidence level required.
-#' @param digits an integer indicating the number of decimal places to be used. 
-#' Negative values are allowed (see 'Details' of \code{\link{round}}).
-#' The default value is 3.
 #' @param ... other arguments for future usage.
 #' @return a numeric matrix with rownames and colnames.
 #' @aliases confint,heart-method
@@ -93,17 +87,16 @@ setMethod(f = "coef", signature = "heart",
 #' \emph{Journal of biopharmaceutical statistics}, 2014 Dec 1, Epub 2014 Dec 1.
 #' @examples 
 #' library(reda)
-#' data(simuDat)
-#' heartfit <- heart(formula = Survr(ID, time, event) ~ X1 + group, 
+#' heartFit <- heart(formula = Survr(ID, time, event) ~ x1 + group, 
 #'                   data = simuDat, subset = ID %in% 75:125,
-#'                   baselinepieces = seq(28, 168, length = 6))
-#' confint(heartfit)
-#' confint(heartfit, "X1")
-#' confint(heartfit, 2)
+#'                   baselinePieces = seq(28, 168, length = 6))
+#' confint(heartFit)
+#' confint(heartFit, "x1")
+#' confint(heartFit, 2)
 #' @importFrom stats confint qnorm 
 #' @export
 setMethod(f = "confint", signature = "heart",
-          definition = function(object, parm, level = 0.95, digits = 3, ...) {
+          definition = function(object, parm, level = 0.95, ...) {
               ## internal function
               format.perc <- function (probs, digits){
                   paste(format(100 * probs, trim = TRUE, scientific = FALSE, 
@@ -124,12 +117,11 @@ setMethod(f = "confint", signature = "heart",
               a <- (1 - level)/2
               a <- c(a, 1 - a)
               fac <- qnorm(a)
-              pct <- format.perc(a, digits = digits)
+              pct <- format.perc(a, digits = 3)
               ci <- array(NA, dim = c(length(parm), 2L), 
                           dimnames = list(parm, pct))
               ses <- betamat[parm, 2]
               ci[] <- cf[parm] + ses %o% fac
-              ci <- round(ci, digits = digits)
               rownames(ci) <- pnames[parm]
               ## return
               ci

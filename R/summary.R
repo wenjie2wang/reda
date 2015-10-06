@@ -30,20 +30,19 @@ NULL
 #'
 #' \code{summary} returns summary of estimates from HEART model.
 #'
-#' To be specific, \code{summary} returns a \code{\link{summary.heart-class}}
-#' object which can be printed by \code{\link{show,summary.heart-method}}. 
+#' To be more specific, \code{summary} returns a
+#' \code{\link{summaryHeart-class}} object which can be printed by
+#' \code{\link{show,summaryHeart-method}}. 
 #'
 #' @param object heart object from \code{heart}.
-#' @param showcall a logic value with dafault as TRUE,
-#' indicating whether method \code{\link{show,summary.heart-method}} prints out 
+#' @param showCall a logic value with dafault as TRUE,
+#' indicating whether method \code{\link{show,summaryHeart-method}} prints out 
 #' the call information of original call of \code{heart}.
-#' @param showpieces a logic value with default as TRUE, 
-#' indicating whether method \code{\link{show,summary.heart-method}} prints out 
+#' @param showPieces a logic value with default as TRUE, 
+#' indicating whether method \code{\link{show,summaryHeart-method}} prints out 
 #' the baseline pieces.
-#' @param digits, an interger specifying the desired number of decimal places 
-#' (round) for estimates. Negative values are allowed 
-#' (\code{help(round)} for more details).
-#' @return summary.heart-class object
+#' @param ... other arguments for future usage.
+#' @return summaryHeart-class object
 #' @aliases summary,heart-method
 #' @seealso \code{\link{heart}} \code{\link{coef,heart-method}}
 #' \code{\link{confint,heart-method}} \code{\link{baseline,heart-method}}
@@ -51,20 +50,19 @@ NULL
 #' @importFrom methods new
 #' @export
 setMethod(f = "summary", signature = "heart",
-          definition = function(object, showcall = TRUE, showpieces = TRUE, 
-                                digits = 3) {
+          definition = function(object, showCall = TRUE, showPieces = TRUE, ...) {
               Call <- object@call
-              attr(Call, "show") <- showcall
-              blpieces <- object@baselinepieces
-              attr(blpieces, "show") <- showpieces
-              beta <- round(object@estimates$beta, digits = digits)
-              theta <- round(object@estimates$theta, digits = digits)
-              alpha <- round(object@estimates$alpha, digits = digits)
+              attr(Call, "show") <- showCall
+              blpieces <- object@baselinePieces
+              attr(blpieces, "show") <- showPieces
+              beta <- object@estimates$beta
+              theta <- object@estimates$theta
+              alpha <- object@estimates$alpha
               colnames(beta)[1] <- colnames(theta)[1] <- 
                   colnames(alpha)[1] <- "estimates"
-              results <- new("summary.heart", 
+              results <- new("summaryHeart", 
                              call = Call,
-                             baselinepieces = blpieces,
+                             baselinePieces = blpieces,
                              coefficients = beta,
                              theta = theta, 
                              baseline = alpha)

@@ -32,19 +32,16 @@ NULL
 #' from HEART model. 
 #' 
 #' @param object heart-class object.
-#' @param digits an integer indicating the number of decimal places to be used. 
-#' Negative values are allowed (see 'Details' of \code{\link{round}}).
-#' The default value is 3.
 #' @param ... other arguments for future usage.
 #' @return a named vector.
 #' @aliases baseline,heart-method
 #' @examples 
 #' library(reda)
 #' data(simuDat)
-#' heartfit <- heart(formula = Survr(ID, time, event) ~ X1 + group, 
+#' heartFit <- heart(formula = Survr(ID, time, event) ~ x1 + group, 
 #'                   data = simuDat, subset = ID %in% 75:125,
-#'                   baselinepieces = seq(28, 168, length = 6))
-#' baseline(heartfit)
+#'                   baselinePieces = seq(28, 168, length = 6))
+#' baseline(heartFit)
 #' @seealso \code{\link{heart}} \code{\link{summary,heart-method}}
 #' @export
 setGeneric(name = "baseline",
@@ -57,12 +54,10 @@ setGeneric(name = "baseline",
 #' from heart-class object.
 #' @export
 setMethod(f = "baseline", signature = "heart",
-          definition = function(object, digits = 3, ...) {
-              alpha <- round(object@estimates$alpha[, "alpha"], digits = digits)
+          definition = function(object, ...) {
+              alpha <- object@estimates$alpha[, "alpha"]
               names(alpha) <- rownames(object@estimates$alpha)
               ## return
               alpha
           })
-
-
 
