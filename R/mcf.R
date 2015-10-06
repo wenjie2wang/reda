@@ -49,11 +49,10 @@ NULL
 #' indicating the confidence level required. 
 #' For \code{mcf,formula-method}, it must be between 0.5 and 1.
 #' The default value is 0.95.
-#' @seealso \code{\link{heart}} \code{\link{plotMCF}}
+#' @seealso \code{\link{heart}} \code{\link{plotMcf}}
 #' @examples 
 #' library(reda)
-#' data(simuDat)
-#' 
+#'  
 #' ## empirical MCF
 #' sampleMCF <- mcf(Survr(ID, time, event) ~ group, data = simuDat)
 #' 
@@ -61,12 +60,12 @@ NULL
 #' subset = ID %in% 100:101, na.action = na.omit)
 #' 
 #' ## estimated MCF for baseline rate function from HEART model
-#' heartfit <- heart(formula = Survr(ID, time, event) ~ X1 + group, 
+#' heartFit <- heart(formula = Survr(ID, time, event) ~ x1 + group, 
 #'                   data = simuDat, subset = ID %in% 75:125,
-#'                   baselinepieces = seq(28, 168, length = 6))
-#' baselineMCF <- mcf(heartfit)
+#'                   baselinePieces = seq(28, 168, length = 6))
+#' baselineMCF <- mcf(heartFit)
 #' 
-#' mcf(heartfit, level = 0.9, control = list(length.out = 500))
+#' mcf(heartFit, level = 0.9, control = list(length.out = 500))
 #'  
 #' @export
 setGeneric(name = "mcf",
@@ -89,7 +88,7 @@ setGeneric(name = "mcf",
 #' not set.  The "factory-fresh" default is \code{\link[stats]{na.omit}}.
 #' Another possible value is NULL, no action.  
 #' Value \code{\link[stats]{na.exclude}} can be useful. 
-#' @return \code{\link{empirMCF-class}} or \code{\link{heartMCF-class}} object
+#' @return \code{\link{empirMcf-class}} or \code{\link{heartMcf-class}} object
 #' @aliases mcf,formula-method 
 #' @importFrom utils head 
 #' @importFrom methods new
@@ -181,8 +180,8 @@ setMethod(f = "mcf", signature = "formula",
               
               if (nbeta == 0) {
                   outdat <- sMCF(dat)
-                  out <- new("empirMCF", formula = object, 
-                             MCF = outdat, multigroup = FALSE)
+                  out <- new("empirMcf", formula = object, 
+                             MCF = outdat, multiGroup = FALSE)
                   return(out)
               } else {
                   ## argument check
@@ -202,8 +201,8 @@ setMethod(f = "mcf", signature = "formula",
                       outdat <- rbind(outdat, resdat)
                   }
                   colnames(outdat)[ncol(outdat)] <- covar_names
-                  out <- methods::new("empirMCF", call = Call, formula = object, 
-                                      MCF = outdat, multigroup = TRUE)
+                  out <- methods::new("empirMcf", call = Call, formula = object, 
+                                      MCF = outdat, multiGroup = TRUE)
                   return(out)
               }
           })
@@ -212,8 +211,8 @@ setMethod(f = "mcf", signature = "formula",
 #' @describeIn mcf Estimated Mean Cumulative Function (MCF) from HEART Model
 #' 
 #' @param newdata an optional data.frame. 
-#' @param groupname an optional length-one charactor vector. 
-#' @param grouplevels an optional charactor vector.
+#' @param groupName an optional length-one charactor vector. 
+#' @param groupLevels an optional charactor vector.
 #' @param control an optional list to specify the time grid 
 #' where the MCF are estimated.
 #' The possible elements of the control list include 
@@ -233,7 +232,7 @@ setMethod(f = "mcf", signature = "formula",
 #' model.frame delete.response 
 #' @export
 setMethod(f = "mcf", signature = "heart", 
-          definition = function(object, newdata, groupname, grouplevels, 
+          definition = function(object, newdata, groupName, groupLevels, 
                                 level = 0.95, na.action, control = list(), 
                                 ...) {
               beta <- object@estimates$beta[, 1]
@@ -241,21 +240,21 @@ setMethod(f = "mcf", signature = "heart",
               fcovnames <- as.character(object@call[[2]][[3]])
               covnames <- fcovnames[fcovnames != "+"]
               nbeta <- length(beta)
-              baselinepieces <- object@baselinepieces
+              baselinePieces <- object@baselinePieces
               controlist <- c(control,
-                              list("baselinepieces" = as.numeric(baselinepieces)))
+                              list("baselinePieces" = as.numeric(baselinePieces)))
               control <- do.call("heart_mcf_control", controlist)
               n_xx <- control$length.out
-              n_pieces <- length(baselinepieces)
-              BL_segments <- c(baselinepieces[1], diff(baselinepieces))
+              n_pieces <- length(baselinePieces)
+              BL_segments <- c(baselinePieces[1], diff(baselinePieces))
               xx <- control$grid
-              indx <- sapply(xx, whereT, baselinepieces = baselinepieces)
+              indx <- sapply(xx, whereT, baselinePieces = baselinePieces)
               LinCom_M <- NULL
               for (ind_indx in indx) {
                   LinCom_M <- rbind(LinCom_M, c(BL_segments[1:ind_indx], 
                                                 rep(0, n_pieces - ind_indx)))
               }
-              CMF_B4_indx <- c(0, baselinepieces)[indx]
+              CMF_B4_indx <- c(0, baselinePieces)[indx]
               LinCom_M[(indx - 1) * n_xx + 1:n_xx] <- xx - CMF_B4_indx
               n_par <- nrow(object@fisher)
               ## covariance matrix of beta and alpha
@@ -293,9 +292,9 @@ setMethod(f = "mcf", signature = "heart",
                   }
               }
               ndesign <- nrow(X)
-              multigroup <- ifelse(ndesign == 1, FALSE, TRUE)
+              multiGroup <- ifelse(ndesign == 1, FALSE, TRUE)
               coveff <- as.numeric(exp(crossprod(t(X), beta)))
-              outdat <- NULL
+              outdat <- matrix(NA, ncol = 4, nrow = ndesign * length(xx))
               for (i in seq(ndesign)) {
                   ## Delta-method
                   grad <- cbind(alpha %o% X[i, ], diag(rep(1, n_pieces))) * 
@@ -303,32 +302,38 @@ setMethod(f = "mcf", signature = "heart",
                   Cov_M <- tcrossprod(crossprod(t(grad), Cov_par), grad)
                   criti <- diag(tcrossprod(crossprod(t(LinCom_M), Cov_M),
                                            LinCom_M))
-                  CI_band <- qnorm((1 + level)/2) * sqrt(criti)
+                  CI_band <- qnorm((1 + level) / 2) * sqrt(criti)
                   baseline_mean <- crossprod(t(LinCom_M), alpha) * coveff[i]
                   lower <- baseline_mean - CI_band
                   upper <- baseline_mean + CI_band
-                  outdat <- rbind(outdat,
-                                  data.frame(time = xx, MCF = baseline_mean, 
-                                             lower = lower, upper = upper))
+                  ind <- seq(from = length(xx) * (i - 1) + 1,
+                             to = length(xx) * i, by = 1)
+                  outdat[ind, 1] <- xx
+                  outdat[ind, 2] <- baseline_mean
+                  outdat[ind, 3] <- lower
+                  outdat[ind, 4] <- upper
               }
-              if (multigroup) {
-                  if (missing(grouplevels)) {
-                      grouplevels <- LETTERS[seq(ndesign)]
+              outdat <- as.data.frame(outdat)
+              colnames(outdat) <- c("time", "MCF", "lower", "upper")
+              if (multiGroup) {
+                  if (missing(groupLevels)) {
+                      groupLevels <- LETTERS[seq(ndesign)]
                   }
-                  if (missing(groupname)) {
-                      groupname <- "group"
+                  if (missing(groupName)) {
+                      groupName <- "group"
                   }
-                  tempcol <- factor(rep(grouplevels[seq(ndesign)], each = n_xx))
+                  tempcol <- factor(rep(groupLevels[seq(ndesign)], each = n_xx))
                   outdat <- cbind(outdat, tempcol)
-                  colnames(outdat)[ncol(outdat)] <- groupname
+                  colnames(outdat) <- c("time", "MCF", "lower", "upper",
+                                        groupName)
               }
               ## output
-              out <- new("heartMCF", 
+              out <- new("heartMcf", 
                          formula = object@formula, 
-                         baselinepieces = object@baselinepieces, 
+                         baselinePieces = object@baselinePieces, 
                          newdata = X, MCF = outdat, level = level,
                          na.action = na.action, control = control, 
-                         multigroup = multigroup)
+                         multiGroup = multiGroup)
               ## return
               out
           })
@@ -336,13 +341,13 @@ setMethod(f = "mcf", signature = "heart",
 
 ## internal function ===========================================================
 heart_mcf_control <- function (grid, length.out = 200, from, to, 
-                               baselinepieces) {
+                               baselinePieces) {
     ## controls for function MCF with signiture heart
     if (missing(from)) {
         from <- 0
     }
     if (missing(to)) {
-        to <- max(baselinepieces)
+        to <- max(baselinePieces)
     }
     if (! missing(grid)) {
         if (! is.numeric(grid) || is.unsorted(grid)) {
@@ -354,7 +359,7 @@ heart_mcf_control <- function (grid, length.out = 200, from, to,
     } else {
         grid <- seq(from = from, to = to, length.out = length.out)
     }
-    if (min(grid) < 0 || max(grid) > max(baselinepieces)) {
+    if (min(grid) < 0 || max(grid) > max(baselinePieces)) {
         stop("'grid' must be within the coverage of baseline pieces.")
     }
     ## return
