@@ -15,68 +15,67 @@ vignette: >
 
 ```{r fits, message=FALSE}
 library(reda)
-data(simuDat)
-heartfit <- heart(formula = Survr(ID, time, event) ~ X1 + group, 
-                  data = simuDat, baselinepieces = seq(28, 168, length = 6))
+heartFit <- heart(formula = Survr(ID, time, event) ~ x1 + group, 
+                  data = simuDat, baselinePieces = seq(28, 168, length = 6))
 ```
 
 ## Estimates 
 
 ```{r estimates}
 # point estimates of coefficients
-coef(heartfit)
+coef(heartFit)
 # confidence interval for coefficients
-confint(heartfit)
+confint(heartFit)
 # estimates of piece-wise constant baseline rate function
-baseline(heartfit)
+baseline(heartFit)
 ```
 
 ## Summary of the Model Fits
 
 ```{r summary}
 # a brief summary for the model fits
-heartfit 
+heartFit 
 # summary in more details
-summary(heartfit)
+summary(heartFit)
 ```
 
 # Mean Cumulative Function (MCF)
 
 ## Empirical MCF
 
-```{r empirMCF}
+```{r empirMcf}
 mcf(Survr(ID, time, event) ~ group, data = simuDat,
     subset = ID %in% 100:101, na.action = na.omit, level = 0.9)
 sampleMCF <- mcf(Survr(ID, time, event) ~ group, data = simuDat)
 ```
 
 ```{r plotempir, fig.height=6, fig.width=7}
-plotMCF(sampleMCF, conf.int = TRUE, mark.time = TRUE, 
+plotMcf(sampleMCF, conf.int = TRUE, mark.time = TRUE, 
         lty = c(1, 3), col = c("orange", "navy"))
 ```
 
 ## Estimated MCF from the HEART Model
 
-Note that function 'plotMCF' returns 'ggplot' object so that the plot can be 
+Note that function 'plotMcf' returns 'ggplot' object so that the plot can be 
 further customized properly.
 
 ### Baseline MCF 
 
 ```{r baselineMCF, fig.height=6, fig.width=7}
-baselineMCF <- mcf(heartfit)
-plotMCF(baselineMCF, conf.int = TRUE, col = "royalblue") +
-  ggplot2::theme_bw()
+baselineMcf <- mcf(heartFit)
+plotMcf(baselineMcf, conf.int = TRUE, col = "royalblue") +
+    ggplot2::theme_bw()
 ```
 
 ### MCF for certain group(s)
 
-```{r heartMCF, fig.height=6, fig.width=7}
-estmcf <- mcf(heartfit, 
+```{r heartMcf, fig.height=6, fig.width=7}
+estmcf <- mcf(heartFit, 
               newdata = data.frame(
-                X1 = c(0.1, 0.1), 
-                group = gl(2, 1, labels = c("Treat", "Contr"))), 
-              groupname = "Group", 
-              grouplevels = c("Treatment", "Control"))
-plotMCF(estmcf, conf.int = TRUE, col = c("royalblue", "red")) +
-  ggplot2::theme_bw()
+                  x1 = c(0.1, 0.1), 
+                  group = gl(2, 1, labels = c("Treat", "Contr"))), 
+              groupName = "Group", 
+              groupLevels = c("Treatment", "Control"))
+plotMcf(estmcf, conf.int = TRUE, col = c("royalblue", "red")) +
+    ggplot2::theme_bw()
 ```
