@@ -15,7 +15,7 @@ INSTALL: reda_*.tar.gz
 	R CMD INSTALL --build reda_*.tar.gz
 
 updateYear: 
-	yr=$$(date +"%y");\
+	yr=$$(date +"%Y");\
 	for f in R/*.R; do sed -i "s/Copyright (C) [0-9]\{4\}/Copyright (C) $$yr/" $$f; done
 
 clean: 
