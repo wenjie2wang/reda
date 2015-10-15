@@ -1,3 +1,5 @@
+pkg = reda
+
 Rpkg: Rd build  
 	make check 
 	make INSTALL
@@ -6,13 +8,13 @@ Rd:
 	Rscript -e "library(methods); devtools::document();" 
 
 build:  
-	R CMD build ../reda
+	R CMD build ../$(pkg)
 
-check: reda_*.tar.gz
-	R CMD check --as-cran reda_*.tar.gz
+check: $(pkg)_*.tar.gz
+	R CMD check --as-cran $(pkg)_*.tar.gz
 
-INSTALL: reda_*.tar.gz
-	R CMD INSTALL --build reda_*.tar.gz
+INSTALL: $(pkg)_*.tar.gz
+	R CMD INSTALL --build $(pkg)_*.tar.gz
 
 updateYear: 
 	yr=$$(date +"%Y");\
