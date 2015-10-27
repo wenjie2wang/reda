@@ -8,10 +8,10 @@ Authors@R: c(person(given = "Haoda", family = "Fu", email = "fu_haoda@lily.com",
                     email = "wenjie.2.wang@uconn.edu",
                     role = c("aut","cre")),
              person(given = "Jun", family = "Yan", role = "ctb"))
-Description: This package mainly provides functions
-    to fit gamma frailty model with a piecewise constant baseline rate function
+Description: Functions to fit gamma frailty model
+    with a piecewise constant baseline rate function
     (or simply called 'HEART' model) for recurrent event data.
-    Handy function to compute and plot nonparametric mean
+    Handy functions to compute and plot nonparametric mean
     cumulative function (MCF) are implemented as well.
     The most functions are S4 methods that produce S4 class objects.
 Imports:
