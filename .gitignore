@@ -1,6 +1,9 @@
 *.Rproj.user
+*.Rproj
 .Rhistory
+*.tar.gz
+NAMESPACE
+man/
+*.Rcheck/
 *.*~
 *~
-.Rproj.user
-*.Rproj
