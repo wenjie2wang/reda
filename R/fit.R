@@ -168,6 +168,10 @@ heart <- function(formula, baselinePieces, data, subset, na.action,
     ## check the impact caused by missing value
     ## if there is missing value removed
     if (nrow(mm_na) > nrow(dat)) {
+        ## recover original ID names for possible pin-point
+        idFactor <- with(data, attr(eval(Call[[2]][[2]]), "ID"))
+        attr(dat, "ID") <- factor(levels(idFactor)[dat$ID],
+                                  levels = levels(idFactor)) 
         message("Observations with missing values on covariates are removed.") 
         message("Checking new data set again ... ", appendLF = FALSE)
         check_Survr(dat)

@@ -50,6 +50,7 @@ Survr <- function (ID, time, event) {
     inpdat <- data.frame(ID, time, event)
     dat <- check_Survr(inpdat)
     outdat <- with(dat, as.matrix(cbind(ID, time, event)))
+    attr(outdat, "ID") <- attr(dat, "ID")
     oldClass(outdat) <- "Survr"
     invisible(outdat)
 }
@@ -164,12 +165,16 @@ check_Survr <- function(dat) {
     if (any(! dat$event %in% 0:1)) {
         stop("'event' must be coded as 0 (censoring) or 1 (event).")
     }
-    ## check whether 'ID' is numeric or not. convert if not.
-    factorID <- factor(dat$ID, levels = unique(dat$ID),
-                       labels = unique(dat$ID))
-    dat$ID <- as.numeric(factorID)
-    dat$IDnam <- factorID
-
+    ## if dat input has an attr 'ID'
+    nID <- attr(dat, "ID")
+    if (! is.null(nID)) {
+        dat$IDnam <- nID
+    } else {
+        ## check whether 'ID' is numeric or not. convert if not.
+        dat$IDnam <- factor(dat$ID, levels = unique(dat$ID))
+        dat$ID <- as.numeric(dat$IDnam)
+    }
+    
     ## nonsense, just to suppress Note from R CMD check --as-cran
     mis_time1 <- mis_time0 <- censor1 <- censor2 <- event <- NULL
 
@@ -212,18 +217,19 @@ check_Survr <- function(dat) {
     ## stop if no censoring time or more than one censoring time
     ID_censor1 <- with(subset(outdat, censor1 == 1), unique(IDnam))
     if (length(ID_censor1) > 0) {
-        stop(paste(
-            "Every subject must have one (and only one) censored time.",
-            "Check subject: ",
+        message("Every subject must have one (and only one) censored time.")
+        stop(paste("Check subject: ",
             paste0(ID_censor1, collapse = ", ")))
     }
     ## stop if event time after censoring time
     ID_censor2 <- with(subset(outdat, censor2 == 1), unique(IDnam))
     if (length(ID_censor2) > 0) {
-        stop(paste(
-            "Event time should be earlier than censoring time. Check subject:",
-            paste0(ID_censor2, collapse = ", ")))
+        message("Event time should be earlier than censoring time.")
+        stop(paste("Check subject:",
+                   paste0(ID_censor2, collapse = ", ")))
     }
     ## return
-    invisible(outdat[, c("ID", "time", "event")])
+    out <- outdat[, c("ID", "time", "event")]
+    attr(out, "ID") <- outdat$IDnam
+    invisible(out)
 }
