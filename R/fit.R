@@ -318,11 +318,16 @@ logL_heart <- function(par, data, baselinePieces) {
     par_theta <- par[nbeta + 1]
     par_alpha <- par[(nbeta + 2) : length(par)]
     m <- length(unique(data$ID))
-    expXBeta <- exp(as.matrix(data[, 4 : (3 + nbeta)]) %*% as.matrix(par_beta))
+    expXBeta <- exp(crossprod(t(as.matrix(data[, 4 : (3 + nbeta)])),
+                              as.matrix(par_beta)))
+    ## index for event and censoring
+    ind_event <- data$event == 1
+    ind_cens <- data$event == 0
+    ## rate function
     rho_0_ij <- rho_0(par_BaselinePW = par_alpha,
                       baselinePieces = baselinePieces, 
-                      data$time[data$event == 1])
-    rho_i <- expXBeta[data$event == 1] * rho_0_ij
+                      data$time[ind_event])
+    rho_i <- expXBeta[ind_event] * rho_0_ij
     rho_i[rho_i < 1e-100] <- 1e-100
     sum_log_rho_i <- sum(log(rho_i))
     ## these codes to make sure that the order will not change 
@@ -334,8 +339,8 @@ logL_heart <- function(par, data, baselinePieces) {
     theta_j_1[theta_j_1 < 1e-100] <- 1e-100
     sum_log_theta_j_1 <- sum(log(theta_j_1))
     mu0i <- mu0(par_BaselinePW = par_alpha, baselinePieces = baselinePieces, 
-                data$time[data$event == 0])
-    mui <- mu0i * expXBeta[data$event == 0]
+                data$time[ind_cens])
+    mui <- mu0i * expXBeta[ind_cens]
     mui_theta <- par_theta + mui
     mui_theta[mui_theta < 1e-100] <- 1e-100
     sum_log_theta_mui <- sum((n_ij + par_theta) * log(mui_theta))
@@ -348,24 +353,24 @@ logL_heart <- function(par, data, baselinePieces) {
     negLH <- -logLH + penal
     ## Calculate the gradient
     dl_dbeta <- apply(diag((n_ij - mui)/(par_theta + mui) * par_theta) %*% 
-                      as.matrix(data[data$event == 0, 4:(3 + nbeta)]), 2, sum)
+                      as.matrix(data[ind_cens, 4:(3 + nbeta)]), 2, sum)
     dl_dtheta <- m + m * log(par_theta) + 
         sum(1/(par_theta + sequence(n_ij) - 1)) - 
         sum((n_ij + par_theta)/(par_theta + mui)) - sum(log(mui_theta))
-    indx <- apply(as.array(data$time[data$event == 1]), 1, 
+    indx <- apply(as.array(data$time[ind_event]), 1, 
                   whereT, baselinePieces)
     if (length(unique(indx)) < length(par_alpha)) {
         stop("Some segements have zero events!")
     }
-    indx_taui <- apply(as.array(data$time[data$event == 0]), 1, 
+    indx_taui <- apply(as.array(data$time[ind_cens]), 1, 
                        whereT, baselinePieces)
     ## reform dimension by 'array' for one-piece baseline 
     dim_n1 <- length(baselinePieces)
-    dim_n2 <- length(data$time[data$event == 0])
-    tempart2 <- array(apply(array(data$time[data$event == 0]), 1, 
+    dim_n2 <- length(data$time[ind_cens])
+    tempart2 <- array(apply(array(data$time[ind_cens]), 1, 
                             dmu0_alpha, baselinePieces), c(dim_n1, dim_n2))
     dl_dalpha_part2 <- diag((n_ij + par_theta) / (par_theta + mui) * 
-                            expXBeta[data$event == 0]) %*% t(tempart2)
+                            expXBeta[ind_cens]) %*% t(tempart2)
     dl_dalpha <- 1 / par_alpha * table(indx) - apply(dl_dalpha_part2, 2, sum)
     attr(negLH, "gradient") <- -c(dl_dbeta, dl_dtheta, dl_dalpha)
     ## return
