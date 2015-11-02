@@ -127,8 +127,10 @@ NULL
 #' @importFrom methods new
 #' @importFrom stats model.matrix nlm pnorm na.fail na.omit na.exclude na.pass
 #' .getXlevels
+#' @importFrom splines bs
 #' @export
-heart <- function(formula, baselinePieces, data, subset, na.action, 
+heart <- function(formula, df = NULL, knots = NULL, degree = 0,
+                  data, subset, na.action, 
                   start = list(), control = list(), contrasts = NULL, ...) {
     ## record the function call to return
     Call <- match.call()
@@ -177,6 +179,7 @@ heart <- function(formula, baselinePieces, data, subset, na.action,
         check_Survr(dat)
         message("done.")
     }
+    
     ## baselinePieces
     if(missing(baselinePieces)) {
         baselinePieces <- as.numeric(max(dat$time))
@@ -257,14 +260,26 @@ heart <- function(formula, baselinePieces, data, subset, na.action,
 
 ## internal functions ==========================================================
 whereT <- function(tt, baselinePieces) {
-    ## return
+    ## designed to be used inside function 'apply', 'tt' is length one vector
+    ## return the baseline segment number 'tt' belongs to
     min(which(tt <= baselinePieces))
 }
 
-rho_0 <- function(par_BaselinePW, baselinePieces, Tvec) {
-    indx <- apply(as.array(Tvec), 1, whereT, baselinePieces)
+## baseline rate function
+rho_0 <- function(par_BaselinePW, Tvec, bKnots, degree) {
+    ## if piecewise constant
+    if (degree == 0) {
+        indx <- apply(as.array(Tvec), 1, whereT, bKnots)
+        return(par_BaselinePW[indx])  # function ends
+    } 
+    ## else spline with degree >= 1
+    knots <- head(bKnots, -1)
+    ## B-spline matrix including intercept
+    ## with ncol: length(knots) + degree + 1
+    bsmat <- bs(x = Tvec, knots = knots, degree = degree,
+                intercept = TRUE, Boundary.knots = c(0, tail(bKnots, 1)))
     ## return
-    par_BaselinePW[indx]
+    crossprod(t(bsmat), par_BaselinePW)
 }
 
 mu0 <- function(par_BaselinePW, baselinePieces, Tvec) {
