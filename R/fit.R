@@ -180,8 +180,27 @@ heart <- function(formula, df = NULL, knots = NULL, degree = 0,
         message("done.")
     }
     
+    ## 'control' for 'nlm' and 'bs'
+    control <- do.call("heart_control", control)
+    ## generate knots for bKnots if knots is unspecified
+    ## degree <- as.interger(degree) at the same time
+    ord <- 1L + (degree <- as.integer(degree))
+    if (!is.null(df) && is.null(knots)) {
+        nIknots <- df - ord + (1L - control$intercept)
+        if (nIknots < 0L) {
+            nIknots <- 0L
+            warning(gettextf("'df' was too small; have used %d", 
+                ord - (1L - intercept)), domain = NA)
+        }
+        knots <- if (nIknots > 0L) {
+            knots <- seq.int(from = 0, to = 1, length.out = nIknots + 
+                2L)[-c(1L, nIknots + 2L)]
+            stats::quantile(x[!outside], knots)
+        }
+    }
+    
     ## baselinePieces
-    if(missing(baselinePieces)) {
+    if(missing()) {
         baselinePieces <- as.numeric(max(dat$time))
     } 
     ## number of baseline pieces or rate functions
@@ -193,10 +212,9 @@ heart <- function(formula, df = NULL, knots = NULL, degree = 0,
     ## friendly version of baseline pieces to print out
     print_blpieces <- int_baseline(baselinePieces = baselinePieces)
     attr(baselinePieces, "name") <- print_blpieces
-    ## 'control' and 'start' values for 'nlm'
+    ## start' values for 'nlm'
     startlist <- c(start, nbeta = nbeta, nalpha = nalpha)
     start <- do.call("heart_start", startlist)
-    control <- do.call("heart_control", control)
     ini <- do.call("c", start)
     length_par <- length(ini)
     ## log likelihood
@@ -340,6 +358,7 @@ logL_heart <- function(par, data, baselinePieces) {
     ind_cens <- data$event == 0
     ## rate function
     rho_0_ij <- rho_0(par_BaselinePW = par_alpha,
+                      Tvec = 
                       baselinePieces = baselinePieces, 
                       data$time[ind_event])
     rho_i <- expXBeta[ind_event] * rho_0_ij
@@ -393,7 +412,8 @@ logL_heart <- function(par, data, baselinePieces) {
 }
 
 heart_control <- function (gradtol = 1e-6, stepmax = 1e5, 
-                           steptol = 1e-6, iterlim = 1e2) {
+                           steptol = 1e-6, iterlim = 1e2,
+                           bounaryKnots = NULL, intercept = TRUE) {
     ## controls for function stats::nlm
     if (!is.numeric(gradtol) || gradtol <= 0) {
         stop("value of 'gradtol' must be > 0")
@@ -407,9 +427,19 @@ heart_control <- function (gradtol = 1e-6, stepmax = 1e5,
     if (!is.numeric(iterlim) || iterlim <= 0) {
         stop("maximum number of iterations must be > 0")
     }
+    if (is.null(bounaryKnots)) {
+        bounaryKnots <- c(0, max(dat$time))
+    } else {
+        ind1 <- bounaryKnots[1] > min(dat$time)
+        ind2 <- bounaryKnots[2] < max(dat$time)
+        if (ind1 | ind2) {
+            stop("bounary knots should at least cover the range of visit time")
+        }
+    }
     ## return
     list(gradtol = gradtol, stepmax = stepmax, 
-         steptol = steptol, iterlim = iterlim)
+         steptol = steptol, iterlim = iterlim,
+         bounaryKnots = bounaryKnots, intercept = intercept)
 }
 
 heart_start <- function(beta, theta = 0.5, alpha, nbeta, nalpha) {
