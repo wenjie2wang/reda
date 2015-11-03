@@ -190,17 +190,22 @@ heart <- function (formula, df = NULL, knots = NULL, degree = 0,
     }
     ## if piece-wise constant, generate knots if knots is unspecified
     if (degree == 0) {
-        templist <- pieceConst(x = dat$time[dat$event == 1],
-                              df = df, knots = knots)
+        templist <- pieceConst(x = dat$time,
+                               df = df, knots = knots)
         knots <- templist$knots
         df <- templist$df
     } else { ## else degree > 0, call 'bs' for spline 
-       bsmat <- bs(x = dat$time[dat$event == 1], df = df,
-                   knots = knots, degree = degree,
-                   intercept = indIntercept, Boundary.knots = bounaryKnots)
-       ## update df, knots
-       knots <- as.numeric(attr(bsmat, "knots"))
-       df <- degree + length(knots) + as.numeric(indIntercept)
+        bsmat <- bs(x = dat$time, df = df,
+                    knots = knots, degree = degree,
+                    intercept = indIntercept, Boundary.knots = bounaryKnots)
+        ## update df, knots
+        knots <- as.numeric(attr(bsmat, "knots"))
+        df <- degree + length(knots) + as.numeric(indIntercept)
+        ## generate bsmat for estimated baseline rate function and mcf
+        xTime <- seq(from = min(dat$time), to = max(dat$time),
+                     lenght.out = max(1e3, length(unique(dat$time))))
+        bsmat_est <- bs(xTime, knots = knots, degree = degree,
+                        intercept = indIntercept, Boundary.knots = bounaryKnots)
     }
     ## bKnots = c(knots, last_bounary_knots)
     bKnots <- c(knots, tail(bounaryKnots, 1))
@@ -217,6 +222,7 @@ heart <- function (formula, df = NULL, knots = NULL, degree = 0,
     ## log likelihood
     fit <- stats::nlm(logL_heart, ini, data = dat, 
                       bKnots = bKnots, hessian = TRUE,
+                      bsmat = bsmat, bsmat_est = bsmat_est, 
                       gradtol = control$gradtol, stepmax = control$stepmax,
                       steptol = control$steptol, iterlim = control$iterlim)
     
@@ -298,23 +304,38 @@ pieceConst <- function (x, df = NULL, knots = NULL) {
 
 ## baseline rate function
 rho_0 <- function (par_BaselinePW, Tvec, bKnots, degree, bsmat) {
-    ## if piecewise constant
+    ## if piecewise constant, degree == 0
     if (degree == 0) {
         indx <- apply(as.array(Tvec), 1, whereT, bKnots)
         return(par_BaselinePW[indx])  # function ends
     } 
     ## else spline with degree >= 1
     ## return
-    crossprod(t(bsmat), par_BaselinePW)
+    bsmat %*% par_BaselinePW
 }
 
-mu0 <- function (par_BaselinePW, bKnots, Tvec) {
-    indx <- apply(as.array(Tvec), 1, whereT, bKnots)
-    BL_segments <- c(bKnots[1], diff(bKnots))
-    ## The MCF at each time point  
-    CumMean_Pieces <- diffinv(BL_segments * par_BaselinePW)[-1]  
-    ## return
-    CumMean_Pieces[indx] - (bKnots[indx] - Tvec) * par_BaselinePW[indx]
+whereTspline <- function (tt, xTime) {
+    min(which(tt <= xTime))
+    diff(c(0, xTime)
+}
+
+## mean cumulative function
+mu0 <- function (par_BaselinePW, Tvec, bKnots, degree, bsmat_est, xTime) {
+    ## if piecewise constant, degree == 0
+    if (degree == 0) {
+        ## segement number of each subject
+        indx <- apply(as.array(Tvec), 1, whereT, bKnots)
+        BL_segments <- c(bKnots[1], diff(bKnots))
+        ## The MCF at each time point  
+        CumMean_Pieces <- diffinv(BL_segments * par_BaselinePW)[-1]  
+        mu_tau <- CumMean_Pieces[indx] -
+            (bKnots[indx] - Tvec) * par_BaselinePW[indx]
+        return(mu_tau)  # function ends
+    }
+    ## else spline with degree >= 1
+    meanCumFun <- bsmat_est %*% par_BaselinePW
+
+    
 }
 
 dmu0_alpha <- function (tt, bKnots) {
@@ -337,15 +358,15 @@ dmu0_alpha <- function (tt, bKnots) {
 }
 
 ## compute negative log likelihood
-logL_heart <- function (par, data, bKnots, degree, bsmat) {
+logL_heart <- function (par, data, bKnots, degree, bsmat, bsmat_est, xTime) {
     nbeta <- ncol(data) - 3
     ## par = \THETA in the paper
     par_beta <- par[1 : nbeta]
     par_theta <- par[nbeta + 1]
     par_alpha <- par[(nbeta + 2) : length(par)]
     m <- length(unique(data$ID))
-    expXBeta <- exp(crossprod(t(as.matrix(data[, 4 : (3 + nbeta)])),
-                              as.matrix(par_beta)))
+    expXBeta <- exp(as.matrix(data[, 4 : (3 + nbeta)]) %*%
+                              as.matrix(par_beta))
     ## index for event and censoring
     ind_event <- data$event == 1
     ind_cens <- data$event == 0
@@ -357,6 +378,7 @@ logL_heart <- function (par, data, bKnots, degree, bsmat) {
     rho_i <- expXBeta[ind_event] * rho_0_ij
     rho_i[rho_i < 1e-100] <- 1e-100
     sum_log_rho_i <- sum(log(rho_i))
+    ## n_ij: number of event for each subject
     ## these codes to make sure that the order will not change 
     ## if the patient ID is not ordered
     n_ij <- table(data$ID)[order(unique(data$ID))] - 1  
@@ -365,6 +387,7 @@ logL_heart <- function (par, data, bKnots, degree, bsmat) {
     theta_j_1 <- par_theta + sequence(n_ij) - 1  
     theta_j_1[theta_j_1 < 1e-100] <- 1e-100
     sum_log_theta_j_1 <- sum(log(theta_j_1))
+
     mu0i <- mu0(par_BaselinePW = par_alpha, bKnots = bKnots, 
                 data$time[ind_cens])
     mui <- mu0i * expXBeta[ind_cens]
