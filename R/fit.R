@@ -316,7 +316,8 @@ rho_0 <- function (par_BaselinePW, Tvec, bKnots, degree, bsmat) {
 
 whereTspline <- function (tt, xTime) {
     min(which(tt <= xTime))
-    diff(c(0, xTime)
+    diff(c(0, xTime))
+    ## FIXME
 }
 
 ## mean cumulative function
@@ -334,8 +335,7 @@ mu0 <- function (par_BaselinePW, Tvec, bKnots, degree, bsmat_est, xTime) {
     }
     ## else spline with degree >= 1
     meanCumFun <- bsmat_est %*% par_BaselinePW
-
-    
+    ## FIXME
 }
 
 dmu0_alpha <- function (tt, bKnots) {
