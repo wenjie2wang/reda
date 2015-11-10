@@ -115,6 +115,8 @@ NULL
 #' heartFit <- heart(formula = Survr(ID, time, event) ~ x1 + group, 
 #'                   data = simuDat, subset = ID %in% 75:125,
 #'                   baselinePieces = seq(28, 168, length = 6))
+#' heart(Survr(ID, time, event) ~ x1 + group, 
+#'       data = simuDat, subset = ID %in% 75:125)
 #' ## str(heartFit)
 #' show(heartFit) # or simply call 'heartFit'
 #' summary(heartFit)
@@ -129,7 +131,7 @@ NULL
 #' .getXlevels
 #' @importFrom splines bs
 #' @export
-heart <- function (formula, df = NULL, knots = NULL, degree = 0,
+heart <- function (formula, df = NULL, knots = NULL, degree = 0L,
                    data, subset, na.action, 
                    start = list(), control = list(), contrasts = NULL, ...) {
     ## record the function call to return
@@ -181,48 +183,50 @@ heart <- function (formula, df = NULL, knots = NULL, degree = 0,
     }
 
     ## 'control' for 'nlm' and 'bs'
+    control <- c(control, list(time = dat$time))
     control <- do.call("heart_control", control)
-    bounaryKnots <- control$bounaryKnots
+    boundaryKnots <- control$boundaryKnots
     indIntercept <- control$intercept
     ## check and reformat 'degree' at the same time
     if ((degree <- as.integer(degree)) < 0) {
         stop("'degree' must be a nonnegative integer.")
     }
     ## if piece-wise constant, generate knots if knots is unspecified
-    if (degree == 0) {
+    if (degree == 0L) {
         templist <- pieceConst(x = dat$time,
                                df = df, knots = knots)
         knots <- templist$knots
         df <- templist$df
     } else { ## else degree > 0, call 'bs' for spline 
-        bsmat <- bs(x = dat$time, df = df,
+        bsMat <- bs(x = dat$time, df = df,
                     knots = knots, degree = degree,
-                    intercept = indIntercept, Boundary.knots = bounaryKnots)
+                    intercept = indIntercept, Boundary.knots = boundaryKnots)
         ## update df, knots
-        knots <- as.numeric(attr(bsmat, "knots"))
+        knots <- as.numeric(attr(bsMat, "knots"))
         df <- degree + length(knots) + as.numeric(indIntercept)
-        ## generate bsmat for estimated baseline rate function and mcf
+        ## generate bsMat for estimated baseline rate function and mcf
         xTime <- seq(from = min(dat$time), to = max(dat$time),
-                     lenght.out = max(1e3, length(unique(dat$time))))
-        bsmat_est <- bs(xTime, knots = knots, degree = degree,
-                        intercept = indIntercept, Boundary.knots = bounaryKnots)
+                     length.out = max(1e3, length(unique(dat$time))))
+        xTime <- sort(unique(c(xTime, dat$time[all.equal(dat$event, 0)])))
+        bsMat_est <- bs(xTime, knots = knots, degree = degree,
+                        intercept = indIntercept, Boundary.knots = boundaryKnots)
     }
-    ## bKnots = c(knots, last_bounary_knots)
-    bKnots <- c(knots, tail(bounaryKnots, 1))
-    ## number of baseline pieces or rate functions
-    nalpha <- length(bKnots)
+    ## bKnots = c(knots, last_boundary_knots)
+    bKnots <- c(knots, tail(boundaryKnots, 1))
     ## friendly version of baseline pieces to print out
     print_blpieces <- int_baseline(bKnots = bKnots)
     attr(bKnots, "name") <- print_blpieces
     ## start' values for 'nlm'
-    startlist <- c(start, nbeta = nbeta, nalpha = nalpha)
+    startlist <- c(start, list(nbeta = nbeta, nalpha = df))
     start <- do.call("heart_start", startlist)
     ini <- do.call("c", start)
     length_par <- length(ini)
+    # browser()
     ## log likelihood
     fit <- stats::nlm(logL_heart, ini, data = dat, 
-                      bKnots = bKnots, hessian = TRUE,
-                      bsmat = bsmat, bsmat_est = bsmat_est, 
+                      bKnots = bKnots, degree = degree,
+                      bsMat = bsMat, bsMat_est = bsMat_est, xTime = xTime,
+                      hessian = TRUE,
                       gradtol = control$gradtol, stepmax = control$stepmax,
                       steptol = control$steptol, iterlim = control$iterlim)
     
@@ -240,7 +244,7 @@ heart <- function (formula, df = NULL, knots = NULL, degree = 0,
     colnames(est_theta) <- c("theta", "se")
     est_theta[1, ] <- c(fit$estimate[nbeta + 1], se_vec[nbeta + 1])
     
-    est_alpha <- matrix(NA, nrow = nalpha, ncol = 2)
+    est_alpha <- matrix(NA, nrow = df, ncol = 2)
     colnames(est_alpha) <- c("alpha", "se")
     rownames(est_alpha) <- print_blpieces 
     
@@ -263,7 +267,8 @@ heart <- function (formula, df = NULL, knots = NULL, degree = 0,
     ## results to return
     results <- methods::new("heart", 
                             call = Call, formula = formula, 
-                            bKnots = bKnots,
+                            knots = knots,
+                            boundaryKnots = boundaryKnots,
                             estimates = list(beta = est_beta, 
                                              theta = est_theta, 
                                              alpha = est_alpha),
@@ -283,16 +288,17 @@ heart <- function (formula, df = NULL, knots = NULL, degree = 0,
 whereT <- function (tt, bKnots) {
     ## designed to be used inside function 'apply', 'tt' is length one vector
     ## return the baseline segment number 'tt' belongs to
+    ## or the row number of bsMat for censoring time
     min(which(tt <= bKnots))
 }
 
 pieceConst <- function (x, df = NULL, knots = NULL) {
     ind <- (is.null(df) + 1) * is.null(knots) + 1
-    ## ind == 3: both df and knots are NULL; one-piece constant, df <- 1
-    ## ind == 2: df is not NULL, while knots is NULL; number of piece <- df
     ## ind == 1: knots is not NULL; df <- length(knots) + 1
+    ## ind == 2: df is not NULL, while knots is NULL; number of piece <- df
+    ## ind == 3: : both df and knots are NULL; one-piece constant, df <- 1
     df <- switch(ind, length(knots) + 1, df, 1)
-    if (ind == 2) {
+    if (ind > 1) {
         tknots <- df + 1
         quans <- seq.int(from = 0, to = 1,
                          length.out = tknots)[-c(1L, tknots)]
@@ -303,7 +309,7 @@ pieceConst <- function (x, df = NULL, knots = NULL) {
 }
 
 ## baseline rate function
-rho_0 <- function (par_BaselinePW, Tvec, bKnots, degree, bsmat) {
+rho_0 <- function (par_BaselinePW, Tvec, bKnots, degree, bsMat) {
     ## if piecewise constant, degree == 0
     if (degree == 0) {
         indx <- apply(as.array(Tvec), 1, whereT, bKnots)
@@ -311,17 +317,12 @@ rho_0 <- function (par_BaselinePW, Tvec, bKnots, degree, bsmat) {
     } 
     ## else spline with degree >= 1
     ## return
-    bsmat %*% par_BaselinePW
-}
-
-whereTspline <- function (tt, xTime) {
-    min(which(tt <= xTime))
-    diff(c(0, xTime))
-    ## FIXME
+    ## FIXME Tvec, event time.
+    bsMat %*% par_BaselinePW
 }
 
 ## mean cumulative function
-mu0 <- function (par_BaselinePW, Tvec, bKnots, degree, bsmat_est, xTime) {
+mu0 <- function (par_BaselinePW, Tvec, bKnots, degree, bsMat_est, xTime) {
     ## if piecewise constant, degree == 0
     if (degree == 0) {
         ## segement number of each subject
@@ -334,8 +335,14 @@ mu0 <- function (par_BaselinePW, Tvec, bKnots, degree, bsmat_est, xTime) {
         return(mu_tau)  # function ends
     }
     ## else spline with degree >= 1
-    meanCumFun <- bsmat_est %*% par_BaselinePW
-    ## FIXME
+    stepTime <- xTime[2] - xTime[1]
+    baseRate <- bsMat_est %*% par_BaselinePW
+    indx <- apply(array(Tvec), 1, whereT, bknots = xTime)
+    mu_tau <- apply(array(indx), 1, function (ind) {
+        cumsum(baseRate[seq(ind)]) * stepTime
+    })
+    ## return
+    mu_tau
 }
 
 dmu0_alpha <- function (tt, bKnots) {
@@ -358,15 +365,15 @@ dmu0_alpha <- function (tt, bKnots) {
 }
 
 ## compute negative log likelihood
-logL_heart <- function (par, data, bKnots, degree, bsmat, bsmat_est, xTime) {
+logL_heart <- function (par, data, bKnots, degree, bsMat, bsMat_est, xTime) {
+    browser()
     nbeta <- ncol(data) - 3
     ## par = \THETA in the paper
     par_beta <- par[1 : nbeta]
     par_theta <- par[nbeta + 1]
     par_alpha <- par[(nbeta + 2) : length(par)]
     m <- length(unique(data$ID))
-    expXBeta <- exp(as.matrix(data[, 4 : (3 + nbeta)]) %*%
-                              as.matrix(par_beta))
+    expXBeta <- exp(as.matrix(data[, 4 : (3 + nbeta)]) %*% as.matrix(par_beta))
     ## index for event and censoring
     ind_event <- data$event == 1
     ind_cens <- data$event == 0
@@ -374,7 +381,7 @@ logL_heart <- function (par, data, bKnots, degree, bsmat, bsmat_est, xTime) {
     rho_0_ij <- rho_0(par_BaselinePW = par_alpha,
                       Tvec = data$time[ind_event],
                       bKnots = bKnots, degree = degree, 
-                      bsmat = bsmat)
+                      bsMat = bsMat)
     rho_i <- expXBeta[ind_event] * rho_0_ij
     rho_i[rho_i < 1e-100] <- 1e-100
     sum_log_rho_i <- sum(log(rho_i))
@@ -387,9 +394,11 @@ logL_heart <- function (par, data, bKnots, degree, bsmat, bsmat_est, xTime) {
     theta_j_1 <- par_theta + sequence(n_ij) - 1  
     theta_j_1[theta_j_1 < 1e-100] <- 1e-100
     sum_log_theta_j_1 <- sum(log(theta_j_1))
-
-    mu0i <- mu0(par_BaselinePW = par_alpha, bKnots = bKnots, 
-                data$time[ind_cens])
+    ## integral that involves censoring time tau
+    ## baseline mcf
+    mu0i <- mu0(par_BaselinePW = par_alpha, Tvec = data$time[ind_cens],
+                bKnots = bKnots, degree = degree, bsMat_est = bsMat_est,
+                xTime = xTime)
     mui <- mu0i * expXBeta[ind_cens]
     mui_theta <- par_theta + mui
     mui_theta[mui_theta < 1e-100] <- 1e-100
@@ -429,7 +438,8 @@ logL_heart <- function (par, data, bKnots, degree, bsmat, bsmat_est, xTime) {
 
 heart_control <- function (gradtol = 1e-6, stepmax = 1e5, 
                            steptol = 1e-6, iterlim = 1e2,
-                           bounaryKnots = NULL, intercept = TRUE) {
+                           boundaryKnots = NULL, intercept = TRUE,
+                           time) {
     ## controls for function stats::nlm
     if (!is.numeric(gradtol) || gradtol <= 0) {
         stop("value of 'gradtol' must be > 0")
@@ -443,20 +453,20 @@ heart_control <- function (gradtol = 1e-6, stepmax = 1e5,
     if (!is.numeric(iterlim) || iterlim <= 0) {
         stop("maximum number of iterations must be > 0")
     }
-    if (is.null(bounaryKnots)) {
-        bounaryKnots <- c(0, max(dat$time))
+    if (is.null(boundaryKnots)) {
+        boundaryKnots <- c(0, max(time))
     } else {
-        bounaryKnots <- sort(bounaryKnots)
-        ind1 <- bounaryKnots[1] > min(dat$time)
-        ind2 <- bounaryKnots[2] < max(dat$time)
+        boundaryKnots <- sort(boundaryKnots)
+        ind1 <- boundaryKnots[1] > min(time)
+        ind2 <- boundaryKnots[2] < max(time)
         if (ind1 | ind2) {
-            stop("bounary knots should not lie inside the range of visit time")
+            stop("boundary knots should not lie inside the range of visit time")
         }
     }
     ## return
     list(gradtol = gradtol, stepmax = stepmax, 
          steptol = steptol, iterlim = iterlim,
-         bounaryKnots = bounaryKnots, intercept = intercept)
+         boundaryKnots = boundaryKnots, intercept = intercept)
 }
 
 heart_start <- function (beta, theta = 0.5, alpha, nbeta, nalpha) {

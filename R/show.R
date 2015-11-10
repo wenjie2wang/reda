@@ -62,10 +62,10 @@ setMethod(f = "show", signature = "heart",
               names(theta) <- NULL
               alpha <- round(object@estimates$alpha[, "alpha"], digits = 3)
               names(alpha) <- rownames(object@estimates$alpha)
-              cat("\ncall: \n")
+              cat("call: \n")
               print(object@call)
               cat("\nbaseline pieces: \n")
-              cat(attr(object@baselinePieces, "name"), "\n")
+              cat(attr(object@knots, "name"), "\n")
               cat("\ncoefficients: \n") 
               print(beta)
               cat("\ntheta: ", theta, "\n")
@@ -83,12 +83,12 @@ setMethod(f = "show", signature = "summaryHeart",
               if (attr(object@call, "show")) {
                   Call <- object@call
                   attr(Call, "show") <- NULL
-                  cat("\ncall: \n")
+                  cat("call: \n")
                   print(Call)
               }
-              if (attr(object@baselinePieces, "show")) {
+              if (attr(object@knots, "show")) {
                   cat("\nbaseline pieces: \n")
-                  cat(attr(object@baselinePieces, "name"), "\n")
+                  cat(attr(object@knots, "name"), "\n")
               }
               cat("\ncoefficients: \n") 
               printCoefmat(object@coefficients)
@@ -107,7 +107,7 @@ setMethod(f = "show", signature = "summaryHeart",
 #' @export
 setMethod(f = "show", signature = "empirMcf",
           definition = function(object) {
-              cat("\ncall: \n")
+              cat("call: \n")
               print(object@call)
               cat("\nformula:\n")
               print(object@formula)
@@ -133,7 +133,7 @@ setMethod(f = "show", signature = "heartMcf",
               cat("formula:\n")
               print(object@formula)
               cat("\nbaseline pieces:\n")
-              print(attr(object@baselinePieces, "name"))
+              print(attr(object@knots, "name"))
               cat("\nMCF:\n")
               if (nrow(object@MCF) <= 100) {
                   print(object@MCF)
