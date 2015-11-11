@@ -246,7 +246,7 @@ heart <- function (formula, df = NULL, knots = NULL, degree = 0L,
     
     est_alpha <- matrix(NA, nrow = df, ncol = 2)
     colnames(est_alpha) <- c("alpha", "se")
-    rownames(est_alpha) <- print_blpieces 
+#    rownames(est_alpha) <- print_blpieces 
     
     est_alpha[, 1] <- fit$estimate[(nbeta + 2):length_par]
     est_alpha[, 2] <- se_vec[(nbeta + 2):length_par]
@@ -269,6 +269,7 @@ heart <- function (formula, df = NULL, knots = NULL, degree = 0L,
                             call = Call, formula = formula, 
                             knots = knots,
                             boundaryKnots = boundaryKnots,
+                            degree = degree, df = df,
                             estimates = list(beta = est_beta, 
                                              theta = est_theta, 
                                              alpha = est_alpha),
@@ -296,7 +297,7 @@ pieceConst <- function (x, df = NULL, knots = NULL) {
     ind <- (is.null(df) + 1) * is.null(knots) + 1
     ## ind == 1: knots is not NULL; df <- length(knots) + 1
     ## ind == 2: df is not NULL, while knots is NULL; number of piece <- df
-    ## ind == 3: : both df and knots are NULL; one-piece constant, df <- 1
+    ## ind == 3: both df and knots are NULL; one-piece constant, df <- 1
     df <- switch(ind, length(knots) + 1, df, 1)
     if (ind > 1) {
         tknots <- df + 1
@@ -317,7 +318,6 @@ rho_0 <- function (par_BaselinePW, Tvec, bKnots, degree, bsMat) {
     } 
     ## else spline with degree >= 1
     ## return
-    ## FIXME Tvec, event time.
     bsMat %*% par_BaselinePW
 }
 
@@ -334,39 +334,62 @@ mu0 <- function (par_BaselinePW, Tvec, bKnots, degree, bsMat_est, xTime) {
             (bKnots[indx] - Tvec) * par_BaselinePW[indx]
         return(mu_tau)  # function ends
     }
-    ## else spline with degree >= 1
+    ## else spline with degree > 1
     stepTime <- xTime[2] - xTime[1]
     baseRate <- bsMat_est %*% par_BaselinePW
-    indx <- apply(array(Tvec), 1, whereT, bknots = xTime)
+    indx <- apply(array(Tvec), 1, whereT, bKnots = xTime)
     mu_tau <- apply(array(indx), 1, function (ind) {
-        cumsum(baseRate[seq(ind)]) * stepTime
+        sum(baseRate[seq(ind)]) * stepTime
     })
     ## return
     mu_tau
 }
 
-dmu0_alpha <- function (tt, bKnots) {
-    indx <- min(which(tt <= bKnots))
-    ## BL_segments 
-    value <- diff(c(0, bKnots))
-    n_pieces <- length(bKnots)
-    if (indx == n_pieces) {
-        value[n_pieces] <- ifelse(n_pieces == 1, tt, 
-                                  tt - bKnots[n_pieces - 1])
-    } else if (indx > 1) {
-        value[(indx + 1):n_pieces] <- 0
-        value[indx] <- tt - bKnots[indx - 1]
-    } else {
-        value[(indx + 1):n_pieces] <- 0
-        value[indx] <- tt
+dmu0_dalpha <- function (tt, bKnots, degree, bsMat_est, xTime) {
+    ## if baseline rate function is piecewise constant
+    if (degree == 0L) {
+        indx <- min(which(tt <= bKnots))
+        ## BL_segments 
+        value <- diff(c(0, bKnots))
+        n_pieces <- length(bKnots)
+        ## if tt lies in the last segment
+        if (indx == n_pieces) {
+            value[n_pieces] <- ifelse(n_pieces == 1, tt, 
+                                      tt - bKnots[n_pieces - 1])
+        } else if (indx > 1) { ## if tt lies in one of the middle segments
+            value[(indx + 1) : n_pieces] <- 0
+            value[indx] <- tt - bKnots[indx - 1]
+        } else { ## if tt lies in the first segment
+            value[(indx + 1) : n_pieces] <- 0
+            value[indx] <- tt
+        }
+        ## return and end the function
+        return(value)    
     }
+    ## else it is spline with degree > 1
+    stepTime <- xTime[2] - xTime[1]
+    indx <- min(which(tt <= xTime))
+    derVec <- apply(array(indx), 1, function (ind) {
+        colSums(bsMat_est[seq(ind), ]) * stepTime
+    })
     ## return
-    value
+    derVec
+}
+
+dl_dalpha_part1 <- function (par_alpha, indx, degree, bsMat) {
+    ## if rate function is piecewise constant
+    if (degree == 0L) {
+        return(1 / par_alpha * table(indx))     
+    }
+    ## else rate function is spline
+    drho0_dbeta_ij <- bsMat
+    rho0_ij <- bsMat %*% par_alpha
+    ## return
+    colSums(t(1 / rho0_ij) %*% drho0_dbeta_ij)
 }
 
 ## compute negative log likelihood
 logL_heart <- function (par, data, bKnots, degree, bsMat, bsMat_est, xTime) {
-    browser()
     nbeta <- ncol(data) - 3
     ## par = \THETA in the paper
     par_beta <- par[1 : nbeta]
@@ -381,7 +404,7 @@ logL_heart <- function (par, data, bKnots, degree, bsMat, bsMat_est, xTime) {
     rho_0_ij <- rho_0(par_BaselinePW = par_alpha,
                       Tvec = data$time[ind_event],
                       bKnots = bKnots, degree = degree, 
-                      bsMat = bsMat)
+                      bsMat = bsMat[ind_event, ])
     rho_i <- expXBeta[ind_event] * rho_0_ij
     rho_i[rho_i < 1e-100] <- 1e-100
     sum_log_rho_i <- sum(log(rho_i))
@@ -411,26 +434,33 @@ logL_heart <- function (par, data, bKnots, degree, bsMat, bsMat_est, xTime) {
     penal <- ifelse(par_theta < 0 | min(par_alpha) < 0, 1e+50, 0)
     negLH <- -logLH + penal
     ## Calculate the gradient
-    dl_dbeta <- apply(diag((n_ij - mui)/(par_theta + mui) * par_theta) %*% 
-                      as.matrix(data[ind_cens, 4:(3 + nbeta)]), 2, sum)
+    xMat_i <- as.matrix(data[ind_cens, 4:(3 + nbeta)])
+    dl_dbeta_i <- sweep(x = xMat_i, MARGIN = 1, FUN = "*", 
+                        STATS = (n_ij - mui)/(par_theta + mui) * par_theta)
+    dl_dbeta <- colSums(dl_dbeta_i)
     dl_dtheta <- m + m * log(par_theta) + 
         sum(1/(par_theta + sequence(n_ij) - 1)) - 
         sum((n_ij + par_theta)/(par_theta + mui)) - sum(log(mui_theta))
     indx <- apply(as.array(data$time[ind_event]), 1, 
                   whereT, bKnots)
-    if (length(unique(indx)) < length(par_alpha)) {
+    if (length(unique(indx)) < length(bKnots)) {
         stop("Some segements have zero events!")
     }
-    indx_taui <- apply(as.array(data$time[ind_cens]), 1, 
-                       whereT, bKnots)
+    # indx_taui <- apply(as.array(data$time[ind_cens]), 1, 
+    #                    whereT, bKnots)
     ## reform dimension by 'array' for one-piece baseline 
-    dim_n1 <- length(bKnots)
+    dim_n1 <- length(par_alpha)
     dim_n2 <- length(data$time[ind_cens])
-    tempart2 <- array(apply(array(data$time[ind_cens]), 1, 
-                            dmu0_alpha, bKnots), c(dim_n1, dim_n2))
-    dl_dalpha_part2 <- diag((n_ij + par_theta) / (par_theta + mui) * 
-                            expXBeta[ind_cens]) %*% t(tempart2)
-    dl_dalpha <- 1 / par_alpha * table(indx) - apply(dl_dalpha_part2, 2, sum)
+    tempPart2 <- array(apply(array(data$time[ind_cens]), 1, 
+                             dmu0_dalpha, bKnots, degree,
+                             bsMat_est, xTime),
+                       c(dim_n1, dim_n2))
+    dl_dalpha_part2 <- sweep(t(tempPart2), MARGIN = 1, FUN = "*", 
+                             STATS = (n_ij + par_theta) / (par_theta + mui) *
+                                 expXBeta[ind_cens])
+    tempPart2 <- colSums(dl_dalpha_part2)
+    tempPart1 <- dl_dalpha_part1(par_alpha, indx, degree, bsMat[ind_event, ])
+    dl_dalpha <-  tempPart1 - tempPart2
     attr(negLH, "gradient") <- -c(dl_dbeta, dl_dtheta, dl_dalpha)
     ## return
     negLH
