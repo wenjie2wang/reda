@@ -5,182 +5,113 @@
 ## set five internal knots due to 6 visits
 ################################################################################
 
-### function part ==============================================================
-## generate event times for each process (each subject)
-## x and beta can be vector of length more than one
-## alpha should be vector of length more than one if df > 1
-## if knots and degree are set, df will be ignore
-## tau can be different for different processes
-simuFun <- function (ID = 1, beta = 0.3, theta = 0.5, alpha = 0.06,
-                     df = NULL, knots = NULL, degree = 0L, 
-                     boundaryKnots = c(0, 168), x = 0, tau = 168) {
-
-    ## quick check:
-    ## length(theta) == 1
-    ## length(alpha) == length(knots) | length(alpha) == df - degree
-    ## length(beta) == length(x)
-    ## boundaryKnots == sort(boundaryKnots)
-    ## boundaryKnots[2] >= tau
-    
-    ## internal handy function
-    whereT <- function (tt, bKnots) {
-        min(which(tt <= bKnots))
-    }
-    ## set df, knots and degree
-    ind <- (is.null(df) + 1) * is.null(knots) + 1
-    ## ind == 1: knots is not NULL; df <- length(knots) + 1
-    ## ind == 2: df is not NULL, knots is NULL; number of piece <- df
-    ## ind == 3: df, knots are both NULL; one-piece constant, df <- 1
-    df <- switch(ind, length(knots) + 1, df, 1)
-    if (ind > 1) {
-        tknots <- df + 1
-        knots <- seq.int(from = boundaryKnots[1], to = boundaryKnots[2],
-                         length.out = tknots)[-c(1L, tknots)]
-    }
-    
-    ## step 1: Calculate the supremum value of rate function for each process
-    ## equivalent to calculate the superemum value of baseline rate function
-    if (degree == 0L) { ## if degree == 0L, i.e. piecewise constant
-        supBaseRate <- max(bsRateFun <- alpha)
-    } else { ## else splines
-        xTime <- seq(from = boundaryKnots[1], to = boundaryKnots[2],
-                     length.out = 1e3)
-        bsMat <- splines::bs(x = xTime, knots = knots, degree = degree,
-                             intercept = TRUE, Boundary.knots = boundaryKnots)
-        bsRateFun <- bsMat %*% alpha
-        supBaseRate <- max(bsRateFun)
-    }
-    ## rate functions for a single process
-    r <- rgamma(n = 1, shape = theta, scale = 1 / theta)
-    tempComp <- as.numeric(r * exp(crossprod(beta, x)))
-    # browser()
-    rho <- tempComp * bsRateFun
-    rho_m <- tempComp * supBaseRate 
-
-    ## step 2: Simulate W_i every time
-    ## estimate the number of W_i before censoring
-    iterLim <- round(max(1, tau / qexp(p = 0.1, rate = rho_m)))
-    nIter <- 1
-    W <- 0
-    eventTime <- NULL
-    lastEventTime <- 0
-    while (lastEventTime < tau) {
-        W <- rexp(n = iterLim, rate = rho_m)
-        ## step 3
-        eventTime <- c(eventTime, lastEventTime + cumsum(W))
-        lastEventTime <- tail(eventTime, 1)
-        nIter <- nIter + 1
-        if (nIter == 20) stop("Fix me")
-    }
-    ## evenTime <- unique(round(eventTime, digits = 0)) 
-    eventTime <- eventTime[eventTime < tau]
-
-    ## step 4
-    tempn <- length(eventTime)
-    U <- runif(n = tempn, min = 0, max = 1)
-    
-    if (degree == 0L) {
-        rho_t <- rho[apply(as.array(eventTime), 1, 
-                           whereT, bKnots = c(knots, tau))]
-    } else if (length(eventTime) == 0L) {
-        ## no any event 
-        rho_t <- 0 # to avoid argument x in splines::bs being NULL
-    } else {
-        bsMat <- splines::bs(x = eventTime, knots = knots, degree = degree,
-                             intercept = TRUE, Boundary.knots = boundaryKnots)
-        rho_t <- tempComp * (bsMat %*% alpha)
-    }
-    
-    ind <- U <= rho_t / rho_m
-    timeout <- c(eventTime[ind], tau)
-    eventout <- c(rep(1, length(timeout) - 1), 0)
-    nRecord <- length(timeout)
-    nBeta <- length(beta)
-    xNames <- paste("x", seq(nBeta), sep = "")
-    x <- matrix(t(x), ncol = nBeta, nrow = nRecord, byrow = TRUE)
-    resMat <- cbind(rep(ID, nRecord), timeout, eventout, x)
-    attr(resMat, "dimnames")[[2]] <- c("ID", "time", "event", xNames)
-    ## return
-    resMat
-}
-
-## function that extracts estimates and their se
-## by default, 6 pieces' piecewise constant rate function
-simu <- function (nSubject = 200, beta0 = c(0.5, 0.3), theta0 = 0.5,
-                  alpha0 = c(0.06, 0.04, 0.05, 0.03, 0.04, 0.05),
-                  knots0 = seq(from = 28, to = 140, by = 28), degree0 = 0,
-                  boundaryKnots0 = c(0, 168),
-                  x0 = function() c(sample(c(0, 1), size = 1),
-                         round(rnorm(1, mean = 0, sd = 1), 2)),
-                  tau0 = rep(168, nSubject)) {
-    ## generate sample data
-    simuDat <- foreach(i = seq(nSubject), .combine = "rbind") %do% {
-        simuFun(ID = i, beta = beta0, theta = theta0, alpha = alpha0,
-                knots = knots0, degree = degree0,
-                boundaryKnots = boundaryKnots0, x = x0(), tau = tau0[i])
-    }
-    simuDat <- data.frame(simuDat)
-    simuDat$x1 <- factor(simuDat$x1, levels = c(0, 1),
-                         labels = c("Treat", "Contr"))
-    colnames(simuDat)[4:5] <- c("group", "x1")
-    ## model-fitting
-    oneFit <- heart(reda::Survr(ID, time, event) ~ group + x1,
-                    data = simuDat, knots = knots0, degree = degree0,
-                    control = list(boundaryKnots = boundaryKnots0))
-    estBeta <- oneFit@estimates$beta[, 1]
-    estTheta <- oneFit@estimates$theta[, 1]
-    estAlpha <- oneFit@estimates$alpha[, 1]
-    seBeta <- oneFit@estimates$beta[, 2]
-    seTheta <- oneFit@estimates$theta[, 2]
-    seAlpha <- oneFit@estimates$alpha[, 2]
-    estVec <- c(estBeta, estTheta, estAlpha)
-    seVec <- c(seBeta, seTheta, seAlpha)
-    ## return
-    resVec <- c(estVec, seVec)
-    names(resVec) <- NULL
-    resVec
-}
-################################################################################
-
 ### computation part ===========================================================
+## setups
+source("simuFun.R")
 source("../R/fit.R")
 source("../R/class.R")
 ## source("../R/show.R")
-if (! require(foreach)) {install.packages(foreach); library(foreach)}
-if (! require(doParallel)) {install.packages(doParallel); library(doParallel)}
-if (! require(doRNG)) {install.packages(doRNG); library(doRNG)}
+if (! require(foreach)) {install.packages("foreach"); library(foreach)}
+if (! require(doParallel)) {install.packages("doParallel"); library(doParallel)}
+if (! require(doRNG)) {install.packages("doRNG"); library(doRNG)}
 
+## fit rateReg model to recover the truth ======================================
 ## setting 1: 6 pieces' piecewise constant rate function
-## fit heart model to recover the truth
-nRepeat <- 8
+nRepeat <- 1e3
 lenPara <- 9
-estMat <- matrix(NA, ncol = 2 * lenPara, nrow = nRepeat)
+nMC <- detectCores()
 set.seed(1216)
-cl <- makeCluster(2)
+
+## nSubject = 200
+nMC <- detectCores()
+cl <- makeCluster(nMC)
 registerDoParallel(cl)
-simuResMat <- foreach(j = seq(nRepeat),
-                      .combine = "rbind",
-                      .packages = c("foreach"),
-                      .export = c("Survr", "heart_control", "heart_start"),
-                      .options.RNG = 1216) %dorng% {
-    simu()
-}
+const_2e2 <- foreach(j = seq(nRepeat),
+                     .packages = c("foreach", "splines"),
+                     .export = c("Survr", "rateReg_control", "rateReg_start"),
+                     .combine = "rbind") %dorng% {
+                         temp <- exportClass()                        
+                         simuFit(nSubject = 200)
+                     }
 stopCluster(cl)
 
-## spline with 2 internal knots and degree 3 and thus df = 6
+## nSubject = 500
+cl <- makeCluster(nMC)
+registerDoParallel(cl)
+const_5e2 <- foreach(j = seq(nRepeat),
+                     .packages = c("foreach", "splines"),
+                     .export = c("Survr", "rateReg_control", "rateReg_start"),
+                     .combine = "rbind") %dorng% {
+                         temp <- exportClass()                        
+                         simuFit(nSubject = 500)
+                     }
+stopCluster(cl)
+
+## nSubject = 1000
+cl <- makeCluster(nMC)
+registerDoParallel(cl)
+const_1e3 <- foreach(j = seq(nRepeat),
+                     .packages = c("foreach", "splines"),
+                     .export = c("Survr", "rateReg_control", "rateReg_start"),
+                     .combine = "rbind") %dorng% {
+                         temp <- exportClass()                        
+                         simuFit(nSubject = 1000)
+                     }
+stopCluster(cl)
+## save results for constant rate function
+save(const_2e2, const_5e2, const_1e3, file = "simuConst.RData")
+
+## setting 2: spline rate function with 2 internal knots and degree 3 (df = 6)
+nRepeat <- 1e3
+lenPara <- 9
+nMC <- detectCores()
 set.seed(1216)
-nSubject <- 200
-simuDat <- foreach(i = seq(nSubject), .combine = "rbind") %do% {
-    simuFun(ID = i, beta = c(0.5, 0.3),
-            alpha = c(0.06, 0.04, 0.05, 0.03, 0.04, 0.05),
-            knots = c(56, 112), degree = 3, boundaryKnots = c(0, 168),
-            x = rbind(ifelse(i <= 100, 0, 1),
-                      round(rnorm(1, mean = 0, sd = 1), 2)),
-            tau = 168)
-}
-simuDat <- data.frame(simuDat)
-simuDat$x1 <- factor(simuDat$x1, levels = c(0, 1),
-                     labels = c("Treat", "Contr"))
-colnames(simuDat)[4:5] <- c("group", "x1")
+
+## nSubject = 200
+cl <- makeCluster(nMC)
+registerDoParallel(cl)
+spline_2e2 <- foreach(j = seq(nRepeat),
+                      .packages = c("foreach", "splines"),
+                      .export = c("Survr", "rateReg_control", "rateReg_start"),
+                      .combine = "rbind") %dorng% {
+                          temp <- exportClass()                        
+                          simuFit(nSubject = 200, knots0 = c(56, 112),
+                                  degree = 3, boundaryKnots = c(0 ,168))
+                      }
+stopCluster(cl)
+
+## nSubject = 500
+cl <- makeCluster(nMC)
+registerDoParallel(cl)
+spline_5e2 <- foreach(j = seq(nRepeat),
+                      .packages = c("foreach", "splines"),
+                      .export = c("Survr", "rateReg_control", "rateReg_start"),
+                      .combine = "rbind") %dorng% {
+                          temp <- exportClass()                        
+                          simuFit(nSubject = 500, knots0 = c(56, 112),
+                                  degree = 3, boundaryKnots = c(0 ,168))
+                      }
+stopCluster(cl)
+
+## nSubject = 1000
+cl <- makeCluster(nMC)
+registerDoParallel(cl)
+spline_1e3 <- foreach(j = seq(nRepeat),
+                      .packages = c("foreach", "splines"),
+                      .export = c("Survr", "rateReg_control", "rateReg_start"),
+                      .combine = "rbind") %dorng% {
+                          temp <- exportClass()                        
+                          simuFit(nSubject = 1000, knots0 = c(56, 112),
+                                  degree = 3, boundaryKnots = c(0 ,168))
+                      }
+stopCluster(cl)
+## save results for spline rate function
+save(spline_2e2, spline_5e2, spline_1e3, file = "simuSpline.RData")
 
 
+## underlying true spline rate function
+require(splines)
+bsVec <- bs(1:167, knots = c(56, 112), degree = 3, Boundary.knots = c(0, 168),
+            intercept = TRUE) %*% c(0.06, 0.04, 0.05, 0.03, 0.04, 0.05)
+plot(1:167, bsVec, type = "l")
+dev.off()
