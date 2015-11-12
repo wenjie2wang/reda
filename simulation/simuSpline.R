@@ -1,8 +1,11 @@
+################################################################################
 ## simulation study on performance of spline rate function
 ## 200 patients with follow-up period: 24 * 7 = 168 days.
 ## covariate: treatment group, factor with level: treatment and control
 ## set five internal knots due to 6 visits
+################################################################################
 
+### function part ==============================================================
 ## generate event times for each process (each subject)
 ## x and beta can be vector of length more than one
 ## alpha should be vector of length more than one if df > 1
@@ -26,8 +29,8 @@ simuFun <- function (ID = 1, beta = 0.3, theta = 0.5, alpha = 0.06,
     ## set df, knots and degree
     ind <- (is.null(df) + 1) * is.null(knots) + 1
     ## ind == 1: knots is not NULL; df <- length(knots) + 1
-    ## ind == 2: df is not NULL, while knots is NULL; number of piece <- df
-    ## ind == 3: both df and knots are NULL; one-piece constant, df <- 1
+    ## ind == 2: df is not NULL, knots is NULL; number of piece <- df
+    ## ind == 3: df, knots are both NULL; one-piece constant, df <- 1
     df <- switch(ind, length(knots) + 1, df, 1)
     if (ind > 1) {
         tknots <- df + 1
@@ -101,26 +104,68 @@ simuFun <- function (ID = 1, beta = 0.3, theta = 0.5, alpha = 0.06,
     resMat
 }
 
-
-## 6 pieces' piecewise constant rate function
-## TODO: Generate simulation data to export as example data
-set.seed(1216)
-nSubject <- 200
-simuDat <- foreach(i = seq(nSubject), .combine = "rbind") %do% {
-    simuFun(ID = i, beta = c(0.5, 0.3),
-            alpha = c(0.06, 0.04, 0.05, 0.03, 0.04, 0.05),
-            knots = seq(from = 28, to = 140, by = 28),
-            degree = 0, boundaryKnots = c(0, 168),
-            x = rbind(ifelse(i <= 100, 0, 1),
-                      round(rnorm(1, mean = 0, sd = 1), 2)),
-            tau = 168)
+## function that extracts estimates and their se
+## by default, 6 pieces' piecewise constant rate function
+simu <- function (nSubject = 200, beta0 = c(0.5, 0.3), theta0 = 0.5,
+                  alpha0 = c(0.06, 0.04, 0.05, 0.03, 0.04, 0.05),
+                  knots0 = seq(from = 28, to = 140, by = 28), degree0 = 0,
+                  boundaryKnots0 = c(0, 168),
+                  x0 = function() c(sample(c(0, 1), size = 1),
+                         round(rnorm(1, mean = 0, sd = 1), 2)),
+                  tau0 = rep(168, nSubject)) {
+    ## generate sample data
+    simuDat <- foreach(i = seq(nSubject), .combine = "rbind") %do% {
+        simuFun(ID = i, beta = beta0, theta = theta0, alpha = alpha0,
+                knots = knots0, degree = degree0,
+                boundaryKnots = boundaryKnots0, x = x0(), tau = tau0[i])
+    }
+    simuDat <- data.frame(simuDat)
+    simuDat$x1 <- factor(simuDat$x1, levels = c(0, 1),
+                         labels = c("Treat", "Contr"))
+    colnames(simuDat)[4:5] <- c("group", "x1")
+    ## model-fitting
+    oneFit <- heart(reda::Survr(ID, time, event) ~ group + x1,
+                    data = simuDat, knots = knots0, degree = degree0,
+                    control = list(boundaryKnots = boundaryKnots0))
+    estBeta <- oneFit@estimates$beta[, 1]
+    estTheta <- oneFit@estimates$theta[, 1]
+    estAlpha <- oneFit@estimates$alpha[, 1]
+    seBeta <- oneFit@estimates$beta[, 2]
+    seTheta <- oneFit@estimates$theta[, 2]
+    seAlpha <- oneFit@estimates$alpha[, 2]
+    estVec <- c(estBeta, estTheta, estAlpha)
+    seVec <- c(seBeta, seTheta, seAlpha)
+    ## return
+    resVec <- c(estVec, seVec)
+    names(resVec) <- NULL
+    resVec
 }
-## simuDat$X2 <- round(simuDat$X2, digits = 2)
-## simuDat$X1 <- factor(simuDat$X1, levels = c(0, 1),
-##                      labels = c("Treat", "Contr"))
-## colnames(simuDat)[4:5] <- c("group", "X1")
-## save(simuDat, file = "data/simuDat.RData")
+################################################################################
 
+### computation part ===========================================================
+source("../R/fit.R")
+source("../R/class.R")
+## source("../R/show.R")
+if (! require(foreach)) {install.packages(foreach); library(foreach)}
+if (! require(doParallel)) {install.packages(doParallel); library(doParallel)}
+if (! require(doRNG)) {install.packages(doRNG); library(doRNG)}
+
+## setting 1: 6 pieces' piecewise constant rate function
+## fit heart model to recover the truth
+nRepeat <- 8
+lenPara <- 9
+estMat <- matrix(NA, ncol = 2 * lenPara, nrow = nRepeat)
+set.seed(1216)
+cl <- makeCluster(2)
+registerDoParallel(cl)
+simuResMat <- foreach(j = seq(nRepeat),
+                      .combine = "rbind",
+                      .packages = c("foreach"),
+                      .export = c("Survr", "heart_control", "heart_start"),
+                      .options.RNG = 1216) %dorng% {
+    simu()
+}
+stopCluster(cl)
 
 ## spline with 2 internal knots and degree 3 and thus df = 6
 set.seed(1216)
@@ -133,5 +178,9 @@ simuDat <- foreach(i = seq(nSubject), .combine = "rbind") %do% {
                       round(rnorm(1, mean = 0, sd = 1), 2)),
             tau = 168)
 }
+simuDat <- data.frame(simuDat)
+simuDat$x1 <- factor(simuDat$x1, levels = c(0, 1),
+                     labels = c("Treat", "Contr"))
+colnames(simuDat)[4:5] <- c("group", "x1")
 
 
