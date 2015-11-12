@@ -31,17 +31,17 @@ NULL
 #' An S4 class generic function to extract the estimated baseline rate function 
 #' from HEART model. 
 #' 
-#' @param object heart-class object.
+#' @param object rateReg-class object.
 #' @param ... other arguments for future usage.
 #' @return a named vector.
-#' @aliases baseline,heart-method
+#' @aliases baseline,rateReg-method
 #' @examples 
 #' library(reda)
-#' heartFit <- heart(formula = Survr(ID, time, event) ~ x1 + group, 
+#' rateRegFit <- rateReg(formula = Survr(ID, time, event) ~ x1 + group, 
 #'                   data = simuDat, subset = ID %in% 75:125,
 #'                   baselinePieces = seq(28, 168, length = 6))
-#' baseline(heartFit)
-#' @seealso \code{\link{heart}} \code{\link{summary,heart-method}}
+#' baseline(rateRegFit)
+#' @seealso \code{\link{rateReg}} \code{\link{summary,rateReg-method}}
 #' @export
 setGeneric(name = "baseline",
            def = function(object, ...) {
@@ -50,9 +50,9 @@ setGeneric(name = "baseline",
 
 
 #' @describeIn baseline Extract estiamted baseline rate function 
-#' from heart-class object.
+#' from rateReg-class object.
 #' @export
-setMethod(f = "baseline", signature = "heart",
+setMethod(f = "baseline", signature = "rateReg",
           definition = function(object, ...) {
               alpha <- object@estimates$alpha[, "alpha"]
               names(alpha) <- rownames(object@estimates$alpha)

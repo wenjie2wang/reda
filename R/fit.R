@@ -26,17 +26,15 @@
 NULL
 
 
-#' Fitting HEART Model
+#' Fitting Recurrent Events Regression Model Based on Counts and Rate Function
 #'
-#' \code{heart} returns fitted model results.
-#' HEART model is a gamma frailty model with a piecewise constant
+#' \code{rateReg} returns fitted model results.
+#' The default model is a gamma frailty model with a piecewise constant
 #' baseline rate function for recurrent event data. 
-#' The model is named after the paper title of \emph{Fu et al. (2014)},  
-#' Hypoglycemic Events Analysis via Recurrent Time-to-Event (HEART) Models
 #'
-#' In detail, function \code{heart} first constructs the design matrix from
+#' In detail, function \code{rateReg} first constructs the design matrix from
 #' the specified arguments: \code{formula}, \code{data}, \code{subset},
-#' \code{na.action} and \code{constrasts} before fitting the HEART model.
+#' \code{na.action} and \code{constrasts} before fitting the RECREG model.
 #' The constructed design matrix will be checked again to fit in the recurrent
 #' event data framework if any observation with missing covariates is removed.
 #' (see detail in \code{\link{Survr}} for checking rules).
@@ -83,7 +81,7 @@ NULL
 #' @param data an optional data frame, list or environment containing
 #' the variables in the model.  If not found in data, the variables are taken 
 #' from \code{environment(formula)}, usually the environment from which 
-#' function \code{\link{heart}} is called.
+#' function \code{\link{rateReg}} is called.
 #' @param subset an optional vector specifying a subset of observations 
 #' to be used in the fitting process.
 #' @param na.action function which indicates what should the procedure do 
@@ -104,34 +102,34 @@ NULL
 #' See the \code{contrasts.arg} of 
 #' \code{\link[stats]{model.matrix.default}} for more details.
 #' @param ... other arguments for future usage.
-#' @return a \code{\link{heart-class}} object.
+#' @return a \code{\link{rateReg-class}} object.
 #' @references 
 #' Fu, Haoda, Junxiang Luo, and Yongming Qu. (2014),
-#' "Hypoglycemic Events Analysis via Recurrent Time-to-Event (HEART) Models," 
+#' "Hypoglycemic Events Analysis via Recurrent Time-to-Event (RECREG) Models," 
 #' \emph{Journal of biopharmaceutical statistics}, 2014 Dec 1, Epub 2014 Dec 1.
 #' @examples
 #' library(reda)
 #' ## data(simuDat)
-#' heartFit <- heart(formula = Survr(ID, time, event) ~ x1 + group, 
+#' rateRegFit <- rateReg(formula = Survr(ID, time, event) ~ x1 + group, 
 #'                   data = simuDat, subset = ID %in% 75:125,
 #'                   baselinePieces = seq(28, 168, length = 6))
-#' heart(Survr(ID, time, event) ~ x1 + group, 
+#' rateReg(Survr(ID, time, event) ~ x1 + group, 
 #'       data = simuDat, subset = ID %in% 75:125)
-#' ## str(heartFit)
-#' show(heartFit) # or simply call 'heartFit'
-#' summary(heartFit)
-#' coef(heartFit)
-#' confint(heartFit)
-#' baseline(heartFit)
-#' @seealso \code{\link{summary,heart-method}} \code{\link{coef,heart-method}}
-#' \code{\link{confint,heart-method}} \code{\link{baseline,heart-method}}
-#' \code{\link{mcf,heart-method}}
+#' ## str(rateRegFit)
+#' show(rateRegFit) # or simply call 'rateRegFit'
+#' summary(rateRegFit)
+#' coef(rateRegFit)
+#' confint(rateRegFit)
+#' baseline(rateRegFit)
+#' @seealso \code{\link{summary,rateReg-method}} \code{\link{coef,rateReg-method}}
+#' \code{\link{confint,rateReg-method}} \code{\link{baseline,rateReg-method}}
+#' \code{\link{mcf,rateReg-method}}
 #' @importFrom methods new
 #' @importFrom stats model.matrix nlm pnorm na.fail na.omit na.exclude na.pass
 #' .getXlevels
 #' @importFrom splines bs
 #' @export
-heart <- function (formula, df = NULL, knots = NULL, degree = 0L,
+rateReg <- function (formula, df = NULL, knots = NULL, degree = 0L,
                    data, subset, na.action, 
                    start = list(), control = list(), contrasts = NULL, ...) {
     ## record the function call to return
@@ -184,7 +182,7 @@ heart <- function (formula, df = NULL, knots = NULL, degree = 0L,
 
     ## 'control' for 'nlm' and 'bs'
     control <- c(control, list(time = dat$time))
-    control <- do.call("heart_control", control)
+    control <- do.call("rateReg_control", control)
     boundaryKnots <- control$boundaryKnots
     indIntercept <- control$intercept
     ## check and reformat 'degree' at the same time
@@ -218,12 +216,12 @@ heart <- function (formula, df = NULL, knots = NULL, degree = 0L,
     attr(bKnots, "name") <- print_blpieces
     ## start' values for 'nlm'
     startlist <- c(start, list(nbeta = nbeta, nalpha = df))
-    start <- do.call("heart_start", startlist)
+    start <- do.call("rateReg_start", startlist)
     ini <- do.call("c", start)
     length_par <- length(ini)
     # browser()
     ## log likelihood
-    fit <- stats::nlm(logL_heart, ini, data = dat, 
+    fit <- stats::nlm(logL_rateReg, ini, data = dat, 
                       bKnots = bKnots, degree = degree,
                       bsMat = bsMat, bsMat_est = bsMat_est, xTime = xTime,
                       hessian = TRUE,
@@ -265,7 +263,7 @@ heart <- function (formula, df = NULL, knots = NULL, degree = 0L,
     }
     
     ## results to return
-    results <- methods::new("heart", 
+    results <- methods::new("rateReg", 
                             call = Call, formula = formula, 
                             knots = knots,
                             boundaryKnots = boundaryKnots,
@@ -389,7 +387,7 @@ dl_dalpha_part1 <- function (par_alpha, indx, degree, bsMat) {
 }
 
 ## compute negative log likelihood
-logL_heart <- function (par, data, bKnots, degree, bsMat, bsMat_est, xTime) {
+logL_rateReg <- function (par, data, bKnots, degree, bsMat, bsMat_est, xTime) {
     nbeta <- ncol(data) - 3
     ## par = \THETA in the paper
     par_beta <- par[1 : nbeta]
@@ -466,7 +464,7 @@ logL_heart <- function (par, data, bKnots, degree, bsMat, bsMat_est, xTime) {
     negLH
 }
 
-heart_control <- function (gradtol = 1e-6, stepmax = 1e5, 
+rateReg_control <- function (gradtol = 1e-6, stepmax = 1e5, 
                            steptol = 1e-6, iterlim = 1e2,
                            boundaryKnots = NULL, intercept = TRUE,
                            time) {
@@ -499,7 +497,7 @@ heart_control <- function (gradtol = 1e-6, stepmax = 1e5,
          boundaryKnots = boundaryKnots, intercept = intercept)
 }
 
-heart_start <- function (beta, theta = 0.5, alpha, nbeta, nalpha) {
+rateReg_start <- function (beta, theta = 0.5, alpha, nbeta, nalpha) {
     ## beta = starting value(s) for coefficients of covariates
     ## theta = starting value for random effects
     ## alpha = starting values for piece-wise baseline rate functions

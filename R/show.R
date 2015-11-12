@@ -31,30 +31,30 @@ NULL
 #' An S4 class generic function to display certain object.
 #' 
 #' \itemize{
-#'   \item For \code{\link{heart-class}} object, 
+#'   \item For \code{\link{rateReg-class}} object, 
 #'   it prints brief summary of the fitted HEART model.
 #'   \item For \code{\link{summaryHeart-class}} object, 
 #'   it prints summary of the fitted HEART model.
 #'   \item For \code{\link{empirMcf-class}} object,
 #'   it prints formula and the first 100 rows of the computed MCF data frame.
-#'   \item For \code{\link{heartMcf-class}} object,
+#'   \item For \code{\link{rateRegMcf-class}} object,
 #'   it prints formula, baseline pieces and the first 100 rows of the estimated
 #'   MCF data frame.
 #' }
 #' 
-#' @param object certain R object generated from heart package.
+#' @param object certain R object generated from rateReg package.
 #' @name show
-#' @seealso \code{\link{heart}} \code{\link{summary,heart-method}}
+#' @seealso \code{\link{rateReg}} \code{\link{summary,rateReg-method}}
 #' \code{\link{mcf}}
 NULL
 
 
 #' @rdname show 
-#' @aliases show,heart-method
+#' @aliases show,rateReg-method
 
 #' @importFrom methods show
 #' @export
-setMethod(f = "show", signature = "heart",
+setMethod(f = "show", signature = "rateReg",
           definition = function(object) {
               beta <- round(object@estimates$beta[, "coef"], digits = 3)
               names(beta) <- rownames(object@estimates$beta)
@@ -124,11 +124,11 @@ setMethod(f = "show", signature = "empirMcf",
 
 
 #' @rdname show 
-#' @aliases show,heartMcf-method
+#' @aliases show,rateRegMcf-method
 #' @importFrom methods show 
 #' @importFrom utils head
 #' @export
-setMethod(f = "show", signature = "heartMcf",
+setMethod(f = "show", signature = "rateRegMcf",
           definition = function(object) {
               cat("formula:\n")
               print(object@formula)

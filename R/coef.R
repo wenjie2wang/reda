@@ -29,23 +29,23 @@ NULL
 #' Extract Coefficients Estiamtes from HEART Model
 #'
 #' \code{coef} is a S4 class method which extracts model coefficients 
-#' from the \code{\link{heart-class}} object 
-#' produced by function \code{\link{heart}}.
+#' from the \code{\link{rateReg-class}} object 
+#' produced by function \code{\link{rateReg}}.
 #'
-#' @param object heart-class object.
+#' @param object rateReg-class object.
 #' @param ... other arguments for future usage.
 #' @return a named numeric vector.
-#' @aliases coef,heart-method
-#' @seealso \code{\link{heart}} \code{\link{summary,heart-method}}
+#' @aliases coef,rateReg-method
+#' @seealso \code{\link{rateReg}} \code{\link{summary,rateReg-method}}
 #' @examples 
 #' library(reda)
-#' heartFit <- heart(formula = Survr(ID, time, event) ~ x1 + group, 
+#' rateRegFit <- rateReg(formula = Survr(ID, time, event) ~ x1 + group, 
 #'                   data = simuDat, subset = ID %in% 75:125,
 #'                   baselinePieces = seq(28, 168, length = 6))
-#' coef(heartFit)
+#' coef(rateRegFit)
 #' @importFrom stats coef
 #' @export
-setMethod(f = "coef", signature = "heart",
+setMethod(f = "coef", signature = "rateReg",
           definition = function(object, ...) {
               beta <- object@estimates$beta[, "coef"]
               names(beta) <- rownames(object@estimates$beta)
@@ -56,7 +56,7 @@ setMethod(f = "coef", signature = "heart",
 
 #' Confidence Intervals for HEART Model Coefficients
 #'
-#' \code{confint} is a S4 class generic function for heart object, 
+#' \code{confint} is a S4 class generic function for rateReg object, 
 #' which computes confidence intervals 
 #' for all or selected coefficients in a fitted HEART model. 
 #'
@@ -66,7 +66,7 @@ setMethod(f = "coef", signature = "heart",
 #' based on Fisher information matrix and estimates of coefficients. 
 #' See \emph{Fu et al. (2014)} for more details.
 #' 
-#' @param object heart-class object.
+#' @param object rateReg-class object.
 #' @param parm a specification of which parameters are 
 #' to be given confidence intervals, 
 #' either a vector of numbers or a vector of names. 
@@ -74,8 +74,8 @@ setMethod(f = "coef", signature = "heart",
 #' @param level the confidence level required.
 #' @param ... other arguments for future usage.
 #' @return a numeric matrix with rownames and colnames.
-#' @aliases confint,heart-method
-#' @seealso \code{\link{heart}} \code{\link{coef,heart-method}}
+#' @aliases confint,rateReg-method
+#' @seealso \code{\link{rateReg}} \code{\link{coef,rateReg-method}}
 #' @references 
 #' Fu, Haoda, Junxiang Luo, and Yongming Qu. (2014),
 #' "Hypoglycemic Events Analysis via Recurrent Time-to-Event (HEART) Models,"
@@ -86,15 +86,15 @@ setMethod(f = "coef", signature = "heart",
 #' New York: Springer, 2nd edition.
 #' @examples 
 #' library(reda)
-#' heartFit <- heart(formula = Survr(ID, time, event) ~ x1 + group, 
+#' rateRegFit <- rateReg(formula = Survr(ID, time, event) ~ x1 + group, 
 #'                   data = simuDat, subset = ID %in% 75:125,
 #'                   baselinePieces = seq(28, 168, length = 6))
-#' confint(heartFit)
-#' confint(heartFit, "x1")
-#' confint(heartFit, 2)
+#' confint(rateRegFit)
+#' confint(rateRegFit, "x1")
+#' confint(rateRegFit, 2)
 #' @importFrom stats confint qnorm 
 #' @export
-setMethod(f = "confint", signature = "heart",
+setMethod(f = "confint", signature = "rateReg",
           definition = function(object, parm, level = 0.95, ...) {
               ## internal function
               format.perc <- function (probs, digits){

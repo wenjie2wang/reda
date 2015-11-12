@@ -34,22 +34,22 @@ NULL
 #' \code{\link{summaryHeart-class}} object which can be printed by
 #' \code{\link{show,summaryHeart-method}}. 
 #'
-#' @param object heart object from \code{heart}.
+#' @param object rateReg object from \code{rateReg}.
 #' @param showCall a logic value with dafault as TRUE,
 #' indicating whether method \code{\link{show,summaryHeart-method}} prints out 
-#' the call information of original call of \code{heart}.
+#' the call information of original call of \code{rateReg}.
 #' @param showPieces a logic value with default as TRUE, 
 #' indicating whether method \code{\link{show,summaryHeart-method}} prints out 
 #' the baseline pieces.
 #' @param ... other arguments for future usage.
 #' @return summaryHeart-class object
-#' @aliases summary,heart-method
-#' @seealso \code{\link{heart}} \code{\link{coef,heart-method}}
-#' \code{\link{confint,heart-method}} \code{\link{baseline,heart-method}}
+#' @aliases summary,rateReg-method
+#' @seealso \code{\link{rateReg}} \code{\link{coef,rateReg-method}}
+#' \code{\link{confint,rateReg-method}} \code{\link{baseline,rateReg-method}}
 #' \code{\link{mcf}}
 #' @importFrom methods new
 #' @export
-setMethod(f = "summary", signature = "heart",
+setMethod(f = "summary", signature = "rateReg",
           definition = function(object, showCall = TRUE, showPieces = TRUE, ...) {
               Call <- object@call
               attr(Call, "show") <- showCall

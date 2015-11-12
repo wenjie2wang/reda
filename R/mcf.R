@@ -40,7 +40,7 @@ NULL
 #' time point from recurrent event sample data.  
 #' It does not assume any particular underlying model. 
 #' 
-#' For \code{\link{heart-class}} object, 
+#' For \code{\link{rateReg-class}} object, 
 #' \code{mcf} estimates the MCF of baseline rate function.
 #' 
 #' @param object an object used to dispatch a method.
@@ -49,7 +49,7 @@ NULL
 #' indicating the confidence level required. 
 #' For \code{mcf,formula-method}, it must be between 0.5 and 1.
 #' The default value is 0.95.
-#' @seealso \code{\link{heart}} \code{\link{plotMcf}}
+#' @seealso \code{\link{rateReg}} \code{\link{plotMcf}}
 #' @examples 
 #' library(reda)
 #'  
@@ -60,12 +60,12 @@ NULL
 #' subset = ID %in% 100:101, na.action = na.omit)
 #' 
 #' ## estimated MCF for baseline rate function from HEART model
-#' heartFit <- heart(formula = Survr(ID, time, event) ~ x1 + group, 
+#' rateRegFit <- rateReg(formula = Survr(ID, time, event) ~ x1 + group, 
 #'                   data = simuDat, subset = ID %in% 75:125,
 #'                   baselinePieces = seq(28, 168, length = 6))
-#' baselineMCF <- mcf(heartFit)
+#' baselineMCF <- mcf(rateRegFit)
 #' 
-#' mcf(heartFit, level = 0.9, control = list(length.out = 500))
+#' mcf(rateRegFit, level = 0.9, control = list(length.out = 500))
 #'  
 #' @export
 setGeneric(name = "mcf",
@@ -88,7 +88,7 @@ setGeneric(name = "mcf",
 #' not set.  The "factory-fresh" default is \code{\link[stats]{na.omit}}.
 #' Another possible value is NULL, no action.  
 #' Value \code{\link[stats]{na.exclude}} can be useful. 
-#' @return \code{\link{empirMcf-class}} or \code{\link{heartMcf-class}} object
+#' @return \code{\link{empirMcf-class}} or \code{\link{rateRegMcf-class}} object
 #' @aliases mcf,formula-method 
 #' @importFrom utils head 
 #' @importFrom methods new
@@ -226,12 +226,12 @@ setMethod(f = "mcf", signature = "formula",
 #' When \code{grid} is missing, the grid will be generated 
 #' via \code{\link{seq}} with arguments \code{from}, \code{to} 
 #' and \code{length.out}
-#' @aliases mcf,heart-method
+#' @aliases mcf,rateReg-method
 #' @importFrom methods new
 #' @importFrom stats terms na.fail na.omit na.exclude na.pass qnorm model.matrix
 #' model.frame delete.response 
 #' @export
-setMethod(f = "mcf", signature = "heart", 
+setMethod(f = "mcf", signature = "rateReg", 
           definition = function(object, newdata, groupName, groupLevels, 
                                 level = 0.95, na.action, control = list(), 
                                 ...) {
@@ -243,7 +243,7 @@ setMethod(f = "mcf", signature = "heart",
               baselinePieces <- object@baselinePieces
               controlist <- c(control,
                               list("baselinePieces" = as.numeric(baselinePieces)))
-              control <- do.call("heart_mcf_control", controlist)
+              control <- do.call("rateReg_mcf_control", controlist)
               n_xx <- control$length.out
               n_pieces <- length(baselinePieces)
               BL_segments <- c(baselinePieces[1], diff(baselinePieces))
@@ -288,7 +288,7 @@ setMethod(f = "mcf", signature = "heart",
                   X <- unique(base::subset(X, select = -`(Intercept)`))
                   if (ncol(X) != nbeta) {
                       stop("The number of input covariates does not match 
-                   with 'heart' object")
+                   with 'rateReg' object")
                   }
               }
               ndesign <- nrow(X)
@@ -328,7 +328,7 @@ setMethod(f = "mcf", signature = "heart",
                                         groupName)
               }
               ## output
-              out <- new("heartMcf", 
+              out <- new("rateRegMcf", 
                          formula = object@formula, 
                          baselinePieces = object@baselinePieces, 
                          newdata = X, MCF = outdat, level = level,
@@ -340,9 +340,9 @@ setMethod(f = "mcf", signature = "heart",
 
 
 ## internal function ===========================================================
-heart_mcf_control <- function (grid, length.out = 200, from, to, 
+rateReg_mcf_control <- function (grid, length.out = 200, from, to, 
                                baselinePieces) {
-    ## controls for function MCF with signiture heart
+    ## controls for function MCF with signiture rateReg
     if (missing(from)) {
         from <- 0
     }

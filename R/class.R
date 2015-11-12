@@ -43,7 +43,7 @@
 #' @param event the status indicator, 
 #' 0 = censored, 1 = recurrent event. 
 #' @aliases Survr
-#' @seealso \code{\link{heart}}
+#' @seealso \code{\link{rateReg}}
 #' @importFrom plyr ddply
 #' @export
 Survr <- function (ID, time, event) {
@@ -56,11 +56,11 @@ Survr <- function (ID, time, event) {
 }
 
 
-## create S4 Class called "heart" for heart object from function heart
+## create S4 Class called "rateReg" for rateReg object from function rateReg
 #' An S4 Class to Represent a Fitted HEART Model
 #' 
-#' \code{heart-class} is an S4 class to represent a HEART model fits. 
-#' \code{\link{heart}} produces objects of this class.  
+#' \code{rateReg-class} is an S4 class to represent a HEART model fits. 
+#' \code{\link{rateReg}} produces objects of this class.  
 #' See ``Slots'' for details.
 #' 
 #' @slot call function call.
@@ -74,10 +74,10 @@ Survr <- function (ID, time, event) {
 #' @slot contrasts list.
 #' @slot convergence an integer.
 #' @slot fisher a numeric matrix.
-#' @aliases heart-class
-#' @seealso \code{\link{heart}}
+#' @aliases rateReg-class
+#' @seealso \code{\link{rateReg}}
 #' @export
-setClass(Class = "heart", 
+setClass(Class = "rateReg", 
          slots = c(call = "call", 
                    formula = "formula", 
                    knots = "numeric",
@@ -95,10 +95,10 @@ setClass(Class = "heart",
 
 
 ## create S4 Class called "summaryHeart" for summaryHeart object from summary
-#' An S4 Class to Represent Summary of heart-class Object
+#' An S4 Class to Represent Summary of rateReg-class Object
 #' 
 #' summaryHeart-class is an S4 class with selective slots 
-#' of heart-class object.  See ``Slots'' for details.  
+#' of rateReg-class object.  See ``Slots'' for details.  
 #' \code{\link{summary}} produces objects of this class. 
 #'  
 #' @slot call function call.
@@ -107,7 +107,7 @@ setClass(Class = "heart",
 #' @slot theta numeric a matrix.
 #' @slot baseline a numeric matrix.
 #' @aliases summaryHeart-class
-#' @seealso \code{\link{summary,heart-method}} 
+#' @seealso \code{\link{summary,rateReg-method}} 
 #' @export
 setClass(Class = "summaryHeart", 
          slots = c(call = "call", 
@@ -148,10 +148,10 @@ setClass(Class = "empirMcf",
 #' @slot na.action a length-one character vector.
 #' @slot control list.
 #' @slot multiGroup a logical value. 
-#' @aliases heartMcf-class
-#' @seealso \code{\link{mcf,heart-method}}
+#' @aliases rateRegMcf-class
+#' @seealso \code{\link{mcf,rateReg-method}}
 #' @export
-setClass(Class = "heartMcf", 
+setClass(Class = "rateRegMcf", 
          slots = c(formula = "formula", baselinePieces = "numeric",
                    newdata = "matrix", MCF = "data.frame", level = "numeric", 
                    na.action = "character", control = "list", 

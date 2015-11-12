@@ -28,7 +28,7 @@
 #' So the plots generated are able to be further customized properly.
 #' 
 #' @param object \code{\link{empirMcf-class}} or 
-#' \code{\link{heartMcf-class}} object.
+#' \code{\link{rateRegMcf-class}} object.
 #' @param conf.int logical indicating whether to plot confidence interval.
 #' The default value is FALSE.
 #' @param ... other arguments for further usage.
@@ -52,10 +52,10 @@
 #' plotMcf(sampleMCF, lty = c(1, 3), col = c("orange", "navy"))
 #' 
 #' ## estimated MCF for baseline rate function from HEART model
-#' heartFit <- heart(formula = Survr(ID, time, event) ~ x1 + group, 
+#' rateRegFit <- rateReg(formula = Survr(ID, time, event) ~ x1 + group, 
 #'                   data = simuDat, subset = ID %in% 75:125,
 #'                   baselinePieces = seq(28, 168, length = 6))
-#' baselineMCF <- mcf(heartFit)
+#' baselineMCF <- mcf(rateRegFit)
 #' plotMcf(baselineMCF, conf.int = TRUE, col = "blueviolet") + 
 #'   ggplot2::theme_bw()
 #' @export
@@ -169,12 +169,12 @@ setMethod(f = "plotMcf", signature = "empirMcf",
 
 #' @describeIn plotMcf Estimated mean cumulative function (MCF) 
 #' for baseline rate function.
-#' @aliases plotMcf,heartMcf-method
+#' @aliases plotMcf,rateRegMcf-method
 #' @importFrom stats setNames
 #' @importFrom ggplot2 ggplot geom_line aes aes_string scale_color_manual
 #' scale_linetype_manual ylab ggtitle 
 #' @export
-setMethod(f = "plotMcf", signature = "heartMcf", 
+setMethod(f = "plotMcf", signature = "rateRegMcf", 
           definition = function(object, conf.int = FALSE, 
                                 lty, col, ...) {
 
