@@ -1,6 +1,6 @@
 # R Package reda 
 
-## To-do-list
+## To-do
 
 * ~~Understand the origin code, add some necessary comments and 
 	document every function with Roxygen2.~~
@@ -8,6 +8,8 @@
 * ~~Rewrite plot function by using ggplot2 if necessary.~~
 
 * ~~Add S4 class functions for print and summary.~~
+
+* test spline rate function by simulation.
 
 * Polish the documentation for every function in a better organization.
 
@@ -23,3 +25,15 @@
 * Add more handy functions for recurrent event analysis.
 
 * Write up manuscript for JSS.
+
+
+## Notes
+
+* 'heart' is renamed by 'rateReg' since the model is
+based on counts and rate function.
+Therefore, in 'Survr', 'r' represents 'rate'.
+
+* Later on, function fitting model based on gap times can be named as
+'gapsReg' (or 'gapReg'). Response formula function can be named as 'Survg',
+where 'g' means 'gaps' and which would have different data checking procedure
+with 'Survr'.
