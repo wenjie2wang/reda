@@ -62,7 +62,7 @@ NULL
 #' ## estimated MCF for baseline rate function from HEART model
 #' rateRegFit <- rateReg(formula = Survr(ID, time, event) ~ x1 + group, 
 #'                   data = simuDat, subset = ID %in% 75:125,
-#'                   baselinePieces = seq(28, 168, length = 6))
+#'                   bKnots = seq(28, 168, length = 6))
 #' baselineMCF <- mcf(rateRegFit)
 #' 
 #' mcf(rateRegFit, level = 0.9, control = list(length.out = 500))
@@ -240,22 +240,34 @@ setMethod(f = "mcf", signature = "rateReg",
               fcovnames <- as.character(object@call[[2]][[3]])
               covnames <- fcovnames[fcovnames != "+"]
               nbeta <- length(beta)
-              baselinePieces <- object@baselinePieces
-              controlist <- c(control,
-                              list("baselinePieces" = as.numeric(baselinePieces)))
+              knots <- object@knots
+              degree <- object@degree
+              boundaryKnots <- object@boundaryKnots
+              bKnots <- c(knots, boundaryKnots[2])
+              controlist <- c(control, list("bKnots" = bKnots)
               control <- do.call("rateReg_mcf_control", controlist)
               n_xx <- control$length.out
-              n_pieces <- length(baselinePieces)
-              BL_segments <- c(baselinePieces[1], diff(baselinePieces))
-              xx <- control$grid
-              indx <- sapply(xx, whereT, baselinePieces = baselinePieces)
-              LinCom_M <- NULL
-              for (ind_indx in indx) {
-                  LinCom_M <- rbind(LinCom_M, c(BL_segments[1:ind_indx], 
-                                                rep(0, n_pieces - ind_indx)))
+
+              ## piecewise constant
+              if (degree == 0L) {
+                  n_pieces <- length(bKnots)
+                  BL_segments <- c(bKnots[1], diff(bKnots))
+                  xx <- control$grid
+                  indx <- sapply(xx, whereT, bKnots = bKnots)
+                  LinCom_M <- matrix(NA, ncol = n_pieces, nrow = n_xx)
+                  i <- 1
+                  for (ind_indx in indx) {
+                      LinCom_M[i] <- c(BL_segments[1:ind_indx], 
+                                       rep(0, n_pieces - ind_indx))
+                      i <- i + 1
+                  }
+                  CMF_B4_indx <- c(boundaryKnots[1], bKnots)[indx]
+                  LinCom_M[(indx - 1) * n_xx + seq(n_xx)] <- xx - CMF_B4_indx
+              } else { ## spline rate function of degree at least one
+                  
               }
-              CMF_B4_indx <- c(0, baselinePieces)[indx]
-              LinCom_M[(indx - 1) * n_xx + 1:n_xx] <- xx - CMF_B4_indx
+              
+              
               n_par <- nrow(object@fisher)
               ## covariance matrix of beta and alpha
               Cov_ind <- c(seq(nbeta), (n_par - n_pieces + 1):n_par)
@@ -330,7 +342,7 @@ setMethod(f = "mcf", signature = "rateReg",
               ## output
               out <- new("rateRegMcf", 
                          formula = object@formula, 
-                         baselinePieces = object@baselinePieces, 
+                         bKnots = object@bKnots, 
                          newdata = X, MCF = outdat, level = level,
                          na.action = na.action, control = control, 
                          multiGroup = multiGroup)
@@ -341,13 +353,13 @@ setMethod(f = "mcf", signature = "rateReg",
 
 ## internal function ===========================================================
 rateReg_mcf_control <- function (grid, length.out = 200, from, to, 
-                               baselinePieces) {
+                                 bKnots) {
     ## controls for function MCF with signiture rateReg
     if (missing(from)) {
         from <- 0
     }
     if (missing(to)) {
-        to <- max(baselinePieces)
+        to <- max(bKnots)
     }
     if (! missing(grid)) {
         if (! is.numeric(grid) || is.unsorted(grid)) {
@@ -359,7 +371,7 @@ rateReg_mcf_control <- function (grid, length.out = 200, from, to,
     } else {
         grid <- seq(from = from, to = to, length.out = length.out)
     }
-    if (min(grid) < 0 || max(grid) > max(baselinePieces)) {
+    if (min(grid) < 0 || max(grid) > max(bKnots)) {
         stop("'grid' must be within the coverage of baseline pieces.")
     }
     ## return
