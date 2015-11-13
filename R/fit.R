@@ -1,6 +1,6 @@
 ################################################################################
 ##
-##   R package reda by Haoda Fu, Jun Yan, and Wenjie Wang
+##   R package reda by Wenjie Wang, Haoda Fu, and Jun Yan
 ##   Copyright (C) 2015
 ##
 ##   This file is part of the R package reda.
@@ -110,19 +110,21 @@ NULL
 #' @examples
 #' library(reda)
 #' ## data(simuDat)
-#' rateRegFit <- rateReg(formula = Survr(ID, time, event) ~ x1 + group, 
-#'                   data = simuDat, subset = ID %in% 75:125,
-#'                   baselinePieces = seq(28, 168, length = 6))
+#' regFit <- rateReg(formula = Survr(ID, time, event) ~ x1 + group, 
+#'                   data = simuDat, subset = ID %in% 1:100,
+#'                   knots = seq(28, 140, length = 5))
 #' rateReg(Survr(ID, time, event) ~ x1 + group, 
-#'       data = simuDat, subset = ID %in% 75:125)
-#' ## str(rateRegFit)
-#' show(rateRegFit) # or simply call 'rateRegFit'
-#' summary(rateRegFit)
-#' coef(rateRegFit)
-#' confint(rateRegFit)
-#' baseline(rateRegFit)
-#' @seealso \code{\link{summary,rateReg-method}} \code{\link{coef,rateReg-method}}
-#' \code{\link{confint,rateReg-method}} \code{\link{baseline,rateReg-method}}
+#'         data = simuDat, subset = ID %in% 75:125)
+#' ## str(regFit)
+#' show(regFit) # or simply call 'rateRegFit'
+#' summary(regFit)
+#' coef(regFit)
+#' confint(regFit)
+#' baseline(regFit)
+#' @seealso \code{\link{summary,rateReg-method}}
+#' \code{\link{coef,rateReg-method}}
+#' \code{\link{confint,rateReg-method}}
+#' \code{\link{baseline,rateReg-method}}
 #' \code{\link{mcf,rateReg-method}}
 #' @importFrom methods new
 #' @importFrom stats model.matrix nlm pnorm na.fail na.omit na.exclude na.pass
@@ -130,10 +132,11 @@ NULL
 #' @importFrom splines bs
 #' @export
 rateReg <- function (formula, df = NULL, knots = NULL, degree = 0L,
-                   data, subset, na.action, 
-                   start = list(), control = list(), contrasts = NULL, ...) {
+                     data, subset, na.action, start = list(), control = list(),
+                     contrasts = NULL, ...) {
     ## record the function call to return
     Call <- match.call()
+
     ## arguments check
     if (missing(formula)) {
         stop("Argument 'formula' is required.")
@@ -144,6 +147,7 @@ rateReg <- function (formula, df = NULL, knots = NULL, degree = 0L,
     if (! with(data, inherits(eval(Call[[2]][[2]]), "Survr"))) {
         stop("Response in formula must be a survival recurrent object.")
     }
+
     ## Prepare data: ID, time, event ~ X(s)
     mcall <- match.call(expand.dots = FALSE)
     mmcall <- match(c("formula", "data", "subset", "na.action"),
@@ -155,18 +159,19 @@ rateReg <- function (formula, df = NULL, knots = NULL, degree = 0L,
     mf <- eval(mcall, parent.frame())
     mt <- attr(mf, "terms")
     mm <- stats::model.matrix(formula, data = mf, contrasts.arg = contrasts)
-    ## get data.frame if na.action = na.pass
+    ## get data.frame if na.action = na.pass for further data checking 
     mcall$na.action <- na.pass
     mf_na <- eval(mcall, parent.frame())
     mm_na <- stats::model.matrix(formula, data = mf_na,
                                  contrasts.arg = contrasts)
     ## number of covariates excluding intercept
-    nbeta <- ncol(mm) - 1 
+    nBeta <- ncol(mm) - 1 
     ## covariates' names
     covar_names <- colnames(mm)[-1]
     ## data 
     dat <- as.data.frame(cbind(mf[, 1][, 1:3], mm[, -1]))
     colnames(dat) <- c("ID", "time", "event", covar_names)
+
     ## check the impact caused by missing value
     ## if there is missing value removed
     if (nrow(mm_na) > nrow(dat)) {
@@ -185,12 +190,14 @@ rateReg <- function (formula, df = NULL, knots = NULL, degree = 0L,
     control <- do.call("rateReg_control", control)
     boundaryKnots <- control$boundaryKnots
     indIntercept <- control$intercept
+
     ## check and reformat 'degree' at the same time
     if ((degree <- as.integer(degree)) < 0) {
         stop("'degree' must be a nonnegative integer.")
     }
-    ## if piece-wise constant, generate knots if knots is unspecified
-    if (degree == 0L) {
+
+    ## generate knots if knots is unspecified
+    if (degree == 0L) { ## if piece-wise constant
         templist <- pieceConst(x = dat$time,
                                df = df, knots = knots)
         knots <- templist$knots
@@ -201,25 +208,29 @@ rateReg <- function (formula, df = NULL, knots = NULL, degree = 0L,
                     intercept = indIntercept, Boundary.knots = boundaryKnots)
         ## update df, knots
         knots <- as.numeric(attr(bsMat, "knots"))
-        df <- degree + length(knots) + as.numeric(indIntercept)
+        ## set bKnots as c(knots, last_boundary_knots)
+        bKnots <- c(knots, boundaryKnots[2])
+        df <- degree + length(knots) + as.integer(indIntercept)
         ## generate bsMat for estimated baseline rate function and mcf
         xTime <- seq(from = min(dat$time), to = max(dat$time),
                      length.out = max(1e3, length(unique(dat$time))))
         xTime <- sort(unique(c(xTime, dat$time[all.equal(dat$event, 0)])))
         bsMat_est <- bs(xTime, knots = knots, degree = degree,
-                        intercept = indIntercept, Boundary.knots = boundaryKnots)
+                        intercept = indIntercept,
+                        Boundary.knots = boundaryKnots)
     }
-    ## bKnots = c(knots, last_boundary_knots)
-    bKnots <- c(knots, tail(boundaryKnots, 1))
-    ## friendly version of baseline pieces to print out
-    print_blpieces <- int_baseline(bKnots = bKnots)
-    attr(bKnots, "name") <- print_blpieces
+
+    ## set bKnots as c(knots, last_boundary_knots)
+    bKnots <- c(knots, boundaryKnots[2])
+    alphaName <- nameBases(bKnots = bKnots, degree = degree, df = df, 
+                           leftBound = boundaryKnots[1])
+                                            
     ## start' values for 'nlm'
-    startlist <- c(start, list(nbeta = nbeta, nalpha = df))
+    startlist <- c(start, list(nBeta = nBeta, nAlpha = df))
     start <- do.call("rateReg_start", startlist)
     ini <- do.call("c", start)
     length_par <- length(ini)
-    # browser()
+
     ## log likelihood
     fit <- stats::nlm(logL_rateReg, ini, data = dat, 
                       bKnots = bKnots, degree = degree,
@@ -227,27 +238,27 @@ rateReg <- function (formula, df = NULL, knots = NULL, degree = 0L,
                       hessian = TRUE,
                       gradtol = control$gradtol, stepmax = control$stepmax,
                       steptol = control$steptol, iterlim = control$iterlim)
-    
-    est_beta <- matrix(NA, nrow = nbeta, ncol = 3)
+
+    ## estimates for beta
+    est_beta <- matrix(NA, nrow = nBeta, ncol = 3)
     colnames(est_beta) <- c("coef", "se", "Pr(>|z|)")
     rownames(est_beta) <- covar_names
-    
     se_vec <- sqrt(diag(solve(fit$hessian)))
-    
-    est_beta[, 1] <- fit$estimate[1:nbeta]
-    est_beta[, 2] <- se_vec[1:nbeta]
+    est_beta[, 1] <- fit$estimate[1:nBeta]
+    est_beta[, 2] <- se_vec[1:nBeta]
     est_beta[, 3] <- 2 * stats::pnorm(-abs(est_beta[, 1]/est_beta[, 2]))
-    
+
+    ## estimates for theta
     est_theta <- matrix(NA, nrow = 1, ncol = 2)
     colnames(est_theta) <- c("theta", "se")
-    est_theta[1, ] <- c(fit$estimate[nbeta + 1], se_vec[nbeta + 1])
-    
+    est_theta[1, ] <- c(fit$estimate[nBeta + 1], se_vec[nBeta + 1])
+
+    ## estimates for alpha
     est_alpha <- matrix(NA, nrow = df, ncol = 2)
     colnames(est_alpha) <- c("alpha", "se")
-#    rownames(est_alpha) <- print_blpieces 
-    
-    est_alpha[, 1] <- fit$estimate[(nbeta + 2):length_par]
-    est_alpha[, 2] <- se_vec[(nbeta + 2):length_par]
+    rownames(est_alpha) <- alphaName 
+    est_alpha[, 1] <- fit$estimate[(nBeta + 2):length_par]
+    est_alpha[, 2] <- se_vec[(nBeta + 2):length_par]
 
     ## output: na.action
     if (is.null(attr(mf, "na.action"))) {
@@ -255,6 +266,7 @@ rateReg <- function (formula, df = NULL, knots = NULL, degree = 0L,
     } else {
         na.action <- paste("na", class(attr(mf, "na.action")), sep = ".")
     }
+    
     ## output: contrasts
     if (is.null(contrasts)) {
         contrasts <- list(contrasts = NA)
@@ -276,7 +288,8 @@ rateReg <- function (formula, df = NULL, knots = NULL, degree = 0L,
                             na.action = na.action,
                             xlevels = .getXlevels(mt, mf),
                             contrasts = contrasts,
-                            convergence = fit$code, 
+                            convergCode = fit$code,
+                            logL = - fit$minimum,
                             fisher = fit$hessian)
     ## return
     results
@@ -285,7 +298,7 @@ rateReg <- function (formula, df = NULL, knots = NULL, degree = 0L,
 
 ## internal functions ==========================================================
 whereT <- function (tt, bKnots) {
-    ## designed to be used inside function 'apply', 'tt' is length one vector
+    ## designed to be used inside function 'sapply', 'tt' is length one vector
     ## return the baseline segment number 'tt' belongs to
     ## or the row number of bsMat for censoring time
     min(which(tt <= bKnots))
@@ -296,9 +309,9 @@ pieceConst <- function (x, df = NULL, knots = NULL) {
     ## ind == 1: knots is not NULL; df <- length(knots) + 1
     ## ind == 2: df is not NULL, while knots is NULL; number of piece <- df
     ## ind == 3: both df and knots are NULL; one-piece constant, df <- 1
-    df <- switch(ind, length(knots) + 1, df, 1)
+    df <- switch(ind, length(knots) + 1L, as.integer(df), 1L)
     if (ind > 1) {
-        tknots <- df + 1
+        tknots <- df + 1L
         quans <- seq.int(from = 0, to = 1,
                          length.out = tknots)[-c(1L, tknots)]
         knots <- as.numeric(stats::quantile(x, quans))
@@ -311,7 +324,7 @@ pieceConst <- function (x, df = NULL, knots = NULL) {
 rho_0 <- function (par_BaselinePW, Tvec, bKnots, degree, bsMat) {
     ## if piecewise constant, degree == 0
     if (degree == 0) {
-        indx <- apply(as.array(Tvec), 1, whereT, bKnots)
+        indx <- sapply(Tvec, whereT, bKnots)
         return(par_BaselinePW[indx])  # function ends
     } 
     ## else spline with degree >= 1
@@ -324,7 +337,7 @@ mu0 <- function (par_BaselinePW, Tvec, bKnots, degree, bsMat_est, xTime) {
     ## if piecewise constant, degree == 0
     if (degree == 0) {
         ## segement number of each subject
-        indx <- apply(as.array(Tvec), 1, whereT, bKnots)
+        indx <- sapply(Tvec, whereT, bKnots)
         BL_segments <- c(bKnots[1], diff(bKnots))
         ## The MCF at each time point  
         CumMean_Pieces <- diffinv(BL_segments * par_BaselinePW)[-1]  
@@ -335,8 +348,8 @@ mu0 <- function (par_BaselinePW, Tvec, bKnots, degree, bsMat_est, xTime) {
     ## else spline with degree > 1
     stepTime <- xTime[2] - xTime[1]
     baseRate <- bsMat_est %*% par_BaselinePW
-    indx <- apply(array(Tvec), 1, whereT, bKnots = xTime)
-    mu_tau <- apply(array(indx), 1, function (ind) {
+    indx <- sapply(Tvec, whereT, bKnots = xTime)
+    mu_tau <- sapply(indx, function (ind) {
         sum(baseRate[seq(ind)]) * stepTime
     })
     ## return
@@ -367,7 +380,7 @@ dmu0_dalpha <- function (tt, bKnots, degree, bsMat_est, xTime) {
     ## else it is spline with degree > 1
     stepTime <- xTime[2] - xTime[1]
     indx <- min(which(tt <= xTime))
-    derVec <- apply(array(indx), 1, function (ind) {
+    derVec <- sapply(indx, function (ind) {
         colSums(bsMat_est[seq(ind), ]) * stepTime
     })
     ## return
@@ -388,13 +401,13 @@ dl_dalpha_part1 <- function (par_alpha, indx, degree, bsMat) {
 
 ## compute negative log likelihood
 logL_rateReg <- function (par, data, bKnots, degree, bsMat, bsMat_est, xTime) {
-    nbeta <- ncol(data) - 3
+    nBeta <- ncol(data) - 3
     ## par = \THETA in the paper
-    par_beta <- par[1 : nbeta]
-    par_theta <- par[nbeta + 1]
-    par_alpha <- par[(nbeta + 2) : length(par)]
+    par_beta <- par[1 : nBeta]
+    par_theta <- par[nBeta + 1]
+    par_alpha <- par[(nBeta + 2) : length(par)]
     m <- length(unique(data$ID))
-    expXBeta <- exp(as.matrix(data[, 4 : (3 + nbeta)]) %*% as.matrix(par_beta))
+    expXBeta <- exp(as.matrix(data[, 4 : (3 + nBeta)]) %*% as.matrix(par_beta))
     ## index for event and censoring
     ind_event <- data$event == 1
     ind_cens <- data$event == 0
@@ -432,26 +445,22 @@ logL_rateReg <- function (par, data, bKnots, degree, bsMat, bsMat_est, xTime) {
     penal <- ifelse(par_theta < 0 | min(par_alpha) < 0, 1e+50, 0)
     negLH <- -logLH + penal
     ## Calculate the gradient
-    xMat_i <- as.matrix(data[ind_cens, 4:(3 + nbeta)])
+    xMat_i <- as.matrix(data[ind_cens, 4:(3 + nBeta)])
     dl_dbeta_i <- sweep(x = xMat_i, MARGIN = 1, FUN = "*", 
                         STATS = (n_ij - mui)/(par_theta + mui) * par_theta)
     dl_dbeta <- colSums(dl_dbeta_i)
     dl_dtheta <- m + m * log(par_theta) + 
         sum(1/(par_theta + sequence(n_ij) - 1)) - 
         sum((n_ij + par_theta)/(par_theta + mui)) - sum(log(mui_theta))
-    indx <- apply(as.array(data$time[ind_event]), 1, 
-                  whereT, bKnots)
+    indx <- sapply(data$time[ind_event], whereT, bKnots)
     if (length(unique(indx)) < length(bKnots)) {
         stop("Some segements have zero events!")
     }
-    # indx_taui <- apply(as.array(data$time[ind_cens]), 1, 
-    #                    whereT, bKnots)
     ## reform dimension by 'array' for one-piece baseline 
     dim_n1 <- length(par_alpha)
     dim_n2 <- length(data$time[ind_cens])
-    tempPart2 <- array(apply(array(data$time[ind_cens]), 1, 
-                             dmu0_dalpha, bKnots, degree,
-                             bsMat_est, xTime),
+    tempPart2 <- array(sapply(data$time[ind_cens], dmu0_dalpha,
+                              bKnots, degree, bsMat_est, xTime),
                        c(dim_n1, dim_n2))
     dl_dalpha_part2 <- sweep(t(tempPart2), MARGIN = 1, FUN = "*", 
                              STATS = (n_ij + par_theta) / (par_theta + mui) *
@@ -487,7 +496,7 @@ rateReg_control <- function (gradtol = 1e-6, stepmax = 1e5,
         boundaryKnots <- sort(boundaryKnots)
         ind1 <- boundaryKnots[1] > min(time)
         ind2 <- boundaryKnots[2] < max(time)
-        if (ind1 | ind2) {
+        if (ind1 || ind2) {
             stop("boundary knots should not lie inside the range of visit time")
         }
     }
@@ -497,13 +506,13 @@ rateReg_control <- function (gradtol = 1e-6, stepmax = 1e5,
          boundaryKnots = boundaryKnots, intercept = intercept)
 }
 
-rateReg_start <- function (beta, theta = 0.5, alpha, nbeta, nalpha) {
+rateReg_start <- function (beta, theta = 0.5, alpha, nBeta, nAlpha) {
     ## beta = starting value(s) for coefficients of covariates
     ## theta = starting value for random effects
     ## alpha = starting values for piece-wise baseline rate functions
     if (missing(beta)) {
-        beta <- rep(1, nbeta)
-    } else if (length(beta) != nbeta) {
+        beta <- rep(1, nBeta)
+    } else if (length(beta) != nBeta) {
         stop(paste("number of starting values for coefficients of covariates",
                    "does not match with the specified formula"))
     }
@@ -511,23 +520,27 @@ rateReg_start <- function (beta, theta = 0.5, alpha, nbeta, nalpha) {
         stop("value of parameter for random effects must be > 0")
     }
     if (missing(alpha)) {
-        alpha <- rep(0.15, nalpha)
+        alpha <- rep(0.15, nAlpha)
     }
     ## return
     list(beta = beta, theta = theta, alpha = alpha)
 }
 
 ## generate intervals from specified baseline pieces
-int_baseline <- function (bKnots) {
-    nalpha <- length(bKnots)
-    intervals <- rep(NA, nalpha)
-    intervals[1] <- paste0("[0, ", bKnots[1], "]", sep = "")
-    if (nalpha > 1) {
-        for(i in 2:nalpha){
-            intervals[i] <- paste0("(", bKnots[i - 1], ", ", 
-                                   bKnots[i], "]", sep = "")
+nameBases <- function (bKnots, degree, df, leftBound) {
+    nAlpha <- length(bKnots)
+    intervals <- rep(NA, nAlpha)
+    if (degree == 0L) {
+        intervals[1] <- paste0("(", leftBound, ", ", bKnots[1], "]", sep = "")
+        if (nAlpha > 1) {
+            for(i in 2:nAlpha){
+                intervals[i] <- paste0("(", bKnots[i - 1], ", ", 
+                                       bKnots[i], "]", sep = "")
+            }
         }
+        return(intervals)
     }
+    ## else degree > 0 
     ## return
-    intervals
+    paste("B-spline", seq(df))
 }

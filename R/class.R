@@ -1,6 +1,6 @@
 ################################################################################
 ##
-##   R package reda by Haoda Fu, Jun Yan, and Wenjie Wang
+##   R package reda by Wenjie Wang, Haoda Fu, and Jun Yan
 ##   Copyright (C) 2015
 ##
 ##   This file is part of the R package reda.
@@ -21,59 +21,62 @@
 ################################################################################
 
 
-## create S3 Class called "survr" as formula response for recurrent event data
 #' An S3 Class to Represent Formula Response for Recurrent Event Data
 #' 
 #' \code{Survr} is an S3 class to represent 
-#' formula response for recurrent event data.
+#' formula response for recurrent event data
+#' modeled by methods based on counts and rate function.
+#' The last letter 'r' in 'Survr' represents 'rate'.
 #'
 #' This is a similar function to \code{\link[survrec]{Survr}} in package
 #' \code{survrec}, but with a better checking procedure for recurrent event
 #' data. The checking rules include that
 #' \itemize{
-#'     \item identificator of each subject cannot be missing.
-#'     \item event indicator must be coded as 0 (censoring) or 1 (event).
-#'     \item event time and censoring time cannot be missing.
-#'     \item each subject must have one and only one censoring time.
-#'     \item event time cannot not be later than censoring time.
+#'     \item Identificator of each subject cannot be missing.
+#'     \item Event indicator must be coded as 0 (censoring) or 1 (event).
+#'     \item Event time and censoring time cannot be missing.
+#'     \item Each subject must have one and only one censoring time.
+#'     \item Event time cannot not be later than censoring time.
 #' }
 #'  
 #' @param ID identificator of each subject. 
 #' @param time time of reccurence. For each subject the last time are censored.
 #' @param event the status indicator, 
-#' 0 = censored, 1 = recurrent event. 
+#' 0 = censored, 1 = event. 
 #' @aliases Survr
 #' @seealso \code{\link{rateReg}}
 #' @importFrom plyr ddply
 #' @export
 Survr <- function (ID, time, event) {
-    inpdat <- data.frame(ID, time, event)
-    dat <- check_Survr(inpdat)
-    outdat <- with(dat, as.matrix(cbind(ID, time, event)))
-    attr(outdat, "ID") <- attr(dat, "ID")
-    oldClass(outdat) <- "Survr"
-    invisible(outdat)
+    inpDat <- data.frame(ID, time, event)
+    dat <- check_Survr(inpDat)
+    outDat <- with(dat, as.matrix(cbind(ID, time, event)))
+    attr(outDat, "ID") <- attr(dat, "ID")
+    oldClass(outDat) <- "Survr"
+    invisible(outDat)
 }
 
 
-## create S4 Class called "rateReg" for rateReg object from function rateReg
-#' An S4 Class to Represent a Fitted HEART Model
+#' An S4 Class to Represent a Fitted Model
 #' 
-#' \code{rateReg-class} is an S4 class to represent a HEART model fits. 
+#' \code{rateReg-class} is an S4 class to represent a model fits. 
 #' \code{\link{rateReg}} produces objects of this class.  
 #' See ``Slots'' for details.
 #' 
-#' @slot call function call.
-#' @slot formula formula.
-#' @slot baselinePieces a numeric vector.
-#' @slot estimates list.
-#' @slot control list.
-#' @slot start list.
-#' @slot na.action a length-one character vector.
-#' @slot xlevels list.
-#' @slot contrasts list.
-#' @slot convergence an integer.
-#' @slot fisher a numeric matrix.
+#' @slot call Function call.
+#' @slot formula Formula.
+#' @slot knots A numeric vector.
+#' @slot boundaryKnots A numeric vector.
+#' @slot degree An integer. 
+#' @slot estimates List.
+#' @slot control List.
+#' @slot start List.
+#' @slot na.action A length-one character vector.
+#' @slot xlevels List.
+#' @slot contrasts List.
+#' @slot convergCode An integer.
+#' @slot logL A numeric value.
+#' @slot fisher A numeric matrix.
 #' @aliases rateReg-class
 #' @seealso \code{\link{rateReg}}
 #' @export
@@ -82,15 +85,16 @@ setClass(Class = "rateReg",
                    formula = "formula", 
                    knots = "numeric",
                    boundaryKnots = "numeric",
-                   degree = "numeric",
-                   df = "numeric",
+                   degree = "integer",
+                   df = "integer",
                    estimates = "list",
                    control = "list",
                    start = "list",
                    na.action = "character",
                    xlevels = "list",
                    contrasts = "list",
-                   convergence = "integer", 
+                   convergCode = "integer",
+                   logL = "numeric",
                    fisher = "matrix"))
 
 
@@ -204,35 +208,35 @@ check_Survr <- function(dat) {
         ## return
         cbind(subdat, mis_time1, mis_time0, censor1, censor2)
     }
-    outdat <- plyr::ddply(dat, "ID", check_ddply)
+    outDat <- plyr::ddply(dat, "ID", check_ddply)
     ## stop if missing value of 'time' for event == 1
-    ID_mis_time1 <- with(subset(outdat, mis_time1 == 1), unique(IDnam))
+    ID_mis_time1 <- with(subset(outDat, mis_time1 == 1), unique(IDnam))
     if (length(ID_mis_time1) > 0) {
         stop(paste("There is missing value on event time for subject:", 
                    paste0(ID_mis_time1, collapse = ", ")))
     }
     ## stop if missing value of 'time' for event == 0
-    ID_mis_time0 <- with(subset(outdat, mis_time0 == 1), unique(IDnam))
+    ID_mis_time0 <- with(subset(outDat, mis_time0 == 1), unique(IDnam))
     if (length(ID_mis_time0) > 0) {
         stop(paste("Censoring time is missing for subject:", 
                    paste0(ID_mis_time0, collapse = ", ")))
     }
     ## stop if no censoring time or more than one censoring time
-    ID_censor1 <- with(subset(outdat, censor1 == 1), unique(IDnam))
+    ID_censor1 <- with(subset(outDat, censor1 == 1), unique(IDnam))
     if (length(ID_censor1) > 0) {
         message("Every subject must have one (and only one) censored time.")
         stop(paste("Check subject: ",
             paste0(ID_censor1, collapse = ", ")))
     }
     ## stop if event time after censoring time
-    ID_censor2 <- with(subset(outdat, censor2 == 1), unique(IDnam))
+    ID_censor2 <- with(subset(outDat, censor2 == 1), unique(IDnam))
     if (length(ID_censor2) > 0) {
         message("Event time should be earlier than censoring time.")
         stop(paste("Check subject:",
                    paste0(ID_censor2, collapse = ", ")))
     }
     ## return
-    out <- outdat[, c("ID", "time", "event")]
-    attr(out, "ID") <- outdat$IDnam
+    out <- outDat[, c("ID", "time", "event")]
+    attr(out, "ID") <- outDat$IDnam
     invisible(out)
 }

@@ -1,6 +1,6 @@
 ################################################################################
 ##
-##   R package reda by Haoda Fu, Jun Yan, and Wenjie Wang
+##   R package reda by Wenjie Wang, Haoda Fu, and Jun Yan
 ##   Copyright (C) 2015
 ##
 ##   This file is part of the R package reda.
@@ -112,6 +112,7 @@ setMethod(f = "mcf", signature = "formula",
               mcall <- Call[c(1, mfind)]
               ## Call to return
               Call <- mcall
+              
               ## drop unused levels in factors 
               mcall$drop.unused.levels <- TRUE
               ## Prepare data: ID, time, event ~ X
@@ -137,10 +138,10 @@ setMethod(f = "mcf", signature = "formula",
                   stop("Confidence level specified must be between 0.5 and 1.")
               }
               ## number of covariates excluding intercept
-              nbeta <- ncol(mm) - 1 
-              nsample <- nrow(mm)
-              if (nbeta == 0) { 
-                  X <- covar_names <-NULL
+              nBeta <- ncol(mm) - 1L
+              nSample <- nrow(mm)
+              if (nBeta == 0L) { 
+                  X <- covar_names <- NULL
               } else {
                   X <- mm[, 2]
                   ## covariates' names
@@ -148,79 +149,59 @@ setMethod(f = "mcf", signature = "formula",
               }
               ## data 
               dat <- as.data.frame(cbind(mm[, 1], X))
-              colnames(dat) <- c("ID", "time", "event", covar_names)
+              colnames(dat) <- c("ID", "time", "event", covar_names)     
               
-              ## compute sample MCF 
-              ## function part
-              sMCF <- function(inpdat) {
-                  outdat <- plyr::ddply(inpdat, "time", function(a){
-                      a[order(a$event, decreasing = TRUE),
-                        c("ID", "time", "event")]
-                  })
-                  nsample <- nrow(outdat)
-                  num_pat <- length(unique(outdat$ID))
-                  num_at_risk <- apply(array(seq(nsample)), 1, 
-                                       function(a) {
-                                           with(outdat[seq(a), ], 
-                                                num_pat - sum(event == 0))
-                                       })
-                  increment <- ifelse(outdat$event == 1, 1 / num_at_risk, 0)
-                  smcf <- cumsum(increment)
-                  inc2 <- increment ^ 2
-                  inc12 <- (1 - increment) ^ 2
-                  incre <- inc2 * (inc12 + (num_at_risk - 1) * inc2)
-                  incre_var <- ifelse(outdat$event == 0, 0, incre)
-                  var_smcf <- cumsum(incre_var)
-                  wtonexp <- qnorm(level) * sqrt(var_smcf) / smcf
-                  upper <- smcf * exp(wtonexp)
-                  lower <- smcf * exp(-wtonexp)
-                                        # return
-                  data.frame(outdat, MCF = smcf, var = var_smcf, lower, upper)
-              }
-              
-              if (nbeta == 0) {
-                  outdat <- sMCF(dat)
+              if (nBeta == 0L) { ## if no covariates specified
+                  outDat <- sMcf(dat, level = level)
                   out <- new("empirMcf", formula = object, 
-                             MCF = outdat, multiGroup = FALSE)
-                  return(out)
-              } else {
-                  ## argument check
-                  if (nbeta != 1 && ! is.factor(X)) {
-                      stop("The covariate in object must be a factor or 1.")
-                  } 
-                  ## number of levels
-                  num_levels <- length(levels(X))
-                  if (num_levels == 1) {
-                      warning("The factor covariate has only one level.")
-                  }
-                  outdat <- NULL
-                  for (i in seq(num_levels)) {
-                      subdat <- base::subset(dat, subset = X %in% levels(X)[i])
-                      resdat <- data.frame(sMCF(subdat), levels(X)[i])
-                      ## subdata.frame to return
-                      outdat <- rbind(outdat, resdat)
-                  }
-                  colnames(outdat)[ncol(outdat)] <- covar_names
-                  out <- methods::new("empirMcf", call = Call, formula = object, 
-                                      MCF = outdat, multiGroup = TRUE)
+                             MCF = outDat, multiGroup = FALSE)
                   return(out)
               }
+              ## else one covariate specified
+              ## argument check
+              if (nBeta != 1L && ! is.factor(X)) {
+                  stop("The covariate in object must be a factor or '1'.")
+              } 
+              ## number of levels
+              num_levels <- length(levels(X))
+              if (num_levels == 1) {
+                  warning("The factor covariate has only one level.")
+              }
+              # browser()
+              outDat <- data.frame(matrix(NA, nrow = nSample, ncol = 8))
+              for (i in seq(num_levels)) {
+                  subdat <- base::subset(dat, subset = X %in% levels(X)[i])
+                  rowInd <- if(i == 1L) {
+                      seq(nrow(subdat))
+                  } else {
+                      seq(from = tail(rowInd, 1) + 1, by = 1,
+                          length.out = nrow(subdat))                            
+                  }
+                  outDat[rowInd, ] <- data.frame(sMcf(subdat, level = level),
+                                                 levels(X)[i])
+              }
+              colnames(outDat) <- c(colnames(dat)[1:3], "MCF",
+                                    "var", "lower", "upper", covar_names)
+              out <- methods::new("empirMcf", call = Call, formula = object, 
+                                  MCF = outDat, multiGroup = TRUE)
+              ## return
+              out
           })
 
 
-#' @describeIn mcf Estimated Mean Cumulative Function (MCF) from HEART Model
+#' @describeIn mcf Estimated Mean Cumulative Function (MCF) from Model Fits
 #' 
-#' @param newdata an optional data.frame. 
-#' @param groupName an optional length-one charactor vector. 
-#' @param groupLevels an optional charactor vector.
-#' @param control an optional list to specify the time grid 
+#' @param newdata An optional data.frame. 
+#' @param groupName An optional length-one charactor vector. 
+#' @param groupLevels An optional charactor vector.
+#' @param control An optional list to specify the time grid 
 #' where the MCF are estimated.
 #' The possible elements of the control list include 
 #' \code{grid}, \code{length.out}, \code{from} and \code{to}.
 #' The time grid can be directly specified via element \code{grid}.
 #' \code{length.out} represents the length of grid points.
 #' The dafault value is 200.
-#' \code{from} means the starting point of grid. It takes 0 as default.
+#' \code{from} mean the starting point of grid. It takes 0 as default.
 #' \code{to} means the endpoint of grid. 
 #' It takes the endpoint of baseline pieces as default.
 #' When \code{grid} is missing, the grid will be generated 
@@ -239,7 +220,7 @@ setMethod(f = "mcf", signature = "rateReg",
               alpha <- object@estimates$alpha[, 1]
               fcovnames <- as.character(object@call[[2]][[3]])
               covnames <- fcovnames[fcovnames != "+"]
-              nbeta <- length(beta)
+              nBeta <- length(beta)
               knots <- object@knots
               degree <- object@degree
               boundaryKnots <- object@boundaryKnots
@@ -248,8 +229,8 @@ setMethod(f = "mcf", signature = "rateReg",
               control <- do.call("rateReg_mcf_control", controlist)
               n_xx <- control$length.out
 
-              ## piecewise constant
-              if (degree == 0L) {
+              ## compute mcf
+              if (degree == 0L) { ## if piecewise constant
                   n_pieces <- length(bKnots)
                   BL_segments <- c(bKnots[1], diff(bKnots))
                   xx <- control$grid
@@ -270,7 +251,7 @@ setMethod(f = "mcf", signature = "rateReg",
               
               n_par <- nrow(object@fisher)
               ## covariance matrix of beta and alpha
-              Cov_ind <- c(seq(nbeta), (n_par - n_pieces + 1):n_par)
+              Cov_ind <- c(seq(nBeta), (n_par - n_pieces + 1):n_par)
               Cov_par <- solve(object@fisher)[Cov_ind, Cov_ind]
 
               ## nonsense, just to suppress Note from R CMD check --as-cran
@@ -283,7 +264,7 @@ setMethod(f = "mcf", signature = "rateReg",
                   na.action <- options("na.action")[[1]]
               }
               if (missing(newdata)) {
-                  X <- matrix(rep(0, nbeta), nrow = 1)
+                  X <- matrix(rep(0, nBeta), nrow = 1)
                   colnames(X) <- covnames
                   rownames(X) <- "1"
               } else {
@@ -298,7 +279,7 @@ setMethod(f = "mcf", signature = "rateReg",
                   X <- model.matrix(Terms, mf, contrasts.arg = object@contrasts)
                   ## remove intercept and deplicated rows
                   X <- unique(base::subset(X, select = -`(Intercept)`))
-                  if (ncol(X) != nbeta) {
+                  if (ncol(X) != nBeta) {
                       stop("The number of input covariates does not match 
                    with 'rateReg' object")
                   }
@@ -306,7 +287,7 @@ setMethod(f = "mcf", signature = "rateReg",
               ndesign <- nrow(X)
               multiGroup <- ifelse(ndesign == 1, FALSE, TRUE)
               coveff <- as.numeric(exp(crossprod(t(X), beta)))
-              outdat <- matrix(NA, ncol = 4, nrow = ndesign * length(xx))
+              outDat <- matrix(NA, ncol = 4, nrow = ndesign * length(xx))
               for (i in seq(ndesign)) {
                   ## Delta-method
                   grad <- cbind(alpha %o% X[i, ], diag(rep(1, n_pieces))) * 
@@ -320,13 +301,13 @@ setMethod(f = "mcf", signature = "rateReg",
                   upper <- baseline_mean + CI_band
                   ind <- seq(from = length(xx) * (i - 1) + 1,
                              to = length(xx) * i, by = 1)
-                  outdat[ind, 1] <- xx
-                  outdat[ind, 2] <- baseline_mean
-                  outdat[ind, 3] <- lower
-                  outdat[ind, 4] <- upper
+                  outDat[ind, 1] <- xx
+                  outDat[ind, 2] <- baseline_mean
+                  outDat[ind, 3] <- lower
+                  outDat[ind, 4] <- upper
               }
-              outdat <- as.data.frame(outdat)
-              colnames(outdat) <- c("time", "MCF", "lower", "upper")
+              outDat <- as.data.frame(outDat)
+              colnames(outDat) <- c("time", "MCF", "lower", "upper")
               if (multiGroup) {
                   if (missing(groupLevels)) {
                       groupLevels <- LETTERS[seq(ndesign)]
@@ -335,15 +316,15 @@ setMethod(f = "mcf", signature = "rateReg",
                       groupName <- "group"
                   }
                   tempcol <- factor(rep(groupLevels[seq(ndesign)], each = n_xx))
-                  outdat <- cbind(outdat, tempcol)
-                  colnames(outdat) <- c("time", "MCF", "lower", "upper",
+                  outDat <- cbind(outDat, tempcol)
+                  colnames(outDat) <- c("time", "MCF", "lower", "upper",
                                         groupName)
               }
               ## output
               out <- new("rateRegMcf", 
                          formula = object@formula, 
                          bKnots = object@bKnots, 
-                         newdata = X, MCF = outdat, level = level,
+                         newdata = X, MCF = outDat, level = level,
                          na.action = na.action, control = control, 
                          multiGroup = multiGroup)
               ## return
@@ -378,3 +359,29 @@ rateReg_mcf_control <- function (grid, length.out = 200, from, to,
     list(grid = grid, length.out = length.out, from = from, to = to)
 }
 
+## compute sample MCF 
+sMcf <- function(inpDat, level) {
+    outDat <- plyr::ddply(inpDat, "time", function(a){
+        a[order(a$event, decreasing = TRUE),
+          c("ID", "time", "event")]
+    })
+    nSample <- nrow(outDat)
+    num_pat <- length(unique(outDat$ID))
+    num_at_risk <- apply(array(seq(nSample)), 1, 
+                         function(a) {
+                             with(outDat[seq(a), ], 
+                                  num_pat - sum(event == 0))
+                         })
+    increment <- ifelse(outDat$event == 1, 1 / num_at_risk, 0)
+    smcf <- cumsum(increment)
+    inc2 <- increment ^ 2
+    inc12 <- (1 - increment) ^ 2
+    incre <- inc2 * (inc12 + (num_at_risk - 1) * inc2)
+    incre_var <- ifelse(outDat$event == 0, 0, incre)
+    var_smcf <- cumsum(incre_var)
+    wtonexp <- qnorm(level) * sqrt(var_smcf) / smcf
+    upper <- smcf * exp(wtonexp)
+    lower <- smcf * exp(- wtonexp)
+    ## return
+    data.frame(outDat, MCF = smcf, var = var_smcf, lower, upper)
+}
