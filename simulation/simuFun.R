@@ -60,7 +60,7 @@ simuData <- function (ID = 1, beta = 0.3, theta = 0.5, alpha = 0.06,
     ## step 2: Simulate W_i every time
     ## estimate the number of W_i before censoring
     iterLim <- round(max(1, tau / qexp(p = 0.1, rate = rho_m)))
-    nIter <- 1
+    nIter <- 1L
     W <- 0
     eventTime <- NULL
     lastEventTime <- 0
@@ -69,8 +69,8 @@ simuData <- function (ID = 1, beta = 0.3, theta = 0.5, alpha = 0.06,
         ## step 3
         eventTime <- c(eventTime, lastEventTime + cumsum(W))
         lastEventTime <- tail(eventTime, 1)
-        nIter <- nIter + 1
-        if (nIter == 20) stop("Fix me")
+        nIter <- nIter + 1L
+        if (nIter > 20) stop("Fix me")
     }
     ## evenTime <- unique(round(eventTime, digits = 0)) 
     eventTime <- eventTime[eventTime < tau]
@@ -159,4 +159,24 @@ exportClass <- function () {
                        convergence = "integer", 
                        fisher = "matrix"))
     return(NULL)
+}
+
+## summary simulation results
+simuSummary <- function (object, beta0 = c(0.5, 0.3), theta0 = 0.5, 
+                         alpha0 = c(0.06, 0.04, 0.05, 0.03, 0.04, 0.05)) {
+    est0 <- c(beta0, theta0, alpha0)
+    nBeta <- length(beta0)
+    nAlpha <- length(alpha0)
+    nParam <- nBeta + 1L + nAlpha   # add 1 for theta
+    if (ncol(object) != 2L * nParam) {
+        stop("Number of parameters does not match.")
+    }
+    barVec <- colMeans(object)
+    barEst <- barVec[seq(nParam)]
+    barSe <- barVec[seq(nParam + 1, 2 * nParam)]
+    seEst <- apply(object[, seq(nParam)], 2, sd)
+    res <- cbind(est0, barEst, seEst, barSe)
+    row.names(res) <- c(paste("beta", seq(nBeta), sep = ""),
+                        "theta", paste("alpha", seq(nAlpha), sep = ""))
+    res
 }
