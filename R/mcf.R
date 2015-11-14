@@ -229,7 +229,11 @@ setMethod(f = "mcf", signature = "rateReg",
               control <- do.call("rateReg_mcf_control", controlist)
               n_xx <- control$length.out
 
+              
               ## compute mcf
+              mu0(par_BaselinePW = alpha, Tvec = grid, bKnots = bKnots,
+                  degree = degree, bsMat_est)
+
               if (degree == 0L) { ## if piecewise constant
                   n_pieces <- length(bKnots)
                   BL_segments <- c(bKnots[1], diff(bKnots))

@@ -333,7 +333,8 @@ rho_0 <- function (par_BaselinePW, Tvec, bKnots, degree, bsMat) {
 }
 
 ## mean cumulative function
-mu0 <- function (par_BaselinePW, Tvec, bKnots, degree, bsMat_est, xTime) {
+mu0 <- function (par_BaselinePW, Tvec, bKnots,
+                 degree, bsMat_est, xTime = NULL) {
     ## if piecewise constant, degree == 0
     if (degree == 0) {
         ## segement number of each subject
@@ -345,9 +346,14 @@ mu0 <- function (par_BaselinePW, Tvec, bKnots, degree, bsMat_est, xTime) {
             (bKnots[indx] - Tvec) * par_BaselinePW[indx]
         return(mu_tau)  # function ends
     }
-    ## else spline with degree > 1
+    ## else spline with degree >= 1
     stepTime <- xTime[2] - xTime[1]
     baseRate <- bsMat_est %*% par_BaselinePW
+    if (is.null(xTime)) { ## for function mcf
+        mu_tau <- cumsum(baseRate) * steptime
+        return(mu_tau)
+    }
+    ## else for loglikehood
     indx <- sapply(Tvec, whereT, bKnots = xTime)
     mu_tau <- sapply(indx, function (ind) {
         sum(baseRate[seq(ind)]) * stepTime
