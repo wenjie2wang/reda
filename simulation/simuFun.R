@@ -13,7 +13,8 @@
 ## tau can be different for different processes
 simuData <- function (ID = 1, beta = 0.3, theta = 0.5, alpha = 0.06,
                      df = NULL, knots = NULL, degree = 0L, 
-                     boundaryKnots = c(0, 168), x = 0, tau = 168) {
+                     boundaryKnots = c(0, 168), x = 0.5, tau = 168,
+                     rho0 = NULL, ...) {
 
     ## quick check:
     ## length(theta) == 1
@@ -39,22 +40,27 @@ simuData <- function (ID = 1, beta = 0.3, theta = 0.5, alpha = 0.06,
     }
     
     ## step 1: Calculate the supremum value of rate function for each process
-    ## equivalent to calculate the superemum value of baseline rate function
-    if (degree == 0L) { ## if degree == 0L, i.e. piecewise constant
-        supBaseRate <- max(bsRateFun <- alpha)
+    if (! is.null(rho0)) { ## if the baseline rate function, rho0 is specified
+        xTime <- seq(from = boundaryKnots[1], to = boundaryKnots[2],
+                     length.out = 1e3)
+        bsRateFun <- rho0(xTime)
+        if (any(bsRateFun < 0)) {
+            stop("Baseline rate function must be nonnegative")
+        }
+    } else if (degree == 0L) { ## if degree == 0L, i.e. piecewise constant
+        bsRateFun <- alpha
     } else { ## else splines
         xTime <- seq(from = boundaryKnots[1], to = boundaryKnots[2],
                      length.out = 1e3)
         bsMat <- splines::bs(x = xTime, knots = knots, degree = degree,
                              intercept = TRUE, Boundary.knots = boundaryKnots)
         bsRateFun <- bsMat %*% alpha
-        supBaseRate <- max(bsRateFun)
     }
     ## rate functions for a single process
     r <- rgamma(n = 1, shape = theta, scale = 1 / theta)
     tempComp <- as.numeric(r * exp(crossprod(beta, x)))
     rho <- tempComp * bsRateFun
-    rho_m <- tempComp * supBaseRate 
+    rho_m <- max(rho)
 
     ## step 2: Simulate W_i every time
     ## estimate the number of W_i before censoring
@@ -78,9 +84,10 @@ simuData <- function (ID = 1, beta = 0.3, theta = 0.5, alpha = 0.06,
     tempn <- length(eventTime)
     U <- runif(n = tempn, min = 0, max = 1)
     
-    if (degree == 0L) {
-        rho_t <- rho[apply(as.array(eventTime), 1, 
-                           whereT, bKnots = c(knots, tau))]
+    if (! is.null(rho0)) {
+        rho_t <- tempComp * rho0(eventTime)
+    } else if (degree == 0L) {
+        rho_t <- rho[sapply(eventTime, whereT, bKnots = c(knots, tau))]
     } else if (length(eventTime) == 0L) {
         ## no any event 
         rho_t <- 0 # to avoid argument x in splines::bs being NULL
@@ -111,12 +118,13 @@ simuFit <- function (nSubject = 200, beta0 = c(0.5, 0.3), theta0 = 0.5,
                      boundaryKnots0 = c(0, 168),
                      x0 = function() c(sample(c(0, 1), size = 1),
                                        round(rnorm(1, mean = 0, sd = 1), 2)),
-                     tau0 = rep(168, nSubject)) {
+                     tau0 = rep(168, nSubject), rho0 = NULL, ...) {
     ## generate sample data
     simuDat <- foreach(i = seq(nSubject), .combine = "rbind") %do% {
         simuData(ID = i, beta = beta0, theta = theta0, alpha = alpha0,
                 knots = knots0, degree = degree0,
-                boundaryKnots = boundaryKnots0, x = x0(), tau = tau0[i])
+                boundaryKnots = boundaryKnots0, x = x0(), tau = tau0[i],
+                rho0 = rho0)
     }
     simuDat <- data.frame(simuDat)
     simuDat$x1 <- factor(simuDat$x1, levels = c(0, 1),
@@ -155,13 +163,13 @@ exportClass <- function () {
                        na.action = "character",
                        xlevels = "list",
                        contrasts = "list",
-                       converCode = "integer",
+                       convergCode = "integer",
                        logL = "numeric",
                        fisher = "matrix"))
     return(NULL)
 }
 
-## summary simulation results
+## summary simulation results compared with true model
 simuSummary <- function (object, beta0 = c(0.5, 0.3), theta0 = 0.5, 
                          alpha0 = c(0.06, 0.04, 0.05, 0.03, 0.04, 0.05)) {
     est0 <- c(beta0, theta0, alpha0)
@@ -179,4 +187,9 @@ simuSummary <- function (object, beta0 = c(0.5, 0.3), theta0 = 0.5,
     row.names(res) <- c(paste("beta", seq(nBeta), sep = ""),
                         "theta", paste("alpha", seq(nAlpha), sep = ""))
     res
+}
+
+## sample general rate function
+rho0 <- function (x) {
+    0.03 * exp(x / 168) + 0.02 * sin(10 * x / 168)
 }

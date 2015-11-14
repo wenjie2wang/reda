@@ -3,6 +3,7 @@
 ## 200 patients with follow-up period: 24 * 7 = 168 days.
 ## covariate: treatment group, factor with level: treatment and control
 ## set five internal knots due to 6 visits
+## version controlled by git
 ################################################################################
 
 ### computation part ===========================================================
@@ -11,12 +12,14 @@ source("simuFun.R")
 source("../R/fit.R")
 source("../R/class.R")
 ## source("../R/show.R")
+require(splines)
 if (! require(foreach)) {install.packages("foreach"); library(foreach)}
 if (! require(doParallel)) {install.packages("doParallel"); library(doParallel)}
 if (! require(doRNG)) {install.packages("doRNG"); library(doRNG)}
 
-## fit rateReg model to recover the truth ======================================
-## setting 1: 6 pieces' piecewise constant rate function
+### fit rateReg model to recover the truth =====================================
+
+## setting 1: 6 pieces' piecewise constant rate function =======================
 nRepeat <- 1e3
 lenPara <- 9
 nMC <- detectCores()
@@ -60,7 +63,8 @@ stopCluster(cl)
 ## save results for constant rate function
 save(const_2e2, const_5e2, const_1e3, file = "simuConst.RData")
 
-## setting 2: spline rate function with 2 internal knots and degree 3 (df = 6)
+
+## setting 2: cubic spline with 2 knots (df = 6) ===============================
 nRepeat <- 1e3
 lenPara <- 9
 nMC <- detectCores()
@@ -108,9 +112,64 @@ stopCluster(cl)
 save(spline_2e2, spline_5e2, spline_1e3, file = "simuSpline.RData")
 
 
-## summary simulation results
+## setting 3: general rate function fitted by cubic spline with 5 knots ========
+nRepeat <- 1e3
+lenPara <- 12
+nMC <- detectCores()
+set.seed(1216)
 
-## 6 pieces' pieceswise constant rate function
+## nSubject = 200
+cl <- makeCluster(nMC)
+registerDoParallel(cl)
+rho0_2e2 <- foreach(j = seq(nRepeat),
+                      .packages = c("foreach", "splines"),
+                      .export = c("Survr", "rateReg_control", "rateReg_start"),
+                      .combine = "rbind") %dorng% {
+                          temp <- exportClass()                        
+                          simuFit(nSubject = 200,
+                                  knots0 = seq(28, 140, by = 28),
+                                  degree = 3, boundaryKnots = c(0 ,168),
+                                  rho0 = rho0)
+                      }
+stopCluster(cl)
+
+## nSubject = 500
+cl <- makeCluster(nMC)
+registerDoParallel(cl)
+rho0_5e2 <- foreach(j = seq(nRepeat),
+                      .packages = c("foreach", "splines"),
+                      .export = c("Survr", "rateReg_control", "rateReg_start"),
+                      .combine = "rbind") %dorng% {
+                          temp <- exportClass()                        
+                          simuFit(nSubject = 500,
+                                  knots0 = seq(28, 140, by = 28),
+                                  degree = 3, boundaryKnots = c(0 ,168),
+                                  rho0 = rho0)
+                      }
+stopCluster(cl)
+
+## nSubject = 1000
+cl <- makeCluster(nMC)
+registerDoParallel(cl)
+rho0_2e2 <- foreach(j = seq(nRepeat),
+                      .packages = c("foreach", "splines"),
+                      .export = c("Survr", "rateReg_control", "rateReg_start"),
+                      .combine = "rbind") %dorng% {
+                          temp <- exportClass()                        
+                          simuFit(nSubject = 1000,
+                                  knots0 = seq(28, 140, by = 28),
+                                  degree = 3, boundaryKnots = c(0 ,168),
+                                  rho0 = rho0)
+                      }
+stopCluster(cl)
+
+## save results for spline rate function
+save(rho0_2e2, rho0_5e2, rho0_1e3, file = "simuRho0.RData")
+
+
+## summary simulation results ==================================================
+
+## 6 pieces' pieceswise constant rate function =================================
 load("simuConst.RData")
 
 ## number of subjects: 200
@@ -153,7 +212,7 @@ simuSummary(const_1e3)
 ## alpha6 0.05 0.05001748 0.003365394 0.003726254
 
 
-## spline rate function with 2 internal knots of degree 3
+## spline rate function with 2 internal knots of degree 3 ======================
 load("simuSpline.RData")
 
 ## number of subjects: 200
@@ -195,8 +254,6 @@ simuSummary(spline_1e3)
 ## alpha5 0.04 0.04011860 0.003679048 0.003779682
 ## alpha6 0.05 0.04987170 0.004036874 0.004186134
 
-
-
 ## underlying true spline rate function
 require(splines)
 bsVec <- bs(1:167, knots = c(56, 112), degree = 3, Boundary.knots = c(0, 168),
@@ -205,7 +262,8 @@ plot(1:167, bsVec, type = "l")
 dev.off()
 
 
-f <- function (x) { 0.02 * exp(x / 168) + 0.03 * sin(10 * x / 168)}
+
+f <- function (x) { 0.03 * exp(x / 168) + 0.02 * sin(10 * x / 168)}
 x <- seq(0, 168, length.out = 1000)
 y <- f(x)
 plot(x, y, type = "l")
