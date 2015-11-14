@@ -53,7 +53,6 @@ simuData <- function (ID = 1, beta = 0.3, theta = 0.5, alpha = 0.06,
     ## rate functions for a single process
     r <- rgamma(n = 1, shape = theta, scale = 1 / theta)
     tempComp <- as.numeric(r * exp(crossprod(beta, x)))
-    # browser()
     rho <- tempComp * bsRateFun
     rho_m <- tempComp * supBaseRate 
 
@@ -148,15 +147,16 @@ exportClass <- function () {
                        formula = "formula", 
                        knots = "numeric",
                        boundaryKnots = "numeric",
-                       degree = "numeric",
-                       df = "numeric",
+                       degree = "integer",
+                       df = "integer",
                        estimates = "list",
                        control = "list",
                        start = "list",
                        na.action = "character",
                        xlevels = "list",
                        contrasts = "list",
-                       convergence = "integer", 
+                       converCode = "integer",
+                       logL = "numeric",
                        fisher = "matrix"))
     return(NULL)
 }
