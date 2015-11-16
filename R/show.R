@@ -64,13 +64,19 @@ setMethod(f = "show", signature = "rateReg",
               names(alpha) <- rownames(object@estimates$alpha)
               cat("call: \n")
               print(object@call)
-              cat("\nbaseline pieces: \n")
-              cat(attr(object@knots, "name"), "\n")
-              cat("\ncoefficients: \n") 
+              cat("\ncoefficients of covariates: \n") 
               print(beta)
               cat("\ntheta: ", theta, "\n")
-              cat("\nbaseline rate functions: \n")
-              print(alpha)
+              if (length(object@knots) > 0) {
+              cat("\nknots: \n", object@knots, "\n")
+              }
+              if (object@degree > 0) {
+                  cat("\ncoefficients of spline bases:\n")
+                  print(alpha)    
+              } else {
+                  cat("\ncoefficients of pieces:\n")
+                  print(alpha)
+              }
           })
 
 

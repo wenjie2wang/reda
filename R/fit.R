@@ -109,15 +109,23 @@ NULL
 #' \emph{Journal of biopharmaceutical statistics}, 2014 Dec 1, Epub 2014 Dec 1.
 #' @examples
 #' library(reda)
-#' ## data(simuDat)
-#' regFit <- rateReg(formula = Survr(ID, time, event) ~ x1 + group, 
-#'                   data = simuDat, subset = ID %in% 1:100,
-#'                   knots = seq(28, 140, length = 5))
-#' rateReg(Survr(ID, time, event) ~ x1 + group, 
-#'         data = simuDat, subset = ID %in% 75:125)
-#' ## str(regFit)
-#' show(regFit) # or simply call 'rateRegFit'
-#' summary(regFit)
+#' 
+#' ## constant rate function
+#' rateReg(Survr(ID, time, event) ~ group + x1, df = 1,
+#'         data = simuDat, subset = ID %in% 1:50)
+#' 
+#' ## 6 pieces' piecewise constant rate function
+#' piecesFit <- rateReg(Survr(ID, time, event) ~ group + x1, 
+#'                      data = simuDat, subset = ID %in% 1:100,
+#'                      knots = seq(28, 140, length.out = 5))
+#'
+#' ## fit rate function with cubic spline 
+#' splineFit <- rateReg(Survr(ID, time, event) ~ group + x1, 
+#'                      data = simuDat, subset = ID %in% 1:100,
+#'                      knots = c(56, 84, 112), degree = 3)
+#'
+#' show(piecesFit) # or simply call 'piecesRate'
+#' summary()
 #' coef(regFit)
 #' confint(regFit)
 #' baseline(regFit)
@@ -243,6 +251,7 @@ rateReg <- function (formula, df = NULL, knots = NULL, degree = 0L,
     est_beta <- matrix(NA, nrow = nBeta, ncol = 3)
     colnames(est_beta) <- c("coef", "se", "Pr(>|z|)")
     rownames(est_beta) <- covar_names
+    
     se_vec <- sqrt(diag(solve(fit$hessian)))
     est_beta[, 1] <- fit$estimate[1:nBeta]
     est_beta[, 2] <- se_vec[1:nBeta]
@@ -347,13 +356,14 @@ mu0 <- function (par_BaselinePW, Tvec, bKnots,
         return(mu_tau)  # function ends
     }
     ## else spline with degree >= 1
-    stepTime <- xTime[2] - xTime[1]
     baseRate <- bsMat_est %*% par_BaselinePW
     if (is.null(xTime)) { ## for function mcf
-        mu_tau <- cumsum(baseRate) * steptime
+        stepTime <- diff(c(boundaryKnots[1], Tvec))
+        mu_tau <- cumsum(baseRate) * stepTime
         return(mu_tau)
     }
     ## else for loglikehood
+    stepTime <- xTime[2] - xTime[1]
     indx <- sapply(Tvec, whereT, bKnots = xTime)
     mu_tau <- sapply(indx, function (ind) {
         sum(baseRate[seq(ind)]) * stepTime

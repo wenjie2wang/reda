@@ -225,37 +225,24 @@ setMethod(f = "mcf", signature = "rateReg",
               degree <- object@degree
               boundaryKnots <- object@boundaryKnots
               bKnots <- c(knots, boundaryKnots[2])
-              controlist <- c(control, list("bKnots" = bKnots)
+              controlist <- c(control, list("bKnots" = bKnots,
+                                            "boundaryKnots" = boundaryKnots))
               control <- do.call("rateReg_mcf_control", controlist)
+              grid_xx <- control$grid
               n_xx <- control$length.out
-
               
+              ## B-spline bases
+              bsMat_est = bs(grid_xx, degree = degree, knots = knots,
+                             Boundary.knots = boundaryKnots,
+                             intercept = object@control$intercept)
               ## compute mcf
-              mu0(par_BaselinePW = alpha, Tvec = grid, bKnots = bKnots,
-                  degree = degree, bsMat_est)
+              estMcf <- mu0(par_BaselinePW = alpha, Tvec = grid_xx,
+                            bKnots = bKnots, degree = degree,
+                            bsMat_est = bsMat_est, xTime = NULL)
 
-              if (degree == 0L) { ## if piecewise constant
-                  n_pieces <- length(bKnots)
-                  BL_segments <- c(bKnots[1], diff(bKnots))
-                  xx <- control$grid
-                  indx <- sapply(xx, whereT, bKnots = bKnots)
-                  LinCom_M <- matrix(NA, ncol = n_pieces, nrow = n_xx)
-                  i <- 1
-                  for (ind_indx in indx) {
-                      LinCom_M[i] <- c(BL_segments[1:ind_indx], 
-                                       rep(0, n_pieces - ind_indx))
-                      i <- i + 1
-                  }
-                  CMF_B4_indx <- c(boundaryKnots[1], bKnots)[indx]
-                  LinCom_M[(indx - 1) * n_xx + seq(n_xx)] <- xx - CMF_B4_indx
-              } else { ## spline rate function of degree at least one
-                  
-              }
-              
-              
               n_par <- nrow(object@fisher)
               ## covariance matrix of beta and alpha
-              Cov_ind <- c(seq(nBeta), (n_par - n_pieces + 1):n_par)
+              Cov_ind <- seq(n_par)[- (nBeta + 1)]
               Cov_par <- solve(object@fisher)[Cov_ind, Cov_ind]
 
               ## nonsense, just to suppress Note from R CMD check --as-cran
@@ -284,16 +271,23 @@ setMethod(f = "mcf", signature = "rateReg",
                   ## remove intercept and deplicated rows
                   X <- unique(base::subset(X, select = -`(Intercept)`))
                   if (ncol(X) != nBeta) {
-                      stop("The number of input covariates does not match 
-                   with 'rateReg' object")
+                      stop(paste("The number of input covariates does not",
+                                 "match with 'rateReg' object"))
                   }
               }
+
+              ## mcf for possible multigroups
               ndesign <- nrow(X)
               multiGroup <- ifelse(ndesign == 1, FALSE, TRUE)
-              coveff <- as.numeric(exp(crossprod(t(X), beta)))
-              outDat <- matrix(NA, ncol = 4, nrow = ndesign * length(xx))
+              
+              coveff <- as.numeric(exp(X %*% beta))
+              outDat <- matrix(NA, ncol = 4, nrow = ndesign * n_xx)
               for (i in seq(ndesign)) {
+
                   ## Delta-method
+                  gradVec <- function ()
+
+                  
                   grad <- cbind(alpha %o% X[i, ], diag(rep(1, n_pieces))) * 
                       coveff[i]
                   Cov_M <- tcrossprod(crossprod(t(grad), Cov_par), grad)
@@ -337,15 +331,11 @@ setMethod(f = "mcf", signature = "rateReg",
 
 
 ## internal function ===========================================================
-rateReg_mcf_control <- function (grid, length.out = 200, from, to, 
-                                 bKnots) {
+rateReg_mcf_control <- function (grid, length.out = 5e2, from, to, 
+                                 bKnots, boundaryKnots) {
     ## controls for function MCF with signiture rateReg
-    if (missing(from)) {
-        from <- 0
-    }
-    if (missing(to)) {
-        to <- max(bKnots)
-    }
+    from <- if (missing(from)) boundaryKnots[1]
+    to  <- if (missing(to)) boundaryKnots[2]
     if (! missing(grid)) {
         if (! is.numeric(grid) || is.unsorted(grid)) {
             stop("'grid' specified must be a increasing numeric vector.")
@@ -356,8 +346,8 @@ rateReg_mcf_control <- function (grid, length.out = 200, from, to,
     } else {
         grid <- seq(from = from, to = to, length.out = length.out)
     }
-    if (min(grid) < 0 || max(grid) > max(bKnots)) {
-        stop("'grid' must be within the coverage of baseline pieces.")
+    if (min(grid) < boundaryKnots[1] || max(grid) > boundaryKnots[2]) {
+        stop("'grid' must be within the coverage of boundary knots.")
     }
     ## return
     list(grid = grid, length.out = length.out, from = from, to = to)
