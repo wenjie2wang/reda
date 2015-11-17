@@ -92,13 +92,13 @@ simuData <- function (ID = 1, beta = 0.3, theta = 0.5, alpha = 0.06,
     tempn <- length(eventTime)
     U <- runif(n = tempn, min = 0, max = 1)
     
-    if (! is.null(rho0)) {
+    if (length(eventTime) == 0L) {
+        ## no any event 
+        rho_t <- 0 # to avoid errors
+    } else if (! is.null(rho0)) {
         rho_t <- tempComp * rho0(eventTime)
     } else if (degree == 0L) {
         rho_t <- rho[sapply(eventTime, whereT, bKnots = c(knots, tau))]
-    } else if (length(eventTime) == 0L) {
-        ## no any event 
-        rho_t <- 0 # to avoid argument x in splines::bs being NULL
     } else {
         bsMat <- splines::bs(x = eventTime, knots = knots, degree = degree,
                              intercept = TRUE, Boundary.knots = boundaryKnots)
@@ -118,23 +118,36 @@ simuData <- function (ID = 1, beta = 0.3, theta = 0.5, alpha = 0.06,
     resMat
 }
 
+xFun = function(seed) {
+    if (! missing(seed)) set.seed(seed)
+    c(sample(c(0, 1), size = 1),
+      round(rnorm(1, mean = 0, sd = 1), 2))
+}
+
+simuDataset <- function (nSubject, ..., boundaryKnots0,
+                         x0 = xFun, rho0 = NULL,
+                         tau0 = rep(boundaryKnots0[2], nSubject)) {
+    
+    simuDat <- foreach(i = seq(nSubject), .combine = "rbind") %do% { 
+        simuData(ID = i, ..., boundaryKnots = boundaryKnots0,
+                 x = x0(), tau = tau0[i], rho0 = rho0)
+    }
+    ## return
+    data.frame(simuDat)   
+}
+
 ## function that extracts estimates and their se
 ## by default, 6 pieces' piecewise constant rate function
 simuFit <- function (nSubject = 200, beta0 = c(0.5, 0.3), theta0 = 0.5,
                      alpha0 = c(0.06, 0.04, 0.05, 0.03, 0.04, 0.05),
                      knots0 = seq(from = 28, to = 140, by = 28), degree0 = 0,
                      boundaryKnots0 = c(0, 168),
-                     x0 = function() c(sample(c(0, 1), size = 1),
-                                       round(rnorm(1, mean = 0, sd = 1), 2)),
-                     tau0 = rep(168, nSubject), rho0 = NULL, ...) {
+                     rho0 = NULL, ...) {
+    ## ... can specifiy x0, rho0, and tau0, in function simuDataset
+    
     ## generate sample data
-    simuDat <- foreach(i = seq(nSubject), .combine = "rbind") %do% {
-        simuData(ID = i, beta = beta0, theta = theta0, alpha = alpha0,
-                knots = knots0, degree = degree0,
-                boundaryKnots = boundaryKnots0, x = x0(), tau = tau0[i],
-                rho0 = rho0)
-    }
-    simuDat <- data.frame(simuDat)
+    simuDat <- simuDataset(nSubject, beta0, theta0, alpha0, knots0,
+                           degree0, boundaryKnots0, ...)
     simuDat$x1 <- factor(simuDat$x1, levels = c(0, 1),
                          labels = c("Treat", "Contr"))
     colnames(simuDat)[4:5] <- c("group", "x1")
@@ -198,8 +211,14 @@ simuSummary <- function (object, beta0 = c(0.5, 0.3), theta0 = 0.5,
 }
 
 ## sample general rate function
-rho0 <- function (x) {
-    0.03 * exp(x / 168) + 0.02 * sin(10 * x / 168)
+rho0 <- function (t) {
+    0.03 * exp(t / 168) + 0.02 * sin(10 * t / 168)
+}
+
+## the integral of sample rate function as sample baseline mcf
+mu0t <- function (t) {
+    0.03 * 168 * (exp(t / 168) - 1) -
+        0.02 * (168 / 10) * (cos(10 * t / 168) - 1)
 }
 
 ## plot fits for general rate funciton 
