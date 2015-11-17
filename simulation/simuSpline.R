@@ -11,11 +11,6 @@
 source("simuFun.R")
 source("../R/fit.R")
 source("../R/class.R")
-## source("../R/show.R")
-require(splines)
-if (! require(foreach)) {install.packages("foreach"); library(foreach)}
-if (! require(doParallel)) {install.packages("doParallel"); library(doParallel)}
-if (! require(doRNG)) {install.packages("doRNG"); library(doRNG)}
 
 ### fit rateReg model to recover the truth =====================================
 
@@ -112,7 +107,7 @@ stopCluster(cl)
 save(spline_2e2, spline_5e2, spline_1e3, file = "simuSpline.RData")
 
 
-## setting 3: general rate function fitted by cubic spline with 5 knots ========
+## setting 3: general rate function fitted by cubic spline with 5 knots, df = 9
 nRepeat <- 1e3
 lenPara <- 12
 nMC <- detectCores()
@@ -151,7 +146,7 @@ stopCluster(cl)
 ## nSubject = 1000
 cl <- makeCluster(nMC)
 registerDoParallel(cl)
-rho0_2e2 <- foreach(j = seq(nRepeat),
+rho0_1e3 <- foreach(j = seq(nRepeat),
                       .packages = c("foreach", "splines"),
                       .export = c("Survr", "rateReg_control", "rateReg_start"),
                       .combine = "rbind") %dorng% {
@@ -255,15 +250,23 @@ simuSummary(spline_1e3)
 ## alpha6 0.05 0.04987170 0.004036874 0.004186134
 
 ## underlying true spline rate function
-require(splines)
 bsVec <- bs(1:167, knots = c(56, 112), degree = 3, Boundary.knots = c(0, 168),
             intercept = TRUE) %*% c(0.06, 0.04, 0.05, 0.03, 0.04, 0.05)
 plot(1:167, bsVec, type = "l")
 dev.off()
 
 
+## generate plots of fitted rate function by cubic splines =====================
+load("simuRho0.RData")
+pdf(file = "simuPlot.pdf", width = 7, height = 5)
+plotRate(rho0_2e2) + ggtitle("200 Subjects") + ylim(c(0.02, 0.12))
+plotRate(rho0_5e2) + ggtitle("500 Subjects") + ylim(c(0.02, 0.12))
+plotRate(rho0_1e3) + ggtitle("1000 Subjects") + ylim(c(0.02, 0.12))
+dev.off()
 
+## undelying general rate function used
 f <- function (x) { 0.03 * exp(x / 168) + 0.02 * sin(10 * x / 168)}
-x <- seq(0, 168, length.out = 1000)
+x <- seq(1, 168, length.out = 1000)
 y <- f(x)
-plot(x, y, type = "l")
+plot(x, y, type = "l", col = "red", ylim = c(0.02, 0.12))
+

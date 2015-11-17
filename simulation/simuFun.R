@@ -5,6 +5,14 @@
 ## set five internal knots due to 6 visits
 ################################################################################
 
+### attach packages needed =====================================================
+require(splines)
+if (! require(ggplot2)) {install.packages("ggplot2"); library(ggplot2)}
+if (! require(tidyr)) {install.packages("tidyr"); library(tidyr)}
+if (! require(foreach)) {install.packages("foreach"); library(foreach)}
+if (! require(doParallel)) {install.packages("doParallel"); library(doParallel)}
+if (! require(doRNG)) {install.packages("doRNG"); library(doRNG)}
+
 ### function part ==============================================================
 ## generate event times for each process (each subject)
 ## x and beta can be vector of length more than one
@@ -192,4 +200,39 @@ simuSummary <- function (object, beta0 = c(0.5, 0.3), theta0 = 0.5,
 ## sample general rate function
 rho0 <- function (x) {
     0.03 * exp(x / 168) + 0.02 * sin(10 * x / 168)
+}
+
+## plot fits for general rate funciton 
+plotRate <- function (object, df = 9, lenPara = 12, level = 0.95,
+                      knots = seq(28, 140, by = 28), degree = 3) {
+    xt <- seq(1, 167, length.out = 1e3)
+    alphaMat <- object[, seq(lenPara - df + 1, lenPara)]
+    bsMat <- bs(xt, knots = knots, degree = degree,
+                intercept = TRUE, Boundary.knots = c(0, 168))
+    rateEst <- tcrossprod(bsMat, alphaMat)
+    meanRate <- bsMat %*% colMeans(alphaMat)
+    lowUpp <- matrix(NA, ncol = 2, nrow = 1e3)
+    for (j in seq(1e3)) {
+        lowUpp[j, ] <- quantile(rateEst[j, ],
+                                probs = c((1 - level) / 2,
+                                (1 + level) / 2))
+    }
+    colnames(lowUpp) <- c("lower", "upper")
+    ggWideDat <- data.frame("time" = xt, "rho0" = rho0(xt),
+                            "mean" = meanRate, lowUpp, rateEst)
+    ggLongDat <- gather(ggWideDat, key = type, value = rate, -time)
+    ind1 <- ggLongDat$type %in% levels(ggLongDat$type)[1:2]
+    indLower <- ggLongDat$type %in% levels(ggLongDat$type)[3]
+    indUpper <- ggLongDat$type %in% levels(ggLongDat$type)[4]
+    ind2 <- ! (ind1 | indLower | indUpper)
+    ## ggOut <- ggplot(data = ggLongDat[ind3, ], aes(x = time)) +
+    ##     geom_line(mapping = aes(y = rate, color = type), color = "gray") +
+    ggOut <- ggplot(data = ggLongDat, aes(x = time)) + 
+        geom_line(data = ggLongDat[ind1, ], aes(y = rate, color = type)) +
+        geom_line(data = ggLongDat[indLower, ],
+                  aes(y = rate), linetype = "3313") +
+        geom_line(data = ggLongDat[indUpper, ],
+                  aes(y = rate), linetype = "3313") +
+        theme_bw()
+    ggOut
 }
