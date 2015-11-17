@@ -167,7 +167,7 @@ setMethod(f = "mcf", signature = "formula",
               if (num_levels == 1) {
                   warning("The factor covariate has only one level.")
               }
-              # browser()
+              
               outDat <- data.frame(matrix(NA, nrow = nSample, ncol = 8))
               for (i in seq(num_levels)) {
                   subdat <- base::subset(dat, subset = X %in% levels(X)[i])
@@ -225,25 +225,30 @@ setMethod(f = "mcf", signature = "rateReg",
               degree <- object@degree
               boundaryKnots <- object@boundaryKnots
               bKnots <- c(knots, boundaryKnots[2])
+              interceptInd <- object@control$intercept
               controlist <- c(control, list("bKnots" = bKnots,
                                             "boundaryKnots" = boundaryKnots))
               control <- do.call("rateReg_mcf_control", controlist)
-              grid_xx <- control$grid
+              gridTime <- control$grid
               n_xx <- control$length.out
-              
-              ## B-spline bases
-              bsMat_est = bs(grid_xx, degree = degree, knots = knots,
-                             Boundary.knots = boundaryKnots,
-                             intercept = object@control$intercept)
-              ## compute mcf
-              estMcf <- mu0(par_BaselinePW = alpha, Tvec = grid_xx,
+
+              if (degree > 0L) {
+                  ## B-spline bases at given time grid
+                  bsMat_est = bs(gridTime, degree = degree,
+                                 knots = knots,
+                                 Boundary.knots = boundaryKnots,
+                                 intercept = interceptInd)
+              }
+              ## estimated baseline mcf
+              estMcf <- mu0(par_BaselinePW = alpha, Tvec = gridTime,
                             bKnots = bKnots, degree = degree,
-                            bsMat_est = bsMat_est, xTime = NULL)
+                            boundaryKnots = boundaryKnots,
+                            bsMat_est = bsMat_est)
 
               n_par <- nrow(object@fisher)
               ## covariance matrix of beta and alpha
-              Cov_ind <- seq(n_par)[- (nBeta + 1)]
-              Cov_par <- solve(object@fisher)[Cov_ind, Cov_ind]
+              covInd <- seq(n_par)[- (nBeta + 1)]
+              covPar <- solve(object@fisher)[covInd, covInd]
 
               ## nonsense, just to suppress Note from R CMD check --as-cran
               `(Intercept)` <- NULL
@@ -253,7 +258,7 @@ setMethod(f = "mcf", signature = "rateReg",
               Terms <- delete.response(tt)
               if (missing("na.action")) {
                   na.action <- options("na.action")[[1]]
-              }
+              } 
               if (missing(newdata)) {
                   X <- matrix(rep(0, nBeta), nrow = 1)
                   colnames(X) <- covnames
@@ -282,25 +287,26 @@ setMethod(f = "mcf", signature = "rateReg",
               
               coveff <- as.numeric(exp(X %*% beta))
               outDat <- matrix(NA, ncol = 4, nrow = ndesign * n_xx)
+
               for (i in seq(ndesign)) {
-
                   ## Delta-method
-                  gradVec <- function ()
-
-                  
-                  grad <- cbind(alpha %o% X[i, ], diag(rep(1, n_pieces))) * 
-                      coveff[i]
-                  Cov_M <- tcrossprod(crossprod(t(grad), Cov_par), grad)
-                  criti <- diag(tcrossprod(crossprod(t(LinCom_M), Cov_M),
-                                           LinCom_M))
-                  CI_band <- qnorm((1 + level) / 2) * sqrt(criti)
-                  baseline_mean <- crossprod(t(LinCom_M), alpha) * coveff[i]
-                  lower <- baseline_mean - CI_band
-                  upper <- baseline_mean + CI_band
-                  ind <- seq(from = length(xx) * (i - 1) + 1,
-                             to = length(xx) * i, by = 1)
-                  outDat[ind, 1] <- xx
-                  outDat[ind, 2] <- baseline_mean
+                  gradMat <- gradDelta(Xi = X[i, ], estMcf = estMcf,
+                                       degree = degree, bKnots = bKnots, 
+                                       boundaryKnots = boundaryKnots,
+                                       gridTime = gridTime,
+                                       bsMat_est = bsMat_est,
+                                       coveffi = coveff[i])
+                  varTime <- apply(gradMat, 1, function (gradVec, covMat) {
+                      crossprod(gradVec, covMat) %*% gradVec
+                          }, covMat = covPar)
+                  confBand <- qnorm((1 + level) / 2) * sqrt(varTime)
+                  mcf_i <- estMcf * coveff[i]
+                  lower <- pmax(0, mcf_i - confBand)
+                  upper <- mcf_i + confBand
+                  ind <- seq(from = n_xx * (i - 1) + 1,
+                             to = n_xx * i, by = 1)
+                  outDat[ind, 1] <- gridTime
+                  outDat[ind, 2] <- mcf_i
                   outDat[ind, 3] <- lower
                   outDat[ind, 4] <- upper
               }
@@ -320,8 +326,9 @@ setMethod(f = "mcf", signature = "rateReg",
               }
               ## output
               out <- new("rateRegMcf", 
-                         formula = object@formula, 
-                         bKnots = object@bKnots, 
+                         formula = object@formula,
+                         knots = knots, degree = degree, 
+                         boundaryKnots = boundaryKnots,
                          newdata = X, MCF = outDat, level = level,
                          na.action = na.action, control = control, 
                          multiGroup = multiGroup)
@@ -378,4 +385,25 @@ sMcf <- function(inpDat, level) {
     lower <- smcf * exp(- wtonexp)
     ## return
     data.frame(outDat, MCF = smcf, var = var_smcf, lower, upper)
+}
+
+## Delta-method, compute the gradient on beta and alpha
+gradDelta <- function (Xi, estMcf, degree, bKnots, boundaryKnots,
+                       gridTime, bsMat_est, coveffi) {
+    gradBeta <- estMcf %o% Xi * coveffi
+    allKnots <- c(boundaryKnots[1], bKnots)
+    if (degree == 0L) { ## if piecewise constant rate function
+        gradAlpha <- matrix(NA, nrow = n_xx, ncol = length(bKnots))
+        for (j in seq_along(bKnots)) {
+            gradAlpha[, j] <- sapply(gridTime, function (tt, knotj, knotjm1) {
+                (tt >= knotj) * (knotj - knotjm1) +
+                    (tt < knotj && tt > knotjm1) * (tt - knotjm1)          
+            }, knotj = allKnots[j + 1], knotjm1 = allKnots[j])
+        }
+    } else { ## degree >= 1, spline rate function
+        gradAlpha <- apply(bsMat_est, 2, cumsum)
+    }
+    gradAlpha <- gradAlpha * coveffi
+    ## retrun
+    cbind(gradBeta, gradAlpha)
 }

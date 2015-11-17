@@ -117,7 +117,7 @@ NULL
 #' ## 6 pieces' piecewise constant rate function
 #' piecesFit <- rateReg(Survr(ID, time, event) ~ group + x1, 
 #'                      data = simuDat, subset = ID %in% 1:100,
-#'                      knots = seq(28, 140, length.out = 5))
+#'                      knots = seq(28, 140, by = 28))
 #'
 #' ## fit rate function with cubic spline 
 #' splineFit <- rateReg(Survr(ID, time, event) ~ group + x1, 
@@ -342,8 +342,8 @@ rho_0 <- function (par_BaselinePW, Tvec, bKnots, degree, bsMat) {
 }
 
 ## mean cumulative function
-mu0 <- function (par_BaselinePW, Tvec, bKnots,
-                 degree, bsMat_est, xTime = NULL) {
+mu0 <- function (par_BaselinePW, Tvec, bKnots, degree,
+                 boundaryKnots, bsMat_est, xTime = NULL) {
     ## if piecewise constant, degree == 0
     if (degree == 0) {
         ## segement number of each subject
@@ -416,7 +416,8 @@ dl_dalpha_part1 <- function (par_alpha, indx, degree, bsMat) {
 }
 
 ## compute negative log likelihood
-logL_rateReg <- function (par, data, bKnots, degree, bsMat, bsMat_est, xTime) {
+logL_rateReg <- function (par, data, bKnots, degree,
+                          boundaryKnots, bsMat, bsMat_est, xTime) {
     nBeta <- ncol(data) - 3
     ## par = \THETA in the paper
     par_beta <- par[1 : nBeta]
@@ -447,8 +448,8 @@ logL_rateReg <- function (par, data, bKnots, degree, bsMat, bsMat_est, xTime) {
     ## integral that involves censoring time tau
     ## baseline mcf
     mu0i <- mu0(par_BaselinePW = par_alpha, Tvec = data$time[ind_cens],
-                bKnots = bKnots, degree = degree, bsMat_est = bsMat_est,
-                xTime = xTime)
+                bKnots = bKnots, degree = degree, boundaryKnots = boundaryKnots,
+                bsMat_est = bsMat_est, xTime = xTime)
     mui <- mu0i * expXBeta[ind_cens]
     mui_theta <- par_theta + mui
     mui_theta[mui_theta < 1e-100] <- 1e-100

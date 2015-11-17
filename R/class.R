@@ -156,9 +156,15 @@ setClass(Class = "empirMcf",
 #' @seealso \code{\link{mcf,rateReg-method}}
 #' @export
 setClass(Class = "rateRegMcf", 
-         slots = c(formula = "formula", baselinePieces = "numeric",
-                   newdata = "matrix", MCF = "data.frame", level = "numeric", 
-                   na.action = "character", control = "list", 
+         slots = c(formula = "formula",
+                   knots = "numeric",
+                   degree = "integer",
+                   boundaryKnots = "numeric",
+                   newdata = "matrix",
+                   MCF = "data.frame",
+                   level = "numeric", 
+                   na.action = "character",
+                   control = "list", 
                    multiGroup = "logical"))
 
 
