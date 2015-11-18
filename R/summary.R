@@ -26,46 +26,51 @@
 NULL
 
 
-#' Summarizing HEART Model Fits
+#' Summarizing Model Fits
 #'
-#' \code{summary} returns summary of estimates from HEART model.
+#' \code{summary} returns summary of estimated coefficients of covariates,
+#' rate function bases, and estimated parameter of frailty variable.
 #'
-#' To be more specific, \code{summary} returns a
-#' \code{\link{summaryHeart-class}} object which can be printed by
+#' Technitically, \code{summary} returns a
+#' \code{\link{summaryHeart-class}} object,
+#' which can be printed by
 #' \code{\link{show,summaryHeart-method}}. 
 #'
 #' @param object rateReg object from \code{rateReg}.
 #' @param showCall a logic value with dafault as TRUE,
 #' indicating whether method \code{\link{show,summaryHeart-method}} prints out 
 #' the call information of original call of \code{rateReg}.
-#' @param showPieces a logic value with default as TRUE, 
+#' @param showKnots a logic value with default as TRUE, 
 #' indicating whether method \code{\link{show,summaryHeart-method}} prints out 
-#' the baseline pieces.
+#' the internal and boundary knots.
 #' @param ... other arguments for future usage.
 #' @return summaryHeart-class object
 #' @aliases summary,rateReg-method
 #' @seealso \code{\link{rateReg}} \code{\link{coef,rateReg-method}}
-#' \code{\link{confint,rateReg-method}} \code{\link{baseline,rateReg-method}}
-#' \code{\link{mcf}}
+#' \code{\link{confint,rateReg-method}} \code{\link{baseRate,rateReg-method}}
 #' @importFrom methods new
 #' @export
 setMethod(f = "summary", signature = "rateReg",
-          definition = function(object, showCall = TRUE, showPieces = TRUE, ...) {
+          definition = function(object, showCall = TRUE,
+                                showKnots = TRUE, ...) {
               Call <- object@call
               attr(Call, "show") <- showCall
-              blpieces <- object@baselinePieces
-              attr(blpieces, "show") <- showPieces
+              knots <- object@knots
+              boundaryKnots <- object@boundaryKnots
+              attr(knots, "show") <- showKnots
               beta <- object@estimates$beta
               theta <- object@estimates$theta
               alpha <- object@estimates$alpha
-              colnames(beta)[1] <- colnames(theta)[1] <- 
-                  colnames(alpha)[1] <- "estimates"
               results <- new("summaryHeart", 
                              call = Call,
-                             baselinePieces = blpieces,
-                             coefficients = beta,
-                             theta = theta, 
-                             baseline = alpha)
+                             knots = knots,
+                             boundaryKnots = boundaryKnots,
+                             covariateCoef = beta,
+                             frailtyPar = theta,
+                             degree = object@degree,
+                             df = object@df, 
+                             baseRateCoef = alpha,
+                             logL = object@logL)
               ## return
               results
           })

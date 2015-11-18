@@ -248,23 +248,25 @@ rateReg <- function (formula, df = NULL, knots = NULL, degree = 0L,
                       steptol = control$steptol, iterlim = control$iterlim)
 
     ## estimates for beta
-    est_beta <- matrix(NA, nrow = nBeta, ncol = 3)
-    colnames(est_beta) <- c("coef", "se", "Pr(>|z|)")
+    est_beta <- matrix(NA, nrow = nBeta, ncol = 4)
+    colnames(est_beta) <- c("estimates", "se", "z", "Pr(>|z|)")
     rownames(est_beta) <- covar_names
     
     se_vec <- sqrt(diag(solve(fit$hessian)))
     est_beta[, 1] <- fit$estimate[1:nBeta]
     est_beta[, 2] <- se_vec[1:nBeta]
-    est_beta[, 3] <- 2 * stats::pnorm(-abs(est_beta[, 1]/est_beta[, 2]))
+    est_beta[, 3] <- est_beta[, 1]/est_beta[, 2]
+    est_beta[, 4] <- 2 * stats::pnorm(- abs(est_beta[, 3]))
 
     ## estimates for theta
     est_theta <- matrix(NA, nrow = 1, ncol = 2)
-    colnames(est_theta) <- c("theta", "se")
+    colnames(est_theta) <- c("estimates", "se")
+    rownames(est_theta) <- "Frailty"
     est_theta[1, ] <- c(fit$estimate[nBeta + 1], se_vec[nBeta + 1])
 
     ## estimates for alpha
     est_alpha <- matrix(NA, nrow = df, ncol = 2)
-    colnames(est_alpha) <- c("alpha", "se")
+    colnames(est_alpha) <- c("estimates", "se")
     rownames(est_alpha) <- alphaName 
     est_alpha[, 1] <- fit$estimate[(nBeta + 2):length_par]
     est_alpha[, 2] <- se_vec[(nBeta + 2):length_par]
@@ -559,5 +561,5 @@ nameBases <- function (bKnots, degree, df, leftBound) {
     }
     ## else degree > 0 
     ## return
-    paste("B-spline", seq(df))
+    paste("B-spline", seq(df), sep = ".")
 }

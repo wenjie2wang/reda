@@ -56,25 +56,26 @@ NULL
 #' @export
 setMethod(f = "show", signature = "rateReg",
           definition = function(object) {
-              beta <- round(object@estimates$beta[, "coef"], digits = 3)
-              names(beta) <- rownames(object@estimates$beta)
-              theta <- round(object@estimates$theta[, "theta"], digits = 3)
+              beta <- object@estimates$beta[, 1]
+              theta <- object@estimates$theta[, 1]
               names(theta) <- NULL
-              alpha <- round(object@estimates$alpha[, "alpha"], digits = 3)
-              names(alpha) <- rownames(object@estimates$alpha)
-              cat("call: \n")
+              alpha <- object@estimates$alpha[, 1]
+              cat("Call: \n")
               print(object@call)
-              cat("\ncoefficients of covariates: \n") 
+              cat("\nCoefficients of covariates: \n") 
               print(beta)
-              cat("\ntheta: ", theta, "\n")
+              cat("\nFrailty parameter: ", theta, "\n")
               if (length(object@knots) > 0) {
-              cat("\nknots: \n", object@knots, "\n")
+              cat("\nInternal knots: \n") 
+              cat(object@knots, sep = ", ", fill = TRUE)
               }
+              cat("\nBoundary knots: \n")
+              cat(object@boundaryKnots, sep = ", ", fill = TRUE)
               if (object@degree > 0) {
-                  cat("\ncoefficients of spline bases:\n")
+                  cat("\nCoefficients of spline bases:\n")
                   print(alpha)    
               } else {
-                  cat("\ncoefficients of pieces:\n")
+                  cat("\nCoefficients of pieces:\n")
                   print(alpha)
               }
           })
@@ -83,26 +84,35 @@ setMethod(f = "show", signature = "rateReg",
 #' @rdname show 
 #' @aliases show,summaryHeart-method
 #' @importFrom methods show
+#' @importFrom stats printCoefmat
 #' @export
 setMethod(f = "show", signature = "summaryHeart",
           definition = function(object) {
               if (attr(object@call, "show")) {
                   Call <- object@call
                   attr(Call, "show") <- NULL
-                  cat("call: \n")
+                  cat("Call: \n")
                   print(Call)
               }
+              cat("\nCoefficients of covariates: \n") 
+              printCoefmat(object@covariateCoef)
+              cat("\nParameter of frailty: \n")
+              print(object@frailtyPar)
               if (attr(object@knots, "show")) {
-                  cat("\nbaseline pieces: \n")
-                  cat(attr(object@knots, "name"), "\n")
+                  cat("\nInternal knots: \n")
+                  cat(object@knots, sep = ", ", fill = TRUE)
+                  cat("\nBoundary knots:\n")
+                  cat(object@boundaryKnots, sep = ", ", fill = TRUE)
               }
-              cat("\ncoefficients: \n") 
-              printCoefmat(object@coefficients)
-              theta <- as.data.frame(object@theta)
-              cat("\ntheta: \n")
-              print(theta, row.names = FALSE)
-              cat("\nbaseline rate functions: \n")
-              print(object@baseline)
+              if (object@degree > 0) {
+                  cat("\nDegree of spline bases:", object@degree, "\n")
+                  cat("\nCoefficients of spline bases:\n")
+                  printCoefmat(object@baseRateCoef)    
+              } else {
+                  cat("\nCoefficients of pieces:\n")
+                  printCoefmat(object@baseRateCoef)    
+              }
+              cat("\nloglikelihood: ", object@logL, "\n")
           })
 
 
