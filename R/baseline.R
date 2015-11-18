@@ -26,37 +26,37 @@
 NULL
 
 
-#' Estimated Baseline Rate Function
+#' Estimated Coefficients of Baseline Rate Function
 #' 
-#' An S4 class generic function to extract the estimated baseline rate function 
-#' from HEART model. 
+#' An S4 class generic function to extract the estimated coefficients
+#' of baseline rate function. It returns either coefficients
+#' of pieceswise constant rate function
+#' or coefficients of B-spline bases
 #' 
 #' @param object rateReg-class object.
-#' @param ... other arguments for future usage.
-#' @return a named vector.
-#' @aliases baseline,rateReg-method
+#' @param ... Other arguments for future usage.
+#' @return A named numeric vector, either pieceswise constants
+#' or coefficients of B-spline bases.
+#' @aliases BaseRate,rateReg-method
 #' @examples 
 #' library(reda)
 #' rateRegFit <- rateReg(formula = Survr(ID, time, event) ~ x1 + group, 
 #'                   data = simuDat, subset = ID %in% 75:125,
 #'                   baselinePieces = seq(28, 168, length = 6))
-#' baseline(rateRegFit)
+#' baseRate(rateRegFit)
 #' @seealso \code{\link{rateReg}} \code{\link{summary,rateReg-method}}
 #' @export
-setGeneric(name = "baseline",
+setGeneric(name = "baseRate",
            def = function(object, ...) {
-               standardGeneric("baseline")
+               standardGeneric("baseRate")
            })
 
 
-#' @describeIn baseline Extract estiamted baseline rate function 
+#' @describeIn baseRate Extract estiamted baseline rate function 
 #' from rateReg-class object.
 #' @export
-setMethod(f = "baseline", signature = "rateReg",
+setMethod(f = "baseRate", signature = "rateReg",
           definition = function(object, ...) {
-              alpha <- object@estimates$alpha[, "alpha"]
-              names(alpha) <- rownames(object@estimates$alpha)
-              ## return
-              alpha
+              object@estimates$alpha[, "alpha"]
           })
 
