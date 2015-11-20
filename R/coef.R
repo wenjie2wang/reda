@@ -26,39 +26,33 @@
 NULL
 
 
-#' Extract Coefficients Estiamtes from HEART Model
+#' Estimated Coefficients of Covariates
 #'
-#' \code{coef} is a S4 class method which extracts model coefficients 
+#' \code{coef} is a S4 class method which extracts
+#' estimated coefficients of covariates
 #' from the \code{\link{rateReg-class}} object 
 #' produced by function \code{\link{rateReg}}.
 #'
 #' @param object rateReg-class object.
-#' @param ... other arguments for future usage.
-#' @return a named numeric vector.
+#' @param ... Other arguments for future usage.
+#' @return A named numeric vector.
 #' @aliases coef,rateReg-method
 #' @seealso \code{\link{rateReg}} \code{\link{summary,rateReg-method}}
-#' @examples 
-#' library(reda)
-#' rateRegFit <- rateReg(formula = Survr(ID, time, event) ~ x1 + group, 
-#'                   data = simuDat, subset = ID %in% 75:125,
-#'                   baselinePieces = seq(28, 168, length = 6))
-#' coef(rateRegFit)
+#' @examples
+#' ## Please see examples given in \code{\link{rateReg}}.
+#' @importFrom methods setMethod
 #' @importFrom stats coef
 #' @export
 setMethod(f = "coef", signature = "rateReg",
           definition = function(object, ...) {
-              beta <- object@estimates$beta[, "coef"]
-              names(beta) <- rownames(object@estimates$beta)
-              ## return
-              beta
+              object@estimates$beta[, 1]
           })
 
 
-#' Confidence Intervals for HEART Model Coefficients
-#'
-#' \code{confint} is a S4 class generic function for rateReg object, 
+#' Confidence Intervals for Coefficients of Covariates
+#' \code{confint} is a S4 class method for rateReg object, 
 #' which computes confidence intervals 
-#' for all or selected coefficients in a fitted HEART model. 
+#' for all or selected covariates. 
 #'
 #' Under regularity condition (Shao, 2003, 
 #' Theorem 4.16 and Theorem 4.17, page 287, 290), 
@@ -67,11 +61,14 @@ setMethod(f = "coef", signature = "rateReg",
 #' See \emph{Fu et al. (2014)} for more details.
 #' 
 #' @param object rateReg-class object.
-#' @param parm a specification of which parameters are 
+#' @param parm A specification of which parameters are 
 #' to be given confidence intervals, 
 #' either a vector of numbers or a vector of names. 
 #' If missing, all parameters are considered.
-#' @param level the confidence level required.
+#' @param level A optional numeric value to specify
+#' the confidence level required.
+#' By default, the value is 0.95,
+#' which specifies 95\% confidence intervals.
 #' @param ... other arguments for future usage.
 #' @return a numeric matrix with rownames and colnames.
 #' @aliases confint,rateReg-method
@@ -84,43 +81,36 @@ setMethod(f = "coef", signature = "rateReg",
 #' Shao, J. (2003), 
 #' \emph{Mathematical statistics}, Springer texts in statistics, 
 #' New York: Springer, 2nd edition.
-#' @examples 
-#' library(reda)
-#' rateRegFit <- rateReg(formula = Survr(ID, time, event) ~ x1 + group, 
-#'                   data = simuDat, subset = ID %in% 75:125,
-#'                   baselinePieces = seq(28, 168, length = 6))
-#' confint(rateRegFit)
-#' confint(rateRegFit, "x1")
-#' confint(rateRegFit, 2)
+#' @examples
+#' ## Pleas see examples given in \code{\link{rateReg}}.
 #' @importFrom stats confint qnorm 
 #' @export
 setMethod(f = "confint", signature = "rateReg",
           definition = function(object, parm, level = 0.95, ...) {
               ## internal function
-              format.perc <- function (probs, digits){
-                  paste(format(100 * probs, trim = TRUE, scientific = FALSE, 
-                               digits = digits), "%")
+              format.perc <- function (probs){
+                  paste(format(100 * probs, trim = TRUE,
+                               scientific = FALSE), "%", sep = "")
               }
-              betamat <- object@estimates$beta
-              cf <- betamat[, 1]
-              pnames <- attr(betamat, "dimnames")[[1]]
+              betaMat <- object@estimates$beta
+              estCoef <- betaMat[, 1]
+              pnames <- attr(betaMat, "dimnames")[[1]]
               if (missing(parm)) {
-                  parm <- seq(nrow(betamat))
+                  parm <- seq(nrow(betaMat))
               } else if (is.numeric(parm)) { 
-                  parm <- intersect(seq(nrow(betamat)), parm) 
+                  parm <- intersect(seq(nrow(betaMat)), parm) 
               } else if (is.character(parm)) {
                   parm <- match(parm, pnames, nomatch = NULL)
               } else {
                   stop("invalid argument param")
               }
-              a <- (1 - level)/2
-              a <- c(a, 1 - a)
+              a <- (1 + c(-1, 1) * level)/2
               fac <- qnorm(a)
-              pct <- format.perc(a, digits = 3)
+              pct <- format.perc(a)
               ci <- array(NA, dim = c(length(parm), 2L), 
                           dimnames = list(parm, pct))
-              ses <- betamat[parm, 2]
-              ci[] <- cf[parm] + ses %o% fac
+              ses <- betaMat[parm, 2]
+              ci[] <- estCoef[parm] + ses %o% fac
               rownames(ci) <- pnames[parm]
               ## return
               ci

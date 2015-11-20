@@ -125,9 +125,11 @@ NULL
 #'                      knots = c(56, 84, 112), degree = 3)
 #'
 #' show(piecesFit) # or simply call 'piecesRate'
-#' summary()
-#' coef(regFit)
-#' confint(regFit)
+#' summary(piecesFit)
+#' coef(rateRegFit)
+#' confint(rateRegFit)
+#' confint(rateRegFit, "x1")
+#' confint(rateRegFit, 2)
 #' baseline(regFit)
 #' @seealso \code{\link{summary,rateReg-method}}
 #' \code{\link{coef,rateReg-method}}
