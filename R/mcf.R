@@ -392,6 +392,8 @@ gradDelta <- function (Xi, estMcf, degree, bKnots, boundaryKnots,
                        gridTime, bsMat_est, coveffi) {
     gradBeta <- estMcf %o% Xi * coveffi
     allKnots <- c(boundaryKnots[1], bKnots)
+    n_xx <- length(gridTime)
+    stepTime <- diff(c(boundaryKnots[1], gridTime))
     if (degree == 0L) { ## if piecewise constant rate function
         gradAlpha <- matrix(NA, nrow = n_xx, ncol = length(bKnots))
         for (j in seq_along(bKnots)) {
@@ -401,7 +403,7 @@ gradDelta <- function (Xi, estMcf, degree, bKnots, boundaryKnots,
             }, knotj = allKnots[j + 1], knotjm1 = allKnots[j])
         }
     } else { ## degree >= 1, spline rate function
-        gradAlpha <- apply(bsMat_est, 2, cumsum)
+        gradAlpha <- apply(bsMat_est, 2, cumsum) * stepTime 
     }
     gradAlpha <- gradAlpha * coveffi
     ## retrun
