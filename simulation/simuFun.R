@@ -212,12 +212,12 @@ simuSummary <- function (object, beta0 = c(0.5, 0.3), theta0 = 0.5,
 
 ## sample general rate function
 rho0 <- function (t) {
-    0.03 * exp(t / 168) + 0.02 * sin(10 * t / 168)
+    0.05 * exp(t / 168) + 0.02 * sin(10 * t / 168)
 }
 
 ## the integral of sample rate function as sample baseline mcf
 mu0t <- function (t) {
-    0.03 * 168 * (exp(t / 168) - 1) -
+    0.05 * 168 * (exp(t / 168) - 1) -
         0.02 * (168 / 10) * (cos(10 * t / 168) - 1)
 }
 
@@ -255,3 +255,19 @@ plotRate <- function (object, df = 9, lenPara = 12, level = 0.95,
         theme_bw()
     ggOut
 }
+
+## function for simulation study testing implementation of delta method for mcf
+simuMcf <- function (data, ...) {
+    ## note that a lot of settings are fixed for convenience
+    ## fitting
+    piecesFit <- rateReg(Survr(ID, time, event) ~ x1 + x2, data = data,
+                         knots = seq(28, 140, by = 28))
+    splineFit <- rateReg(Survr(ID, time, event) ~ x1 + x2, data = data,
+                         knots = c(56, 112), degree = 3)
+    ## compute mcf
+    mcf1 <- mcf(piecesFit, control = list(length.out = 7), ...)@MCF
+    mcf2 <- mcf(splineFit, control = list(length.out = 7), ...)@MCF
+    ## return
+    cbind(mcf1, mcf2)
+}
+
