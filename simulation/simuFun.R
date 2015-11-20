@@ -12,7 +12,7 @@ if (! require(tidyr)) {install.packages("tidyr"); library(tidyr)}
 if (! require(foreach)) {install.packages("foreach"); library(foreach)}
 if (! require(doParallel)) {install.packages("doParallel"); library(doParallel)}
 if (! require(doRNG)) {install.packages("doRNG"); library(doRNG)}
-if (! require(foreach)) {install.packages("foreach"); library(foreach)}
+if (! require(snow)) {install.packages("foreach"); library(snow)}
 
 ### function part ==============================================================
 ## generate event times for each process (each subject)

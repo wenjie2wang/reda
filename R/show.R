@@ -146,17 +146,14 @@ setMethod(f = "show", signature = "empirMcf",
 #' @export
 setMethod(f = "show", signature = "rateRegMcf",
           definition = function(object) {
-              cat("formula:\n")
+              cat("Formula:\n")
               print(object@formula)
-              cat("\nbaseline pieces:\n")
-              print(attr(object@knots, "name"))
+              cat("\nNew data:\n")
+              print(object@newdata)
+              cat("\nConfidence level:",
+                  paste(format(100 * object@level,
+                               trim = TRUE, scientific = FALSE),
+                        "%", sep = ""), "\n")
               cat("\nMCF:\n")
-              if (nrow(object@MCF) <= 100) {
-                  print(object@MCF)
-                  cat("\n")
-              } else {
-                  print(head(object@MCF, 100))
-                  cat("...\n\n")
-                  cat("Only the first 100 rows are printed.\n")
-              }
+              print(object@MCF)
           })
