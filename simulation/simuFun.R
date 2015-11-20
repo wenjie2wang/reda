@@ -12,6 +12,7 @@ if (! require(tidyr)) {install.packages("tidyr"); library(tidyr)}
 if (! require(foreach)) {install.packages("foreach"); library(foreach)}
 if (! require(doParallel)) {install.packages("doParallel"); library(doParallel)}
 if (! require(doRNG)) {install.packages("doRNG"); library(doRNG)}
+if (! require(foreach)) {install.packages("foreach"); library(foreach)}
 
 ### function part ==============================================================
 ## generate event times for each process (each subject)
@@ -187,6 +188,19 @@ exportClass <- function () {
                        convergCode = "integer",
                        logL = "numeric",
                        fisher = "matrix"))
+
+    setClass(Class = "rateRegMcf", 
+         slots = c(formula = "formula",
+                   knots = "numeric",
+                   degree = "integer",
+                   boundaryKnots = "numeric",
+                   newdata = "matrix",
+                   MCF = "data.frame",
+                   level = "numeric", 
+                   na.action = "character",
+                   control = "list", 
+                   multiGroup = "logical"))
+
     return(NULL)
 }
 

@@ -4,8 +4,11 @@
 ## version controlled by git
 ################################################################################
 
+rm(list = ls())
 ### computation part ===========================================================
-## setups
+## test on baseline mcf for general rate function
+## apply package snow for parallel computing and
+## package doRNG to ensure the reproducibility
 source("simuFun.R")
 source("../R/fit.R")
 source("../R/class.R")
@@ -13,46 +16,90 @@ source("../R/dataCheck.R")
 source("../R/mcf.R")
 source("../R/plot.R")
 
-## test on baseline mcf
-nRepeat <- 4
+## setups
+nRepeat <- 1e3
 nMC <- detectCores()
 set.seed(1216)
 
-## nSubject = 200
-cl <- makeCluster(nMC)
-registerDoParallel(cl)
-baseMcfConst_2e2 <- foreach(j = seq(nRepeat),
-                     .packages = c("foreach", "splines"),
-                     .export = c('Survr', 'rateReg_control', 'rateReg_start',
-                                 'rateReg_mcf_control', 'gradDelta')) %dorng% {
-                         temp <- exportClass()                        
-                         simuDat <- simuDataset(nSubject = 200,
-                                                beta = c(0.5, 0.3),
-                                                theta = 0.5,
-                                                alpha = c(0.06, 0.04, 0.05,
-                                                          0.03, 0.04, 0.05),
-                                                knots = seq(28, 140, by = 28),
-                                                degree = 0L,
-                                                boundaryKnots0 = c(0, 168))
-                         simuMcf(data = simuDat)
+## nSubject = 100
+cl <- makeCluster(nMC, type = "SOCK")
+clusterExport(cl, as.list(ls()))
+clusterEvalQ(cl, library(splines))
+clusterEvalQ(cl, library(foreach))
+clusterSetupRNG(cl)
+mcfList_1e2 <- parLapply(cl, seq(nRepeat),
+                         function(a) {
+                             temp <- exportClass()
+                             simuDat <- simuDataset(nSubject = 100,
+                                                    beta = c(0.05, 0.1),
+                                                    theta = 0.5,
+                                                    boundaryKnots0 = c(0, 168),
+                                                    rho0 = rho0)
+                             simuMcf(data = simuDat)
+                         })
+## Cluster ends
+stopCluster(cl)
 
-                     }
+## nSubject = 200
+cl <- makeCluster(nMC, type = "SOCK")
+clusterExport(cl, as.list(ls()))
+clusterEvalQ(cl, library(splines))
+clusterEvalQ(cl, library(foreach))
+clusterSetupRNG(cl)
+mcfList_2e2 <- parLapply(cl, seq(nRepeat),
+                         function(a) {
+                             temp <- exportClass()
+                             simuDat <- simuDataset(nSubject = 200,
+                                                    beta = c(0.05, 0.1),
+                                                    theta = 0.5,
+                                                    boundaryKnots0 = c(0, 168),
+                                                    rho0 = rho0)
+                             simuMcf(data = simuDat)
+                         })
+## Cluster ends
 stopCluster(cl)
 
 ## nSubject = 500
-
+cl <- makeCluster(nMC, type = "SOCK")
+clusterExport(cl, as.list(ls()))
+clusterEvalQ(cl, library(splines))
+clusterEvalQ(cl, library(foreach))
+clusterSetupRNG(cl)
+mcfList_5e2 <- parLapply(cl, seq(nRepeat),
+                         function(a) {
+                             temp <- exportClass()
+                             simuDat <- simuDataset(nSubject = 500,
+                                                    beta = c(0.05, 0.1),
+                                                    theta = 0.5,
+                                                    boundaryKnots0 = c(0, 168),
+                                                    rho0 = rho0)
+                             simuMcf(data = simuDat)
+                    })
+## Cluster ends
+stopCluster(cl)
 
 ## nSubject = 1000
+cl <- makeCluster(nMC, type = "SOCK")
+clusterExport(cl, as.list(ls()))
+clusterEvalQ(cl, library(splines))
+clusterEvalQ(cl, library(foreach))
+clusterSetupRNG(cl)
+mcfList_1e3 <- parLapply(cl, seq(nRepeat),
+                         function(a) {
+                             temp <- exportClass()
+                             simuDat <- simuDataset(nSubject = 1000,
+                                                    beta = c(0.05, 0.1),
+                                                    theta = 0.5,
+                                                    boundaryKnots0 = c(0, 168),
+                                                    rho0 = rho0)
+                             simuMcf(data = simuDat)
+                         })
+## Cluster ends
+stopCluster(cl)
 
-
-## save results for constant rate function
-
-
-## setting 2: Underlying spline rate ===========================================
-
-
-## setting 3: Underlying general rate ==========================================
-
+## save results
+save(mcfList_1e3, mcfList_2e2, mcfList_5e2, mcfList_1e3,
+     file = "mcfTest.RData")
 
 ## ### tryout ==================================================================
 ## ## setting 1: Underlying constant rate ======================================
