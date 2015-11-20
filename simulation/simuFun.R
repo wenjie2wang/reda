@@ -12,7 +12,8 @@ if (! require(tidyr)) {install.packages("tidyr"); library(tidyr)}
 if (! require(foreach)) {install.packages("foreach"); library(foreach)}
 if (! require(doParallel)) {install.packages("doParallel"); library(doParallel)}
 if (! require(doRNG)) {install.packages("doRNG"); library(doRNG)}
-if (! require(snow)) {install.packages("foreach"); library(snow)}
+if (! require(snow)) {install.packages("snow"); library(snow)}
+if (! require(rlecuyer)) {install.packages("rlecuyer"); library(rlecuyer)}
 
 ### function part ==============================================================
 ## generate event times for each process (each subject)
@@ -285,3 +286,14 @@ simuMcf <- function (data, ...) {
     cbind(mcf1, mcf2)
 }
 
+## function for simulation study to get the fits from piecewise and spline rate
+simuFit <- function (data, ...) {
+  ## note that a lot of settings are fixed for convenience
+  ## fitting
+  piecesFit <- rateReg(Survr(ID, time, event) ~ x1 + x2, data = data,
+                       knots = seq(28, 140, by = 28))
+  splineFit <- rateReg(Survr(ID, time, event) ~ x1 + x2, data = data,
+                       knots = c(56, 112), degree = 3)
+  ## return
+  list(piecesFit = piecesFit, splineFit = splineFit)
+}
