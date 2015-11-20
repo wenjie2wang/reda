@@ -32,6 +32,7 @@ Collate:
     'baseline.R'
     'coef.R'
     'data.R'
+    'dataCheck.R'
     'fit.R'
     'mcf.R'
     'plot.R'

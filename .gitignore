@@ -4,6 +4,7 @@
 *.tar.gz
 NAMESPACE
 man/
+reference/
 *.Rcheck/
 *.*~
 *~
