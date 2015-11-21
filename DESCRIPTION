@@ -1,17 +1,19 @@
 Package: reda
 Title: Recurrent Event Data Analysis
-Version: 0.1.0
-Date: 2015-10-05
-Authors@R: c(person(given = "Wenjie", family = "Wang", 
-                    email = "wenjie.2.wang@uconn.edu",
-                    role = c("aut","cre")),
- 	     person(given = "Haoda", family = "Fu", role = "aut"),
-             person(given = "Jun", family = "Yan", role = "ctb"))
+Version: 0.2.0
+Date: 2015-11-20
+Authors@R: c(
+    person(given = "Wenjie", family = "Wang", 
+           email = "wenjie.2.wang@uconn.edu",
+           role = c("aut", "cre")),
+    person(given = "Haoda", family = "Fu", role = "aut"),
+    person(given = "Jun", family = "Yan", role = "ctb")
+    )
 Description: Functions to fit gamma frailty model
     with a piecewise constant or B-splines baseline rate function
     for recurrent event data.
     Handy functions to compute and plot nonparametric mean
-    cumulative function (MCF) are implemented as well.
+    cumulative function (MCF) are provided as well.
     The most functions are S4 methods that produce S4 class objects.
 Imports:
     utils,
@@ -29,10 +31,10 @@ LazyData: true
 VignetteBuilder: knitr
 Collate:
     'class.R'
+    'dataCheck.R'
     'baseline.R'
     'coef.R'
     'data.R'
-    'dataCheck.R'
     'fit.R'
     'mcf.R'
     'plot.R'
