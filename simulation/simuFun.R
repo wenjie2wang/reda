@@ -227,7 +227,7 @@ simuSummary <- function (object, beta0 = c(0.5, 0.3), theta0 = 0.5,
 
 ## sample general rate function
 rho0 <- function (t) {
-    0.05 * exp(t / 168) + 0.02 * sin(10 * t / 168)
+    0.03 * exp(t / 168) + 0.01 * sin(10 * t / 168)
 }
 
 ## the integral of sample rate function as sample baseline mcf

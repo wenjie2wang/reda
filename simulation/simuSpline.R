@@ -266,7 +266,7 @@ plotRate(rho0_1e3) + ggtitle("1000 Subjects") + ylim(c(0.02, 0.12))
 dev.off()
 
 ## undelying general rate function used
-f <- function (x) { 0.05 * exp(x / 168) + 0.02 * sin(10 * x / 168)}
+f <- function (x) { 0.03 * exp(x / 168) + 0.01 * sin(10 * x / 168)}
 x <- seq(1, 168, length.out = 1000)
 y <- f(x)
 plot(x, y, type = "l", col = "red")
