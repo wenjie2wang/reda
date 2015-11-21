@@ -116,21 +116,35 @@ NULL
 #' 
 #' ## 6 pieces' piecewise constant rate function
 #' piecesFit <- rateReg(Survr(ID, time, event) ~ group + x1, 
-#'                      data = simuDat, subset = ID %in% 1:100,
+#'                      data = simuDat, subset = ID %in% 1:50,
 #'                      knots = seq(28, 140, by = 28))
 #'
 #' ## fit rate function with cubic spline 
 #' splineFit <- rateReg(Survr(ID, time, event) ~ group + x1, 
-#'                      data = simuDat, subset = ID %in% 1:100,
+#'                      data = simuDat, subset = ID %in% 1:50,
 #'                      knots = c(56, 84, 112), degree = 3)
 #'
-#' show(piecesFit) # or simply call 'piecesRate'
+#' ## brief summary of model fits
+#' piecesFit
+#' splineFit
+#'
+#' ## more specific summary
 #' summary(piecesFit)
-#' coef(rateRegFit)
-#' confint(rateRegFit)
-#' confint(rateRegFit, "x1")
-#' confint(rateRegFit, 2)
-#' baseline(regFit)
+#' summary(splineFit)
+#'
+#' ## estimated covariate coefficients
+#' coef(piecesFit)
+#' coef(splineFit)
+#'
+#' ## confidence intervals for covariate coefficients
+#' confint(piecesFit)
+#' confint(piecesFit, "x1", 0.9)
+#' confint(splineFit, 1, 0.975)
+#'
+#' ## estimated coefficients for baseline rate function
+#' baseRate(piecesFit)
+#' baseRate(splineFit)
+#' 
 #' @seealso \code{\link{summary,rateReg-method}}
 #' \code{\link{coef,rateReg-method}}
 #' \code{\link{confint,rateReg-method}}
@@ -532,7 +546,7 @@ rateReg_start <- function (beta, theta = 0.5, alpha, nBeta, nAlpha) {
     ## theta = starting value for random effects
     ## alpha = starting values for piece-wise baseline rate functions
     if (missing(beta)) {
-        beta <- rep(1, nBeta)
+        beta <- rep(0.1, nBeta)
     } else if (length(beta) != nBeta) {
         stop(paste("number of starting values for coefficients of covariates",
                    "does not match with the specified formula"))
@@ -541,7 +555,7 @@ rateReg_start <- function (beta, theta = 0.5, alpha, nBeta, nAlpha) {
         stop("value of parameter for random effects must be > 0")
     }
     if (missing(alpha)) {
-        alpha <- rep(0.15, nAlpha)
+        alpha <- rep(0.05, nAlpha)
     }
     ## return
     list(beta = beta, theta = theta, alpha = alpha)
