@@ -21,17 +21,21 @@
 ################################################################################
 
 
-#' Simulated Dataset for Demonstration
+#' Simulated Sample Dataset for Demonstration
 #'
 #' A simulated data frame with covariates named 
 #' 'ID', 'time', 'event', 'group' and 'x1'.
-#' 
-#' The dataset is simulated by the thinning method developed 
-#' by \emph{Lewis and Shedler (1979)}. 
-#' See \emph{Fu et al. (2014)} for more details.
+#' The event times are rounded to integer. 
+#'
+#' The sample dataset is artificially processed
+#' and only for demonstration of the usage of functions
+#' in this package.
+#' The original dataset is simulated by the thinning
+#' method developed by \emph{Lewis and Shedler (1979)}. 
+#' See also \emph{Fu et al. (2014)} for more details.
 #' @docType data
 #' @name simuDat
-#' @format A data frame with 2403 rows and 5 variables.
+#' @format A data frame with 512 rows and 5 variables.
 #' @references 
 #' Lewis, P. and Shedler, G. (1979), 
 #' ``Simulation of nonhomogeneous Poisson processes by thinning,'' 
@@ -40,10 +44,5 @@
 #' Fu, Haoda, Junxiang Luo, and Yongming Qu. (2014),
 #' ``Hypoglycemic Events Analysis via Recurrent Time-to-Event (HEART) Models,''
 #' \emph{Journal of biopharmaceutical statistics}, 2014 Dec 1, Epub 2014 Dec 1.
-#' @importFrom utils head 
-#' @examples 
-#' data(simuDat)
-#' head(simuDat)
-#' str(simuDat)
 NULL
 

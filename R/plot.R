@@ -69,6 +69,7 @@ setGeneric(name = "plotMcf",
 #' @aliases plotMcf,empirMcf-method
 #' @importFrom utils tail
 #' @importFrom stats setNames
+#' @importFrom grDevices hcl
 #' @importFrom ggplot2 ggplot geom_step aes aes_string scale_color_manual
 #' scale_linetype_manual ylab ggtitle geom_text
 #' @export
@@ -106,13 +107,7 @@ setMethod(f = "plotMcf", signature = "empirMcf",
                           geom_step(mapping = aes(x = time, y = upper), 
                                     linetype = "3313", color = col)
                   }
-              } else {
-                  ## function to emulate the default colors used in ggplot2
-                  gg_color_hue <- function(n){
-                      hues = seq(15, 375, length=n+1)
-                      return(hcl(h=hues, l=65, c=100)[1:n])
-                  }
-                  
+              } else {         
                   legendname <- utils::tail(colnames(MCFdat), n = 1)
                   MCFdat$design <- MCFdat[, legendname]
                   Design <- factor(MCFdat$design)
@@ -171,6 +166,7 @@ setMethod(f = "plotMcf", signature = "empirMcf",
 #' for baseline rate function.
 #' @aliases plotMcf,rateRegMcf-method
 #' @importFrom stats setNames
+#' @importFrom grDevices hcl
 #' @importFrom ggplot2 ggplot geom_line aes aes_string scale_color_manual
 #' scale_linetype_manual ylab ggtitle 
 #' @export
@@ -198,12 +194,6 @@ setMethod(f = "plotMcf", signature = "rateRegMcf",
                                     linetype = "3313", color = col)
                   }
               } else {
-                  ## function to emulate the default colors used in ggplot2
-                  gg_color_hue <- function(n){
-                      hues = seq(15, 375, length=n+1)
-                      return(hcl(h=hues, l=65, c=100)[1:n])
-                  }
-                  
                   legendname <- tail(colnames(MCFdat), n = 1)
                   MCFdat$Design <- MCFdat[, legendname]
                   Design <- factor(MCFdat$Design)
@@ -248,3 +238,9 @@ setMethod(f = "plotMcf", signature = "rateRegMcf",
           })
 
 
+### internal function ==========================================================
+## function to emulate the default colors used in ggplot2
+gg_color_hue <- function (n) {
+    hues <- seq(15, 375, length = n + 1)
+    hcl(h = hues, l = 65, c = 100)[1 : n]
+}

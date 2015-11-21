@@ -42,7 +42,7 @@ NULL
 #'   MCF data frame.
 #' }
 #' 
-#' @param object certain R object generated from rateReg package.
+#' @param object Certain R object produced by package reda.
 #' @name show
 #' @seealso \code{\link{rateReg}} \code{\link{summary,rateReg-method}}
 #' \code{\link{mcf}}
@@ -51,7 +51,6 @@ NULL
 
 #' @rdname show 
 #' @aliases show,rateReg-method
-
 #' @importFrom methods show
 #' @export
 setMethod(f = "show", signature = "rateReg",
@@ -112,7 +111,7 @@ setMethod(f = "show", signature = "summaryHeart",
                   cat("\nCoefficients of pieces:\n")
                   printCoefmat(object@baseRateCoef)    
               }
-              cat("\nloglikelihood: ", object@logL, "\n")
+              cat("\nLoglikelihood: ", object@logL, "\n")
           })
 
 
@@ -123,19 +122,12 @@ setMethod(f = "show", signature = "summaryHeart",
 #' @export
 setMethod(f = "show", signature = "empirMcf",
           definition = function(object) {
-              cat("call: \n")
+              cat("Call: \n")
               print(object@call)
-              cat("\nformula:\n")
+              cat("\nFormula:\n")
               print(object@formula)
               cat("\nMCF:\n")
-              if (nrow(object@MCF) <= 100) {
-                  print(object@MCF)
-                  cat("\n")
-              } else {
-                  print(head(object@MCF, 100))
-                  cat("...\n\n")
-                  cat("Only the first 100 rows are printed.\n")
-              }
+              print(object@MCF)
           })
 
 

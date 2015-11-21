@@ -57,6 +57,6 @@ setGeneric(name = "baseRate",
 #' @export
 setMethod(f = "baseRate", signature = "rateReg",
           definition = function(object, ...) {
-              object@estimates$alpha[, "alpha"]
+              object@estimates$alpha[, 1]
           })
 
