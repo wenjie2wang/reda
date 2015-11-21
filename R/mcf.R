@@ -29,7 +29,7 @@ NULL
 #' Mean Cumulative Function (MCF)
 #' 
 #' S4 class generic function to compute mean empirical cumulative function (MCF)
-#' from sample data or estimated MCF from HEART model.
+#' from sample data or estimated MCF from models.
 #' 
 #' For formula with \code{\link{Survr}} object as response, 
 #' the covariate specified in the rhs of the formula can either be 1 or 
@@ -43,9 +43,9 @@ NULL
 #' For \code{\link{rateReg-class}} object, 
 #' \code{mcf} estimates the MCF of baseline rate function.
 #' 
-#' @param object an object used to dispatch a method.
-#' @param ... other arguments for future usage.
-#' @param level a optional numeric value 
+#' @param object An object used to dispatch a method.
+#' @param ... Other arguments for future usage.
+#' @param level A optional numeric value 
 #' indicating the confidence level required. 
 #' For \code{mcf,formula-method}, it must be between 0.5 and 1.
 #' The default value is 0.95.
@@ -54,18 +54,16 @@ NULL
 #' library(reda)
 #'  
 #' ## empirical MCF
-#' sampleMCF <- mcf(Survr(ID, time, event) ~ group, data = simuDat)
-#' 
-#' mcf(Survr(ID, time, event) ~ group, data = simuDat, 
-#' subset = ID %in% 100:101, na.action = na.omit)
+#' sampleMcf <- mcf(Survr(ID, time, event) ~ group,
+#'                  data = simuDat, subset = ID %in% 1:50)
 #' 
 #' ## estimated MCF for baseline rate function from HEART model
 #' rateRegFit <- rateReg(formula = Survr(ID, time, event) ~ x1 + group, 
-#'                   data = simuDat, subset = ID %in% 75:125,
-#'                   bKnots = seq(28, 168, length = 6))
+#'                       data = simuDat, subset = ID %in% 75:125,
+#'                       bKnots = seq(28, 168, length = 6))
 #' baselineMCF <- mcf(rateRegFit)
 #' 
-#' mcf(rateRegFit, level = 0.9, control = list(length.out = 500))
+#' mcf(rateRegFit, level = 0.9, control = list(length.out = 10))
 #'  
 #' @export
 setGeneric(name = "mcf",
@@ -76,20 +74,24 @@ setGeneric(name = "mcf",
 
 #' @describeIn mcf Empirical mean cumulative function (MCF)
 #' 
-#' @param data an optional data frame, list or environment containing
+#' @param data An optional data frame, list or environment containing
 #' the variables in the model.  If not found in data, the variables are taken 
 #' from \code{environment(formula)}, usually the environment from which 
 #' the function is called.
-#' @param subset an optional vector specifying a subset of observations 
+#' @param subset An optional vector specifying a subset of observations 
 #' to be used in the fitting process.
-#' @param na.action a function which indicates what should the procedure do 
+#' @param na.action A function which indicates what should the procedure do 
 #' if the data contains NAs.  The default is set by the 
 #' na.action setting of \code{\link[base]{options}} and is na.fail if that is 
 #' not set.  The "factory-fresh" default is \code{\link[stats]{na.omit}}.
 #' Another possible value is NULL, no action.  
 #' Value \code{\link[stats]{na.exclude}} can be useful. 
 #' @return \code{\link{empirMcf-class}} or \code{\link{rateRegMcf-class}} object
-#' @aliases mcf,formula-method 
+#' @aliases mcf,formula-method
+#' @references
+#' Nelson, Wayne, \emph{Recurrent Events Data Analysis for Product Repairs,
+#' Disease Recurrences, and Other Applications}, ASA-SIAM, 2003.
+#' 
 #' @importFrom utils head 
 #' @importFrom methods new
 #' @importFrom stats na.fail na.omit na.exclude na.pass
@@ -131,7 +133,7 @@ setMethod(f = "mcf", signature = "formula",
               Terms <- terms(object)
               ord <- attr(Terms, "order")
               if (length(ord) & any(ord != 1)) {
-                  stop("Interaction terms are not valid for this function")
+                  stop("Interaction terms are not valid for this function.")
               }
               ## check for confidence level: 0.5 < level < 1 
               if (level <= 0.5 | level >= 1) {
@@ -177,9 +179,11 @@ setMethod(f = "mcf", signature = "formula",
                       seq(from = tail(rowInd, 1) + 1, by = 1,
                           length.out = nrow(subdat))                            
                   }
-                  outDat[rowInd, ] <- data.frame(sMcf(subdat, level = level),
-                                                 levels(X)[i])
+                  outDat[rowInd, 1:7] <- sMcf(subdat, level = level)
+                  outDat[rowInd, 8] <- i
               }
+              outDat[, 8] <- factor(outDat[, 8], levels = seq(num_levels),
+                                    labels = levels(X))
               colnames(outDat) <- c(colnames(dat)[1:3], "MCF",
                                     "var", "lower", "upper", covar_names)
               out <- methods::new("empirMcf", call = Call, formula = object, 
