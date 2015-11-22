@@ -11,13 +11,12 @@
 source("simuFun.R")
 source("../R/fit.R")
 source("../R/class.R")
-source("../R/dataCheck")
+source("../R/dataCheck.R")
 
 ### fit rateReg model to recover the truth =====================================
 
 ## setting 1: 6 pieces' piecewise constant rate function =======================
 nRepeat <- 1e3
-lenPara <- 9
 nMC <- detectCores()
 set.seed(1216)
 
@@ -29,7 +28,7 @@ const_2e2 <- foreach(j = seq(nRepeat),
                      .export = c("Survr", "rateReg_control", "rateReg_start"),
                      .combine = "rbind") %dorng% {
                          temp <- exportClass()                        
-                         simuFit(nSubject = 200)
+                         simuEst(nSubject = 200)
                      }
 stopCluster(cl)
 
@@ -41,7 +40,7 @@ const_5e2 <- foreach(j = seq(nRepeat),
                      .export = c("Survr", "rateReg_control", "rateReg_start"),
                      .combine = "rbind") %dorng% {
                          temp <- exportClass()                        
-                         simuFit(nSubject = 500)
+                         simuEst(nSubject = 500)
                      }
 stopCluster(cl)
 
@@ -53,7 +52,7 @@ const_1e3 <- foreach(j = seq(nRepeat),
                      .export = c("Survr", "rateReg_control", "rateReg_start"),
                      .combine = "rbind") %dorng% {
                          temp <- exportClass()                        
-                         simuFit(nSubject = 1000)
+                         simuEst(nSubject = 1000)
                      }
 stopCluster(cl)
 ## save results for constant rate function
@@ -62,7 +61,6 @@ save(const_2e2, const_5e2, const_1e3, file = "simuConst.RData")
 
 ## setting 2: cubic spline with 2 knots (df = 6) ===============================
 nRepeat <- 1e3
-lenPara <- 9
 nMC <- detectCores()
 set.seed(1216)
 
@@ -74,7 +72,7 @@ spline_2e2 <- foreach(j = seq(nRepeat),
                       .export = c("Survr", "rateReg_control", "rateReg_start"),
                       .combine = "rbind") %dorng% {
                           temp <- exportClass()                        
-                          simuFit(nSubject = 200, knots0 = c(56, 112),
+                          simuEst(nSubject = 200, knots0 = c(56, 112),
                                   degree = 3, boundaryKnots = c(0 ,168))
                       }
 stopCluster(cl)
@@ -87,7 +85,7 @@ spline_5e2 <- foreach(j = seq(nRepeat),
                       .export = c("Survr", "rateReg_control", "rateReg_start"),
                       .combine = "rbind") %dorng% {
                           temp <- exportClass()                        
-                          simuFit(nSubject = 500, knots0 = c(56, 112),
+                          simuEst(nSubject = 500, knots0 = c(56, 112),
                                   degree = 3, boundaryKnots = c(0 ,168))
                       }
 stopCluster(cl)
@@ -100,7 +98,7 @@ spline_1e3 <- foreach(j = seq(nRepeat),
                       .export = c("Survr", "rateReg_control", "rateReg_start"),
                       .combine = "rbind") %dorng% {
                           temp <- exportClass()                        
-                          simuFit(nSubject = 1000, knots0 = c(56, 112),
+                          simuEst(nSubject = 1000, knots0 = c(56, 112),
                                   degree = 3, boundaryKnots = c(0 ,168))
                       }
 stopCluster(cl)
@@ -110,7 +108,6 @@ save(spline_2e2, spline_5e2, spline_1e3, file = "simuSpline.RData")
 
 ## setting 3: general rate function fitted by cubic spline with 5 knots, df = 9
 nRepeat <- 1e3
-lenPara <- 12
 nMC <- detectCores()
 set.seed(1216)
 
@@ -122,9 +119,8 @@ rho0_2e2 <- foreach(j = seq(nRepeat),
                       .export = c("Survr", "rateReg_control", "rateReg_start"),
                       .combine = "rbind") %dorng% {
                           temp <- exportClass()                        
-                          simuFit(nSubject = 200,
-                                  knots0 = seq(28, 140, by = 28),
-                                  degree = 3, boundaryKnots = c(0 ,168),
+                          simuEst(nSubject = 200, degree0 = 3,
+                                  boundaryKnots = c(0 ,168),
                                   rho0 = rho0)
                       }
 stopCluster(cl)
@@ -137,9 +133,8 @@ rho0_5e2 <- foreach(j = seq(nRepeat),
                       .export = c("Survr", "rateReg_control", "rateReg_start"),
                       .combine = "rbind") %dorng% {
                           temp <- exportClass()                        
-                          simuFit(nSubject = 500,
-                                  knots0 = seq(28, 140, by = 28),
-                                  degree = 3, boundaryKnots = c(0 ,168),
+                          simuEst(nSubject = 500, degree0 = 3,
+                                  boundaryKnots = c(0 ,168),
                                   rho0 = rho0)
                       }
 stopCluster(cl)
@@ -152,9 +147,8 @@ rho0_1e3 <- foreach(j = seq(nRepeat),
                       .export = c("Survr", "rateReg_control", "rateReg_start"),
                       .combine = "rbind") %dorng% {
                           temp <- exportClass()                        
-                          simuFit(nSubject = 1000,
-                                  knots0 = seq(28, 140, by = 28),
-                                  degree = 3, boundaryKnots = c(0 ,168),
+                          simuEst(nSubject = 1000, degree0 = 3,
+                                  boundaryKnots = c(0 ,168),
                                   rho0 = rho0)
                       }
 stopCluster(cl)

@@ -14,6 +14,8 @@ if (! require(doParallel)) {install.packages("doParallel"); library(doParallel)}
 if (! require(doRNG)) {install.packages("doRNG"); library(doRNG)}
 if (! require(snow)) {install.packages("snow"); library(snow)}
 if (! require(rlecuyer)) {install.packages("rlecuyer"); library(rlecuyer)}
+if (! require(plyr)) {install.packages("plyr"); library(plyr)}
+
 
 ### function part ==============================================================
 ## generate event times for each process (each subject)
@@ -120,7 +122,7 @@ simuData <- function (ID = 1, beta = 0.3, theta = 0.5, alpha = 0.06,
     resMat
 }
 
-xFun = function(seed) {
+xFun <- function(seed) {
     if (! missing(seed)) set.seed(seed)
     c(sample(c(0, 1), size = 1),
       round(rnorm(1, mean = 0, sd = 1), 2))
@@ -140,7 +142,7 @@ simuDataset <- function (nSubject, ..., boundaryKnots0,
 
 ## function that extracts estimates and their se
 ## by default, 6 pieces' piecewise constant rate function
-simuFit <- function (nSubject = 200, beta0 = c(0.5, 0.3), theta0 = 0.5,
+simuEst <- function (nSubject = 200, beta0 = c(0.5, 0.3), theta0 = 0.5,
                      alpha0 = c(0.06, 0.04, 0.05, 0.03, 0.04, 0.05),
                      knots0 = seq(from = 28, to = 140, by = 28), degree0 = 0,
                      boundaryKnots0 = c(0, 168),
@@ -149,12 +151,11 @@ simuFit <- function (nSubject = 200, beta0 = c(0.5, 0.3), theta0 = 0.5,
     
     ## generate sample data
     simuDat <- simuDataset(nSubject, beta0, theta0, alpha0, knots0,
-                           degree0, boundaryKnots0, ...)
-    simuDat$x1 <- factor(simuDat$x1, levels = c(0, 1),
-                         labels = c("Treat", "Contr"))
-    colnames(simuDat)[4:5] <- c("group", "x1")
+                           degree0, boundaryKnots0 = boundaryKnots0,
+                           rho0 = rho0, ...)
+
     ## model-fitting
-    oneFit <- rateReg(Survr(ID, time, event) ~ group + x1,
+    oneFit <- rateReg(Survr(ID, time, event) ~ x1 + x2,
                       data = simuDat, knots = knots0, degree = degree0,
                       control = list(boundaryKnots = boundaryKnots0))
     estBeta <- oneFit@estimates$beta[, 1]
@@ -232,8 +233,8 @@ rho0 <- function (t) {
 
 ## the integral of sample rate function as sample baseline mcf
 mu0t <- function (t) {
-    0.05 * 168 * (exp(t / 168) - 1) -
-        0.02 * (168 / 10) * (cos(10 * t / 168) - 1)
+    0.03 * 168 * (exp(t / 168) - 1) -
+        0.01 * (168 / 10) * (cos(10 * t / 168) - 1)
 }
 
 ## plot fits for general rate funciton 
@@ -272,28 +273,55 @@ plotRate <- function (object, df = 9, lenPara = 12, level = 0.95,
 }
 
 ## function for simulation study testing implementation of delta method for mcf
-simuMcf <- function (data, ...) {
+simuMcf <- function (data, piecesFit, splineFit, ...) {
     ## note that a lot of settings are fixed for convenience
-    ## fitting
-    piecesFit <- rateReg(Survr(ID, time, event) ~ x1 + x2, data = data,
-                         knots = seq(28, 140, by = 28))
-    splineFit <- rateReg(Survr(ID, time, event) ~ x1 + x2, data = data,
-                         knots = c(56, 112), degree = 3)
+    if (missing(piecesFit)) {
+        piecesFit <- rateReg(Survr(ID, time, event) ~ x1 + x2, data = data,
+                             knots = seq(28, 140, by = 28))
+    }
+    if (missing(splineFit)) {
+        splineFit <- rateReg(Survr(ID, time, event) ~ x1 + x2, data = data,
+                             knots = c(56, 112), degree = 3)      
+    }
     ## compute mcf
-    mcf1 <- mcf(piecesFit, control = list(length.out = 7), ...)@MCF
-    mcf2 <- mcf(splineFit, control = list(length.out = 7), ...)@MCF
+    mcf1 <- mcf(piecesFit, ...)@MCF
+    mcf2 <- mcf(splineFit, ...)@MCF
     ## return
     cbind(mcf1, mcf2)
 }
 
-## function for simulation study to get the fits from piecewise and spline rate
-simuFit <- function (data, ...) {
-  ## note that a lot of settings are fixed for convenience
-  ## fitting
-  piecesFit <- rateReg(Survr(ID, time, event) ~ x1 + x2, data = data,
-                       knots = seq(28, 140, by = 28))
-  splineFit <- rateReg(Survr(ID, time, event) ~ x1 + x2, data = data,
-                       knots = c(56, 112), degree = 3)
-  ## return
-  list(piecesFit = piecesFit, splineFit = splineFit)
+## function helps summerize mcf test results
+sumrzMcf <- function (mcfList, newdata = c(1, 0.2),
+                      pieces = TRUE, beta0 = c(0, 0)) {
+
+    mu0t <- function (t) {
+        0.05 * 168 * (exp(t / 168) - 1) -
+            0.02 * (168 / 10) * (cos(10 * t / 168) - 1)
+    }
+
+    covEff <- exp(crossprod(newdata, beta0))
+    
+    mcfList <- if (pieces) {
+        lapply(mcfList, function (inpDat) inpDat[, 1:4])
+    } else { # else spline
+        lapply(mcfList, function (inpDat) inpDat[, 5:8])
+    }
+    
+    mcfDat <- subset(do.call("rbind", mcfList),
+                     subset = (! time %in% c(0, 168)))
+    seVec <- apply(mcfDat, 1, function (inpVec) {
+        (inpVec["upper"] - inpVec["MCF"]) / qnorm(0.975)
+    })
+    seDat <- cbind(mcfDat[, 1:2], se = seVec)
+    resDat <- ddply(seDat, .(time), function (inpDat) {
+        meanEstMcf <- mean(inpDat$MCF)
+        seEstMcf <- sd(inpDat$MCF)
+        meanEstSe <- mean(inpDat$se)
+        ## return
+        cbind(meanEstMcf, seEstMcf, meanEstSe)
+    })
+    mcf0 <- mu0t(resDat$time) * covEff
+    ## return
+    cbind(time = resDat[, 1], mcf0, resDat[, -1])
 }
+    

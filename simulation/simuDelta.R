@@ -97,9 +97,13 @@ mcfList_1e3 <- parLapply(cl, seq(nRepeat),
 ## Cluster ends
 stopCluster(cl)
 
-## save results
-save(mcfList_1e3, mcfList_2e2, mcfList_5e2, mcfList_1e3,
+## save results ================================================================
+save(mcfList_1e2, mcfList_2e2, mcfList_5e2, mcfList_1e3,
      file = "mcfTest.RData")
+
+
+## load results ================================================================
+load("mcfTest.RData")
 
 ## ### tryout ==================================================================
 ## ## setting 1: Underlying constant rate ======================================
