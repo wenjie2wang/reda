@@ -111,7 +111,7 @@ simuData <- function (ID = 1, beta = 0.3, theta = 0.5, alpha = 0.06,
     
     ind <- U <= rho_t / rho_m
     timeout <- c(eventTime[ind], tau)
-    eventout <- c(rep(1, length(timeout) - 1), 0)
+    eventout <- c(rep(1L, length(timeout) - 1), 0L)
     nRecord <- length(timeout)
     nBeta <- length(beta)
     xNames <- paste("x", seq(nBeta), sep = "")
@@ -292,7 +292,7 @@ simuMcf <- function (data, piecesFit, splineFit, ...) {
 
 ## function helps summerize mcf test results
 sumrzMcf <- function (mcfList, newdata = c(1, 0.2),
-                      pieces = TRUE, beta0 = c(0, 0)) {
+                      pieces = TRUE, beta0 = c(0, 0), interval = FALSE) {
 
     mu0t <- function (t) {
         0.05 * 168 * (exp(t / 168) - 1) -
@@ -309,17 +309,32 @@ sumrzMcf <- function (mcfList, newdata = c(1, 0.2),
     
     mcfDat <- subset(do.call("rbind", mcfList),
                      subset = (! time %in% c(0, 168)))
-    seVec <- apply(mcfDat, 1, function (inpVec) {
-        (inpVec["upper"] - inpVec["MCF"]) / qnorm(0.975)
-    })
-    seDat <- cbind(mcfDat[, 1:2], se = seVec)
-    resDat <- ddply(seDat, .(time), function (inpDat) {
-        meanEstMcf <- mean(inpDat$MCF)
-        seEstMcf <- sd(inpDat$MCF)
-        meanEstSe <- mean(inpDat$se)
-        ## return
-        cbind(meanEstMcf, seEstMcf, meanEstSe)
-    })
+    if (! interval) {
+        seVec <- apply(mcfDat, 1, function (inpVec) {
+            (inpVec["upper"] - inpVec["MCF"]) / qnorm(0.975)
+        })
+        seDat <- cbind(mcfDat[, 1:2], se = seVec)
+        resDat <- ddply(seDat, .(time), function (inpDat) {
+            meanEstMcf <- mean(inpDat$MCF)
+            seEstMcf <- sd(inpDat$MCF)
+            meanEstSe <- mean(inpDat$se)
+            ## return
+            cbind(meanEstMcf, seEstMcf, meanEstSe)
+        })    
+    } else {
+        resDat <- ddply(mcfDat, .(time), function (inpDat) {
+            meanEstMcf <- mean(inpDat$MCF)
+            intVec <- matrix(quantile(inpDat$MCF,
+                                      probs = c(0.025, 0.975)),
+                             nrow = 1)
+            colnames(intVec) <- c("empirLower", "empirUpper")
+            meanLower <- mean(inpDat$lower)
+            meanUpper <- mean(inpDat$upper)
+            ## return
+            cbind(meanEstMcf, intVec, meanLower, meanUpper)
+        })
+        
+    }
     mcf0 <- mu0t(resDat$time) * covEff
     ## return
     cbind(time = resDat[, 1], mcf0, resDat[, -1])
