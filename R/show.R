@@ -51,7 +51,7 @@ NULL
 
 #' @rdname show 
 #' @aliases show,rateReg-method
-#' @importFrom methods show
+#' @importFrom methods setMethod show
 #' @export
 setMethod(f = "show", signature = "rateReg",
           definition = function(object) {
@@ -82,7 +82,7 @@ setMethod(f = "show", signature = "rateReg",
 
 #' @rdname show 
 #' @aliases show,summaryHeart-method
-#' @importFrom methods show
+#' @importFrom methods setMethod show
 #' @importFrom stats printCoefmat
 #' @export
 setMethod(f = "show", signature = "summaryHeart",
@@ -117,8 +117,7 @@ setMethod(f = "show", signature = "summaryHeart",
 
 #' @rdname show 
 #' @aliases show,empirMcf-method 
-#' @importFrom methods show 
-#' @importFrom utils head
+#' @importFrom methods setMethod show 
 #' @export
 setMethod(f = "show", signature = "empirMcf",
           definition = function(object) {
@@ -133,8 +132,7 @@ setMethod(f = "show", signature = "empirMcf",
 
 #' @rdname show 
 #' @aliases show,rateRegMcf-method
-#' @importFrom methods show 
-#' @importFrom utils head
+#' @importFrom methods setMethod show 
 #' @export
 setMethod(f = "show", signature = "rateRegMcf",
           definition = function(object) {

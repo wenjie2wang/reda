@@ -25,39 +25,27 @@
 #' 
 #' An S4 class generic function dispatched to a certain method 
 #' to plot mean cumulative function by using ggplot2 plotting system. 
-#' So the plots generated are able to be further customized properly.
+#' The plots generated are able to be further customized properly.
 #' 
-#' @param object \code{\link{empirMcf-class}} or 
+#' @param object \code{\link{sampleMcf-class}} or 
 #' \code{\link{rateRegMcf-class}} object.
-#' @param conf.int logical indicating whether to plot confidence interval.
+#' @param conf.int A logical value indicating
+#' whether to plot confidence interval.
 #' The default value is FALSE.
-#' @param ... other arguments for further usage.
-#' @param mark.time logical value controls the labeling of the curves. 
-#' If set to FALSE, no labeling is done. 
-#' If TRUE, then curves are marked at each censoring time 
-#' which is not also a death time.
-#' @param lty an optional numeric vector indicating
+#' @param ... Other arguments for further usage.
+#' @param mark.time A logical value.  
+#' If TRUE, '+' is marked at each censoring time on the curves.
+#' If FALSE, the censoring time would not be marked on the curves. 
+#' @param lty An optional numeric vector indicating
 #' line types specified to different groups with 
 #' 0 = blank, 1 = solid, 2 = dashed, 3 = dotted, 
 #' 4 = dotdash, 5 = longdash, 6 = twodash.
-#' @param col an optional character vector indicating
+#' @param col An optional character vector indicating
 #' line colors specified to different groups. 
 #' @return ggplot object.
 #' @seealso \code{\link{mcf}} 
 #' @examples 
-#' library(reda)
-#'  
-#' ## empirical MCF
-#' sampleMCF <- mcf(Survr(ID, time, event) ~ group, data = simuDat)
-#' plotMcf(sampleMCF, lty = c(1, 3), col = c("orange", "navy"))
-#' 
-#' ## estimated MCF for baseline rate function from HEART model
-#' rateRegFit <- rateReg(formula = Survr(ID, time, event) ~ x1 + group, 
-#'                   data = simuDat, subset = ID %in% 75:125,
-#'                   baselinePieces = seq(28, 168, length = 6))
-#' baselineMCF <- mcf(rateRegFit)
-#' plotMcf(baselineMCF, conf.int = TRUE, col = "blueviolet") + 
-#'   ggplot2::theme_bw()
+#' ## See examples given in \code{\link{mcf}}.
 #' @export
 setGeneric(name = "plotMcf",
            def = function(object, conf.int = FALSE, ...) {
@@ -65,15 +53,14 @@ setGeneric(name = "plotMcf",
            })
 
 
-#' @describeIn plotMcf Plot empirical mean cumulative function (MCF)
-#' @aliases plotMcf,empirMcf-method
+#' @describeIn plotMcf Plot sample mean cumulative function (MCF)
+#' @aliases plotMcf,sampleMcf-method
 #' @importFrom utils tail
 #' @importFrom stats setNames
-#' @importFrom grDevices hcl
 #' @importFrom ggplot2 ggplot geom_step aes aes_string scale_color_manual
 #' scale_linetype_manual ylab ggtitle geom_text
 #' @export
-setMethod(f = "plotMcf", signature = "empirMcf", 
+setMethod(f = "plotMcf", signature = "sampleMcf", 
           definition = function(object, conf.int = FALSE, 
                                 mark.time = FALSE, lty, col, ...) {
               
@@ -157,7 +144,7 @@ setMethod(f = "plotMcf", signature = "empirMcf",
                   }
               }
               p <- p + ylab("MCF") + 
-                  ggtitle("Empirical Mean Cumulative Function")
+                  ggtitle("Sample Mean Cumulative Function")
               return(p)
           })
 
@@ -240,6 +227,7 @@ setMethod(f = "plotMcf", signature = "rateRegMcf",
 
 ### internal function ==========================================================
 ## function to emulate the default colors used in ggplot2
+#' @importFrom grDevices hcl
 gg_color_hue <- function (n) {
     hues <- seq(15, 375, length = n + 1)
     hcl(h = hues, l = 65, c = 100)[1 : n]

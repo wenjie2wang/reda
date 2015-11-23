@@ -29,8 +29,9 @@
 #' The last letter 'r' in 'Survr' represents 'rate'.
 #'
 #' This is a similar function to \code{\link[survrec]{Survr}} in package
-#' \code{survrec}, but with a better checking procedure for recurrent event
-#' data. The checking rules include that
+#' \code{survrec} but with a better checking procedure for recurrent event
+#' data modeled by methods based on counts and rate function.
+#' The checking rules include that
 #' \itemize{
 #'     \item Identificator of each subject cannot be missing.
 #'     \item Event indicator must be coded as 0 (censoring) or 1 (event).
@@ -39,13 +40,11 @@
 #'     \item Event time cannot not be later than censoring time.
 #' }
 #'  
-#' @param ID identificator of each subject. 
-#' @param time time of reccurence. For each subject the last time are censored.
-#' @param event the status indicator, 
-#' 0 = censored, 1 = event. 
+#' @param ID Identificator of each subject. 
+#' @param time Time of reccurence event or censoring.
+#' @param event The status indicator, 0 = censored, 1 = event. 
 #' @aliases Survr
 #' @seealso \code{\link{rateReg}}
-#' @importFrom plyr ddply
 #' @export
 Survr <- function (ID, time, event) {
     inpDat <- data.frame(ID, time, event)
@@ -67,7 +66,8 @@ Survr <- function (ID, time, event) {
 #' @slot formula Formula.
 #' @slot knots A numeric vector.
 #' @slot boundaryKnots A numeric vector.
-#' @slot degree An integer. 
+#' @slot degree An integer.
+#' @slot df List.
 #' @slot estimates List.
 #' @slot control List.
 #' @slot start List.
@@ -86,7 +86,7 @@ setClass(Class = "rateReg",
                    knots = "numeric",
                    boundaryKnots = "numeric",
                    degree = "integer",
-                   df = "integer",
+                   df = "list",
                    estimates = "list",
                    control = "list",
                    start = "list",
@@ -101,15 +101,18 @@ setClass(Class = "rateReg",
 ## create S4 Class called "summaryHeart" for summaryHeart object from summary
 #' An S4 Class to Represent Summary of rateReg-class Object
 #' 
-#' summaryHeart-class is an S4 class with selective slots 
-#' of rateReg-class object.  See ``Slots'' for details.  
+#' \code{summaryHeart-class} is an S4 class with selective slots 
+#' of \code{rateReg-class} object.  See ``Slots'' for details.  
 #' \code{\link{summary}} produces objects of this class. 
 #'  
-#' @slot call function call.
-#' @slot baselinePieces a numeric vector.
-#' @slot coefficients a numeric matrix.
-#' @slot theta numeric a matrix.
-#' @slot baseline a numeric matrix.
+#' @slot call Function call.
+#' @slot knots A numeric vector.
+#' @slot boundaryKnots A numeric vector.
+#' @slot covariateCoef A numeric matrix.
+#' @slot frailtyPar A numeric matrix.
+#' @slot degree An integer.
+#' @slot baseRateCoef A numeric matrix.
+#' @slot logL A numeric value.
 #' @aliases summaryHeart-class
 #' @seealso \code{\link{summary,rateReg-method}} 
 #' @export
@@ -120,25 +123,26 @@ setClass(Class = "summaryHeart",
                    covariateCoef = "matrix",
                    frailtyPar = "matrix",
                    degree = "integer",
-                   df = "integer",
                    baseRateCoef = "matrix",
                    logL = "numeric"))
 
 
-#' An S4 Class to Represent Computed Empirical MCF
+#' An S4 Class to Represent Sample MCF
 #' 
-#' An S4 class to represent computed empirical mean cumulative function (MCF).
+#' An S4 class to represent sample mean cumulative function (MCF).
 #' \code{\link{mcf}} produces objects of this class.  
-#' @slot call function call
-#' @slot formula formula. 
-#' @slot MCF a data.frame.
-#' @slot multiGroup a logical value.
-#' @aliases empirMcf-class
+#' @slot call Function call
+#' @slot formula Formula. 
+#' @slot MCF A data frame.
+#' @slot multiGroup A logical value.
+#' @aliases sampleMcf-class
 #' @seealso \code{\link{mcf,formula-method}}
 #' @importFrom methods setClass
 #' @export
-setClass(Class = "empirMcf", 
-         slots = c(call = "call", formula = "formula", MCF = "data.frame", 
+setClass(Class = "sampleMcf", 
+         slots = c(call = "call",
+                   formula = "formula",
+                   MCF = "data.frame", 
                    multiGroup = "logical"))
 
 
@@ -148,19 +152,23 @@ setClass(Class = "empirMcf",
 #' from HEART Model.
 #' \code{\link{mcf}} produces objects of this class.  
 #' 
-#' @slot formula formula.
-#' @slot baselinePieces a numeric vector.
-#' @slot newdata a numeric matrix.
-#' @slot MCF a data.frame.
-#' @slot level a numeric value between 0 and 1.
-#' @slot na.action a length-one character vector.
-#' @slot control list.
-#' @slot multiGroup a logical value. 
+#' @slot call Function call.
+#' @slot formula Formula.
+#' @slot knots A numeric vector.
+#' @slot degree An integer.
+#' @slot boundaryKnots A numeric vector.
+#' @slot newdata A numeric matrix.
+#' @slot MCF A data frame.
+#' @slot level A numeric value between 0 and 1.
+#' @slot na.action A length-one character vector.
+#' @slot control List.
+#' @slot multiGroup A logical value. 
 #' @aliases rateRegMcf-class
 #' @seealso \code{\link{mcf,rateReg-method}}
 #' @export
 setClass(Class = "rateRegMcf", 
-         slots = c(formula = "formula",
+         slots = c(call = "call",
+                   formula = "formula",
                    knots = "numeric",
                    degree = "integer",
                    boundaryKnots = "numeric",

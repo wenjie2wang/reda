@@ -29,56 +29,61 @@ NULL
 #' Fitting Recurrent Events Regression Model Based on Counts and Rate Function
 #'
 #' \code{rateReg} returns fitted model results.
-#' The default model is a gamma frailty model with a piecewise constant
-#' baseline rate function for recurrent event data. 
-#'
-#' In detail, function \code{rateReg} first constructs the design matrix from
-#' the specified arguments: \code{formula}, \code{data}, \code{subset},
-#' \code{na.action} and \code{constrasts} before fitting the RECREG model.
-#' The constructed design matrix will be checked again to fit in the recurrent
-#' event data framework if any observation with missing covariates is removed.
-#' (see detail in \code{\link{Survr}} for checking rules).
+#' The default model is the Gamma frailty model with one piece constant
+#' baseline rate function, which is equivalent to negative binomial regression. 
+#' Piecewise constant and spline baseline rate function can be specified
+#' and applied to model fitting.
+#'  
+#' Function \code{\link{Survr}} in the formula response first checks
+#' the dataset and will report an error if the dataset do not
+#' fall into recurrent event data framework.
 #' Subject's ID is pinpointed if its observations violate the checking rules.
-#' If the ID is not numerical, the appearing order of the subject in the data
-#' is pinpointed.
+#' See \code{\link{Survr}} for the checking rules.
 #'
+#' Function \code{rateReg} first constructs the design matrix from
+#' the specified arguments: \code{formula}, \code{data}, \code{subset},
+#' \code{na.action} and \code{constrasts} before model fitting.
+#' The constructed design matrix will be checked again whether
+#' fitting in the recurrent event data framework
+#' if any observation with missing covariates is removed.
+#' 
 #' The argument \code{start} is an optional list
 #' which allows users to specify the initial guess for
 #' the parameter values to be estimated.
-#' The possible vector elements in the list include
+#' The available numeric vector elements in the list includes
 #' \itemize{
-#'     \item \code{beta}: coefficient(s) of covariates
-#'         set to be 1 by default.
-#'     \item \code{theta}: coefficient of random effect
-#'         set to be 0.5  by default.
-#'     \item \code{alpha}: coefficient(s) of piece-wise constant baseline
-#'         rate function set to be 0.15 by default.
+#'     \item \code{beta}: Coefficient(s) of covariates,
+#'         set to be 0.1 by default.
+#'     \item \code{theta}: Parameter of frailty random effect,
+#'         set to be 0.5 by default.
+#'     \item \code{alpha}: Coefficient(s) of baseline rate function,
+#'         set to be 0.05 by default.
 #' }
 #'
 #' The argument \code{control} is an optional list
 #' which allows users to control the process of minimization of
 #' negative log likelihood function.
-#' The possible elements in the list include
+#' The available elements in the list include
 #' \itemize{
-#'     \item \code{gradtol}: a positive scalar giving the tolerance at
+#'     \item \code{gradtol}: A positive scalar giving the tolerance at
 #'         which the scaled gradient is considered close enough to zero
 #'         to terminate the algorithm. The default value is 1e-6.
-#'     \item \code{stepmax}: a positive scalar which gives the maximum
+#'     \item \code{stepmax}: A positive scalar which gives the maximum
 #'         allowable scaled step length. The default value is 1e5.
 #'     \item \code{steptol}: A positive scalar providing the minimum
 #'         allowable relative step length. The default value is 1e-6.
-#'     \item \code{iterlim}: a positive integer specifying the maximum
+#'     \item \code{iterlim}: A positive integer specifying the maximum
 #'         number of iterations to be performed before
 #'         the program is terminated. The default value is 1e2.
 #' }
 #' For more details, \code{help(\link[stats]{nlm})}.
 #' 
-#' @param formula Survr object from function \code{\link{Survr}}. 
-#' @param baselinePieces an optional numeric vector consisting of
-#' all the right endpoints of baseline pieces.  The default is maximum of time.
-#' The default model is of one baseline piece, which  is equivalent to 
-#' the negative binomial regression model.
-#' @param data an optional data frame, list or environment containing
+#' @param formula Survr object from function \code{\link{Survr}}.
+#' @param df An optional 
+#' @param knots An optional numeric vector consisting of
+#' all the internal knots of baseline rate function.
+#' The default is NULL, representing no any internal knots.
+#' @param data An optional data frame, list or environment containing
 #' the variables in the model.  If not found in data, the variables are taken 
 #' from \code{environment(formula)}, usually the environment from which 
 #' function \code{\link{rateReg}} is called.
@@ -110,8 +115,8 @@ NULL
 #' @examples
 #' library(reda)
 #' 
-#' ## constant rate function
-#' rateReg(Survr(ID, time, event) ~ group + x1, df = 1,
+#' ## Possion function
+#' rateReg(Survr(ID, time, event) ~ group + x1,
 #'         data = simuDat, subset = ID %in% 1:50)
 #' 
 #' ## 6 pieces' piecewise constant rate function
@@ -189,7 +194,9 @@ rateReg <- function (formula, df = NULL, knots = NULL, degree = 0L,
     mm_na <- stats::model.matrix(formula, data = mf_na,
                                  contrasts.arg = contrasts)
     ## number of covariates excluding intercept
-    nBeta <- ncol(mm) - 1 
+    if ((nBeta <- ncol(mm) - 1) <= 0) {
+        stop("Covariates must be specified in formula.")
+    }
     ## covariates' names
     covar_names <- colnames(mm)[-1]
     ## data 
@@ -257,32 +264,34 @@ rateReg <- function (formula, df = NULL, knots = NULL, degree = 0L,
 
     ## log likelihood
     fit <- stats::nlm(logL_rateReg, ini, data = dat, 
-                      bKnots = bKnots, degree = degree,
-                      bsMat = bsMat, bsMat_est = bsMat_est, xTime = xTime,
+                      bKnots = bKnots, boundaryKnots = boundaryKnots,
+                      degree = degree, bsMat = bsMat,
+                      bsMat_est = bsMat_est, xTime = xTime,
                       hessian = TRUE,
                       gradtol = control$gradtol, stepmax = control$stepmax,
                       steptol = control$steptol, iterlim = control$iterlim)
 
     ## estimates for beta
-    est_beta <- matrix(NA, nrow = nBeta, ncol = 4)
-    colnames(est_beta) <- c("estimates", "se", "z", "Pr(>|z|)")
+    est_beta <- matrix(NA, nrow = nBeta, ncol = 5)
+    colnames(est_beta) <- c("coef", "exp(coef)", "se(coef)", "z", "Pr(>|z|)")
     rownames(est_beta) <- covar_names
     
     se_vec <- sqrt(diag(solve(fit$hessian)))
     est_beta[, 1] <- fit$estimate[1:nBeta]
-    est_beta[, 2] <- se_vec[1:nBeta]
-    est_beta[, 3] <- est_beta[, 1]/est_beta[, 2]
-    est_beta[, 4] <- 2 * stats::pnorm(- abs(est_beta[, 3]))
+    est_beta[, 2] <- exp(est_beta[, 1])
+    est_beta[, 3] <- se_vec[1:nBeta]
+    est_beta[, 4] <- est_beta[, 1]/est_beta[, 3]
+    est_beta[, 5] <- 2 * stats::pnorm(- abs(est_beta[, 4]))
 
     ## estimates for theta
     est_theta <- matrix(NA, nrow = 1, ncol = 2)
-    colnames(est_theta) <- c("estimates", "se")
+    colnames(est_theta) <- c("parameter", "se")
     rownames(est_theta) <- "Frailty"
     est_theta[1, ] <- c(fit$estimate[nBeta + 1], se_vec[nBeta + 1])
 
     ## estimates for alpha
     est_alpha <- matrix(NA, nrow = df, ncol = 2)
-    colnames(est_alpha) <- c("estimates", "se")
+    colnames(est_alpha) <- c("coef", "se(coef)")
     rownames(est_alpha) <- alphaName 
     est_alpha[, 1] <- fit$estimate[(nBeta + 2):length_par]
     est_alpha[, 2] <- se_vec[(nBeta + 2):length_par]
@@ -296,10 +305,13 @@ rateReg <- function (formula, df = NULL, knots = NULL, degree = 0L,
     
     ## output: contrasts
     if (is.null(contrasts)) {
-        contrasts <- list(contrasts = NA)
+        contrasts <- list(contrasts = NULL)
     } else {
         contrasts <- attr(mm, "contrasts")    
     }
+
+    ## output: df, degree of freefom, including beta and theta
+    df <- list(beta = nBeta, theta = 1L, alpha = df)
     
     ## results to return
     results <- methods::new("rateReg", 
@@ -436,13 +448,14 @@ dl_dalpha_part1 <- function (par_alpha, indx, degree, bsMat) {
 ## compute negative log likelihood
 logL_rateReg <- function (par, data, bKnots, degree,
                           boundaryKnots, bsMat, bsMat_est, xTime) {
+    ## number of covariates, possibly zero
     nBeta <- ncol(data) - 3
     ## par = \THETA in the paper
-    par_beta <- par[1 : nBeta]
     par_theta <- par[nBeta + 1]
     par_alpha <- par[(nBeta + 2) : length(par)]
     m <- length(unique(data$ID))
-    expXBeta <- exp(as.matrix(data[, 4 : (3 + nBeta)]) %*% as.matrix(par_beta))
+    xMat <- as.matrix(data[, 4:(3 + nBeta)])
+    expXBeta <- exp(xMat %*% as.matrix(par[1 : nBeta]))
     ## index for event and censoring
     ind_event <- data$event == 1
     ind_cens <- data$event == 0
@@ -480,8 +493,8 @@ logL_rateReg <- function (par, data, bKnots, degree,
     penal <- ifelse(par_theta < 0 | min(par_alpha) < 0, 1e+50, 0)
     negLH <- -logLH + penal
     ## Calculate the gradient
-    xMat_i <- as.matrix(data[ind_cens, 4:(3 + nBeta)])
-    dl_dbeta_i <- sweep(x = xMat_i, MARGIN = 1, FUN = "*", 
+    xMat_i <- xMat[ind_cens, ]
+    dl_dbeta_i <- sweep(x = as.matrix(xMat_i), MARGIN = 1, FUN = "*", 
                         STATS = (n_ij - mui)/(par_theta + mui) * par_theta)
     dl_dbeta <- colSums(dl_dbeta_i)
     dl_dtheta <- m + m * log(par_theta) + 

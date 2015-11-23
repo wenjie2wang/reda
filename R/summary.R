@@ -26,10 +26,10 @@
 NULL
 
 
-#' Summarizing Model Fits
+#' Summarizing a Fitted Model
 #'
-#' \code{summary} returns summary of estimated coefficients of covariates,
-#' rate function bases, and estimated parameter of frailty variable.
+#' \code{summary} mainly returns summary of estimated coefficients of
+#' covariates, rate function bases, and estimated parameter of frailty variable.
 #'
 #' Technitically, \code{summary} returns a
 #' \code{\link{summaryHeart-class}} object,
@@ -37,15 +37,17 @@ NULL
 #' \code{\link{show,summaryHeart-method}}. 
 #'
 #' @param object rateReg object from \code{rateReg}.
-#' @param showCall a logic value with dafault as TRUE,
+#' @param showCall A logic value with dafault as TRUE,
 #' indicating whether method \code{\link{show,summaryHeart-method}} prints out 
 #' the call information of original call of \code{rateReg}.
-#' @param showKnots a logic value with default as TRUE, 
+#' @param showKnots A logic value with default as TRUE, 
 #' indicating whether method \code{\link{show,summaryHeart-method}} prints out 
 #' the internal and boundary knots.
-#' @param ... other arguments for future usage.
+#' @param ... Other arguments for future usage.
 #' @return summaryHeart-class object
 #' @aliases summary,rateReg-method
+#' @examples
+#' ## See examples given in \code{\link{rateReg}}.
 #' @seealso \code{\link{rateReg}} \code{\link{coef,rateReg-method}}
 #' \code{\link{confint,rateReg-method}} \code{\link{baseRate,rateReg-method}}
 #' @importFrom methods new
@@ -68,7 +70,6 @@ setMethod(f = "summary", signature = "rateReg",
                              covariateCoef = beta,
                              frailtyPar = theta,
                              degree = object@degree,
-                             df = object@df, 
                              baseRateCoef = alpha,
                              logL = object@logL)
               ## return

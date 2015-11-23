@@ -38,13 +38,10 @@ NULL
 #' @return A named numeric vector, either pieceswise constants
 #' or coefficients of B-spline bases.
 #' @aliases BaseRate,rateReg-method
-#' @examples 
-#' library(reda)
-#' rateRegFit <- rateReg(formula = Survr(ID, time, event) ~ x1 + group, 
-#'                   data = simuDat, subset = ID %in% 75:125,
-#'                   baselinePieces = seq(28, 168, length = 6))
-#' baseRate(rateRegFit)
+#' @examples
+#' ## See examples given in \code{\link{rateReg}}
 #' @seealso \code{\link{rateReg}} \code{\link{summary,rateReg-method}}
+#' @importFrom methods setGeneric
 #' @export
 setGeneric(name = "baseRate",
            def = function(object, ...) {
@@ -52,8 +49,9 @@ setGeneric(name = "baseRate",
            })
 
 
-#' @describeIn baseRate Extract estiamted baseline rate function 
-#' from rateReg-class object.
+#' @describeIn baseRate Extract estiamted coefficients of
+#' baseline rate function from \code{rateReg-class} object.
+#' @importFrom methods setMethod
 #' @export
 setMethod(f = "baseRate", signature = "rateReg",
           definition = function(object, ...) {
