@@ -1,27 +1,85 @@
 ---
-title: "Introduction to 'reda' via examples"
+title: "Introduction to 'reda' via Examples"
 author: Wenjie Wang
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Introduction to 'heart' via examples}
+  %\VignetteIndexEntry{Introduction to 'reda' via Examples}
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
+  
 ---
 
-# The HEART Model
+The package 'reda' provides functions to fit gamma frailty model with
+either a piecewise constant or a spline as the baseline rate function
+for recurrent event data. What's more, some handy functions are designed,
+such as computing and plotting sample nonparametric mean cumulative function,
+or so-called Nelson-Aalen estimator.
 
-## Model Fitting
+In this vignette, we mainly introduce the usage of the most functions in
+package 'reda' by some examples.
 
-```{r fits, message=FALSE}
-library(reda)
-heartFit <- heart(formula = Survr(ID, time, event) ~ x1 + group, 
-                  data = simuDat, baselinePieces = seq(28, 168, length = 6))
+# Simulated Sample Recurrent Event Data
+
+```{r setup}
+library(reda) # attach package 
+data(simuDat) # attach sample dataset
+```
+
+First of all, the sample recurrent event data 
+we are going to use in the following examples is called 'simuDat'
+and it contains totally `r ncol(simuDat)` observations of `r nrow(simuDat)`.
+
+```{r data}
+str(simuDat)
+```
+
+where
+
+* ID: Subjects indification.
+* time: Event or censoring time.
+* event: Event indicator, 1 = event; 0 = censoring.
+* group: Treatment group indicator.
+* x1: Continuous variable. 
+
+The dataset is originally simulated by thinning method (__cite__)
+and further processed for a better demonstration purpose.
+
+# Model Fitting
+
+The default model when argument df, knots, and degree are not specified
+applies gamma frailty model with (one piece) constant rate function,
+which is equivalent to negative binomial regression of the same
+shape and rate parameter in gamma prior. 
+
+## Constant Rate Function
+
+```{r const}
+constFit <- rateReg(Survr(ID, time, event) ~ group + x1, data = simuDat,
+                    subset = ID %in% 1:50)
+constFit # brief summary
+```
+
+## Piecewise Constant Rate Function
+
+When argument df or knots is given, the model becomes gamma frailty
+model with pices
+
+### Specifying 'df'
+
+
+
+```{r pieces2}
+piecesFit <- rateReg(Survr(ID, time, event) ~ group + x1, 
+                     data = simuDat, subset = ID %in% 1:50,
+                     knots = seq(28, 140, by = 28))
+
+
 ```
 
 ## Estimates 
 
-```{r estimates}
+```{r estimates, eval = FALSE}
 # point estimates of coefficients
 coef(heartFit)
 # confidence interval for coefficients
@@ -32,7 +90,7 @@ baseline(heartFit)
 
 ## Summary of the Model Fits
 
-```{r summary}
+```{r summary, eval = FALSE}
 # a brief summary for the model fits
 heartFit 
 # summary in more details
@@ -43,13 +101,13 @@ summary(heartFit)
 
 ## Empirical MCF
 
-```{r empirMcf}
+```{r empirMcf, eval = FALSE}
 mcf(Survr(ID, time, event) ~ group, data = simuDat,
     subset = ID %in% 100:101, na.action = na.omit, level = 0.9)
 sampleMCF <- mcf(Survr(ID, time, event) ~ group, data = simuDat)
 ```
 
-```{r plotempir, fig.height=6, fig.width=7}
+```{r plotempir, fig.height=6, fig.width=7, eval = FALSE}
 plotMcf(sampleMCF, conf.int = TRUE, mark.time = TRUE, 
         lty = c(1, 3), col = c("orange", "navy"))
 ```
@@ -61,7 +119,7 @@ further customized properly.
 
 ### Baseline MCF 
 
-```{r baselineMCF, fig.height=6, fig.width=7}
+```{r baselineMCF, fig.height=6, fig.width=7, eval = FALSE}
 baselineMcf <- mcf(heartFit)
 plotMcf(baselineMcf, conf.int = TRUE, col = "royalblue") +
     ggplot2::theme_bw()
@@ -69,7 +127,7 @@ plotMcf(baselineMcf, conf.int = TRUE, col = "royalblue") +
 
 ### MCF for certain group(s)
 
-```{r heartMcf, fig.height=6, fig.width=7}
+```{r heartMcf, fig.height=6, fig.width=7, eval = FALSE}
 estmcf <- mcf(heartFit, 
               newdata = data.frame(
                   x1 = c(0.1, 0.1), 
