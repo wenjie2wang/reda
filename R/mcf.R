@@ -5,18 +5,15 @@
 ##
 ##   This file is part of the R package reda.
 ##
-##   The R package reda is free software: you can redistribute it and/or
+##   The R package reda is free software: You can redistribute it and/or
 ##   modify it under the terms of the GNU General Public License as published
 ##   by the Free Software Foundation, either version 3 of the License, or
-##   (at your option) any later version.
+##   any later version (at your option). See the GNU General Public License
+##   at <http://www.gnu.org/licenses/> for details.
 ##
 ##   The R package reda is distributed in the hope that it will be useful,
 ##   but WITHOUT ANY WARRANTY without even the implied warranty of
-##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-##   GNU General Public License for more details.
-##
-##   You should have received a copy of the GNU General Public License
-##   along with the R package reda. If not, see <http://www.gnu.org/licenses/>.
+##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 ##
 ################################################################################
 
@@ -28,18 +25,23 @@ NULL
 
 #' Mean Cumulative Function (MCF)
 #' 
-#' S4 class generic function to compute sample mean cumulative function (MCF)
-#' from data or estimated MCF from models.
+#' An S4 class generic function to estimate mean cumulative function (MCF)
+#' from a fitted model or compute the sample nonparametric MCF,
+#' also called Nelson-Aalen estimator from data.
 #' 
-#' For formula with \code{\link{Survr}} object as response, 
-#' the covariate specified in the right hand side of the formula
-#' should either be 1 or any one factor variable in the data.
+#' For \code{formula} object with \code{\link{Survr}} object as response, 
+#' the covariate specified at the right hand side of the formula
+#' should be either 1 or any one factor variable in the data.
 #' The former computes the overall sample MCF.
 #' The latter computes the sample MCF for each level of
 #' the factor variable specified, respectively.
-#' The sample MCF is also called Nelson-Aalen nonparametric estimator and
-#' computed on each time point from sample data.  
-#' It does not assume any particular underlying model. 
+#' The sample MCF is also called Nelson-Aalen nonparametric estimator
+#' (Nelson, 2003) and computed on each time point from sample data.
+#' The point estimate of sample MCF at each time point does not
+#' assume any particular underlying model. The variance
+#' of estimated MCF (ReliaWiki, 2012) at each time point is estimated
+#' and the approximate confidence intervals based on the asymptotic normality
+#' of log mean cumulative function are provided as well.
 #' 
 #' For \code{\link{rateReg-class}} object, 
 #' \code{mcf} estimates the baseline MCF and its confidence interval
@@ -52,7 +54,15 @@ NULL
 #' @param level A optional numeric value 
 #' indicating the confidence level required. 
 #' The default value is 0.95.
-#' @seealso \code{\link{rateReg}} \code{\link{plotMcf}}
+#' @references
+#' Nelson, W. B. (2003). \emph{Recurrent events data analysis for product
+#' repairs, disease recurrences, and other applications} (Vol. 10). SIAM.
+#'
+#' ReliaWiki. (2012, March 19). Recurrent Event Data Analysis. 
+#' Retrieved November 23, 2015, from
+#' \url{http://reliawiki.org/index.php/Recurrent_Event_Data_Analysis}
+#' @seealso \code{\link{rateReg}} for model fitting;
+#' \code{\link{plotMcf}} for plotting MCF.
 #' @examples 
 #' library(reda)
 #'  
@@ -62,25 +72,11 @@ NULL
 #'
 #' ## plot sample MCF
 #' plotMcf(sampleMcf, lty = c(1, 3), col = c("orange", "navy"),
-#'         mark.time = TRUE, conf.int = TRUE) +
-#'     ggplot2::xlab("Time (Days)") +
-#'     ggplot2::theme_bw()
+#'         mark.time = TRUE) + ggplot2::xlab("Days") + ggplot2::theme_bw()
 #'
-#' ## estimated baseline MCF
-#' constFit <- rateReg(formula = Survr(ID, time, event) ~ x1 + group, 
-#'                     data = simuDat, subset = ID %in% 1:50,
-#'                     knots = seq(28, 140, by = 28))
-#' baselineMcf <- mcf(constFit)
-#' plotMcf(baselineMcf, conf.int = TRUE, col = "blueviolet") + 
-#'     ggplot2::theme_bw()
-#' 
-#' ## estimated MCF for given newdata
-#' newDat <- data.frame(x1 = rep(0, 2), group = c("Treat", "Contr"))
-#' constMcf <- mcf(constFit, newdata = newDat,
-#'                 groupName = "Group", groupLevels = c("Treat", "Contr"))
-#' plotMcf(constMcf, conf.int = TRUE)
+#' ## For estimated MCF from a fitted model,
+#' ## see examples given in function rateReg.
 #'  
-#' @importFrom methods setGeneric
 #' @export
 setGeneric(name = "mcf",
            def = function(object, ...) {
@@ -88,7 +84,7 @@ setGeneric(name = "mcf",
            })
 
 
-#' @describeIn mcf sample cumulative function (MCF)
+#' @describeIn mcf Sample cumulative function (MCF)
 #' 
 #' @param data An optional data frame, list or environment containing
 #' the variables in the model.  If not found in data, the variables are taken 
@@ -98,18 +94,16 @@ setGeneric(name = "mcf",
 #' to be used in the fitting process.
 #' @param na.action A function which indicates what should the procedure do 
 #' if the data contains NAs.  The default is set by the 
-#' na.action setting of \code{\link[base]{options}} and is na.fail if that is 
-#' not set.  The "factory-fresh" default is \code{\link[stats]{na.omit}}.
-#' Another possible value is NULL, no action.  
-#' Value \code{\link[stats]{na.exclude}} can be useful. 
+#' na.action setting of \code{\link[base]{options}}.
+#' The "factory-fresh" default is \code{\link[stats]{na.omit}}.
+#' Other possible values inlcude \code{\link{na.fail}},
+#' \code{\link{na.exclude}}, and \code{\link{na.pass}}.
+#' \code{help(na.fail)} for details.
+#' 
 #' @return \code{\link{sampleMcf-class}} or
 #' \code{\link{rateRegMcf-class}} object
 #' @aliases mcf,formula-method
-#' @references
-#' Nelson, Wayne, \emph{Recurrent Events Data Analysis for Product Repairs,
-#' Disease Recurrences, and Other Applications}, ASA-SIAM, 2003.
-#'  
-#' @importFrom methods setMethod new
+#' @importFrom utils tail
 #' @importFrom stats na.fail na.omit na.exclude na.pass
 #' @export
 setMethod(f = "mcf", signature = "formula", 
@@ -145,7 +139,7 @@ setMethod(f = "mcf", signature = "formula",
               if (! with(data, inherits(eval(object[[2]]), "Survr"))) {
                   stop("Response in formula must be a 'Survr' object.")
               }
-              Terms <- terms(object)
+              Terms <- stats::terms(object)
               ord <- attr(Terms, "order")
               if (length(ord) & any(ord != 1)) {
                   stop("Interaction terms are not valid for this function.")
@@ -188,7 +182,7 @@ setMethod(f = "mcf", signature = "formula",
                   rowInd <- if(i == 1L) {
                       seq(nrow(subdat))
                   } else {
-                      seq(from = tail(rowInd, 1) + 1, by = 1,
+                      seq(from = utils::tail(rowInd, 1) + 1, by = 1,
                           length.out = nrow(subdat))                            
                   }
                   outDat[rowInd, 1:7] <- sMcf(subdat, level = level)
@@ -207,27 +201,31 @@ setMethod(f = "mcf", signature = "formula",
 
 #' @describeIn mcf Estimated Mean Cumulative Function (MCF) from Model Fits
 #' 
-#' @param newdata An optional data.frame. 
-#' @param groupName An optional length-one charactor vector. 
-#' @param groupLevels An optional charactor vector.
+#' @param newdata An optional data frame. If specified, the data frame should
+#' have the same column names with the covariate names appearing in the formula
+#' of original fitting.
+#' @param groupName An optional length-one charactor vector to specify the
+#' name for grouping each unique row in \code{newdata}, such as "gender"
+#' for "male" and "female". The default value is "group".
+#' @param groupLevels An optional charactor vector to specify the levels for
+#' each unique row in \code{newdata}, such as "treatment" and "control".
+#' The default values are capital letters starting from "A". 
 #' @param control An optional list to specify the time grid 
 #' where the MCF are estimated.
-#' The possible elements of the control list include 
+#' The availble elements of the control list include 
 #' \code{grid}, \code{length.out}, \code{from} and \code{to}.
 #' The time grid can be directly specified via element \code{grid}.
 #' A dense time grid is suggested.
-#' \code{length.out} represents the length of grid points.
+#' Element \code{length.out} represents the length of grid points.
 #' The dafault value is 1,000.
-#' \code{from} mean the starting point of grid. It takes 0 as default.
-#' \code{to} means the endpoint of grid. 
-#' It takes the right boundary knot as default.
+#' Element \code{from} means the starting point of grid with default 0.
+#' Element \code{to} represnts the endpoint of grid
+#' with the right boundary knot as default.
 #' When \code{grid} is missing, the grid will be generated 
-#' via \code{\link{seq}} with arguments \code{from}, \code{to} 
+#' by \code{\link[base]{seq}} with arguments \code{from}, \code{to} 
 #' and \code{length.out}
 #' @aliases mcf,rateReg-method
-#' @importFrom methods setMethod new
-#' @importFrom stats terms na.fail na.omit na.exclude na.pass qnorm model.matrix
-#' model.frame delete.response 
+#' @importFrom stats na.fail na.omit na.exclude na.pass
 #' @export
 setMethod(f = "mcf", signature = "rateReg", 
           definition = function(object, newdata, groupName, groupLevels, 
@@ -257,7 +255,7 @@ setMethod(f = "mcf", signature = "rateReg",
                                  intercept = interceptInd)
               }
               ## estimated baseline mcf
-              estMcf <- mu0(par_BaselinePW = alpha, Tvec = gridTime,
+              estMcf <- mu0(par_alpha = alpha, Tvec = gridTime,
                             bKnots = bKnots, degree = degree,
                             boundaryKnots = boundaryKnots,
                             bsMat_est = bsMat_est)
@@ -271,8 +269,8 @@ setMethod(f = "mcf", signature = "rateReg",
               `(Intercept)` <- NULL
               
               ## about newdata
-              tt <- terms(object@formula)
-              Terms <- delete.response(tt)
+              tt <- stats::terms(object@formula)
+              Terms <- stats::delete.response(tt)
               if (missing("na.action")) {
                   na.action <- options("na.action")[[1]]
               } 
@@ -281,15 +279,16 @@ setMethod(f = "mcf", signature = "rateReg",
                   colnames(X) <- covnames
                   rownames(X) <- "1"
               } else {
-                  mf <- model.frame(Terms, newdata, na.action = na.action, 
-                                    xlev = object@xlevels)
+                  mf <- stats::model.frame(Terms, newdata,
+                                           na.action = na.action, 
+                                           xlev = object@xlevels)
                   if (is.null(attr(mf, "na.action"))) {
                       na.action <- options("na.action")[[1]]
                   } else {
                       na.action <- paste("na", class(attr(mf, "na.action")), 
                                          sep = ".")
                   }
-                  X <- model.matrix(Terms, mf,
+                  X <- stats::model.matrix(Terms, mf,
                                     contrasts.arg = object@contrasts$constracts)
                   ## remove intercept and deplicated rows
                   X <- unique(base::subset(X, select = -`(Intercept)`))
@@ -317,7 +316,7 @@ setMethod(f = "mcf", signature = "rateReg",
                   varTime <- apply(gradMat, 1, function (gradVec, covMat) {
                       crossprod(gradVec, covMat) %*% gradVec
                           }, covMat = covPar)
-                  confBand <- qnorm((1 + level) / 2) * sqrt(varTime)
+                  confBand <- stats::qnorm((1 + level) / 2) * sqrt(varTime)
                   mcf_i <- estMcf * coveff[i]
                   lower <- pmax(0, mcf_i - confBand)
                   upper <- mcf_i + confBand
@@ -380,7 +379,6 @@ rateReg_mcf_control <- function (grid, length.out = 1e3, from, to,
 }
 
 ## compute sample MCF
-#' @importFrom stats qnorm
 sMcf <- function(inpDat, level) {
     ## if time ties, put event time before censoring time
     tempDat <- with(inpDat, inpDat[base::order(time, 1 - event), 1:3])
@@ -397,7 +395,7 @@ sMcf <- function(inpDat, level) {
     incre <- inc2 * (inc12 + (num_at_risk - 1) * inc2)
     incre_var <- ifelse(tempDat$event == 0, 0, incre)
     var_smcf <- cumsum(incre_var)
-    wtonexp <- qnorm(0.5 + level / 2) * sqrt(var_smcf) / smcf
+    wtonexp <- stats::qnorm(0.5 + level / 2) * sqrt(var_smcf) / smcf
     upper <- smcf * exp(wtonexp)
     lower <- smcf * exp(- wtonexp)
     ## return

@@ -5,18 +5,15 @@
 ##
 ##   This file is part of the R package reda.
 ##
-##   The R package reda is free software: you can redistribute it and/or
+##   The R package reda is free software: You can redistribute it and/or
 ##   modify it under the terms of the GNU General Public License as published
 ##   by the Free Software Foundation, either version 3 of the License, or
-##   (at your option) any later version.
+##   any later version (at your option). See the GNU General Public License
+##   at <http://www.gnu.org/licenses/> for details.
 ##
 ##   The R package reda is distributed in the hope that it will be useful,
 ##   but WITHOUT ANY WARRANTY without even the implied warranty of
-##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-##   GNU General Public License for more details.
-##
-##   You should have received a copy of the GNU General Public License
-##   along with the R package reda. If not, see <http://www.gnu.org/licenses/>.
+##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 ##
 ################################################################################
 
@@ -30,18 +27,17 @@ NULL
 #' 
 #' An S4 class generic function to extract the estimated coefficients
 #' of baseline rate function. It returns either coefficients
-#' of pieceswise constant rate function
-#' or coefficients of B-spline bases
+#' of pieceswise (including one piece) constant rate function 
+#' or coefficients of B-spline bases.
 #' 
 #' @param object rateReg-class object.
 #' @param ... Other arguments for future usage.
-#' @return A named numeric vector, either pieceswise constants
-#' or coefficients of B-spline bases.
+#' @return A named numeric vector.
 #' @aliases BaseRate,rateReg-method
 #' @examples
-#' ## See examples given in \code{\link{rateReg}}
-#' @seealso \code{\link{rateReg}} \code{\link{summary,rateReg-method}}
-#' @importFrom methods setGeneric
+#' ## See examples given in function rateReg.
+#' @seealso \code{\link{rateReg}} for model fitting;
+#' \code{\link{summary,rateReg-method}} for summary of a fitted model.
 #' @export
 setGeneric(name = "baseRate",
            def = function(object, ...) {
@@ -51,7 +47,6 @@ setGeneric(name = "baseRate",
 
 #' @describeIn baseRate Extract estiamted coefficients of
 #' baseline rate function from \code{rateReg-class} object.
-#' @importFrom methods setMethod
 #' @export
 setMethod(f = "baseRate", signature = "rateReg",
           definition = function(object, ...) {

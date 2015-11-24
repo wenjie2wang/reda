@@ -5,18 +5,15 @@
 ##
 ##   This file is part of the R package reda.
 ##
-##   The R package reda is free software: you can redistribute it and/or
+##   The R package reda is free software: You can redistribute it and/or
 ##   modify it under the terms of the GNU General Public License as published
 ##   by the Free Software Foundation, either version 3 of the License, or
-##   (at your option) any later version.
+##   any later version (at your option). See the GNU General Public License
+##   at <http://www.gnu.org/licenses/> for details.
 ##
 ##   The R package reda is distributed in the hope that it will be useful,
 ##   but WITHOUT ANY WARRANTY without even the implied warranty of
-##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-##   GNU General Public License for more details.
-##
-##   You should have received a copy of the GNU General Public License
-##   along with the R package reda. If not, see <http://www.gnu.org/licenses/>.
+##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 ##
 ################################################################################
 
@@ -27,25 +24,26 @@
 #' to plot mean cumulative function by using ggplot2 plotting system. 
 #' The plots generated are able to be further customized properly.
 #' 
-#' @param object \code{\link{sampleMcf-class}} or 
+#' @param object A \code{\link{sampleMcf-class}} or 
 #' \code{\link{rateRegMcf-class}} object.
 #' @param conf.int A logical value indicating
 #' whether to plot confidence interval.
-#' The default value is FALSE.
+#' The default value is \code{FALSE}.
 #' @param ... Other arguments for further usage.
-#' @param mark.time A logical value.  
-#' If TRUE, '+' is marked at each censoring time on the curves.
-#' If FALSE, the censoring time would not be marked on the curves. 
+#' @param mark.time A logical value with default \code{FALSE}.
+#' If \code{TRUE}, each censoring time is marked by "+" on the MCF curves.
+#' Otherwise, the censoring time would not be marked. 
 #' @param lty An optional numeric vector indicating
-#' line types specified to different groups with 
+#' line types specified to different groups:
 #' 0 = blank, 1 = solid, 2 = dashed, 3 = dotted, 
 #' 4 = dotdash, 5 = longdash, 6 = twodash.
 #' @param col An optional character vector indicating
 #' line colors specified to different groups. 
-#' @return ggplot object.
-#' @seealso \code{\link{mcf}} 
+#' @return A ggplot object.
+#' @seealso \code{\link{mcf}} for estimation of MCF;
+#' \code{\link{rateReg}} for model fitting.
 #' @examples 
-#' ## See examples given in \code{\link{mcf}}.
+#' ## See examples given in function mcf.
 #' @export
 setGeneric(name = "plotMcf",
            def = function(object, conf.int = FALSE, ...) {
@@ -53,10 +51,8 @@ setGeneric(name = "plotMcf",
            })
 
 
-#' @describeIn plotMcf Plot sample mean cumulative function (MCF)
+#' @describeIn plotMcf Plot sample MCF
 #' @aliases plotMcf,sampleMcf-method
-#' @importFrom utils tail
-#' @importFrom stats setNames
 #' @importFrom ggplot2 ggplot geom_step aes aes_string scale_color_manual
 #' scale_linetype_manual ylab ggtitle geom_text
 #' @export
@@ -149,11 +145,8 @@ setMethod(f = "plotMcf", signature = "sampleMcf",
           })
 
 
-#' @describeIn plotMcf Estimated mean cumulative function (MCF) 
-#' for baseline rate function.
+#' @describeIn plotMcf Plot estimated MCF from a fitted model.
 #' @aliases plotMcf,rateRegMcf-method
-#' @importFrom stats setNames
-#' @importFrom grDevices hcl
 #' @importFrom ggplot2 ggplot geom_line aes aes_string scale_color_manual
 #' scale_linetype_manual ylab ggtitle 
 #' @export
@@ -181,7 +174,7 @@ setMethod(f = "plotMcf", signature = "rateRegMcf",
                                     linetype = "3313", color = col)
                   }
               } else {
-                  legendname <- tail(colnames(MCFdat), n = 1)
+                  legendname <- utils::tail(colnames(MCFdat), n = 1)
                   MCFdat$Design <- MCFdat[, legendname]
                   Design <- factor(MCFdat$Design)
                   ndesign = length(levels(Design))
@@ -227,8 +220,7 @@ setMethod(f = "plotMcf", signature = "rateRegMcf",
 
 ### internal function ==========================================================
 ## function to emulate the default colors used in ggplot2
-#' @importFrom grDevices hcl
 gg_color_hue <- function (n) {
     hues <- seq(15, 375, length = n + 1)
-    hcl(h = hues, l = 65, c = 100)[1 : n]
+    grDevices::hcl(h = hues, l = 65, c = 100)[1 : n]
 }

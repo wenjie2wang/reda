@@ -5,18 +5,15 @@
 ##
 ##   This file is part of the R package reda.
 ##
-##   The R package reda is free software: you can redistribute it and/or
+##   The R package reda is free software: You can redistribute it and/or
 ##   modify it under the terms of the GNU General Public License as published
 ##   by the Free Software Foundation, either version 3 of the License, or
-##   (at your option) any later version.
+##   any later version (at your option). See the GNU General Public License
+##   at <http://www.gnu.org/licenses/> for details.
 ##
 ##   The R package reda is distributed in the hope that it will be useful,
 ##   but WITHOUT ANY WARRANTY without even the implied warranty of
-##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-##   GNU General Public License for more details.
-##
-##   You should have received a copy of the GNU General Public License
-##   along with the R package reda. If not, see <http://www.gnu.org/licenses/>.
+##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 ##
 ################################################################################
 
@@ -116,7 +113,7 @@ setClass(Class = "rateReg",
 #' @aliases summaryHeart-class
 #' @seealso \code{\link{summary,rateReg-method}} 
 #' @export
-setClass(Class = "summaryHeart", 
+setClass(Class = "summaryRateReg", 
          slots = c(call = "call", 
                    knots = "numeric",
                    boundaryKnots = "numeric",

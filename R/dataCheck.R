@@ -1,9 +1,28 @@
+################################################################################
+##
+##   R package reda by Wenjie Wang, Haoda Fu, and Jun Yan
+##   Copyright (C) 2015
+##
+##   This file is part of the R package reda.
+##
+##   The R package reda is free software: You can redistribute it and/or
+##   modify it under the terms of the GNU General Public License as published
+##   by the Free Software Foundation, either version 3 of the License, or
+##   any later version (at your option). See the GNU General Public License
+##   at <http://www.gnu.org/licenses/> for details.
+##
+##   The R package reda is distributed in the hope that it will be useful,
+##   but WITHOUT ANY WARRANTY without even the implied warranty of
+##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+##
+################################################################################
+
+
 ## collation after class.R
 #' @include class.R
 NULL
 
 ### internal function ==========================================================
-#' @importFrom plyr ddply
 check_Survr <- function(dat) {
     ## check missing value on 'ID'
     if (any(is.na(dat$ID))) {
@@ -61,6 +80,10 @@ check_Survr <- function(dat) {
 
 ### check function
 check_ddply <- function (subdat) {
+
+    ## nonsense, just to suppress Note from R CMD check --as-cran
+    event <- NULL
+
     subdat <- subdat[order(subdat$time), ]
     ## check missing values on 'time'
     time1 <- with(subset(subdat, event == 1), time)

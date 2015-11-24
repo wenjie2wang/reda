@@ -5,18 +5,15 @@
 ##
 ##   This file is part of the R package reda.
 ##
-##   The R package reda is free software: you can redistribute it and/or
+##   The R package reda is free software: You can redistribute it and/or
 ##   modify it under the terms of the GNU General Public License as published
 ##   by the Free Software Foundation, either version 3 of the License, or
-##   (at your option) any later version.
+##   any later version (at your option). See the GNU General Public License
+##   at <http://www.gnu.org/licenses/> for details.
 ##
 ##   The R package reda is distributed in the hope that it will be useful,
 ##   but WITHOUT ANY WARRANTY without even the implied warranty of
-##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-##   GNU General Public License for more details.
-##
-##   You should have received a copy of the GNU General Public License
-##   along with the R package reda. If not, see <http://www.gnu.org/licenses/>.
+##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 ##
 ################################################################################
 
@@ -30,17 +27,19 @@ NULL
 #'
 #' \code{coef} is a S4 class method which extracts
 #' estimated coefficients of covariates
-#' from the \code{\link{rateReg-class}} object 
+#' from \code{\link{rateReg-class}} object 
 #' produced by function \code{\link{rateReg}}.
 #'
-#' @param object rateReg-class object.
+#' @param object \code{\link{rateReg-class}} object.
 #' @param ... Other arguments for future usage.
 #' @return A named numeric vector.
 #' @aliases coef,rateReg-method
-#' @seealso \code{\link{rateReg}} \code{\link{summary,rateReg-method}}
+#' @seealso \code{\link{rateReg}} for model fitting;
+#' \code{\link{confint,rateReg-method}} for confidence intervals
+#' for covariate coefficients;
+#' \code{\link{summary,rateReg-method}} for summary of a fitted model.
 #' @examples
-#' ## Please see examples given in \code{\link{rateReg}}.
-#' @importFrom methods setMethod
+#' ## See examples given in function rateReg.
 #' @importFrom stats coef
 #' @export
 setMethod(f = "coef", signature = "rateReg",
@@ -49,16 +48,17 @@ setMethod(f = "coef", signature = "rateReg",
           })
 
 
-#' Confidence Intervals for Coefficients of Covariates
-#' \code{confint} is a S4 class method for rateReg object, 
-#' which computes confidence intervals 
-#' for all or selected covariates. 
+#' Confidence Intervals for Covariate Coefficients
+#' 
+#' \code{confint} is a S4 class generic for \code{\link{rateReg}}
+#' object, which returns approximate confidence intervals 
+#' for all or specified covariates. 
 #'
 #' Under regularity condition (Shao, 2003, 
 #' Theorem 4.16 and Theorem 4.17, page 287, 290), 
-#' the confidence intervals are constructed loosely 
+#' the approximate confidence intervals are constructed loosely 
 #' based on Fisher information matrix and estimates of coefficients. 
-#' See \emph{Fu et al. (2014)} for more details.
+#' See \emph{Fu et al. (2014)} for details also.
 #' 
 #' @param object rateReg-class object.
 #' @param parm A specification of which parameters are 
@@ -68,22 +68,24 @@ setMethod(f = "coef", signature = "rateReg",
 #' @param level A optional numeric value to specify
 #' the confidence level required.
 #' By default, the value is 0.95,
-#' which specifies 95\% confidence intervals.
-#' @param ... other arguments for future usage.
-#' @return a numeric matrix with rownames and colnames.
+#' which produces 95\% confidence intervals.
+#' @param ... Other arguments for future usage.
+#' @return A numeric matrix with rownames and colnames.
 #' @aliases confint,rateReg-method
-#' @seealso \code{\link{rateReg}} \code{\link{coef,rateReg-method}}
+#' @seealso \code{\link{rateReg}} for model fitting;
+#' \code{\link{coef,rateReg-method}} for point estimates
+#' of covariate coefficients;
+#' \code{\link{summary,rateReg-method}} for summary of a fitted model.
 #' @references 
-#' Fu, Haoda, Junxiang Luo, and Yongming Qu. (2014),
-#' "Hypoglycemic Events Analysis via Recurrent Time-to-Event (HEART) Models,"
-#'  \emph{Journal of biopharmaceutical statistics}, 2014 Dec 1, Epub 2014 Dec 1.
+#' Fu, H., Luo, L., & Qu Y. (2014). Hypoglycemic Events Analysis via
+#' Recurrent Time-to-Event (HEART) Models. 
+#' \emph{Journal of biopharmaceutical statistics}, Epub 2014 Dec 1.
 #' 
-#' Shao, J. (2003), 
-#' \emph{Mathematical statistics}, Springer texts in statistics, 
-#' New York: Springer, 2nd edition.
+#' Shao, J. (2003), \emph{Mathematical statistics},
+#' Springer texts in statistics, New York: Springer, 2nd Edition.
 #' @examples
-#' ## Pleas see examples given in \code{\link{rateReg}}.
-#' @importFrom stats confint qnorm 
+#' ## See examples given in function rateReg.
+#' @importFrom stats confint 
 #' @export
 setMethod(f = "confint", signature = "rateReg",
           definition = function(object, parm, level = 0.95, ...) {
@@ -105,7 +107,7 @@ setMethod(f = "confint", signature = "rateReg",
                   stop("invalid argument param")
               }
               a <- (1 + c(-1, 1) * level)/2
-              fac <- qnorm(a)
+              fac <- stats::qnorm(a)
               pct <- format.perc(a)
               ci <- array(NA, dim = c(length(parm), 2L), 
                           dimnames = list(parm, pct))

@@ -5,18 +5,15 @@
 ##
 ##   This file is part of the R package reda.
 ##
-##   The R package reda is free software: you can redistribute it and/or
+##   The R package reda is free software: You can redistribute it and/or
 ##   modify it under the terms of the GNU General Public License as published
 ##   by the Free Software Foundation, either version 3 of the License, or
-##   (at your option) any later version.
+##   any later version (at your option). See the GNU General Public License
+##   at <http://www.gnu.org/licenses/> for details.
 ##
 ##   The R package reda is distributed in the hope that it will be useful,
 ##   but WITHOUT ANY WARRANTY without even the implied warranty of
-##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-##   GNU General Public License for more details.
-##
-##   You should have received a copy of the GNU General Public License
-##   along with the R package reda. If not, see <http://www.gnu.org/licenses/>.
+##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 ##
 ################################################################################
 
@@ -26,25 +23,28 @@
 NULL
 
 
-#' Fitting Recurrent Events Regression Model Based on Counts and Rate Function
+#' Fit Recurrent Events Regression Based on Counts and Rate Function
 #'
-#' \code{rateReg} returns fitted model results.
 #' The default model is the Gamma frailty model with one piece constant
-#' baseline rate function, which is equivalent to negative binomial regression. 
-#' Piecewise constant and spline baseline rate function can be specified
-#' and applied to model fitting.
-#'  
+#' baseline rate function, which is equivalent to negative binomial regression
+#' of the same shape and rate parameter in gamma prior. 
+#' Spline and piecewise constant baseline rate function can be
+#' specified and applied to model fitting instead.
+#' \code{rateReg} returns the fitted model
+#' through a \code{\link{rateReg-class}} object.
+#'
+#' @details
 #' Function \code{\link{Survr}} in the formula response first checks
-#' the dataset and will report an error if the dataset do not
+#' the dataset and will report an error if the dataset does not
 #' fall into recurrent event data framework.
-#' Subject's ID is pinpointed if its observations violate the checking rules.
-#' See \code{\link{Survr}} for the checking rules.
+#' Subject's ID is pinpointed if its observation violates any checking rule.
+#' See \code{\link{Survr}} for all the checking rules.
 #'
 #' Function \code{rateReg} first constructs the design matrix from
 #' the specified arguments: \code{formula}, \code{data}, \code{subset},
 #' \code{na.action} and \code{constrasts} before model fitting.
-#' The constructed design matrix will be checked again whether
-#' fitting in the recurrent event data framework
+#' The constructed design matrix will be checked again to
+#' fit the recurrent event data framework
 #' if any observation with missing covariates is removed.
 #' 
 #' The argument \code{start} is an optional list
@@ -76,48 +76,52 @@ NULL
 #'         number of iterations to be performed before
 #'         the program is terminated. The default value is 1e2.
 #' }
-#' For more details, \code{help(\link[stats]{nlm})}.
+#' \code{help(\link[stats]{nlm})} for more details.
 #' 
-#' @param formula Survr object from function \code{\link{Survr}}.
-#' @param df An optional 
-#' @param knots An optional numeric vector consisting of
-#' all the internal knots of baseline rate function.
+#' @param formula \code{Survr} object produced by function \code{\link{Survr}}.
+#' @param df An optional nonnegative integer to specify the degree of freedom
+#' of baseline rate function. If argument \code{knots} or \code{degree} are
+#' specified, \code{df} will be neglected whether it is specified or not.
+#' @param knots An optional numeric vector that represents all the internal
+#' knots of baseline rate function.
 #' The default is NULL, representing no any internal knots.
+#' @param degree An optional nonnegative integer to specify the degree of
+#' spline bases.
 #' @param data An optional data frame, list or environment containing
 #' the variables in the model.  If not found in data, the variables are taken 
 #' from \code{environment(formula)}, usually the environment from which 
 #' function \code{\link{rateReg}} is called.
-#' @param subset an optional vector specifying a subset of observations 
+#' @param subset An optional vector specifying a subset of observations 
 #' to be used in the fitting process.
-#' @param na.action function which indicates what should the procedure do 
+#' @param na.action A function which indicates what should the procedure do 
 #' if the data contains NAs.  The default is set by the 
-#' na.action setting of \code{\link[base]{options}} and is na.fail if that is 
-#' not set.  The "factory-fresh" default is \code{\link[stats]{na.omit}}.
-#' Another possible value is NULL, no action. 
-#' \code{\link[stats]{na.exclude}} can be used as well.
-#' \code{help(na.action)} for more details.
-#' @param start an optional list of starting values for the parameters
+#' na.action setting of \code{\link[base]{options}}.
+#' The "factory-fresh" default is \code{\link[stats]{na.omit}}.
+#' Other possible values inlcude \code{\link{na.fail}},
+#' \code{\link{na.exclude}}, and \code{\link{na.pass}}.
+#' \code{help(na.fail)} for details.
+#' @param start An optional list of starting values for the parameters
 #' to be estimated in the model.
-#' @param control an optional list of parameters for controlling the likelihood 
-#' function maximization process. For more details, users may \code{help(nlm)}.
-#' @param contrasts an optional list, whose entries are values 
+#' @param control An optional list of parameters for controlling the likelihood 
+#' function maximization process. 
+#' @param contrasts An optional list, whose entries are values 
 #' (numeric matrices or character strings naming functions) to be used 
 #' as replacement values for the contrasts replacement function and 
 #' whose names are the names of columns of data containing factors.
-#' See the \code{contrasts.arg} of 
-#' \code{\link[stats]{model.matrix.default}} for more details.
-#' @param ... other arguments for future usage.
-#' @return a \code{\link{rateReg-class}} object.
+#' See \code{contrasts.arg} of \code{\link[stats]{model.matrix.default}}
+#' for details.
+#' @param ... Other arguments for future usage.
+#' @return A \code{\link{rateReg-class}} object.
 #' @references 
-#' Fu, Haoda, Junxiang Luo, and Yongming Qu. (2014),
-#' "Hypoglycemic Events Analysis via Recurrent Time-to-Event (RECREG) Models," 
-#' \emph{Journal of biopharmaceutical statistics}, 2014 Dec 1, Epub 2014 Dec 1.
+#' Fu, H., Luo, L., & Qu Y. (2014). Hypoglycemic Events Analysis via
+#' Recurrent Time-to-Event (HEART) Models. 
+#' \emph{Journal of biopharmaceutical statistics}, Epub 2014 Dec 1.
 #' @examples
 #' library(reda)
 #' 
-#' ## Possion function
-#' rateReg(Survr(ID, time, event) ~ group + x1,
-#'         data = simuDat, subset = ID %in% 1:50)
+#' ## constant rate function
+#' constFit <- rateReg(Survr(ID, time, event) ~ group + x1,
+#'                     data = simuDat, subset = ID %in% 1:50)
 #' 
 #' ## 6 pieces' piecewise constant rate function
 #' piecesFit <- rateReg(Survr(ID, time, event) ~ group + x1, 
@@ -130,10 +134,12 @@ NULL
 #'                      knots = c(56, 84, 112), degree = 3)
 #'
 #' ## brief summary of model fits
+#' constFit
 #' piecesFit
 #' splineFit
 #'
 #' ## more specific summary
+#' summary(constFit)
 #' summary(piecesFit)
 #' summary(splineFit)
 #'
@@ -143,22 +149,35 @@ NULL
 #'
 #' ## confidence intervals for covariate coefficients
 #' confint(piecesFit)
-#' confint(piecesFit, "x1", 0.9)
+#' confint(splineFit, "x1", 0.9)
 #' confint(splineFit, 1, 0.975)
 #'
 #' ## estimated coefficients for baseline rate function
 #' baseRate(piecesFit)
 #' baseRate(splineFit)
+#'
+#' ## estimated baseline mean cumulative function (MCF) from a fitted model
+#' piecesMcf <- mcf(piecesFit)
+#' plotMcf(piecesMcf, conf.int = TRUE, col = "blueviolet") +
+#'     ggplot2::xlab("Days") + ggplot2::theme_bw()
+#'
+#' ## estimated MCF for given new data
+#' newDat <- data.frame(x1 = rep(0, 2), group = c("Treat", "Contr"))
+#' splineMcf <- mcf(splineFit, newdata = newDat,
+#'                  groupName = "Group", groupLevels = c("Treat", "Contr"))
+#' plotMcf(splineMcf, conf.int = TRUE) +
+#'     ggplot2::xlab("Days") + ggplot2::theme_bw()
 #' 
-#' @seealso \code{\link{summary,rateReg-method}}
-#' \code{\link{coef,rateReg-method}}
-#' \code{\link{confint,rateReg-method}}
-#' \code{\link{baseline,rateReg-method}}
-#' \code{\link{mcf,rateReg-method}}
-#' @importFrom methods new
-#' @importFrom stats model.matrix nlm pnorm na.fail na.omit na.exclude na.pass
-#' .getXlevels
+#' @seealso \code{\link{summary,rateReg-method}} for summary of fitted model;
+#' \code{\link{coef,rateReg-method}} for estimated covariate coefficients;
+#' \code{\link{confint,rateReg-method}} for confidence interval of
+#' covariate coefficients;
+#' \code{\link{baseRate,rateReg-method}} for estimated coefficients of baseline
+#' rate function;
+#' \code{\link{mcf,rateReg-method}} for estimated MCF from a fitted model;
+#' \code{\link{plotMcf,rateRegMcf-method}} for plotting estimated MCF.
 #' @importFrom splines bs
+#' @importFrom stats na.fail na.omit na.exclude na.pass .getXlevels
 #' @export
 rateReg <- function (formula, df = NULL, knots = NULL, degree = 0L,
                      data, subset, na.action, start = list(), control = list(),
@@ -234,8 +253,8 @@ rateReg <- function (formula, df = NULL, knots = NULL, degree = 0L,
         knots <- templist$knots
         df <- templist$df
     } else { ## else degree > 0, call 'bs' for spline 
-        bsMat <- bs(x = dat$time, df = df,
-                    knots = knots, degree = degree,
+        bsMat <- splines::bs(x = dat$time, df = df,
+                             knots = knots, degree = degree,
                     intercept = indIntercept, Boundary.knots = boundaryKnots)
         ## update df, knots
         knots <- as.numeric(attr(bsMat, "knots"))
@@ -246,9 +265,9 @@ rateReg <- function (formula, df = NULL, knots = NULL, degree = 0L,
         xTime <- seq(from = min(dat$time), to = max(dat$time),
                      length.out = max(1e3, length(unique(dat$time))))
         xTime <- sort(unique(c(xTime, dat$time[all.equal(dat$event, 0)])))
-        bsMat_est <- bs(xTime, knots = knots, degree = degree,
-                        intercept = indIntercept,
-                        Boundary.knots = boundaryKnots)
+        bsMat_est <- splines::bs(xTime, knots = knots, degree = degree,
+                                 intercept = indIntercept,
+                                 Boundary.knots = boundaryKnots)
     }
 
     ## set bKnots as c(knots, last_boundary_knots)
@@ -360,19 +379,19 @@ pieceConst <- function (x, df = NULL, knots = NULL) {
 }
 
 ## baseline rate function
-rho_0 <- function (par_BaselinePW, Tvec, bKnots, degree, bsMat) {
+rho_0 <- function (par_alpha, Tvec, bKnots, degree, bsMat) {
     ## if piecewise constant, degree == 0
     if (degree == 0) {
         indx <- sapply(Tvec, whereT, bKnots)
-        return(par_BaselinePW[indx])  # function ends
+        return(par_alpha[indx])  # function ends
     } 
     ## else spline with degree >= 1
     ## return
-    bsMat %*% par_BaselinePW
+    bsMat %*% par_alpha
 }
 
 ## mean cumulative function
-mu0 <- function (par_BaselinePW, Tvec, bKnots, degree,
+mu0 <- function (par_alpha, Tvec, bKnots, degree,
                  boundaryKnots, bsMat_est, xTime = NULL) {
     ## if piecewise constant, degree == 0
     if (degree == 0) {
@@ -380,13 +399,13 @@ mu0 <- function (par_BaselinePW, Tvec, bKnots, degree,
         indx <- sapply(Tvec, whereT, bKnots)
         BL_segments <- c(bKnots[1], diff(bKnots))
         ## The MCF at each time point  
-        CumMean_Pieces <- diffinv(BL_segments * par_BaselinePW)[-1]  
+        CumMean_Pieces <- diffinv(BL_segments * par_alpha)[-1]  
         mu_tau <- CumMean_Pieces[indx] -
-            (bKnots[indx] - Tvec) * par_BaselinePW[indx]
+            (bKnots[indx] - Tvec) * par_alpha[indx]
         return(mu_tau)  # function ends
     }
     ## else spline with degree >= 1
-    baseRate <- bsMat_est %*% par_BaselinePW
+    baseRate <- bsMat_est %*% par_alpha
     if (is.null(xTime)) { ## for function mcf
         stepTime <- diff(c(boundaryKnots[1], Tvec))
         mu_tau <- cumsum(baseRate) * stepTime
@@ -460,7 +479,7 @@ logL_rateReg <- function (par, data, bKnots, degree,
     ind_event <- data$event == 1
     ind_cens <- data$event == 0
     ## rate function
-    rho_0_ij <- rho_0(par_BaselinePW = par_alpha,
+    rho_0_ij <- rho_0(par_alpha = par_alpha,
                       Tvec = data$time[ind_event],
                       bKnots = bKnots, degree = degree, 
                       bsMat = bsMat[ind_event, ])
@@ -478,7 +497,7 @@ logL_rateReg <- function (par, data, bKnots, degree,
     sum_log_theta_j_1 <- sum(log(theta_j_1))
     ## integral that involves censoring time tau
     ## baseline mcf
-    mu0i <- mu0(par_BaselinePW = par_alpha, Tvec = data$time[ind_cens],
+    mu0i <- mu0(par_alpha = par_alpha, Tvec = data$time[ind_cens],
                 bKnots = bKnots, degree = degree, boundaryKnots = boundaryKnots,
                 bsMat_est = bsMat_est, xTime = xTime)
     mui <- mu0i * expXBeta[ind_cens]

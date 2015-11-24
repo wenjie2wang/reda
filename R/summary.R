@@ -5,18 +5,15 @@
 ##
 ##   This file is part of the R package reda.
 ##
-##   The R package reda is free software: you can redistribute it and/or
+##   The R package reda is free software: You can redistribute it and/or
 ##   modify it under the terms of the GNU General Public License as published
 ##   by the Free Software Foundation, either version 3 of the License, or
-##   (at your option) any later version.
+##   any later version (at your option). See the GNU General Public License
+##   at <http://www.gnu.org/licenses/> for details.
 ##
 ##   The R package reda is distributed in the hope that it will be useful,
 ##   but WITHOUT ANY WARRANTY without even the implied warranty of
-##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-##   GNU General Public License for more details.
-##
-##   You should have received a copy of the GNU General Public License
-##   along with the R package reda. If not, see <http://www.gnu.org/licenses/>.
+##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 ##
 ################################################################################
 
@@ -32,19 +29,19 @@ NULL
 #' covariates, rate function bases, and estimated parameter of frailty variable.
 #'
 #' Technitically, \code{summary} returns a
-#' \code{\link{summaryHeart-class}} object,
+#' \code{\link{summaryRateReg-class}} object,
 #' which can be printed by
-#' \code{\link{show,summaryHeart-method}}. 
+#' \code{\link{show,summaryRateReg-method}}. 
 #'
 #' @param object rateReg object from \code{rateReg}.
 #' @param showCall A logic value with dafault as TRUE,
-#' indicating whether method \code{\link{show,summaryHeart-method}} prints out 
-#' the call information of original call of \code{rateReg}.
+#' indicating whether method \code{\link{show,summaryRateReg-method}}
+#' prints out the call information of original call of \code{rateReg}.
 #' @param showKnots A logic value with default as TRUE, 
-#' indicating whether method \code{\link{show,summaryHeart-method}} prints out 
-#' the internal and boundary knots.
+#' indicating whether method \code{\link{show,summaryRateReg-method}}
+#' prints out the internal and boundary knots.
 #' @param ... Other arguments for future usage.
-#' @return summaryHeart-class object
+#' @return summaryRateReg-class object
 #' @aliases summary,rateReg-method
 #' @examples
 #' ## See examples given in \code{\link{rateReg}}.
@@ -63,7 +60,7 @@ setMethod(f = "summary", signature = "rateReg",
               beta <- object@estimates$beta
               theta <- object@estimates$theta
               alpha <- object@estimates$alpha
-              results <- new("summaryHeart", 
+              results <- new("summaryRateReg", 
                              call = Call,
                              knots = knots,
                              boundaryKnots = boundaryKnots,

@@ -5,18 +5,15 @@
 ##
 ##   This file is part of the R package reda.
 ##
-##   The R package reda is free software: you can redistribute it and/or
+##   The R package reda is free software: You can redistribute it and/or
 ##   modify it under the terms of the GNU General Public License as published
 ##   by the Free Software Foundation, either version 3 of the License, or
-##   (at your option) any later version.
+##   any later version (at your option). See the GNU General Public License
+##   at <http://www.gnu.org/licenses/> for details.
 ##
 ##   The R package reda is distributed in the hope that it will be useful,
 ##   but WITHOUT ANY WARRANTY without even the implied warranty of
-##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-##   GNU General Public License for more details.
-##
-##   You should have received a copy of the GNU General Public License
-##   along with the R package reda. If not, see <http://www.gnu.org/licenses/>.
+##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 ##
 ################################################################################
 
@@ -32,14 +29,13 @@ NULL
 #' 
 #' \itemize{
 #'   \item For \code{\link{rateReg-class}} object, 
-#'   it prints brief summary of the fitted HEART model.
-#'   \item For \code{\link{summaryHeart-class}} object, 
-#'   it prints summary of the fitted HEART model.
-#'   \item For \code{\link{empirMcf-class}} object,
-#'   it prints formula and the first 100 rows of the computed MCF data frame.
+#'   it prints out brief summary of the fitted model.
+#'   \item For \code{\link{summaryRateReg-class}} object, 
+#'   it prints out summary of the fitted model.
+#'   \item For \code{\link{sampleMcf-class}} object,
+#'   it prints out the formula and the computed MCF data frame.
 #'   \item For \code{\link{rateRegMcf-class}} object,
-#'   it prints formula, baseline pieces and the first 100 rows of the estimated
-#'   MCF data frame.
+#'   it prints formula, baseline pieces and the estimated MCF data frame.
 #' }
 #' 
 #' @param object Certain R object produced by package reda.
@@ -56,9 +52,11 @@ NULL
 setMethod(f = "show", signature = "rateReg",
           definition = function(object) {
               beta <- object@estimates$beta[, 1]
+              names(beta) <- row.names(object@estimates$beta)
               theta <- object@estimates$theta[, 1]
               names(theta) <- NULL
               alpha <- object@estimates$alpha[, 1]
+              names(alpha) <- row.names(object@estimates$alpha)
               cat("Call: \n")
               print(object@call)
               cat("\nCoefficients of covariates: \n") 
@@ -72,7 +70,7 @@ setMethod(f = "show", signature = "rateReg",
               cat(object@boundaryKnots, sep = ", ", fill = TRUE)
               if (object@degree > 0) {
                   cat("\nCoefficients of spline bases:\n")
-                  print(alpha)    
+                  print(alpha)
               } else {
                   cat("\nCoefficients of pieces:\n")
                   print(alpha)
@@ -81,11 +79,11 @@ setMethod(f = "show", signature = "rateReg",
 
 
 #' @rdname show 
-#' @aliases show,summaryHeart-method
+#' @aliases show,summaryRateReg-method
 #' @importFrom methods setMethod show
 #' @importFrom stats printCoefmat
 #' @export
-setMethod(f = "show", signature = "summaryHeart",
+setMethod(f = "show", signature = "summaryRateReg",
           definition = function(object) {
               if (attr(object@call, "show")) {
                   Call <- object@call
@@ -98,8 +96,10 @@ setMethod(f = "show", signature = "summaryHeart",
               cat("\nParameter of frailty: \n")
               print(object@frailtyPar)
               if (attr(object@knots, "show")) {
-                  cat("\nInternal knots: \n")
-                  cat(object@knots, sep = ", ", fill = TRUE)
+                  if (length(object@knots) != 0) {
+                      cat("\nInternal knots: \n")
+                      cat(object@knots, sep = ", ", fill = TRUE)
+                  }
                   cat("\nBoundary knots:\n")
                   cat(object@boundaryKnots, sep = ", ", fill = TRUE)
               }
@@ -116,10 +116,10 @@ setMethod(f = "show", signature = "summaryHeart",
 
 
 #' @rdname show 
-#' @aliases show,empirMcf-method 
+#' @aliases show,sampleMcf-method 
 #' @importFrom methods setMethod show 
 #' @export
-setMethod(f = "show", signature = "empirMcf",
+setMethod(f = "show", signature = "sampleMcf",
           definition = function(object) {
               cat("Call: \n")
               print(object@call)

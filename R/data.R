@@ -5,18 +5,15 @@
 ##
 ##   This file is part of the R package reda.
 ##
-##   The R package reda is free software: you can redistribute it and/or
+##   The R package reda is free software: You can redistribute it and/or
 ##   modify it under the terms of the GNU General Public License as published
 ##   by the Free Software Foundation, either version 3 of the License, or
-##   (at your option) any later version.
+##   any later version (at your option). See the GNU General Public License
+##   at <http://www.gnu.org/licenses/> for details.
 ##
 ##   The R package reda is distributed in the hope that it will be useful,
 ##   but WITHOUT ANY WARRANTY without even the implied warranty of
-##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-##   GNU General Public License for more details.
-##
-##   You should have received a copy of the GNU General Public License
-##   along with the R package reda. If not, see <http://www.gnu.org/licenses/>.
+##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 ##
 ################################################################################
 
@@ -24,21 +21,27 @@
 #' Simulated Sample Dataset for Demonstration
 #'
 #' A simulated data frame with covariates named 
-#' 'ID', 'time', 'event', 'group' and 'x1'.
-#' The event times are rounded to integer. 
+#' 'ID', 'time', 'event', 'group' and 'x1', where
 #'
-#' The sample dataset is artificially processed
-#' and only for demonstration of the usage of functions
-#' in this package.
-#' The original dataset is simulated by the thinning
-#' method developed by \emph{Lewis and Shedler (1979)}. 
+#' \itemize{
+#'     \item \code{ID}: Subjects indification;
+#'     \item \code{time}: Event or censoring time;
+#'     \item \code{event}: Event indicator, 1 = event, 0 = censoring;
+#'     \item \code{group}: Treatment group indicator;
+#'     \item \code{x1}: Continuous variable. 
+#' }
+#'
+#' The sample dataset is originally simulated by the thinning
+#' method developed by \emph{Lewis and Shedler (1979)} and
+#' further processed for a better demonstration purpose.
+#'  
 #' See also \emph{Fu et al. (2014)} for more details.
 #' @docType data
 #' @name simuDat
-#' @format A data frame with 512 rows and 5 variables.
+#' @format A data frame with 500 rows and 5 variables.
 #' @references 
 #' Lewis, P. and Shedler, G. (1979), 
-#' ``Simulation of nonhomogeneous Poisson processes by thinning,'' 
+#' ``Simulation of nonhomogeneous Poisson processes by thinning,''
 #' \emph{Naval Research Logistics Quarterly}, 26, 403--413.
 #' 
 #' Fu, Haoda, Junxiang Luo, and Yongming Qu. (2014),
