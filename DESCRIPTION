@@ -9,19 +9,19 @@ Authors@R: c(
     person(given = "Haoda", family = "Fu", role = "aut"),
     person(given = "Jun", family = "Yan", role = "ctb")
     )
-Description: Functions to fit gamma frailty model
-    with a piecewise constant or B-splines baseline rate function
-    for recurrent event data.
-    Handy functions to compute and plot nonparametric mean
-    cumulative function (MCF) are provided as well.
+Description: Functions that fit gamma frailty model with spline or piecewise 
+    constant baseline rate function for recurrent event data, compute, 
+    and plot parametric mean cumulative function (MCF) from a fitted model 
+    as well as nonparametric sample MCF (Nelson-Aalen estimator) are provided. 
     The most functions are S4 methods that produce S4 class objects.
 Imports:
-    utils,
+    ggplot2,
+    grDevices,
     methods,
+    plyr,
     splines,
     stats,
-    plyr,
-    ggplot2
+    utils
 Suggests:
     knitr
 Depends:
@@ -31,10 +31,10 @@ LazyData: true
 VignetteBuilder: knitr
 Collate:
     'class.R'
-    'dataCheck.R'
     'baseline.R'
     'coef.R'
     'data.R'
+    'dataCheck.R'
     'fit.R'
     'mcf.R'
     'plot.R'
