@@ -23,6 +23,7 @@
 NULL
 
 ### internal function ==========================================================
+#' @importFrom plyr ddply
 check_Survr <- function(dat) {
     ## check missing value on 'ID'
     if (any(is.na(dat$ID))) {

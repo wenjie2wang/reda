@@ -25,29 +25,43 @@ NULL
 
 #' Summarizing a Fitted Model
 #'
-#' \code{summary} mainly returns summary of estimated coefficients of
-#' covariates, rate function bases, and estimated parameter of frailty variable.
-#'
-#' Technitically, \code{summary} returns a
+#' Summary of estimated coefficients of covariates, rate function bases,
+#' and estimated rate parameter of frailty random variable, etc.,
+#' which can be printed out by \code{show}.
+#' 
+#' \code{summary,rateReg-method} returns a
 #' \code{\link{summaryRateReg-class}} object,
-#' which can be printed by
-#' \code{\link{show,summaryRateReg-method}}. 
-#'
-#' @param object rateReg object from \code{rateReg}.
-#' @param showCall A logic value with dafault as TRUE,
-#' indicating whether method \code{\link{show,summaryRateReg-method}}
-#' prints out the call information of original call of \code{rateReg}.
-#' @param showKnots A logic value with default as TRUE, 
-#' indicating whether method \code{\link{show,summaryRateReg-method}}
+#' whose slots include
+#' \itemize{
+#'     \item \code{covarCoef}: Estimated covariate coefficients.
+#'     \item \code{frailtyPar}: Estimated rate parameter of gamma frailty.
+#'     \item \code{baseRateCoef}: Estimated coeffcients of baseline
+#'         rate function.
+#' }
+#' For the meaning of other slots, see \code{\link{rateReg}}.
+#' 
+#' @param object \code{\link{rateReg-class}} object.
+#' @param showCall A logic value with dafault \code{TRUE},
+#' indicating whether function \code{show} 
+#' prints out the original call information of \code{rateReg}.
+#' It may be helpful if one wants a more concise printout.
+#' @param showKnots A logic value with default \code{TRUE}, 
+#' indicating whether function \code{show}
 #' prints out the internal and boundary knots.
+#' Similar to argument \code{showCall}, It may be helpful
+#' if one wants a more concise printout.
 #' @param ... Other arguments for future usage.
 #' @return summaryRateReg-class object
 #' @aliases summary,rateReg-method
 #' @examples
-#' ## See examples given in \code{\link{rateReg}}.
-#' @seealso \code{\link{rateReg}} \code{\link{coef,rateReg-method}}
-#' \code{\link{confint,rateReg-method}} \code{\link{baseRate,rateReg-method}}
-#' @importFrom methods new
+#' ## See examples given in function rateReg.
+#' @seealso \code{\link{rateReg}} for model fitting;
+#' \code{\link{coef,rateReg-method}} for point estimates of
+#' covariate coefficients; 
+#' \code{\link{confint,rateReg-method}} for confidence intervals
+#' of covariate coeffcients;
+#' \code{\link{baseRate,rateReg-method}} for coefficients of baseline
+#' rate function.
 #' @export
 setMethod(f = "summary", signature = "rateReg",
           definition = function(object, showCall = TRUE,
@@ -60,11 +74,12 @@ setMethod(f = "summary", signature = "rateReg",
               beta <- object@estimates$beta
               theta <- object@estimates$theta
               alpha <- object@estimates$alpha
+              ## check on object validity by 'new', validObject(results)
               results <- new("summaryRateReg", 
                              call = Call,
                              knots = knots,
                              boundaryKnots = boundaryKnots,
-                             covariateCoef = beta,
+                             covarCoef = beta,
                              frailtyPar = theta,
                              degree = object@degree,
                              baseRateCoef = alpha,

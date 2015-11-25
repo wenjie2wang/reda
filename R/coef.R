@@ -25,16 +25,17 @@ NULL
 
 #' Estimated Coefficients of Covariates
 #'
-#' \code{coef} is a S4 class method which extracts
-#' estimated coefficients of covariates
-#' from \code{\link{rateReg-class}} object 
-#' produced by function \code{\link{rateReg}}.
+#' \code{coef,rateReg-method} is a S4 class method which extracts
+#' estimated coefficients of covariates from
+#' \code{\link{rateReg-class}} object produced by
+#' function \code{\link{rateReg}}.
 #'
 #' @param object \code{\link{rateReg-class}} object.
 #' @param ... Other arguments for future usage.
 #' @return A named numeric vector.
 #' @aliases coef,rateReg-method
-#' @seealso \code{\link{rateReg}} for model fitting;
+#' @seealso
+#' \code{\link{rateReg}} for model fitting;
 #' \code{\link{confint,rateReg-method}} for confidence intervals
 #' for covariate coefficients;
 #' \code{\link{summary,rateReg-method}} for summary of a fitted model.
@@ -50,15 +51,15 @@ setMethod(f = "coef", signature = "rateReg",
 
 #' Confidence Intervals for Covariate Coefficients
 #' 
-#' \code{confint} is a S4 class generic for \code{\link{rateReg}}
-#' object, which returns approximate confidence intervals 
-#' for all or specified covariates. 
+#' \code{confint,rateReg-method} is a S4 class method for
+#' \code{\link{rateReg}} object, which returns approximate
+#' confidence intervals for all or specified covariates. 
 #'
 #' Under regularity condition (Shao, 2003, 
 #' Theorem 4.16 and Theorem 4.17, page 287, 290), 
 #' the approximate confidence intervals are constructed loosely 
 #' based on Fisher information matrix and estimates of coefficients. 
-#' See \emph{Fu et al. (2014)} for details also.
+#' See Fu et al. (2014) for details also.
 #' 
 #' @param object rateReg-class object.
 #' @param parm A specification of which parameters are 
@@ -72,7 +73,8 @@ setMethod(f = "coef", signature = "rateReg",
 #' @param ... Other arguments for future usage.
 #' @return A numeric matrix with rownames and colnames.
 #' @aliases confint,rateReg-method
-#' @seealso \code{\link{rateReg}} for model fitting;
+#' @seealso
+#' \code{\link{rateReg}} for model fitting;
 #' \code{\link{coef,rateReg-method}} for point estimates
 #' of covariate coefficients;
 #' \code{\link{summary,rateReg-method}} for summary of a fitted model.

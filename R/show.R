@@ -29,25 +29,29 @@ NULL
 #' 
 #' \itemize{
 #'   \item For \code{\link{rateReg-class}} object, 
-#'   it prints out brief summary of the fitted model.
+#'       it prints out brief summary of the fitted model.
 #'   \item For \code{\link{summaryRateReg-class}} object, 
-#'   it prints out summary of the fitted model.
+#'       it prints out summary of the fitted model.
 #'   \item For \code{\link{sampleMcf-class}} object,
-#'   it prints out the formula and the computed MCF data frame.
+#'       it prints out the function call, formula and
+#'       the sample MCF data frame.
 #'   \item For \code{\link{rateRegMcf-class}} object,
-#'   it prints formula, baseline pieces and the estimated MCF data frame.
+#'       it prints formula, new data, confidence level,
+#'       and the estimated MCF data frame.
 #' }
 #' 
-#' @param object Certain R object produced by package reda.
+#' @param object An object used to dispatch a method.
 #' @name show
-#' @seealso \code{\link{rateReg}} \code{\link{summary,rateReg-method}}
-#' \code{\link{mcf}}
+#' @seealso
+#' \code{\link{rateReg}} for model fitting;
+#' \code{\link{summary,rateReg-method}} for summary of a fitted model;
+#' \code{\link{mcf}} for estimation of MCF.
+#' @importFrom methods show
 NULL
 
 
 #' @rdname show 
 #' @aliases show,rateReg-method
-#' @importFrom methods setMethod show
 #' @export
 setMethod(f = "show", signature = "rateReg",
           definition = function(object) {
@@ -80,7 +84,6 @@ setMethod(f = "show", signature = "rateReg",
 
 #' @rdname show 
 #' @aliases show,summaryRateReg-method
-#' @importFrom methods setMethod show
 #' @importFrom stats printCoefmat
 #' @export
 setMethod(f = "show", signature = "summaryRateReg",
@@ -92,7 +95,7 @@ setMethod(f = "show", signature = "summaryRateReg",
                   print(Call)
               }
               cat("\nCoefficients of covariates: \n") 
-              printCoefmat(object@covariateCoef)
+              printCoefmat(object@covarCoef)
               cat("\nParameter of frailty: \n")
               print(object@frailtyPar)
               if (attr(object@knots, "show")) {
@@ -117,7 +120,6 @@ setMethod(f = "show", signature = "summaryRateReg",
 
 #' @rdname show 
 #' @aliases show,sampleMcf-method 
-#' @importFrom methods setMethod show 
 #' @export
 setMethod(f = "show", signature = "sampleMcf",
           definition = function(object) {
@@ -132,7 +134,6 @@ setMethod(f = "show", signature = "sampleMcf",
 
 #' @rdname show 
 #' @aliases show,rateRegMcf-method
-#' @importFrom methods setMethod show 
 #' @export
 setMethod(f = "show", signature = "rateRegMcf",
           definition = function(object) {

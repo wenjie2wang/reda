@@ -25,7 +25,7 @@ NULL
 
 #' Fit Recurrent Events Regression Based on Counts and Rate Function
 #'
-#' The default model is the Gamma frailty model with one piece constant
+#' The default model is the gamma frailty model with one piece constant
 #' baseline rate function, which is equivalent to negative binomial regression
 #' of the same shape and rate parameter in gamma prior. 
 #' Spline and piecewise constant baseline rate function can be
@@ -46,11 +46,16 @@ NULL
 #' The constructed design matrix will be checked again to
 #' fit the recurrent event data framework
 #' if any observation with missing covariates is removed.
+#'
+#' The model fitting process involves minimization of negative log
+#' likelihood function, which calls function \code{\link[stats]{nlm}}
+#' from package \code{stats} internally.
+#' \code{help(nlm)} for more details.
 #' 
 #' The argument \code{start} is an optional list
 #' which allows users to specify the initial guess for
 #' the parameter values to be estimated.
-#' The available numeric vector elements in the list includes
+#' The available numeric vector elements in the list include
 #' \itemize{
 #'     \item \code{beta}: Coefficient(s) of covariates,
 #'         set to be 0.1 by default.
@@ -59,10 +64,10 @@ NULL
 #'     \item \code{alpha}: Coefficient(s) of baseline rate function,
 #'         set to be 0.05 by default.
 #' }
-#'
 #' The argument \code{control} is an optional list
 #' which allows users to control the process of minimization of
-#' negative log likelihood function.
+#' negative log likelihood function and specify the boundary knots,
+#' intercept for baseline rate function.
 #' The available elements in the list include
 #' \itemize{
 #'     \item \code{gradtol}: A positive scalar giving the tolerance at
@@ -75,8 +80,14 @@ NULL
 #'     \item \code{iterlim}: A positive integer specifying the maximum
 #'         number of iterations to be performed before
 #'         the program is terminated. The default value is 1e2.
+#'     \item \code{boundaryKnots}: A length-two numeric vector to specify
+#'         the boundary knots for baseline rate funtion. By default,
+#'         the left boundary knot is zero and the right one takes the
+#'         largest censoring time from data.
+#'     \item \code{intercept}: A logical value specifying whether to
+#'         include intercept in baseline rate function. The default value
+#'         is \code{TRUE}, i.e. the intercept is included.
 #' }
-#' \code{help(\link[stats]{nlm})} for more details.
 #' 
 #' @param formula \code{Survr} object produced by function \code{\link{Survr}}.
 #' @param df An optional nonnegative integer to specify the degree of freedom
@@ -84,7 +95,7 @@ NULL
 #' specified, \code{df} will be neglected whether it is specified or not.
 #' @param knots An optional numeric vector that represents all the internal
 #' knots of baseline rate function.
-#' The default is NULL, representing no any internal knots.
+#' The default is \code{NULL}, representing no any internal knots.
 #' @param degree An optional nonnegative integer to specify the degree of
 #' spline bases.
 #' @param data An optional data frame, list or environment containing
@@ -93,17 +104,19 @@ NULL
 #' function \code{\link{rateReg}} is called.
 #' @param subset An optional vector specifying a subset of observations 
 #' to be used in the fitting process.
-#' @param na.action A function which indicates what should the procedure do 
-#' if the data contains NAs.  The default is set by the 
+#' @param na.action A function which indicates what should the procedure
+#' do if the data contains \code{NA}s.  The default is set by the 
 #' na.action setting of \code{\link[base]{options}}.
 #' The "factory-fresh" default is \code{\link[stats]{na.omit}}.
 #' Other possible values inlcude \code{\link{na.fail}},
 #' \code{\link{na.exclude}}, and \code{\link{na.pass}}.
 #' \code{help(na.fail)} for details.
 #' @param start An optional list of starting values for the parameters
-#' to be estimated in the model.
-#' @param control An optional list of parameters for controlling the likelihood 
-#' function maximization process. 
+#' to be estimated in the model.  See more in section details.
+#' @param control An optional list of parameters to control the
+#' maximization process of negative log likelihood function
+#' and adjust the baseline rate function.
+#' See more in section details.
 #' @param contrasts An optional list, whose entries are values 
 #' (numeric matrices or character strings naming functions) to be used 
 #' as replacement values for the contrasts replacement function and 
@@ -111,7 +124,36 @@ NULL
 #' See \code{contrasts.arg} of \code{\link[stats]{model.matrix.default}}
 #' for details.
 #' @param ... Other arguments for future usage.
-#' @return A \code{\link{rateReg-class}} object.
+#' @return A \code{\link{rateReg-class}} object, whose slots include
+#' \itemize{
+#'     \item \code{call}: Function call of \code{rateReg}.
+#'     \item \code{formula}: Formula used in the model fitting.
+#'     \item \code{knots}: Internal knots specified for the baseline
+#'         rate function.
+#'     \item \code{boundaryKnots}: Boundary knots specified for the baseline
+#'         rate function.
+#'     \item \code{degree}: Degree of spline bases specified in baseline
+#'         rate function.
+#'     \item \code{df}: Degree of freedom of the model specified.
+#'     \item \code{estimates}: Estimated coefficients of covariates and
+#'         baseline rate function, and estimated rate parameter of
+#'         gamma frailty variable.
+#'     \item \code{control}: The control list specified for model fitting.
+#'     \item \code{start}: The initial guess specified for the parameters
+#'         to be estimated.
+#'     \item \code{na.action}: The procedure specified to deal with
+#'         missing values in the covariate.
+#'     \item \code{xlevels}: A list that records the levels in
+#'         each factor variable.
+#'     \item \code{contrasts}: Contrasts specified and used for each
+#'         factor variable.
+#'     \item \code{convergCode}: Value \code{code} returned by function
+#'         \code{\link[stats]{nlm}}, which is an integer indicating why the
+#'         optimization process terminated. \code{help(nlm)} for details.
+#'     \item \code{logL}: Log likelihood of the fitted model.
+#'     \item \code{fisher}: Observed Fisher information matrix.
+#' }
+#' 
 #' @references 
 #' Fu, H., Luo, L., & Qu Y. (2014). Hypoglycemic Events Analysis via
 #' Recurrent Time-to-Event (HEART) Models. 
@@ -163,12 +205,13 @@ NULL
 #'
 #' ## estimated MCF for given new data
 #' newDat <- data.frame(x1 = rep(0, 2), group = c("Treat", "Contr"))
-#' splineMcf <- mcf(splineFit, newdata = newDat,
-#'                  groupName = "Group", groupLevels = c("Treat", "Contr"))
-#' plotMcf(splineMcf, conf.int = TRUE) +
+#' splineMcf <- mcf(splineFit, newdata = newDat, groupName = "Group",
+#'                  groupLevels = c("Treatment", "Control"))
+#' plotMcf(splineMcf, conf.int = TRUE, lty = c(1, 5)) +
 #'     ggplot2::xlab("Days") + ggplot2::theme_bw()
 #' 
-#' @seealso \code{\link{summary,rateReg-method}} for summary of fitted model;
+#' @seealso
+#' \code{\link{summary,rateReg-method}} for summary of fitted model;
 #' \code{\link{coef,rateReg-method}} for estimated covariate coefficients;
 #' \code{\link{confint,rateReg-method}} for confidence interval of
 #' covariate coefficients;
@@ -213,7 +256,7 @@ rateReg <- function (formula, df = NULL, knots = NULL, degree = 0L,
     mm_na <- stats::model.matrix(formula, data = mf_na,
                                  contrasts.arg = contrasts)
     ## number of covariates excluding intercept
-    if ((nBeta <- ncol(mm) - 1) <= 0) {
+    if ((nBeta <- ncol(mm) - 1L) <= 0) {
         stop("Covariates must be specified in formula.")
     }
     ## covariates' names
@@ -541,9 +584,9 @@ logL_rateReg <- function (par, data, bKnots, degree,
 }
 
 rateReg_control <- function (gradtol = 1e-6, stepmax = 1e5, 
-                           steptol = 1e-6, iterlim = 1e2,
-                           boundaryKnots = NULL, intercept = TRUE,
-                           time) {
+                             steptol = 1e-6, iterlim = 1e2,
+                             boundaryKnots = NULL, intercept = TRUE,
+                             time) {
     ## controls for function stats::nlm
     if (!is.numeric(gradtol) || gradtol <= 0) {
         stop("value of 'gradtol' must be > 0")

@@ -21,11 +21,10 @@
 #' Plot Mean Cumulative Function (MCF)
 #' 
 #' An S4 class generic function dispatched to a certain method 
-#' to plot mean cumulative function by using ggplot2 plotting system. 
+#' to plot mean cumulative function by using \code{ggplot2} plotting system. 
 #' The plots generated are able to be further customized properly.
 #' 
-#' @param object A \code{\link{sampleMcf-class}} or 
-#' \code{\link{rateRegMcf-class}} object.
+#' @param object An object used to dispatch a method.
 #' @param conf.int A logical value indicating
 #' whether to plot confidence interval.
 #' The default value is \code{FALSE}.
@@ -39,11 +38,11 @@
 #' 4 = dotdash, 5 = longdash, 6 = twodash.
 #' @param col An optional character vector indicating
 #' line colors specified to different groups. 
-#' @return A ggplot object.
+#' @return A \code{ggplot} object.
 #' @seealso \code{\link{mcf}} for estimation of MCF;
 #' \code{\link{rateReg}} for model fitting.
 #' @examples 
-#' ## See examples given in function mcf.
+#' ## See examples given in function mcf and rateReg.
 #' @export
 setGeneric(name = "plotMcf",
            def = function(object, conf.int = FALSE, ...) {
@@ -51,7 +50,7 @@ setGeneric(name = "plotMcf",
            })
 
 
-#' @describeIn plotMcf Plot sample MCF
+#' @describeIn plotMcf Plot sample MCF from data.
 #' @aliases plotMcf,sampleMcf-method
 #' @importFrom ggplot2 ggplot geom_step aes aes_string scale_color_manual
 #' scale_linetype_manual ylab ggtitle geom_text
@@ -220,6 +219,7 @@ setMethod(f = "plotMcf", signature = "rateRegMcf",
 
 ### internal function ==========================================================
 ## function to emulate the default colors used in ggplot2
+#' @importFrom grDevices hcl
 gg_color_hue <- function (n) {
     hues <- seq(15, 375, length = n + 1)
     grDevices::hcl(h = hues, l = 65, c = 100)[1 : n]

@@ -26,8 +26,8 @@ NULL
 #' Mean Cumulative Function (MCF)
 #' 
 #' An S4 class generic function to estimate mean cumulative function (MCF)
-#' from a fitted model or compute the sample nonparametric MCF,
-#' also called Nelson-Aalen estimator from data.
+#' from a fitted model or compute the sample nonparametric MCF
+#' (also called Nelson-Aalen estimator) from data.
 #' 
 #' For \code{formula} object with \code{\link{Survr}} object as response, 
 #' the covariate specified at the right hand side of the formula
@@ -54,6 +54,18 @@ NULL
 #' @param level A optional numeric value 
 #' indicating the confidence level required. 
 #' The default value is 0.95.
+#' @return
+#' \code{\link{sampleMcf-class}} or \code{\link{rateRegMcf-class}} object.
+#' Their slots include
+#' \itemize{
+#'     \item \code{level}: Confidence level specified.
+#'     \item \code{MCF}: Mean cumulative function at each time point.
+#'     \item \code{multiGroup}: A logical value indicating whether MCF
+#'         is estimated for different specified group.
+#'     \item \code{newdata}: Given dataset used to estimate MCF.
+#' }
+#' For the meaning of other slots, see \code{\link{rateReg}}.
+#' 
 #' @references
 #' Nelson, W. B. (2003). \emph{Recurrent events data analysis for product
 #' repairs, disease recurrences, and other applications} (Vol. 10). SIAM.
@@ -68,7 +80,7 @@ NULL
 #'  
 #' ## sample MCF
 #' sampleMcf <- mcf(Survr(ID, time, event) ~ group,
-#'                  data = simuDat, subset = ID %in% 1:50)
+#'                  data = simuDat, subset = ID %in% 1:10)
 #'
 #' ## plot sample MCF
 #' plotMcf(sampleMcf, lty = c(1, 3), col = c("orange", "navy"),
@@ -84,7 +96,7 @@ setGeneric(name = "mcf",
            })
 
 
-#' @describeIn mcf Sample cumulative function (MCF)
+#' @describeIn mcf Sample MCF from data.
 #' 
 #' @param data An optional data frame, list or environment containing
 #' the variables in the model.  If not found in data, the variables are taken 
@@ -100,8 +112,6 @@ setGeneric(name = "mcf",
 #' \code{\link{na.exclude}}, and \code{\link{na.pass}}.
 #' \code{help(na.fail)} for details.
 #' 
-#' @return \code{\link{sampleMcf-class}} or
-#' \code{\link{rateRegMcf-class}} object
 #' @aliases mcf,formula-method
 #' @importFrom utils tail
 #' @importFrom stats na.fail na.omit na.exclude na.pass
@@ -128,10 +138,10 @@ setMethod(f = "mcf", signature = "formula",
               mcall$drop.unused.levels <- TRUE
               ## Prepare data: ID, time, event ~ X
               mcall[[1]] <- quote(stats::model.frame)
-              if (is.R()) {
-                  mm <- eval.parent(mcall)
-              } else { 
-                  mm <- eval(mcall, sys.parent()) 
+              mm <- if(is.R()) {
+                  eval.parent(mcall)
+              } else {
+                  eval(mcall, sys.parent())
               }
               if(missing(data)) {
                   data <- environment(object)
@@ -158,6 +168,12 @@ setMethod(f = "mcf", signature = "formula",
               ## data 
               dat <- as.data.frame(cbind(mm[, 1], X))
               colnames(dat) <- c("ID", "time", "event", covar_names)     
+
+              ## check on level specified
+              level <- level[1]
+              if (level <= 0 || level >= 1) {
+                  stop("Confidence level must be between 0 and 1.")
+              }
               
               if (nBeta == 0L) { ## if no covariates specified
                   outDat <- sMcf(dat, level = level)
@@ -192,14 +208,27 @@ setMethod(f = "mcf", signature = "formula",
                                     labels = levels(X))
               colnames(outDat) <- c(colnames(dat)[1:3], "MCF",
                                     "var", "lower", "upper", covar_names)
-              out <- methods::new("sampleMcf", call = Call, formula = object, 
-                                  MCF = outDat, multiGroup = TRUE)
+
+              ## output: na.action
+              na.action <- if (is.null(attr(mm, "na.action"))) {
+                  options("na.action")[[1]]
+              } else {
+                  paste("na", class(attr(mm, "na.action")), sep = ".")
+              }
+              
+              out <- methods::new("sampleMcf",
+                                  call = Call,
+                                  formula = object,
+                                  na.action = na.action,
+                                  level = level,    
+                                  MCF = outDat,
+                                  multiGroup = TRUE)
               ## return
               out
           })
 
 
-#' @describeIn mcf Estimated Mean Cumulative Function (MCF) from Model Fits
+#' @describeIn mcf Estimated MCF from a fitted model.
 #' 
 #' @param newdata An optional data frame. If specified, the data frame should
 #' have the same column names with the covariate names appearing in the formula
@@ -222,8 +251,8 @@ setMethod(f = "mcf", signature = "formula",
 #' Element \code{to} represnts the endpoint of grid
 #' with the right boundary knot as default.
 #' When \code{grid} is missing, the grid will be generated 
-#' by \code{\link[base]{seq}} with arguments \code{from}, \code{to} 
-#' and \code{length.out}
+#' by \code{seq} (from package \code{base})
+#' with arguments \code{from}, \code{to} and \code{length.out}.
 #' @aliases mcf,rateReg-method
 #' @importFrom stats na.fail na.omit na.exclude na.pass
 #' @export

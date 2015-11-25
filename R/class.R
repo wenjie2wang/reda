@@ -25,13 +25,13 @@
 #' modeled by methods based on counts and rate function.
 #' The last letter 'r' in 'Survr' represents 'rate'.
 #'
-#' This is a similar function to \code{\link[survrec]{Survr}} in package
+#' This is a similar function to \code{Survr} in package
 #' \code{survrec} but with a better checking procedure for recurrent event
 #' data modeled by methods based on counts and rate function.
 #' The checking rules include that
 #' \itemize{
 #'     \item Identificator of each subject cannot be missing.
-#'     \item Event indicator must be coded as 0 (censoring) or 1 (event).
+#'     \item Event indicator must be coded as 0 (censored) or 1 (event).
 #'     \item Event time and censoring time cannot be missing.
 #'     \item Each subject must have one and only one censoring time.
 #'     \item Event time cannot not be later than censoring time.
@@ -41,7 +41,7 @@
 #' @param time Time of reccurence event or censoring.
 #' @param event The status indicator, 0 = censored, 1 = event. 
 #' @aliases Survr
-#' @seealso \code{\link{rateReg}}
+#' @seealso \code{\link{rateReg}} for model fitting.
 #' @export
 Survr <- function (ID, time, event) {
     inpDat <- data.frame(ID, time, event)
@@ -63,19 +63,19 @@ Survr <- function (ID, time, event) {
 #' @slot formula Formula.
 #' @slot knots A numeric vector.
 #' @slot boundaryKnots A numeric vector.
-#' @slot degree An integer.
-#' @slot df List.
-#' @slot estimates List.
-#' @slot control List.
-#' @slot start List.
+#' @slot degree A nonnegative integer.
+#' @slot df A list of nonnegative numeric vectors.
+#' @slot estimates A list.
+#' @slot control A list.
+#' @slot start A list.
 #' @slot na.action A length-one character vector.
-#' @slot xlevels List.
-#' @slot contrasts List.
-#' @slot convergCode An integer.
+#' @slot xlevels A list.
+#' @slot contrasts A list.
+#' @slot convergCode A nonnegative integer.
 #' @slot logL A numeric value.
 #' @slot fisher A numeric matrix.
 #' @aliases rateReg-class
-#' @seealso \code{\link{rateReg}}
+#' @seealso \code{\link{rateReg}} for details of slots.
 #' @export
 setClass(Class = "rateReg", 
          slots = c(call = "call", 
@@ -92,76 +92,118 @@ setClass(Class = "rateReg",
                    contrasts = "list",
                    convergCode = "integer",
                    logL = "numeric",
-                   fisher = "matrix"))
+                   fisher = "matrix"),
+         validity = function (object) {
+             ## check on knots
+             if (length(object@knots) > 0) { # if there exists internal knots
+                 if (min(object@knots) < min(object@boundaryKnots) ||
+                     max(object@knots) > max(object@boundaryKnots)) {
+                     return(paste("Internal knots must all lie in the", 
+                                  "coverage of boundary knots."))
+                 }
+             }
+             ## check on degree
+             if (object@degree < 0) {
+                 return("Degree of spline bases must be a nonnegative integer.")
+             }
+             ## check on df
+             dfVec <- do.call("c", object@df)
+             dfValid <- is.integer(dfVec) && all(dfVec >= 0)
+             if (! dfValid) {
+                 return("Degree of freedom must be nonnegative integers.")
+             }
+             ## else return
+             TRUE
+         })
 
 
-## create S4 Class called "summaryHeart" for summaryHeart object from summary
-#' An S4 Class to Represent Summary of rateReg-class Object
+#' An S4 Class to Represent Summary of a Fitted Model
 #' 
-#' \code{summaryHeart-class} is an S4 class with selective slots 
+#' \code{summaryRateReg-class} is an S4 class with selective slots 
 #' of \code{rateReg-class} object.  See ``Slots'' for details.  
-#' \code{\link{summary}} produces objects of this class. 
+#' \code{\link{summary,rateReg-method}} produces objects of this class. 
 #'  
 #' @slot call Function call.
 #' @slot knots A numeric vector.
 #' @slot boundaryKnots A numeric vector.
-#' @slot covariateCoef A numeric matrix.
+#' @slot covarCoef A numeric matrix.
 #' @slot frailtyPar A numeric matrix.
-#' @slot degree An integer.
+#' @slot degree A nonnegative integer.
 #' @slot baseRateCoef A numeric matrix.
 #' @slot logL A numeric value.
-#' @aliases summaryHeart-class
-#' @seealso \code{\link{summary,rateReg-method}} 
+#' @aliases summaryRateReg-class
+#' @seealso \code{\link{summary,rateReg-method}} for details of slots.
 #' @export
 setClass(Class = "summaryRateReg", 
          slots = c(call = "call", 
                    knots = "numeric",
                    boundaryKnots = "numeric",
-                   covariateCoef = "matrix",
+                   covarCoef = "matrix",
                    frailtyPar = "matrix",
                    degree = "integer",
                    baseRateCoef = "matrix",
-                   logL = "numeric"))
+                   logL = "numeric"),
+         validity = function (object) {
+             ## check on knots
+             if (length(object@knots) > 0) { # if there exists internal knots
+                 if (min(object@knots) < min(object@boundaryKnots) ||
+                     max(object@knots) > max(object@boundaryKnots)) {
+                     return(paste("Internal knots must all lie in the", 
+                                  "coverage of boundary knots."))
+                 }
+             }
+             ## check on degree
+             if (object@degree < 0) {
+                 return("Degree of spline bases must be a nonnegative integer.")
+             }
+             ## else return
+             TRUE
+         })
 
 
 #' An S4 Class to Represent Sample MCF
 #' 
 #' An S4 class to represent sample mean cumulative function (MCF).
 #' \code{\link{mcf}} produces objects of this class.  
+#'
 #' @slot call Function call
-#' @slot formula Formula. 
+#' @slot formula Formula.
+#' @slot na.action A length-one character vector.
+#' @slot level A numeric value.
 #' @slot MCF A data frame.
 #' @slot multiGroup A logical value.
 #' @aliases sampleMcf-class
-#' @seealso \code{\link{mcf,formula-method}}
+#' @seealso \code{\link{mcf,formula-method}} for details of slots.
 #' @importFrom methods setClass
 #' @export
 setClass(Class = "sampleMcf", 
          slots = c(call = "call",
                    formula = "formula",
+                   na.action = "character",
+                   level = "numeric",
                    MCF = "data.frame", 
                    multiGroup = "logical"))
 
 
-#' An S4 Class to Represent Estimated MCF from HEART Model
+#' An S4 Class to Represent Estimated MCF from a Fitted Model
 #' 
 #' An S4 class to represent estimated mean cumulative function (MCF) 
-#' from HEART Model.
+#' from Models.
 #' \code{\link{mcf}} produces objects of this class.  
 #' 
 #' @slot call Function call.
 #' @slot formula Formula.
 #' @slot knots A numeric vector.
-#' @slot degree An integer.
+#' @slot degree A nonnegative integer.
 #' @slot boundaryKnots A numeric vector.
 #' @slot newdata A numeric matrix.
 #' @slot MCF A data frame.
 #' @slot level A numeric value between 0 and 1.
 #' @slot na.action A length-one character vector.
-#' @slot control List.
+#' @slot control A list.
 #' @slot multiGroup A logical value. 
 #' @aliases rateRegMcf-class
-#' @seealso \code{\link{mcf,rateReg-method}}
+#' @seealso \code{\link{mcf,rateReg-method}} for details of slots.
 #' @export
 setClass(Class = "rateRegMcf", 
          slots = c(call = "call",
@@ -174,5 +216,25 @@ setClass(Class = "rateRegMcf",
                    level = "numeric", 
                    na.action = "character",
                    control = "list", 
-                   multiGroup = "logical"))
+                   multiGroup = "logical"),
+         validity = function (object) {
+             ## check on knots
+             if (length(object@knots) > 0) { # if there exists internal knots
+                 if (min(object@knots) < min(object@boundaryKnots) ||
+                     max(object@knots) > max(object@boundaryKnots)) {
+                     return(paste("Internal knots must all lie in the", 
+                                  "coverage of boundary knots."))
+                 }
+             }
+             ## check on degree
+             if (object@degree < 0) {
+                 return("Degree of spline bases must be a nonnegative integer.")
+             }
+             ## check on level
+             if (object@level <= 0 || object@level >= 1) {
+                 return("Confidence level mush be between 0 and 1.")
+             }
+             ## else return
+             TRUE
+         })
 
