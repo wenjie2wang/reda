@@ -2,7 +2,7 @@
 ^\.Rproj\.user$
 ^Makefile$
 ^README.md$
+^NEWS.md$
 ^simulation$
 ^manuscript$
-^test$
 ^reference$
