@@ -1,25 +1,26 @@
 ---
-title: "Introduction to 'reda' via Examples"
+title: "Introduction to reda by Examples"
 author: Wenjie Wang
 date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
+bibliography:
+- ../inst/bib/reda-intro.bib
 vignette: >
-  %\VignetteIndexEntry{Introduction to 'reda' via Examples}
+  %\VignetteIndexEntry{Introduction to reda by Examples}
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
-  
+output: rmarkdown::html_vignette
 ---
 
-The package 'reda' provides functions to fit gamma frailty model with
+The package **reda** mainly provides function to fit gamma frailty model with
 either a piecewise constant or a spline as the baseline rate function
 for recurrent event data. What's more, some handy functions are designed,
 such as computing and plotting sample nonparametric mean cumulative function,
 or so-called Nelson-Aalen estimator.
 
-In this vignette, we mainly introduce the usage of the most functions in
-package 'reda' by some examples.
+In this vignette, we mainly introduce the basic usage of the functions
+in the package **reda** by some examples.
 
-# Simulated Sample Recurrent Event Data
+## Simulated Sample Recurrent Event Data
 
 ```{r setup}
 library(reda) # attach package 
@@ -27,7 +28,7 @@ data(simuDat) # attach sample dataset
 ```
 
 First of all, the sample recurrent event data 
-we are going to use in the following examples is called 'simuDat'
+we are going to use in the following examples is called **simuDat**
 and it contains totally `r ncol(simuDat)` observations of `r nrow(simuDat)`.
 
 ```{r data}
@@ -38,44 +39,89 @@ where
 
 * ID: Subjects indification.
 * time: Event or censoring time.
-* event: Event indicator, 1 = event; 0 = censoring.
+* event: Event indicator, 1 = event; 0 = censored.
 * group: Treatment group indicator.
 * x1: Continuous variable. 
 
-The dataset is originally simulated by thinning method (__cite__)
+The dataset is originally simulated by thinning method [@lewis1979]
 and further processed for a better demonstration purpose.
 
-# Model Fitting
+## Data Checking and Model Fitting
 
-The default model when argument df, knots, and degree are not specified
-applies gamma frailty model with (one piece) constant rate function,
+In the main function **rateReg** for model fitting,
+formula response is specified by function **Survr**,
+which has embeded data checking procedure for recurrent event data modeled
+by method based on counts and rate function. Therefore, before model fitting,
+the observations of the covariates specified in the formula will be checked.
+The checking rules include
+
+* Identificator of each subject cannot be missing.
+* Event indicator must be coded as 0 (censored) or 1 (event).
+* Event time and censoring time cannot be missing.
+* Each subject must have one and only one censoring time.
+* Event time cannot not be later than censoring time.
+
+The subject's ID will be pinpointed if its observation violates any checking
+rule shown above. 
+
+### Model with Constant Rate Function
+
+The default model when argument **df**, **knots**, and **degree** are not
+specified is gamma frailty model with (one piece) constant rate function,
 which is equivalent to negative binomial regression of the same
-shape and rate parameter in gamma prior. 
+shape and rate parameter in gamma prior.
 
-## Constant Rate Function
+In the following examples, we fit the models on the first 50 subjects
+by specifying argument **subset**. 
 
 ```{r const}
 constFit <- rateReg(Survr(ID, time, event) ~ group + x1, data = simuDat,
                     subset = ID %in% 1:50)
-constFit # brief summary
+# brief summary
+constFit # or explicitly call show(constFit)
 ```
 
-## Piecewise Constant Rate Function
+The function **rateReg** returns **rateReg-class** object, which can be simply
+printed out by calling the object.
+(Internally, **show** method for **rateReg** object is called.)
 
-When argument df or knots is given, the model becomes gamma frailty
-model with pices
+### Model with Piecewise Constant Rate Function
 
-### Specifying 'df'
+When argument **df** or **knots** (at least one internal knot) is specified,
+the model becomes gamma frailty model with piecewise constant rate funtion
+if argument degree is specified to be zero as default.
 
+We may simply specify **df** and leave **knots** and **degree** as default.
+Then piecewise constant rate function will be applied and the number of pieces
+will equal **df**. The internal **knots** will be automatically specified
+at suitable quantiles of the covariate representing event and censoring time.
 
+For example, two pieces' constant rate function can be simply specified
+by setting **df**=2. The internal knot will be the median time of all the
+event and censoring time.
 
-```{r pieces2}
-piecesFit <- rateReg(Survr(ID, time, event) ~ group + x1, 
-                     data = simuDat, subset = ID %in% 1:50,
-                     knots = seq(28, 140, by = 28))
-
-
+```{r twoPieces}
+# two pieces' constant rate function i.e. one internal knot
+twoPiecesFit <- rateReg(Survr(ID, time, event) ~ group + x1, df = 2, 
+                        data = simuDat, subset = ID %in% 1:50)
+twoPiecesFit
 ```
+
+In the example shown above, the internal knots is specified automatically
+to be `r twoPiecesFit@knots` and the rate function is two pieces' constant.
+
+If internal **knots** are specified explicitly, the **df** will be neglected
+even if it is specified. An example of model with six pieces' constant rate
+function is given as follows:
+
+```{r sixPieces}
+piecesFit <- rateReg(Survr(ID, time, event) ~ group + x1, df = 2,
+                     knots = seq(from = 28, to = 140, by = 28),
+                     data = simuDat, subset = ID %in% 1:50)
+piecesFit # note that df = 2 is neglected since knots are specified
+```
+
+
 
 ## Estimates 
 
@@ -137,3 +183,5 @@ estmcf <- mcf(heartFit,
 plotMcf(estmcf, conf.int = TRUE, col = c("royalblue", "red")) +
     ggplot2::theme_bw()
 ```
+
+## Reference
