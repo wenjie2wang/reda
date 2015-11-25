@@ -26,7 +26,7 @@
 #' The last letter 'r' in 'Survr' represents 'rate'.
 #'
 #' This is a similar function to \code{Survr} in package
-#' \code{survrec} but with a better checking procedure for recurrent event
+#' \pkg{survrec} but with a better checking procedure for recurrent event
 #' data modeled by methods based on counts and rate function.
 #' The checking rules include that
 #' \itemize{

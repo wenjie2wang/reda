@@ -49,7 +49,7 @@ NULL
 #'
 #' The model fitting process involves minimization of negative log
 #' likelihood function, which calls function \code{\link[stats]{nlm}}
-#' from package \code{stats} internally.
+#' from package \pkg{stats} internally.
 #' \code{help(nlm)} for more details.
 #' 
 #' The argument \code{start} is an optional list

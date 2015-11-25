@@ -251,7 +251,7 @@ setMethod(f = "mcf", signature = "formula",
 #' Element \code{to} represnts the endpoint of grid
 #' with the right boundary knot as default.
 #' When \code{grid} is missing, the grid will be generated 
-#' by \code{seq} (from package \code{base})
+#' by \code{seq} (from package \pkg{base})
 #' with arguments \code{from}, \code{to} and \code{length.out}.
 #' @aliases mcf,rateReg-method
 #' @importFrom stats na.fail na.omit na.exclude na.pass

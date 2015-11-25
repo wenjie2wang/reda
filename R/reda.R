@@ -20,7 +20,7 @@
 
 #' Recurrent Event Data Analysis
 #' 
-#' The package \code{reda} mainly provides function \code{\link{rateReg}}
+#' The package \pkg{reda} mainly provides function \code{\link{rateReg}}
 #' to fit parametric gamma frailty model with spline or piecewise constant
 #' baseline rate function.
 #' Another main function \code{\link{mcf}} computes and plots
