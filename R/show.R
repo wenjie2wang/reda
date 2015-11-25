@@ -67,8 +67,8 @@ setMethod(f = "show", signature = "rateReg",
               print(beta)
               cat("\nFrailty parameter: ", theta, "\n")
               if (length(object@knots) > 0) {
-              cat("\nInternal knots: \n") 
-              cat(object@knots, sep = ", ", fill = TRUE)
+                  cat("\nInternal knots: \n") 
+                  cat(object@knots, sep = ", ", fill = TRUE)
               }
               cat("\nBoundary knots: \n")
               cat(object@boundaryKnots, sep = ", ", fill = TRUE)

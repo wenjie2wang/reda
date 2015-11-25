@@ -84,9 +84,11 @@ NULL
 #'         the boundary knots for baseline rate funtion. By default,
 #'         the left boundary knot is zero and the right one takes the
 #'         largest censoring time from data.
-#'     \item \code{intercept}: A logical value specifying whether to
-#'         include intercept in baseline rate function. The default value
-#'         is \code{TRUE}, i.e. the intercept is included.
+#'     \item \code{intercept}: A logical value specifying whether
+#'         intercept is included in spline baseline rate function.
+#'         For piecewise constatn baseline (\code{df}=0), the specified
+#'         value would be neglected. The default value
+#'         is \code{TRUE}, i.e. the intercept is included. 
 #' }
 #' 
 #' @param formula \code{Survr} object produced by function \code{\link{Survr}}.
@@ -298,7 +300,8 @@ rateReg <- function (formula, df = NULL, knots = NULL, degree = 0L,
     } else { ## else degree > 0, call 'bs' for spline 
         bsMat <- splines::bs(x = dat$time, df = df,
                              knots = knots, degree = degree,
-                    intercept = indIntercept, Boundary.knots = boundaryKnots)
+                             intercept = indIntercept,
+                             Boundary.knots = boundaryKnots)
         ## update df, knots
         knots <- as.numeric(attr(bsMat, "knots"))
         ## set bKnots as c(knots, last_boundary_knots)
@@ -317,7 +320,7 @@ rateReg <- function (formula, df = NULL, knots = NULL, degree = 0L,
     bKnots <- c(knots, boundaryKnots[2])
     alphaName <- nameBases(bKnots = bKnots, degree = degree, df = df, 
                            leftBound = boundaryKnots[1])
-                                            
+    
     ## start' values for 'nlm'
     startlist <- c(start, list(nBeta = nBeta, nAlpha = df))
     start <- do.call("rateReg_start", startlist)

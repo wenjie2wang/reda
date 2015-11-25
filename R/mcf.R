@@ -318,7 +318,8 @@ setMethod(f = "mcf", signature = "rateReg",
                                          sep = ".")
                   }
                   X <- stats::model.matrix(Terms, mf,
-                                    contrasts.arg = object@contrasts$constracts)
+                                           contrasts.arg =
+                                               object@contrasts$constracts)
                   ## remove intercept and deplicated rows
                   X <- unique(base::subset(X, select = -`(Intercept)`))
                   if (ncol(X) != nBeta) {
@@ -344,7 +345,7 @@ setMethod(f = "mcf", signature = "rateReg",
                                        coveffi = coveff[i])
                   varTime <- apply(gradMat, 1, function (gradVec, covMat) {
                       crossprod(gradVec, covMat) %*% gradVec
-                          }, covMat = covPar)
+                  }, covMat = covPar)
                   confBand <- stats::qnorm((1 + level) / 2) * sqrt(varTime)
                   mcf_i <- estMcf * coveff[i]
                   lower <- pmax(0, mcf_i - confBand)

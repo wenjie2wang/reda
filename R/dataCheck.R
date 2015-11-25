@@ -64,7 +64,7 @@ check_Survr <- function(dat) {
     if (length(ID_censor1) > 0) {
         message("Every subject must have one (and only one) censored time.")
         stop(paste("Check subject: ",
-            paste0(ID_censor1, collapse = ", ")))
+                   paste0(ID_censor1, collapse = ", ")))
     }
     ## stop if event time after censoring time
     ID_censor2 <- with(subset(outDat, censor2 == 1), unique(IDnam))
