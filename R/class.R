@@ -30,7 +30,7 @@
 #' data modeled by methods based on counts and rate function.
 #' The checking rules include that
 #' \itemize{
-#'     \item Identificator of each subject cannot be missing.
+#'     \item Identification of each subject cannot be missing.
 #'     \item Event indicator must be coded as 0 (censored) or 1 (event).
 #'     \item Event time and censoring time cannot be missing.
 #'     \item Each subject must have one and only one censoring time.

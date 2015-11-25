@@ -93,8 +93,9 @@ setMethod(f = "show", signature = "summaryRateReg",
                   attr(Call, "show") <- NULL
                   cat("Call: \n")
                   print(Call)
+                  cat("\n")
               }
-              cat("\nCoefficients of covariates: \n") 
+              cat("Coefficients of covariates: \n") 
               printCoefmat(object@covarCoef)
               cat("\nParameter of frailty: \n")
               print(object@frailtyPar)

@@ -24,7 +24,7 @@
 #' \code{ID}, \code{time}, \code{event}, \code{group} and \code{x1},
 #' where
 #' \itemize{
-#'     \item \code{ID}: Subjects indification;
+#'     \item \code{ID}: Subjects identification;
 #'     \item \code{time}: Event or censoring time;
 #'     \item \code{event}: Event indicator, 1 = event, 0 = censored;
 #'     \item \code{group}: Treatment group indicator;

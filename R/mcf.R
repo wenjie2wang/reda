@@ -40,8 +40,9 @@ NULL
 #' The point estimate of sample MCF at each time point does not
 #' assume any particular underlying model. The variance
 #' of estimated MCF (ReliaWiki, 2012) at each time point is estimated
-#' and the approximate confidence intervals based on the asymptotic normality
-#' of log mean cumulative function are provided as well.
+#' and the approximate confidence intervals are provided as well,
+#' which are constructed based on the asymptotic normality
+#' of log mean cumulative function.
 #' 
 #' For \code{\link{rateReg-class}} object, 
 #' \code{mcf} estimates the baseline MCF and its confidence interval
