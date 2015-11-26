@@ -25,7 +25,7 @@ NULL
 
 #' Estimated Coefficients of Covariates
 #'
-#' \code{coef,rateReg-method} is a S4 class method which extracts
+#' \code{coef,rateReg-method} is a S4 class method that extracts
 #' estimated coefficients of covariates from
 #' \code{\link{rateReg-class}} object produced by
 #' function \code{\link{rateReg}}.
@@ -66,7 +66,7 @@ setMethod(f = "coef", signature = "rateReg",
 #' to be given confidence intervals, 
 #' either a vector of numbers or a vector of names. 
 #' If missing, all parameters are considered.
-#' @param level A optional numeric value to specify
+#' @param level An optional numeric value to specify
 #' the confidence level required.
 #' By default, the value is 0.95,
 #' which produces 95\% confidence intervals.

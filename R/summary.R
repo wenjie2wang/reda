@@ -44,12 +44,12 @@ NULL
 #' @param showCall A logic value with dafault \code{TRUE},
 #' indicating whether function \code{show} 
 #' prints out the original call information of \code{rateReg}.
-#' It may be helpful if one wants a more concise printout.
+#' It may be helpful for a more concise printout.
 #' @param showKnots A logic value with default \code{TRUE}, 
 #' indicating whether function \code{show}
 #' prints out the internal and boundary knots.
 #' Similar to argument \code{showCall}, It may be helpful
-#' if one wants a more concise printout.
+#' for a more concise printout.
 #' @param ... Other arguments for future usage.
 #' @return summaryRateReg-class object
 #' @aliases summary,rateReg-method

@@ -18,16 +18,17 @@
 ################################################################################
 
 
-#' An S3 Class to Represent Formula Response for Recurrent Event Data
+#' Formula Response for Recurrent Event Data
 #' 
-#' \code{Survr} is an S3 class to represent 
+#' \code{Survr} is an S3 class that represents
 #' formula response for recurrent event data
 #' modeled by methods based on counts and rate function.
 #' The last letter 'r' in 'Survr' represents 'rate'.
 #'
 #' This is a similar function to \code{Survr} in package
-#' \pkg{survrec} but with a better checking procedure for recurrent event
-#' data modeled by methods based on counts and rate function.
+#' \pkg{survrec} but with a better embedded checking procedure for
+#' recurrent event data modeled by methods
+#' based on counts and rate function.
 #' The checking rules include that
 #' \itemize{
 #'     \item Identification of each subject cannot be missing.
@@ -55,12 +56,13 @@ Survr <- function (ID, time, event) {
 
 #' An S4 Class to Represent a Fitted Model
 #' 
-#' \code{rateReg-class} is an S4 class to represent a model fits. 
+#' \code{rateReg-class} is an S4 class that represents a fitted model. 
 #' \code{\link{rateReg}} produces objects of this class.  
 #' See ``Slots'' for details.
 #' 
 #' @slot call Function call.
 #' @slot formula Formula.
+#' @slot nObs A positive integer
 #' @slot knots A numeric vector.
 #' @slot boundaryKnots A numeric vector.
 #' @slot degree A nonnegative integer.
@@ -79,7 +81,8 @@ Survr <- function (ID, time, event) {
 #' @export
 setClass(Class = "rateReg", 
          slots = c(call = "call", 
-                   formula = "formula", 
+                   formula = "formula",
+                   nObs = "integer",
                    knots = "numeric",
                    boundaryKnots = "numeric",
                    degree = "integer",
@@ -94,6 +97,10 @@ setClass(Class = "rateReg",
                    logL = "numeric",
                    fisher = "matrix"),
          validity = function (object) {
+             ## check on nObs
+             if (object@nObs <= 0) {
+                 return("Number of observations must be a positive integer.")
+             }
              ## check on knots
              if (length(object@knots) > 0) { # if there exists internal knots
                  if (min(object@knots) < min(object@boundaryKnots) ||
@@ -163,7 +170,7 @@ setClass(Class = "summaryRateReg",
 
 #' An S4 Class to Represent Sample MCF
 #' 
-#' An S4 class to represent sample mean cumulative function (MCF).
+#' An S4 class that represents sample mean cumulative function (MCF) from data.
 #' \code{\link{mcf}} produces objects of this class.  
 #'
 #' @slot call Function call
@@ -185,9 +192,9 @@ setClass(Class = "sampleMcf",
                    multiGroup = "logical"))
 
 
-#' An S4 Class to Represent Estimated MCF from a Fitted Model
+#' An S4 Class to Respresent Estimated MCF from a Fitted Model
 #' 
-#' An S4 class to represent estimated mean cumulative function (MCF) 
+#' An S4 class that represents estimated mean cumulative function (MCF) 
 #' from Models.
 #' \code{\link{mcf}} produces objects of this class.  
 #' 

@@ -53,8 +53,9 @@ NULL
 #' \code{help(nlm)} for more details.
 #' 
 #' The argument \code{start} is an optional list
-#' which allows users to specify the initial guess for
-#' the parameter values to be estimated.
+#' that allows users to specify the initial guess for
+#' the parameter values for the minimization of
+#' negative log likelihood function.
 #' The available numeric vector elements in the list include
 #' \itemize{
 #'     \item \code{beta}: Coefficient(s) of covariates,
@@ -65,15 +66,15 @@ NULL
 #'         set to be 0.05 by default.
 #' }
 #' The argument \code{control} is an optional list
-#' which allows users to control the process of minimization of
-#' negative log likelihood function and specify the boundary knots,
+#' that allows users to control the process of minimization of
+#' negative log likelihood function and to specify the boundary knots,
 #' intercept for baseline rate function.
 #' The available elements in the list include
 #' \itemize{
 #'     \item \code{gradtol}: A positive scalar giving the tolerance at
 #'         which the scaled gradient is considered close enough to zero
 #'         to terminate the algorithm. The default value is 1e-6.
-#'     \item \code{stepmax}: A positive scalar which gives the maximum
+#'     \item \code{stepmax}: A positive scalar that gives the maximum
 #'         allowable scaled step length. The default value is 1e5.
 #'     \item \code{steptol}: A positive scalar providing the minimum
 #'         allowable relative step length. The default value is 1e-6.
@@ -106,7 +107,7 @@ NULL
 #' function \code{\link{rateReg}} is called.
 #' @param subset An optional vector specifying a subset of observations 
 #' to be used in the fitting process.
-#' @param na.action A function which indicates what should the procedure
+#' @param na.action A function that indicates what should the procedure
 #' do if the data contains \code{NA}s.  The default is set by the 
 #' na.action setting of \code{\link[base]{options}}.
 #' The "factory-fresh" default is \code{\link[stats]{na.omit}}.
@@ -130,6 +131,7 @@ NULL
 #' \itemize{
 #'     \item \code{call}: Function call of \code{rateReg}.
 #'     \item \code{formula}: Formula used in the model fitting.
+#'     \item \code{nObs}: Number of observations.
 #'     \item \code{knots}: Internal knots specified for the baseline
 #'         rate function.
 #'     \item \code{boundaryKnots}: Boundary knots specified for the baseline
@@ -149,7 +151,7 @@ NULL
 #'         each factor variable.
 #'     \item \code{contrasts}: Contrasts specified and used for each
 #'         factor variable.
-#'     \item \code{convergCode}: Value \code{code} returned by function
+#'     \item \code{convergCode}: \code{code} returned by function
 #'         \code{\link[stats]{nlm}}, which is an integer indicating why the
 #'         optimization process terminated. \code{help(nlm)} for details.
 #'     \item \code{logL}: Log likelihood of the fitted model.
@@ -266,10 +268,11 @@ rateReg <- function (formula, df = NULL, knots = NULL, degree = 0L,
     ## data 
     dat <- as.data.frame(cbind(mf[, 1][, 1:3], mm[, -1]))
     colnames(dat) <- c("ID", "time", "event", covar_names)
+    nObs <- nrow(dat)
 
     ## check the impact caused by missing value
     ## if there is missing value removed
-    if (nrow(mm_na) > nrow(dat)) {
+    if (nrow(mm_na) > nObs {
         ## recover original ID names for possible pin-point
         idFactor <- with(data, attr(eval(Call[[2]][[2]]), "ID"))
         attr(dat, "ID") <- factor(levels(idFactor)[dat$ID],
@@ -380,10 +383,13 @@ rateReg <- function (formula, df = NULL, knots = NULL, degree = 0L,
     
     ## results to return
     results <- methods::new("rateReg", 
-                            call = Call, formula = formula, 
+                            call = Call,
+                            formula = formula,
+                            nObs = nObs,
                             knots = knots,
                             boundaryKnots = boundaryKnots,
-                            degree = degree, df = df,
+                            degree = degree,
+                            df = df,
                             estimates = list(beta = est_beta, 
                                              theta = est_theta, 
                                              alpha = est_alpha),

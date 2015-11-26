@@ -25,7 +25,7 @@ NULL
 
 #' Estimated Coefficients of Baseline Rate Function
 #' 
-#' An S4 class generic function to extract the estimated coefficients
+#' An S4 class generic function that returns the estimated coefficients
 #' of baseline rate function. For \code{\link{rateReg-class}} object,
 #' it returns either coefficients of pieceswise (including one piece)
 #' constant rate function or coefficients of B-spline bases.

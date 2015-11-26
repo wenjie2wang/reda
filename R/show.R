@@ -25,7 +25,7 @@ NULL
 
 #' Show an object.
 #' 
-#' An S4 class generic function to display certain object.
+#' An S4 class generic function that displays certain object.
 #' 
 #' \itemize{
 #'   \item For \code{\link{rateReg-class}} object, 

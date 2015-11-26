@@ -25,8 +25,8 @@ NULL
 
 #' Mean Cumulative Function (MCF)
 #' 
-#' An S4 class generic function to estimate mean cumulative function (MCF)
-#' from a fitted model or compute the sample nonparametric MCF
+#' An S4 class generic function that estimates mean cumulative function (MCF)
+#' from a fitted model or computing the sample nonparametric MCF
 #' (also called Nelson-Aalen estimator) from data.
 #' 
 #' For \code{formula} object with \code{\link{Survr}} object as response, 
@@ -52,7 +52,7 @@ NULL
 #' 
 #' @param object An object used to dispatch a method.
 #' @param ... Other arguments for future usage.
-#' @param level A optional numeric value 
+#' @param level An optional numeric value 
 #' indicating the confidence level required. 
 #' The default value is 0.95.
 #' @return
@@ -105,8 +105,8 @@ setGeneric(name = "mcf",
 #' the function is called.
 #' @param subset An optional vector specifying a subset of observations 
 #' to be used in the fitting process.
-#' @param na.action A function which indicates what should the procedure do 
-#' if the data contains NAs.  The default is set by the 
+#' @param na.action A function that indicates what should the procedure do 
+#' if the data contains \code{NA}s.  The default is set by the 
 #' na.action setting of \code{\link[base]{options}}.
 #' The "factory-fresh" default is \code{\link[stats]{na.omit}}.
 #' Other possible values inlcude \code{\link{na.fail}},
@@ -232,7 +232,7 @@ setMethod(f = "mcf", signature = "formula",
 #' @describeIn mcf Estimated MCF from a fitted model.
 #' 
 #' @param newdata An optional data frame. If specified, the data frame should
-#' have the same column names with the covariate names appearing in the formula
+#' have the same column names as the covariate names appearing in the formula
 #' of original fitting.
 #' @param groupName An optional length-one charactor vector to specify the
 #' name for grouping each unique row in \code{newdata}, such as "gender"
