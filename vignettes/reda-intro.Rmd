@@ -15,11 +15,11 @@ The package **reda** mainly provides function to fit gamma frailty model with
 either a piecewise constant or a spline as the baseline rate function
 for recurrent event data. What's more, some handy functions are designed,
 such as computing and plotting sample nonparametric mean cumulative function,
-or so-called Nelson-Aalen estimator. The most functions in this package
+or so-called Nelson-Aalen estimator. Most functions in this package
 are S4 methods that produce S4 class objects.
 
 In this vignette, we mainly introduce the basic usage of the functions
-provided in the package by some examples. The details of function snytax
+provided in the package by examples. The details of function snytax
 and slots of the objects produced are available in the package manual,
 which will thus not be covered in this vignette.
 
@@ -30,8 +30,9 @@ After then, the demonstration of the main function `rateReg` for
 [model fitting](#rateReg) is provided, which includes fitting model with
 (one piece) [constant](#constFit), [piecewise constant](#piecesFit),
 and [spline](#splineFit) baseline rate function.
-What follows next is the examples of the functions to
-[summarize](#summaryFit) the model fitted.
+What follows next are the examples of functions that
+[summarize](#summaryFit) the model fitted and
+functions for [model selection](#modSelect) based on AIC or BIC.
 Last but not the least, the demonstration of estimation and
 the mean cumulative function (MCF) is given, which includes
 [sample MCF](#sampleMcf) and [estimated MCF](#rateRegMcf)
@@ -197,7 +198,7 @@ coefficients of rate function bases (pieces), and log likelihood
 of the model fitted. Outputs of function call or knots,
 may be suppressed by specifying argument `showCall` or `showKnots`
 to be `FALSE`, respectively, in `summary` method, which would be
-especially useful if one wants a relatively concise summary
+especially useful for a relatively concise summary
 in a reproducible report using `Rmarkdown`, etc. 
 
 What's more, the corresponding `coef` and `confint` method
@@ -213,6 +214,18 @@ coef(splineFit)
 confint(splineFit, level = 0.95) 
 ## estimated coefficients of baseline rate function
 baseRate(splineFit)
+```
+
+## Model Selection {#modSelect}
+
+Two handy functions are provided for model selection.
+We may compare and select the models with different baseline rate function
+based on Akaike Information Criterion (AIC) by function `AIC` or
+Bayesian Information Criterion (BIC) by function `BIC`.
+
+```{r }
+AIC(constFit, piecesFit, splineFit)
+BIC(constFit, piecesFit, splineFit)
 ```
 
 ## Mean Cumulative Function (MCF)
@@ -277,7 +290,7 @@ the method for `rateReg-class` is called, which returns
 the estimated baseline MCF from the fitted model
 if `newdata` is not specified in the function.
 
-The example to estimate and plot
+The example estimating and plotting
 the baseline MCF from the fitted model
 with piecewise constant rate function is shown as follows:
 
@@ -289,7 +302,7 @@ plotMcf(piecesMcf, conf.int = TRUE, col = "blueviolet") +
 
 The argument `newdata` allows one to estimate the MCF for a given dataset
 instead of the baseline MCF. If `newdata` is specified, the data frame should
-have the same column names with the covariate names appearing in the formula
+have the same column names as the covariate names appearing in the formula
 of original fitting. The MCF will be estimated for each unique row
 in the data frame and its confidence intervals are constructed
 based on Delta-method.
