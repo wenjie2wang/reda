@@ -179,7 +179,7 @@ NULL
 #'                      data = simuDat, subset = ID %in% 1:50,
 #'                      knots = c(56, 84, 112), degree = 3)
 #'
-#' ## brief summary of model fits
+#' ## brief summary of fitted models
 #' constFit
 #' piecesFit
 #' splineFit
@@ -188,6 +188,10 @@ NULL
 #' summary(constFit)
 #' summary(piecesFit)
 #' summary(splineFit)
+#'
+#' ## model selection based on AIC or BIC
+#' AIC(constFit, piecesFit, splineFit)
+#' BIC(constFit, piecesFit, splineFit)
 #'
 #' ## estimated covariate coefficients
 #' coef(piecesFit)
@@ -272,7 +276,7 @@ rateReg <- function (formula, df = NULL, knots = NULL, degree = 0L,
 
     ## check the impact caused by missing value
     ## if there is missing value removed
-    if (nrow(mm_na) > nObs {
+    if (nrow(mm_na) > nObs) {
         ## recover original ID names for possible pin-point
         idFactor <- with(data, attr(eval(Call[[2]][[2]]), "ID"))
         attr(dat, "ID") <- factor(levels(idFactor)[dat$ID],

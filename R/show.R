@@ -41,7 +41,7 @@ NULL
 #' }
 #' 
 #' @param object An object used to dispatch a method.
-#' @name show
+#' @name show-method
 #' @seealso
 #' \code{\link{rateReg}} for model fitting;
 #' \code{\link{summary,rateReg-method}} for summary of a fitted model;
@@ -50,7 +50,7 @@ NULL
 NULL
 
 
-#' @rdname show 
+#' @rdname show-method
 #' @aliases show,rateReg-method
 #' @export
 setMethod(f = "show", signature = "rateReg",
@@ -82,7 +82,7 @@ setMethod(f = "show", signature = "rateReg",
           })
 
 
-#' @rdname show 
+#' @rdname show-method 
 #' @aliases show,summaryRateReg-method
 #' @importFrom stats printCoefmat
 #' @export
@@ -119,7 +119,7 @@ setMethod(f = "show", signature = "summaryRateReg",
           })
 
 
-#' @rdname show 
+#' @rdname show-method
 #' @aliases show,sampleMcf-method 
 #' @export
 setMethod(f = "show", signature = "sampleMcf",
@@ -133,7 +133,7 @@ setMethod(f = "show", signature = "sampleMcf",
           })
 
 
-#' @rdname show 
+#' @rdname show-method 
 #' @aliases show,rateRegMcf-method
 #' @export
 setMethod(f = "show", signature = "rateRegMcf",
