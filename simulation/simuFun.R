@@ -292,9 +292,10 @@ simuMcf <- function (data, piecesFit, splineFit, ...) {
 
 ## function helps summerize mcf test results
 sumrzMcf <- function (mcfList, newdata = c(1, 0.2),
-                      pieces = TRUE, beta0 = c(0, 0), interval = FALSE) {
+                      pieces = TRUE, beta0 = c(0, 0), interval = FALSE, ...) {
 
-    mu0t <- function (t) {
+    mu0t <- function (t, ...) {
+        
         0.05 * 168 * (exp(t / 168) - 1) -
             0.02 * (168 / 10) * (cos(10 * t / 168) - 1)
     }
