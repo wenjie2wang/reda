@@ -455,7 +455,7 @@ mu0 <- function (par_alpha, Tvec, bKnots, degree,
         indx <- sapply(Tvec, whereT, bKnots)
         BL_segments <- c(bKnots[1], diff(bKnots))
         ## The MCF at each time point  
-        CumMean_Pieces <- diffinv(BL_segments * par_alpha)[-1]  
+        CumMean_Pieces <- stats::diffinv(BL_segments * par_alpha)[-1]  
         mu_tau <- CumMean_Pieces[indx] -
             (bKnots[indx] - Tvec) * par_alpha[indx]
         return(mu_tau)  # function ends

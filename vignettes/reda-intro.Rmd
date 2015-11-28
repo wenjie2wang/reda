@@ -274,7 +274,7 @@ are plotted, respectively, as follows:
 plotMcf(sampleMcf1)
 ## plot MCF for different groups
 plotMcf(sampleMcf2, mark.time = TRUE, 
-        lty = c(1, 3), col = c("navy", "orange")) +
+        lty = c(1, 5), col = c("orange", "navy")) +
     ggplot2::xlab("Days") + ggplot2::theme_bw()
 ```
 

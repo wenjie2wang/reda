@@ -60,7 +60,7 @@ setMethod(f = "plotMcf", signature = "sampleMcf",
                                 mark.time = FALSE, lty, col, ...) {
               
               ## nonsense, just to suppress Note from R CMD check --as-cran
-              MCF <- event <- lower <- upper <- design <- NULL
+              MCF <- event <- lower <- upper <- design <- time <- NULL
               
               MCFdat <- object@MCF
               ## add starting point at time 0
@@ -80,7 +80,7 @@ setMethod(f = "plotMcf", signature = "sampleMcf",
                                     aes(label = "+", x = time, y = MCF),
                                     vjust = 0.3, hjust = 0.5, 
                                     linetype = lty, color = col, 
-                                    show_guide  = FALSE)
+                                    show.legend = FALSE)
                   }
                   if (conf.int) {
                       p <- p + geom_step(
@@ -126,7 +126,7 @@ setMethod(f = "plotMcf", signature = "sampleMcf",
                                     aes(label = "+", x = time, y = MCF, 
                                         linetype = design, color = design),
                                     vjust = 0.3, hjust = 0.5, 
-                                    show_guide  = FALSE)
+                                    show.legend = FALSE)
                   }
                   if (conf.int) {2
                       p <- p + 
@@ -154,7 +154,7 @@ setMethod(f = "plotMcf", signature = "rateRegMcf",
                                 lty, col, ...) {
 
               ## nonsense, just to suppress Note from R CMD check --as-cran
-              MCF <- lower <- upper <- NULL
+              MCF <- lower <- upper <- time <- NULL
               
               MCFdat <- object@MCF
               ## if MCF is just for one certain group
