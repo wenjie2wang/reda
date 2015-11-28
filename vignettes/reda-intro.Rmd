@@ -103,7 +103,7 @@ constFit <- rateReg(Survr(ID, time, event) ~ group + x1, data = simuDat,
 constFit # or explicitly call show(constFit)
 ```
 
-The function `rateReg` returns `rateReg-class` object, which can be simply
+The function `rateReg` returns `rateReg-class` object, which can be 
 printed out by calling the object.
 (Internally, `show` method for `rateReg` object is called.)
 
@@ -114,7 +114,7 @@ the model becomes gamma frailty model with piecewise constant rate function
 or so-called HEART model [@fu2014]
 if argument degree is specified to be zero as default.
 
-We may simply specify `df` and leave `knots` and `degree` as default.
+We may specify `df` and leave `knots` and `degree` as default.
 Then piecewise constant rate function will be applied and the number of pieces
 will equal `df`. The internal knots will be automatically specified at
 suitable quantiles of the covariate representing event and censoring time.
@@ -179,7 +179,7 @@ splineFit # note that df = 2 is neglected similarly
 
 ## Summary of Model Fits {#summaryFit}
 
-A brief summary of the fitted model is simply given by `show` method
+A brief summary of the fitted model is  given by `show` method
 as shown in the previous examples. Further, `summary` method for
 `rateReg-class` object provides a more specific summary
 of the model fitted. For instance, the summary of the models fitted
@@ -261,7 +261,7 @@ sampleMcf2 <- mcf(Survr(ID, time, event) ~ group,
                   data = simuDat, subset = ID %in% 1:10)
 ```
 
-After estimation, we may simply plot the sample MCF by function `plotMcf`,
+After estimation, we may plot the sample MCF by function `plotMcf`,
 which actually returns a `ggplot` object so that the plot produced
 can be easily further customized by functions in package **ggplot2**.
 
