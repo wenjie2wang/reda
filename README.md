@@ -9,7 +9,7 @@
 
 * ~~Add S4 class functions for print and summary.~~
 
-* test spline rate function by simulation.
+* ~~test spline rate function by simulation.~~
 
 * Polish the documentation for every function in a better organization.
 
@@ -24,8 +24,10 @@
 
 * Add more handy functions for recurrent event analysis.
 
-* Write up manuscript for JSS.
+* Implement M-spline to replace B-spline bases
+  for rate function (I-spline for MCF).
 
+* Write up manuscript for JSS.
 
 ## Notes
 
@@ -37,3 +39,7 @@ Therefore, in 'Survr', 'r' represents 'rate'.
 'gapsReg' (or 'gapReg'). Response formula function can be named as 'Survg',
 where 'g' means 'gaps' and which would have different data checking procedure
 with 'Survr'.
+
+* All the reference in the package manual follows
+  [APA style](http://www.apastyle.org/learn/faqs/index.aspx).
+

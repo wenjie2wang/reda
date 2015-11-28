@@ -1,22 +1,19 @@
 ################################################################################
 ##
-##   R package reda by Haoda Fu, Jun Yan, and Wenjie Wang
+##   R package reda by Wenjie Wang, Haoda Fu, and Jun Yan
 ##   Copyright (C) 2015
 ##
 ##   This file is part of the R package reda.
 ##
-##   The R package reda is free software: you can redistribute it and/or
+##   The R package reda is free software: You can redistribute it and/or
 ##   modify it under the terms of the GNU General Public License as published
 ##   by the Free Software Foundation, either version 3 of the License, or
-##   (at your option) any later version.
+##   any later version (at your option). See the GNU General Public License
+##   at <http://www.gnu.org/licenses/> for details.
 ##
 ##   The R package reda is distributed in the hope that it will be useful,
 ##   but WITHOUT ANY WARRANTY without even the implied warranty of
-##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-##   GNU General Public License for more details.
-##
-##   You should have received a copy of the GNU General Public License
-##   along with the R package reda. If not, see <http://www.gnu.org/licenses/>.
+##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 ##
 ################################################################################
 
@@ -24,40 +21,28 @@
 #' Plot Mean Cumulative Function (MCF)
 #' 
 #' An S4 class generic function dispatched to a certain method 
-#' to plot mean cumulative function by using ggplot2 plotting system. 
-#' So the plots generated are able to be further customized properly.
+#' to plot mean cumulative function by using \code{ggplot2} plotting system. 
+#' The plots generated are able to be further customized properly.
 #' 
-#' @param object \code{\link{empirMcf-class}} or 
-#' \code{\link{heartMcf-class}} object.
-#' @param conf.int logical indicating whether to plot confidence interval.
-#' The default value is FALSE.
-#' @param ... other arguments for further usage.
-#' @param mark.time logical value controls the labeling of the curves. 
-#' If set to FALSE, no labeling is done. 
-#' If TRUE, then curves are marked at each censoring time 
-#' which is not also a death time.
-#' @param lty an optional numeric vector indicating
-#' line types specified to different groups with 
+#' @param object An object used to dispatch a method.
+#' @param conf.int A logical value indicating
+#' whether to plot confidence interval.
+#' The default value is \code{FALSE}.
+#' @param ... Other arguments for further usage.
+#' @param mark.time A logical value with default \code{FALSE}.
+#' If \code{TRUE}, each censoring time is marked by "+" on the MCF curves.
+#' Otherwise, the censoring time would not be marked. 
+#' @param lty An optional numeric vector indicating
+#' line types specified to different groups:
 #' 0 = blank, 1 = solid, 2 = dashed, 3 = dotted, 
 #' 4 = dotdash, 5 = longdash, 6 = twodash.
-#' @param col an optional character vector indicating
+#' @param col An optional character vector indicating
 #' line colors specified to different groups. 
-#' @return ggplot object.
-#' @seealso \code{\link{mcf}} 
+#' @return A \code{ggplot} object.
+#' @seealso \code{\link{mcf}} for estimation of MCF;
+#' \code{\link{rateReg}} for model fitting.
 #' @examples 
-#' library(reda)
-#'  
-#' ## empirical MCF
-#' sampleMCF <- mcf(Survr(ID, time, event) ~ group, data = simuDat)
-#' plotMcf(sampleMCF, lty = c(1, 3), col = c("orange", "navy"))
-#' 
-#' ## estimated MCF for baseline rate function from HEART model
-#' heartFit <- heart(formula = Survr(ID, time, event) ~ x1 + group, 
-#'                   data = simuDat, subset = ID %in% 75:125,
-#'                   baselinePieces = seq(28, 168, length = 6))
-#' baselineMCF <- mcf(heartFit)
-#' plotMcf(baselineMCF, conf.int = TRUE, col = "blueviolet") + 
-#'   ggplot2::theme_bw()
+#' ## See examples given in function mcf and rateReg.
 #' @export
 setGeneric(name = "plotMcf",
            def = function(object, conf.int = FALSE, ...) {
@@ -65,14 +50,12 @@ setGeneric(name = "plotMcf",
            })
 
 
-#' @describeIn plotMcf Plot empirical mean cumulative function (MCF)
-#' @aliases plotMcf,empirMcf-method
-#' @importFrom utils tail
-#' @importFrom stats setNames
+#' @describeIn plotMcf Plot sample MCF from data.
+#' @aliases plotMcf,sampleMcf-method
 #' @importFrom ggplot2 ggplot geom_step aes aes_string scale_color_manual
 #' scale_linetype_manual ylab ggtitle geom_text
 #' @export
-setMethod(f = "plotMcf", signature = "empirMcf", 
+setMethod(f = "plotMcf", signature = "sampleMcf", 
           definition = function(object, conf.int = FALSE, 
                                 mark.time = FALSE, lty, col, ...) {
               
@@ -106,13 +89,7 @@ setMethod(f = "plotMcf", signature = "empirMcf",
                           geom_step(mapping = aes(x = time, y = upper), 
                                     linetype = "3313", color = col)
                   }
-              } else {
-                  ## function to emulate the default colors used in ggplot2
-                  gg_color_hue <- function(n){
-                      hues = seq(15, 375, length=n+1)
-                      return(hcl(h=hues, l=65, c=100)[1:n])
-                  }
-                  
+              } else {         
                   legendname <- utils::tail(colnames(MCFdat), n = 1)
                   MCFdat$design <- MCFdat[, legendname]
                   Design <- factor(MCFdat$design)
@@ -162,19 +139,17 @@ setMethod(f = "plotMcf", signature = "empirMcf",
                   }
               }
               p <- p + ylab("MCF") + 
-                  ggtitle("Empirical Mean Cumulative Function")
+                  ggtitle("Sample Mean Cumulative Function")
               return(p)
           })
 
 
-#' @describeIn plotMcf Estimated mean cumulative function (MCF) 
-#' for baseline rate function.
-#' @aliases plotMcf,heartMcf-method
-#' @importFrom stats setNames
+#' @describeIn plotMcf Plot estimated MCF from a fitted model.
+#' @aliases plotMcf,rateRegMcf-method
 #' @importFrom ggplot2 ggplot geom_line aes aes_string scale_color_manual
 #' scale_linetype_manual ylab ggtitle 
 #' @export
-setMethod(f = "plotMcf", signature = "heartMcf", 
+setMethod(f = "plotMcf", signature = "rateRegMcf", 
           definition = function(object, conf.int = FALSE, 
                                 lty, col, ...) {
 
@@ -198,13 +173,7 @@ setMethod(f = "plotMcf", signature = "heartMcf",
                                     linetype = "3313", color = col)
                   }
               } else {
-                  ## function to emulate the default colors used in ggplot2
-                  gg_color_hue <- function(n){
-                      hues = seq(15, 375, length=n+1)
-                      return(hcl(h=hues, l=65, c=100)[1:n])
-                  }
-                  
-                  legendname <- tail(colnames(MCFdat), n = 1)
+                  legendname <- utils::tail(colnames(MCFdat), n = 1)
                   MCFdat$Design <- MCFdat[, legendname]
                   Design <- factor(MCFdat$Design)
                   ndesign = length(levels(Design))
@@ -248,3 +217,10 @@ setMethod(f = "plotMcf", signature = "heartMcf",
           })
 
 
+### internal function ==========================================================
+## function to emulate the default colors used in ggplot2
+#' @importFrom grDevices hcl
+gg_color_hue <- function (n) {
+    hues <- seq(15, 375, length = n + 1)
+    grDevices::hcl(h = hues, l = 65, c = 100)[1 : n]
+}

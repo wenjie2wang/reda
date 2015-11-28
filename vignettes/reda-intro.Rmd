@@ -1,81 +1,330 @@
 ---
-title: "Introduction to 'reda' via examples"
+title: "Introduction to reda by Examples"
 author: Wenjie Wang
 date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
+bibliography:
+- ../inst/bib/reda-intro.bib
 vignette: >
-  %\VignetteIndexEntry{Introduction to 'heart' via examples}
+  %\VignetteIndexEntry{Introduction to reda by Examples}
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
+output: rmarkdown::html_vignette
 ---
 
-# The HEART Model
+The package **reda** mainly provides function to fit gamma frailty model with
+either a piecewise constant or a spline as the baseline rate function
+for recurrent event data. What's more, some handy functions are designed,
+such as computing and plotting sample nonparametric mean cumulative function,
+or so-called Nelson-Aalen estimator. Most functions in this package
+are S4 methods that produce S4 class objects.
 
-## Model Fitting
+In this vignette, we mainly introduce the basic usage of the functions
+provided in the package by examples. The details of function snytax
+and slots of the objects produced are available in the package manual,
+which will thus not be covered in this vignette.
 
-```{r fits, message=FALSE}
-library(reda)
-heartFit <- heart(formula = Survr(ID, time, event) ~ x1 + group, 
-                  data = simuDat, baselinePieces = seq(28, 168, length = 6))
+An outline of the remainder of the vignette is as follows:
+We first introduce the [simulated sample recurrent event data](#simuDat)
+and the [data checking](#dataCheck) rules.
+After then, the demonstration of the main function `rateReg` for
+[model fitting](#rateReg) is provided, which includes fitting model with
+(one piece) [constant](#constFit), [piecewise constant](#piecesFit),
+and [spline](#splineFit) baseline rate function.
+What follows next are the examples of functions that
+[summarize](#summaryFit) the model fitted and
+functions for [model selection](#modSelect) based on AIC or BIC.
+Last but not the least, the demonstration of estimation and
+the mean cumulative function (MCF) is given, which includes
+[sample MCF](#sampleMcf) and [estimated MCF](#rateRegMcf)
+from the fitted model.
+
+## Simulated Sample Recurrent Event Data {#simuDat}
+
+```{r setup}
+library(reda) # attach package 
+data(simuDat) # attach sample dataset
 ```
 
-## Estimates 
+First of all, the sample recurrent event data 
+we are going to use in the following examples is called `simuDat`,
+which contains totally `r nrow(simuDat)` observations of `r ncol(simuDat)`
+variables.
 
-```{r estimates}
-# point estimates of coefficients
-coef(heartFit)
-# confidence interval for coefficients
-confint(heartFit)
-# estimates of piece-wise constant baseline rate function
-baseline(heartFit)
+```{r data}
+head(simuDat, 10)
+str(simuDat)
 ```
 
-## Summary of the Model Fits
+where
+
+* ID: Subjects identification.
+* time: Event or censoring time.
+* event: Event indicator, 1 = event; 0 = censored.
+* group: Treatment group indicator.
+* x1: Continuous variable. 
+
+The dataset is originally simulated by thinning method [@lewis1979]
+and further processed for a better demonstration purpose.
+
+## Data Checking {#dataCheck}
+
+In the main function `rateReg` for model fitting,
+formula response is specified by function `Survr`,
+which has embedded data checking procedure for recurrent event data modeled
+by method based on counts and rate function. Therefore, before model fitting,
+the observations of the covariates specified in the formula will be checked.
+The checking rules include
+
+* Identification of each subject cannot be missing.
+* Event indicator must be coded as 0 (censored) or 1 (event).
+* Event time and censoring time cannot be missing.
+* Each subject must have one and only one censoring time.
+* Event time cannot not be later than censoring time.
+
+The subject's ID will be pinpointed if its observation violates any checking
+rule shown above. 
+
+## Model Fitting {#rateReg}
+
+### Model with Constant Rate Function {#constFit}
+
+The default model when argument `df`, `knots`, and `degree` are not
+specified is gamma frailty model with (one piece) constant rate function,
+which is equivalent to negative binomial regression of the same
+shape and rate parameter in gamma prior.
+
+In the following examples, we fit the models on the first 50 subjects
+by specifying argument `subset`. 
+
+```{r const}
+constFit <- rateReg(Survr(ID, time, event) ~ group + x1, data = simuDat,
+                    subset = ID %in% 1:50)
+# brief summary
+constFit # or explicitly call show(constFit)
+```
+
+The function `rateReg` returns `rateReg-class` object, which can be 
+printed out by calling the object.
+(Internally, `show` method for `rateReg` object is called.)
+
+### Model with Piecewise Constant Rate Function {#piecesFit}
+
+When argument `df` or `knots` (at least one internal knot) is specified,
+the model becomes gamma frailty model with piecewise constant rate function
+or so-called HEART model [@fu2014]
+if argument degree is specified to be zero as default.
+
+We may specify `df` and leave `knots` and `degree` as default.
+Then piecewise constant rate function will be applied and the number of pieces
+will equal `df`. The internal knots will be automatically specified at
+suitable quantiles of the covariate representing event and censoring time.
+
+For example, two pieces' constant rate function can be simply specified
+by setting `df = 2`. The internal knot will be the median time of all the
+event and censoring time.
+
+```{r twoPieces}
+# two pieces' constant rate function i.e. one internal knot
+twoPiecesFit <- rateReg(Survr(ID, time, event) ~ group + x1, df = 2, 
+                        data = simuDat, subset = ID %in% 1:50)
+twoPiecesFit
+```
+
+In the example shown above, the internal knots is set automatically to be
+`r twoPiecesFit@knots` and the baseline rate function is two pieces' constant.
+
+If internal `knots` are specified explicitly, the `df` will be neglected
+even if it is specified. An example of model with six pieces' constant rate
+function is given as follows:
+
+```{r sixPieces}
+piecesFit <- rateReg(Survr(ID, time, event) ~ group + x1, df = 2,
+                     knots = seq(from = 28, to = 140, by = 28),
+                     data = simuDat, subset = ID %in% 1:50)
+piecesFit # note that df = 2 is neglected since knots are specified
+```
+
+### Model with Spline Rate Function {#splineFit}
+
+When argument `degree` is specified to be a positive integer,
+the baseline rate function is fitted by splines.
+Currently, B-splines are used.
+
+For example, one may want to fit the baseline rate function by
+a cubic spline with two internal knots. Then we may explicitly
+specify `degree = 3` and `knots` to be a length-two numeric vector.
+Or we may simply specify `degree = 3` and `df = 6`
+(if intercept is considered, which is default).
+Similarly, the internal knots will be automatically specified at
+suitable quantiles of the covariate representing event and censoring time.
+
+Generally speaking, the degree of freedom of spline
+(or the number of spline bases) equals the summation of
+the number of internal knots and the degree of each spline base,
+plus one if intercept is included in spline bases.
+
+```{r spline}
+## df can be simply specified
+splineFit <- rateReg(Survr(ID, time, event) ~ group + x1, df = 6,
+                     degree = 3L, data = simuDat, subset = ID %in% 1:50)
+## internal knots are set as 33% and 67% quantiles of time variable
+splineFit 
+
+## or internal knots are expicitly specified
+splineFit <- rateReg(Survr(ID, time, event) ~ group + x1, df = 2,
+                     degree = 3L, knots = c(56, 112),
+                     data = simuDat, subset = ID %in% 1:50)
+splineFit # note that df = 2 is neglected similarly
+```
+
+## Summary of Model Fits {#summaryFit}
+
+A brief summary of the fitted model is  given by `show` method
+as shown in the previous examples. Further, `summary` method for
+`rateReg-class` object provides a more specific summary
+of the model fitted. For instance, the summary of the models fitted
+in section of model fitting can be called as follows:
 
 ```{r summary}
-# a brief summary for the model fits
-heartFit 
-# summary in more details
-summary(heartFit)
+summary(constFit)
+summary(piecesFit, showCall = FALSE)
+summary(splineFit, showCall = FALSE, showKnots = FALSE)
 ```
 
-# Mean Cumulative Function (MCF)
+The summary includes the function call, estimated covariate coefficients,
+estimated parameter of frailty variable, internal knots (if exist),
+boundary knots, degree of spline bases if splines are applied,
+coefficients of rate function bases (pieces), and log likelihood
+of the model fitted. Outputs of function call or knots,
+may be suppressed by specifying argument `showCall` or `showKnots`
+to be `FALSE`, respectively, in `summary` method, which would be
+especially useful for a relatively concise summary
+in a reproducible report using `Rmarkdown`, etc. 
 
-## Empirical MCF
+What's more, the corresponding `coef` and `confint` method
+for point estimates and confidence interval for covariate coefficients
+are provided as well. The estimated coefficients of baseline rate function
+can be given by function `baseRate`.
+Let's take the fitted model with spline rate function as an example.
 
-```{r empirMcf}
-mcf(Survr(ID, time, event) ~ group, data = simuDat,
-    subset = ID %in% 100:101, na.action = na.omit, level = 0.9)
-sampleMCF <- mcf(Survr(ID, time, event) ~ group, data = simuDat)
+```{r est}
+## point estimates of covariate coefficients
+coef(splineFit)
+## confidence interval for covariate coefficients
+confint(splineFit, level = 0.95) 
+## estimated coefficients of baseline rate function
+baseRate(splineFit)
 ```
 
-```{r plotempir, fig.height=6, fig.width=7}
-plotMcf(sampleMCF, conf.int = TRUE, mark.time = TRUE, 
-        lty = c(1, 3), col = c("orange", "navy"))
+## Model Selection {#modSelect}
+
+Two handy functions are provided for model selection.
+We may compare and select the models with different baseline rate function
+based on Akaike Information Criterion (AIC) by function `AIC` or
+Bayesian Information Criterion (BIC) by function `BIC`.
+
+```{r }
+AIC(constFit, piecesFit, splineFit)
+BIC(constFit, piecesFit, splineFit)
 ```
 
-## Estimated MCF from the HEART Model
+## Mean Cumulative Function (MCF)
 
-Note that function 'plotMcf' returns 'ggplot' object so that the plot can be 
-further customized properly.
+The generic function to compute the sample MCF and
+the estimated MCF from the fitted model is called `mcf`.
+Another related generic function called `plotMcf` plots the
+estimated MCF by using **ggplot2** plotting system.
 
-### Baseline MCF 
+### Sample MCF (Nelson-Aalen Estimator) {#sampleMcf}
 
-```{r baselineMCF, fig.height=6, fig.width=7}
-baselineMcf <- mcf(heartFit)
-plotMcf(baselineMcf, conf.int = TRUE, col = "royalblue") +
-    ggplot2::theme_bw()
+The nonparametric sample MCF is also called
+Nelson-Aalen Estimator [@nelson2003]. The point estimate of MCF
+at each time point does not assume any particular underlying model.
+The variance of estimated MCF [@reliawiki] at each time point is
+estimated and the approximate confidence intervals are provided as well,
+which is constructed based on the asymptotic normality of log MCF.
+
+If a formula with `Survr` as response is specified in function `mcf`,
+the method for sample MCF will be called.
+The covariate specified at the right hand side of the formula
+should be either `1` or any one factor variable in the data.
+The former computes the overall sample MCF.
+The latter computes the sample MCF for each level of
+the factor variable specified, respectively.
+
+```{r sampleMcf}
+## overall sample MCF
+sampleMcf1 <- mcf(Survr(ID, time, event) ~ 1,
+                  data = simuDat, subset = ID %in% 1:10)
+## sample MCF for different groups
+sampleMcf2 <- mcf(Survr(ID, time, event) ~ group,
+                  data = simuDat, subset = ID %in% 1:10)
 ```
 
-### MCF for certain group(s)
+After estimation, we may plot the sample MCF by function `plotMcf`,
+which actually returns a `ggplot` object so that the plot produced
+can be easily further customized by functions in package **ggplot2**.
 
-```{r heartMcf, fig.height=6, fig.width=7}
-estmcf <- mcf(heartFit, 
-              newdata = data.frame(
-                  x1 = c(0.1, 0.1), 
-                  group = gl(2, 1, labels = c("Treat", "Contr"))), 
-              groupName = "Group", 
+For example, the overall sample MCF and the sample MCF
+for two groups (control vs. treatment) estimated above
+are plotted, respectively, as follows:
+
+```{r plot:sampleMcf, fig.height = 5, fig.width = 7}
+## plot overall sample MCF
+plotMcf(sampleMcf1)
+## plot MCF for different groups
+plotMcf(sampleMcf2, mark.time = TRUE, 
+        lty = c(1, 3), col = c("navy", "orange")) +
+    ggplot2::xlab("Days") + ggplot2::theme_bw()
+```
+
+Note that all the censoring time can be marked on the
+step curve by specifying `mark.time = TRUE`.
+The type and color of the line can be specified through
+`lty` and `col`, respectively.
+
+### Estimated MCF from the fitted Model {#rateRegMcf}
+
+If `rateReg-class` object is supplied to function `mcf`,
+the method for `rateReg-class` is called, which returns
+the estimated baseline MCF from the fitted model
+if `newdata` is not specified in the function.
+
+The example estimating and plotting
+the baseline MCF from the fitted model
+with piecewise constant rate function is shown as follows:
+
+```{r piecesMcf, fig.height = 5, fig.width = 7}
+piecesMcf <- mcf(piecesFit)
+plotMcf(piecesMcf, conf.int = TRUE, col = "blueviolet") +
+    ggplot2::xlab("Days") + ggplot2::theme_bw()
+```
+
+The argument `newdata` allows one to estimate the MCF for a given dataset
+instead of the baseline MCF. If `newdata` is specified, the data frame should
+have the same column names as the covariate names appearing in the formula
+of original fitting. The MCF will be estimated for each unique row
+in the data frame and its confidence intervals are constructed
+based on Delta-method.
+
+In addition, we may specify the name for grouping each unique row and
+the levels of each group through `groupName` and `groupLevels`, respectively.
+For example, we may specify `groupName = "Gender"` and
+`groupLevels = c("Male", "Female")` for estimation
+of different gender groups.
+
+As the last example in this vignette,
+we estimate the MCF from fitted model with
+spline rate function for the different treatment groups and plot the
+estimated MCFs and their confidence intervals correspondingly.
+
+```{r splineMcf, fig.height = 5, fig.width = 7}
+newDat <- data.frame(x1 = rep(0, 2), group = c("Treat", "Contr"))
+estmcf <- mcf(splineFit, newdata = newDat, groupName = "Group", 
               groupLevels = c("Treatment", "Control"))
-plotMcf(estmcf, conf.int = TRUE, col = c("royalblue", "red")) +
-    ggplot2::theme_bw()
+plotMcf(estmcf, conf.int = TRUE, col = c("royalblue", "red"), lty = c(1, 5)) +
+    ggplot2::ggtitle("Control vs. Treatment") + ggplot2::xlab("Days") +
+    ggplot2::theme_bw() 
 ```
+
+## Reference

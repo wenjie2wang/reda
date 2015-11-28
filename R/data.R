@@ -1,49 +1,52 @@
 ################################################################################
 ##
-##   R package reda by Haoda Fu, Jun Yan, and Wenjie Wang
+##   R package reda by Wenjie Wang, Haoda Fu, and Jun Yan
 ##   Copyright (C) 2015
 ##
 ##   This file is part of the R package reda.
 ##
-##   The R package reda is free software: you can redistribute it and/or
+##   The R package reda is free software: You can redistribute it and/or
 ##   modify it under the terms of the GNU General Public License as published
 ##   by the Free Software Foundation, either version 3 of the License, or
-##   (at your option) any later version.
+##   any later version (at your option). See the GNU General Public License
+##   at <http://www.gnu.org/licenses/> for details.
 ##
 ##   The R package reda is distributed in the hope that it will be useful,
 ##   but WITHOUT ANY WARRANTY without even the implied warranty of
-##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-##   GNU General Public License for more details.
-##
-##   You should have received a copy of the GNU General Public License
-##   along with the R package reda. If not, see <http://www.gnu.org/licenses/>.
+##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 ##
 ################################################################################
 
 
-#' Simulated Dataset for Demonstration
+#' Simulated Sample Dataset for Demonstration
 #'
 #' A simulated data frame with covariates named 
-#' 'ID', 'time', 'event', 'group' and 'x1'.
+#' \code{ID}, \code{time}, \code{event}, \code{group} and \code{x1},
+#' where
+#' \itemize{
+#'     \item \code{ID}: Subjects identification;
+#'     \item \code{time}: Event or censoring time;
+#'     \item \code{event}: Event indicator, 1 = event, 0 = censored;
+#'     \item \code{group}: Treatment group indicator;
+#'     \item \code{x1}: Continuous variable. 
+#' }
+#'
+#' @details
+#' The sample dataset is originally simulated by the thinning
+#' method developed by Lewis and Shedler (1979) and
+#' further processed for a better demonstration purpose.
+#' See Fu et al. (2014) for details also.
 #' 
-#' The dataset is simulated by the thinning method developed 
-#' by \emph{Lewis and Shedler (1979)}. 
-#' See \emph{Fu et al. (2014)} for more details.
 #' @docType data
 #' @name simuDat
-#' @format A data frame with 2403 rows and 5 variables.
-#' @references 
-#' Lewis, P. and Shedler, G. (1979), 
-#' ``Simulation of nonhomogeneous Poisson processes by thinning,'' 
-#' \emph{Naval Research Logistics Quarterly}, 26, 403--413.
+#' @format A data frame with 500 rows and 5 variables.
+#' @references
+#' Lewis, P. A., & Shedler, G. S. (1979). 
+#' Simulation of nonhomogeneous Poisson processes by thinning.
+#' \emph{Naval Research Logistics Quarterly}, 26(3), 403--413.
 #' 
-#' Fu, Haoda, Junxiang Luo, and Yongming Qu. (2014),
-#' ``Hypoglycemic Events Analysis via Recurrent Time-to-Event (HEART) Models,''
-#' \emph{Journal of biopharmaceutical statistics}, 2014 Dec 1, Epub 2014 Dec 1.
-#' @importFrom utils head 
-#' @examples 
-#' data(simuDat)
-#' head(simuDat)
-#' str(simuDat)
+#' Fu, H., Luo, L., & Qu Y. (2014). Hypoglycemic Events Analysis via
+#' Recurrent Time-to-Event (HEART) Models. 
+#' \emph{Journal of biopharmaceutical statistics}, Epub 2014 Dec 1.
 NULL
 

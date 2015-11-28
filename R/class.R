@@ -1,235 +1,247 @@
 ################################################################################
 ##
-##   R package reda by Haoda Fu, Jun Yan, and Wenjie Wang
+##   R package reda by Wenjie Wang, Haoda Fu, and Jun Yan
 ##   Copyright (C) 2015
 ##
 ##   This file is part of the R package reda.
 ##
-##   The R package reda is free software: you can redistribute it and/or
+##   The R package reda is free software: You can redistribute it and/or
 ##   modify it under the terms of the GNU General Public License as published
 ##   by the Free Software Foundation, either version 3 of the License, or
-##   (at your option) any later version.
+##   any later version (at your option). See the GNU General Public License
+##   at <http://www.gnu.org/licenses/> for details.
 ##
 ##   The R package reda is distributed in the hope that it will be useful,
 ##   but WITHOUT ANY WARRANTY without even the implied warranty of
-##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-##   GNU General Public License for more details.
-##
-##   You should have received a copy of the GNU General Public License
-##   along with the R package reda. If not, see <http://www.gnu.org/licenses/>.
+##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 ##
 ################################################################################
 
 
-## create S3 Class called "survr" as formula response for recurrent event data
-#' An S3 Class to Represent Formula Response for Recurrent Event Data
+#' Formula Response for Recurrent Event Data
 #' 
-#' \code{Survr} is an S3 class to represent 
-#' formula response for recurrent event data.
+#' \code{Survr} is an S3 class that represents
+#' formula response for recurrent event data
+#' modeled by methods based on counts and rate function.
+#' The last letter 'r' in 'Survr' represents 'rate'.
 #'
-#' This is a similar function to \code{\link[survrec]{Survr}} in package
-#' \code{survrec}, but with a better checking procedure for recurrent event
-#' data. The checking rules include that
+#' This is a similar function to \code{Survr} in package
+#' \pkg{survrec} but with a better embedded checking procedure for
+#' recurrent event data modeled by methods
+#' based on counts and rate function.
+#' The checking rules include that
 #' \itemize{
-#'     \item identificator of each subject cannot be missing.
-#'     \item event indicator must be coded as 0 (censoring) or 1 (event).
-#'     \item event time and censoring time cannot be missing.
-#'     \item each subject must have one and only one censoring time.
-#'     \item event time cannot not be later than censoring time.
+#'     \item Identification of each subject cannot be missing.
+#'     \item Event indicator must be coded as 0 (censored) or 1 (event).
+#'     \item Event time and censoring time cannot be missing.
+#'     \item Each subject must have one and only one censoring time.
+#'     \item Event time cannot not be later than censoring time.
 #' }
 #'  
-#' @param ID identificator of each subject. 
-#' @param time time of reccurence. For each subject the last time are censored.
-#' @param event the status indicator, 
-#' 0 = censored, 1 = recurrent event. 
+#' @param ID Identificator of each subject. 
+#' @param time Time of reccurence event or censoring.
+#' @param event The status indicator, 0 = censored, 1 = event. 
 #' @aliases Survr
-#' @seealso \code{\link{heart}}
-#' @importFrom plyr ddply
+#' @seealso \code{\link{rateReg}} for model fitting.
 #' @export
 Survr <- function (ID, time, event) {
-    inpdat <- data.frame(ID, time, event)
-    dat <- check_Survr(inpdat)
-    outdat <- with(dat, as.matrix(cbind(ID, time, event)))
-    attr(outdat, "ID") <- attr(dat, "ID")
-    oldClass(outdat) <- "Survr"
-    invisible(outdat)
+    inpDat <- data.frame(ID, time, event)
+    dat <- check_Survr(inpDat)
+    outDat <- with(dat, as.matrix(cbind(ID, time, event)))
+    attr(outDat, "ID") <- attr(dat, "ID")
+    oldClass(outDat) <- "Survr"
+    invisible(outDat)
 }
 
 
-## create S4 Class called "heart" for heart object from function heart
-#' An S4 Class to Represent a Fitted HEART Model
+#' An S4 Class to Represent a Fitted Model
 #' 
-#' \code{heart-class} is an S4 class to represent a HEART model fits. 
-#' \code{\link{heart}} produces objects of this class.  
+#' \code{rateReg-class} is an S4 class that represents a fitted model. 
+#' \code{\link{rateReg}} produces objects of this class.  
 #' See ``Slots'' for details.
 #' 
-#' @slot call function call.
-#' @slot formula formula.
-#' @slot baselinePieces a numeric vector.
-#' @slot estimates list.
-#' @slot control list.
-#' @slot start list.
-#' @slot na.action a length-one character vector.
-#' @slot xlevels list.
-#' @slot contrasts list.
-#' @slot convergence an integer.
-#' @slot fisher a numeric matrix.
-#' @aliases heart-class
-#' @seealso \code{\link{heart}}
+#' @slot call Function call.
+#' @slot formula Formula.
+#' @slot nObs A positive integer
+#' @slot knots A numeric vector.
+#' @slot boundaryKnots A numeric vector.
+#' @slot degree A nonnegative integer.
+#' @slot df A list of nonnegative numeric vectors.
+#' @slot estimates A list.
+#' @slot control A list.
+#' @slot start A list.
+#' @slot na.action A length-one character vector.
+#' @slot xlevels A list.
+#' @slot contrasts A list.
+#' @slot convergCode A nonnegative integer.
+#' @slot logL A numeric value.
+#' @slot fisher A numeric matrix.
+#' @aliases rateReg-class
+#' @seealso \code{\link{rateReg}} for details of slots.
 #' @export
-setClass(Class = "heart", 
+setClass(Class = "rateReg", 
          slots = c(call = "call", 
-                   formula = "formula", 
-                   baselinePieces = "numeric",
+                   formula = "formula",
+                   nObs = "integer",
+                   knots = "numeric",
+                   boundaryKnots = "numeric",
+                   degree = "integer",
+                   df = "list",
                    estimates = "list",
                    control = "list",
                    start = "list",
                    na.action = "character",
                    xlevels = "list",
                    contrasts = "list",
-                   convergence = "integer", 
-                   fisher = "matrix"))
+                   convergCode = "integer",
+                   logL = "numeric",
+                   fisher = "matrix"),
+         validity = function (object) {
+             ## check on nObs
+             if (object@nObs <= 0) {
+                 return("Number of observations must be a positive integer.")
+             }
+             ## check on knots
+             if (length(object@knots) > 0) { # if there exists internal knots
+                 if (min(object@knots) < min(object@boundaryKnots) ||
+                     max(object@knots) > max(object@boundaryKnots)) {
+                     return(paste("Internal knots must all lie in the", 
+                                  "coverage of boundary knots."))
+                 }
+             }
+             ## check on degree
+             if (object@degree < 0) {
+                 return("Degree of spline bases must be a nonnegative integer.")
+             }
+             ## check on df
+             dfVec <- do.call("c", object@df)
+             dfValid <- is.integer(dfVec) && all(dfVec >= 0)
+             if (! dfValid) {
+                 return("Degree of freedom must be nonnegative integers.")
+             }
+             ## else return
+             TRUE
+         })
 
 
-## create S4 Class called "summaryHeart" for summaryHeart object from summary
-#' An S4 Class to Represent Summary of heart-class Object
+#' An S4 Class to Represent Summary of a Fitted Model
 #' 
-#' summaryHeart-class is an S4 class with selective slots 
-#' of heart-class object.  See ``Slots'' for details.  
-#' \code{\link{summary}} produces objects of this class. 
+#' \code{summaryRateReg-class} is an S4 class with selective slots 
+#' of \code{rateReg-class} object.  See ``Slots'' for details.  
+#' \code{\link{summary,rateReg-method}} produces objects of this class. 
 #'  
-#' @slot call function call.
-#' @slot baselinePieces a numeric vector.
-#' @slot coefficients a numeric matrix.
-#' @slot theta numeric a matrix.
-#' @slot baseline a numeric matrix.
-#' @aliases summaryHeart-class
-#' @seealso \code{\link{summary,heart-method}} 
+#' @slot call Function call.
+#' @slot knots A numeric vector.
+#' @slot boundaryKnots A numeric vector.
+#' @slot covarCoef A numeric matrix.
+#' @slot frailtyPar A numeric matrix.
+#' @slot degree A nonnegative integer.
+#' @slot baseRateCoef A numeric matrix.
+#' @slot logL A numeric value.
+#' @aliases summaryRateReg-class
+#' @seealso \code{\link{summary,rateReg-method}} for details of slots.
 #' @export
-setClass(Class = "summaryHeart", 
+setClass(Class = "summaryRateReg", 
          slots = c(call = "call", 
-                   baselinePieces = "numeric",
-                   coefficients = "matrix",
-                   theta = "matrix",
-                   baseline = "matrix"))
+                   knots = "numeric",
+                   boundaryKnots = "numeric",
+                   covarCoef = "matrix",
+                   frailtyPar = "matrix",
+                   degree = "integer",
+                   baseRateCoef = "matrix",
+                   logL = "numeric"),
+         validity = function (object) {
+             ## check on knots
+             if (length(object@knots) > 0) { # if there exists internal knots
+                 if (min(object@knots) < min(object@boundaryKnots) ||
+                     max(object@knots) > max(object@boundaryKnots)) {
+                     return(paste("Internal knots must all lie in the", 
+                                  "coverage of boundary knots."))
+                 }
+             }
+             ## check on degree
+             if (object@degree < 0) {
+                 return("Degree of spline bases must be a nonnegative integer.")
+             }
+             ## else return
+             TRUE
+         })
 
 
-#' An S4 Class to Represent Computed Empirical MCF
+#' An S4 Class to Represent Sample MCF
 #' 
-#' An S4 class to represent computed empirical mean cumulative function (MCF).
+#' An S4 class that represents sample mean cumulative function (MCF) from data.
 #' \code{\link{mcf}} produces objects of this class.  
-#' @slot call function call
-#' @slot formula formula. 
-#' @slot MCF a data.frame.
-#' @slot multiGroup a logical value.
-#' @aliases empirMcf-class
-#' @seealso \code{\link{mcf,formula-method}}
+#'
+#' @slot call Function call
+#' @slot formula Formula.
+#' @slot na.action A length-one character vector.
+#' @slot level A numeric value.
+#' @slot MCF A data frame.
+#' @slot multiGroup A logical value.
+#' @aliases sampleMcf-class
+#' @seealso \code{\link{mcf,formula-method}} for details of slots.
 #' @importFrom methods setClass
 #' @export
-setClass(Class = "empirMcf", 
-         slots = c(call = "call", formula = "formula", MCF = "data.frame", 
+setClass(Class = "sampleMcf", 
+         slots = c(call = "call",
+                   formula = "formula",
+                   na.action = "character",
+                   level = "numeric",
+                   MCF = "data.frame", 
                    multiGroup = "logical"))
 
 
-#' An S4 Class to Represent Estimated MCF from HEART Model
+#' An S4 Class to Respresent Estimated MCF from a Fitted Model
 #' 
-#' An S4 class to represent estimated mean cumulative function (MCF) 
-#' from HEART Model.
+#' An S4 class that represents estimated mean cumulative function (MCF) 
+#' from Models.
 #' \code{\link{mcf}} produces objects of this class.  
 #' 
-#' @slot formula formula.
-#' @slot baselinePieces a numeric vector.
-#' @slot newdata a numeric matrix.
-#' @slot MCF a data.frame.
-#' @slot level a numeric value between 0 and 1.
-#' @slot na.action a length-one character vector.
-#' @slot control list.
-#' @slot multiGroup a logical value. 
-#' @aliases heartMcf-class
-#' @seealso \code{\link{mcf,heart-method}}
+#' @slot call Function call.
+#' @slot formula Formula.
+#' @slot knots A numeric vector.
+#' @slot degree A nonnegative integer.
+#' @slot boundaryKnots A numeric vector.
+#' @slot newdata A numeric matrix.
+#' @slot MCF A data frame.
+#' @slot level A numeric value between 0 and 1.
+#' @slot na.action A length-one character vector.
+#' @slot control A list.
+#' @slot multiGroup A logical value. 
+#' @aliases rateRegMcf-class
+#' @seealso \code{\link{mcf,rateReg-method}} for details of slots.
 #' @export
-setClass(Class = "heartMcf", 
-         slots = c(formula = "formula", baselinePieces = "numeric",
-                   newdata = "matrix", MCF = "data.frame", level = "numeric", 
-                   na.action = "character", control = "list", 
-                   multiGroup = "logical"))
+setClass(Class = "rateRegMcf", 
+         slots = c(call = "call",
+                   formula = "formula",
+                   knots = "numeric",
+                   degree = "integer",
+                   boundaryKnots = "numeric",
+                   newdata = "matrix",
+                   MCF = "data.frame",
+                   level = "numeric", 
+                   na.action = "character",
+                   control = "list", 
+                   multiGroup = "logical"),
+         validity = function (object) {
+             ## check on knots
+             if (length(object@knots) > 0) { # if there exists internal knots
+                 if (min(object@knots) < min(object@boundaryKnots) ||
+                     max(object@knots) > max(object@boundaryKnots)) {
+                     return(paste("Internal knots must all lie in the", 
+                                  "coverage of boundary knots."))
+                 }
+             }
+             ## check on degree
+             if (object@degree < 0) {
+                 return("Degree of spline bases must be a nonnegative integer.")
+             }
+             ## check on level
+             if (object@level <= 0 || object@level >= 1) {
+                 return("Confidence level mush be between 0 and 1.")
+             }
+             ## else return
+             TRUE
+         })
 
-
-### internal function ========================================================== 
-check_Survr <- function(dat) {
-    ## check missing value on 'ID'
-    if (any(is.na(dat$ID))) {
-        stop("'ID' cannot be missing.")
-    }
-    ## check coding and missing value on 'event'
-    if (any(! dat$event %in% 0:1)) {
-        stop("'event' must be coded as 0 (censoring) or 1 (event).")
-    }
-    ## if dat input has an attr 'ID'
-    nID <- attr(dat, "ID")
-    if (! is.null(nID)) {
-        dat$IDnam <- nID
-    } else {
-        ## check whether 'ID' is numeric or not. convert if not.
-        dat$IDnam <- factor(dat$ID, levels = unique(dat$ID))
-        dat$ID <- as.numeric(dat$IDnam)
-    }
-    
-    ## nonsense, just to suppress Note from R CMD check --as-cran
-    mis_time1 <- mis_time0 <- censor1 <- censor2 <- event <- NULL
-
-    ## check function
-    check_ddply <- function (subdat) {
-        subdat <- subdat[order(subdat$time), ]
-        ## check missing values on 'time'
-        time1 <- with(subset(subdat, event == 1), time)
-        time0 <- with(subset(subdat, event == 0), time)
-        mis_time1 <- if (length(time1) > 0) {
-            ## missing indicator of time for event == 1
-            ifelse(any(is.na(time1)), 1, 0)
-        } else {2}
-        mis_time0 <- if (length(time0) > 0) {
-            ## missing indicator of time for event == 0
-            ifelse(any(is.na(time0)), 1, 0)
-        } else {2}
-        ## issue #1: without censoring time or more than one censoring time
-        censor1 <- ifelse(sum(subdat$event == 0, na.rm = TRUE) != 1, 1, 0)
-        ## issue #2: event time after censoring time
-        censor2 <- if (mis_time1 == 0 && mis_time0 == 0) {
-            ifelse(max(time1) >= min(time0), 1, 0)
-        } else {2}
-        ## return
-        cbind(subdat, mis_time1, mis_time0, censor1, censor2)
-    }
-    outdat <- plyr::ddply(dat, "ID", check_ddply)
-    ## stop if missing value of 'time' for event == 1
-    ID_mis_time1 <- with(subset(outdat, mis_time1 == 1), unique(IDnam))
-    if (length(ID_mis_time1) > 0) {
-        stop(paste("There is missing value on event time for subject:", 
-                   paste0(ID_mis_time1, collapse = ", ")))
-    }
-    ## stop if missing value of 'time' for event == 0
-    ID_mis_time0 <- with(subset(outdat, mis_time0 == 1), unique(IDnam))
-    if (length(ID_mis_time0) > 0) {
-        stop(paste("Censoring time is missing for subject:", 
-                   paste0(ID_mis_time0, collapse = ", ")))
-    }
-    ## stop if no censoring time or more than one censoring time
-    ID_censor1 <- with(subset(outdat, censor1 == 1), unique(IDnam))
-    if (length(ID_censor1) > 0) {
-        message("Every subject must have one (and only one) censored time.")
-        stop(paste("Check subject: ",
-            paste0(ID_censor1, collapse = ", ")))
-    }
-    ## stop if event time after censoring time
-    ID_censor2 <- with(subset(outdat, censor2 == 1), unique(IDnam))
-    if (length(ID_censor2) > 0) {
-        message("Event time should be earlier than censoring time.")
-        stop(paste("Check subject:",
-                   paste0(ID_censor2, collapse = ", ")))
-    }
-    ## return
-    out <- outdat[, c("ID", "time", "event")]
-    attr(out, "ID") <- outdat$IDnam
-    invisible(out)
-}
