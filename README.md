@@ -1,45 +1,47 @@
-# R Package reda 
+# reda 
 
-## To-do
+[![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/reda)](http://cran.r-project.org/package=reda)
 
-* ~~Understand the origin code, add some necessary comments and 
-	document every function with Roxygen2.~~
+The R package **reda** mainly provides function to fit gamma frailty model with
+either a piecewise constant or a spline as the baseline rate function
+for recurrent event data. What's more, some handy functions are designed,
+such as computing and plotting sample nonparametric mean cumulative function,
+or so-called Nelson-Aalen estimator. Most functions in this package
+are S4 methods that produce S4 class objects.
 
-* ~~Rewrite plot function by using ggplot2 if necessary.~~
 
-* ~~Add S4 class functions for print and summary.~~
+## installation
 
-* ~~test spline rate function by simulation.~~
+You can install the stable version on
+[CRAN](http://cran.rstudio.com/package=reda):
 
-* Polish the documentation for every function in a better organization.
+```r
+install.packages("reda", dependencies = TRUE)
+```
 
-* Test by using testthat package.  Write vignettes.
 
-* Tests based on datasets from other R packages for 
-	recurrent event analysis, such as 
-	[survrec](http://cran.r-project.org/web/packages/survrec/index.html),
-	[etc](http://cran.r-project.org/web/views/Survival.html).
+## Usage
 
-* Setup repository on Github for issue or bug report.
+```r
+help(pacakge = "reda")
+library(reda)
+## help on main function for model fitting
+?rateReg 
+```
 
-* Add more handy functions for recurrent event analysis.
+See [package help manual](https://cran.rstudio.com/web/packages/reda/reda.pdf)
+and [vignette](https://cran.rstudio.com/web/packages/reda/vignettes/reda-intro.html)
+for details and demonstration.
 
-* Implement M-spline to replace B-spline bases
-  for rate function (I-spline for MCF).
 
-* Write up manuscript for JSS.
+## License
 
-## Notes
+The R package reda is free software: You can redistribute it and/or
+modify it under the terms of the GNU General Public License as published
+by the Free Software Foundation, either version 3 of the License, or
+any later version (at your option).
+See the [GNU General Public License](http://www.gnu.org/licenses/) for details.
 
-* 'heart' is renamed by 'rateReg' since the model is
-based on counts and rate function.
-Therefore, in 'Survr', 'r' represents 'rate'.
-
-* Later on, function fitting model based on gap times can be named as
-'gapsReg' (or 'gapReg'). Response formula function can be named as 'Survg',
-where 'g' means 'gaps' and which would have different data checking procedure
-with 'Survr'.
-
-* All the reference in the package manual follows
-  [APA style](http://www.apastyle.org/learn/faqs/index.aspx).
-
+The R package reda is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
