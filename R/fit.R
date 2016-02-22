@@ -602,16 +602,16 @@ rateReg_control <- function (gradtol = 1e-6, stepmax = 1e5,
                              time) {
     ## controls for function stats::nlm
     if (!is.numeric(gradtol) || gradtol <= 0) {
-        stop("value of 'gradtol' must be > 0")
+        stop("Value of 'gradtol' must be > 0.")
     }
     if (!is.numeric(stepmax) || stepmax <= 0) {
-        stop("value of 'stepmax' must be > 0")
+        stop("Value of 'stepmax' must be > 0.")
     } 
     if (!is.numeric(steptol) || steptol <= 0) {
-        stop("value of 'steptol' must be > 0")
+        stop("Value of 'steptol' must be > 0.")
     } 
     if (!is.numeric(iterlim) || iterlim <= 0) {
-        stop("maximum number of iterations must be > 0")
+        stop("Maximum number of iterations must be > 0.")
     }
     if (is.null(boundaryKnots)) {
         boundaryKnots <- c(0, max(time))
@@ -620,7 +620,7 @@ rateReg_control <- function (gradtol = 1e-6, stepmax = 1e5,
         ind1 <- boundaryKnots[1] > min(time)
         ind2 <- boundaryKnots[2] < max(time)
         if (ind1 || ind2) {
-            stop("boundary knots should not lie inside the range of visit time")
+            stop("Boundary knots should not lie inside the range of visit time.")
         }
     }
     ## return
@@ -632,15 +632,15 @@ rateReg_control <- function (gradtol = 1e-6, stepmax = 1e5,
 rateReg_start <- function (beta, theta = 0.5, alpha, nBeta, nAlpha) {
     ## beta = starting value(s) for coefficients of covariates
     ## theta = starting value for random effects
-    ## alpha = starting values for piece-wise baseline rate functions
+    ## alpha = starting values for coefficients of baseline rate bases
     if (missing(beta)) {
         beta <- rep(0.1, nBeta)
     } else if (length(beta) != nBeta) {
-        stop(paste("number of starting values for coefficients of covariates",
-                   "does not match with the specified formula"))
+        stop(paste("Number of starting values for coefficients of covariates",
+                   "does not match with the specified formula."))
     }
     if (theta <= 0) {
-        stop("value of parameter for random effects must be > 0")
+        stop("Value of parameter for random effects must be > 0.")
     }
     if (missing(alpha)) {
         alpha <- rep(0.05, nAlpha)

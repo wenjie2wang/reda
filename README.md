@@ -10,7 +10,7 @@ or so-called Nelson-Aalen estimator. Most functions in this package
 are S4 methods that produce S4 class objects.
 
 
-## installation
+## Installation
 
 You can install the stable version on
 [CRAN](http://cran.rstudio.com/package=reda):
