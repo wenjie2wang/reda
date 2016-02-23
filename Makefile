@@ -1,4 +1,5 @@
 pkg = reda
+header = HEADER
 
 Rpkg: Rd build  
 	make check 
@@ -16,10 +17,18 @@ check: $(pkg)_*.tar.gz
 INSTALL: $(pkg)_*.tar.gz
 	R CMD INSTALL --build $(pkg)_*.tar.gz
 
-## update copyright year in each R source and date in DESCRIPTION
-updateYear: 
+## update copyright year in HEADER, R script and date in DESCRIPTION
+updateHeader:
 	yr=$$(date +"%Y");\
-	for f in R/*.R; do sed -i "s/Copyright (C) [0-9]\{4\}/Copyright (C) $$yr/" $$f; done;\
+	sed -i "s/Copyright (C) [0-9]\{4\}/Copyright (C) $$yr/" $(header);\
+# add HEADER file if there is no header
+	for Rfile in R/*.R; do \
+	if ! grep -e 'Copyright (C)' $$Rfile ;\
+	then cat $(header) $$Rfile > tmp ;\
+	mv tmp $$Rfile;\
+	fi;\
+	sed -i "s/Copyright (C) [0-9]\{4\}/Copyright (C) $$yr/" $$Rfile;\
+	done;\
 	dt=$$(date +"%Y-%m-%d");\
 	sed -i "s/Date: [0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}/Date: $$dt/" DESCRIPTION;
 
