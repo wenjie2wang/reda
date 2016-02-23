@@ -1,7 +1,7 @@
 ################################################################################
 ##
 ##   R package reda by Wenjie Wang, Haoda Fu, and Jun Yan
-##   Copyright (C) 2015
+##   Copyright (C) 
 ##
 ##   This file is part of the R package reda.
 ##
