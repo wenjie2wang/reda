@@ -27,7 +27,8 @@ updateHeader:
 	then cat $(header) $$Rfile > tmp ;\
 	mv tmp $$Rfile;\
 	fi;\
-	sed -i "s/Copyright (C) [0-9]\{4\}/Copyright (C) $$yr/" $$Rfile;\
+	yr=$$(date +"%Y");\
+	sed -i "s/Copyright (C) [0-9]*/Copyright (C) $$yr/" $$Rfile;\
 	done;\
 	dt=$$(date +"%Y-%m-%d");\
 	sed -i "s/Date: [0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}/Date: $$dt/" DESCRIPTION;
