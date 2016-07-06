@@ -1,6 +1,4 @@
-# reda 
-
-[![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/reda)](http://cran.r-project.org/package=reda)
+# reda
 
 The R package **reda** mainly provides function to fit gamma frailty model with
 either a piecewise constant or a spline as the baseline rate function
@@ -10,23 +8,30 @@ or so-called Nelson-Aalen estimator. Most functions in this package
 are S4 methods that produce S4 class objects.
 
 
-## Installation
+## Development
 
-You can install the stable version on
+The latest version of package is under development in branch 'dev'.
+
+
+## Installation of Stable Version
+
+You can install the stable version in branch 'master' or on
 [CRAN](http://cran.rstudio.com/package=reda):
+
+[![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/reda)](http://cran.r-project.org/package=reda)
 
 ```r
 install.packages("reda", dependencies = TRUE)
 ```
 
 
-## Usage
+## Basic Usage
 
 ```r
 help(pacakge = "reda")
 library(reda)
 ## help on main function for model fitting
-?rateReg 
+?rateReg
 ```
 
 See [package help manual](https://cran.rstudio.com/web/packages/reda/reda.pdf)

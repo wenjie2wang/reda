@@ -1,14 +1,14 @@
 pkg = reda
 header = HEADER
 
-Rpkg: Rd build  
-	make check 
+Rpkg: Rd build
+	make check
 	make INSTALL
 
-Rd: 
-	Rscript -e "library(methods); devtools::document();" 
+Rd:
+	Rscript -e "library(methods); devtools::document();"
 
-build:  
+build:
 	R CMD build ../$(pkg)
 
 check: $(pkg)_*.tar.gz
@@ -20,7 +20,7 @@ INSTALL: $(pkg)_*.tar.gz
 ## update copyright year in HEADER, R script and date in DESCRIPTION
 updateHeader:
 	yr=$$(date +"%Y");\
-	sed -i "s/Copyright (C) [0-9]\{4\}/Copyright (C) $$yr/" $(header);\
+	sed -i "s/Copyright (C) 2015-[0-9]\{4\}/Copyright (C) $$yr/" $(header);\
 # add HEADER file if there is no header
 	for Rfile in R/*.R; do \
 	if ! grep -e 'Copyright (C)' $$Rfile ;\
@@ -28,10 +28,10 @@ updateHeader:
 	mv tmp $$Rfile;\
 	fi;\
 	yr=$$(date +"%Y");\
-	sed -i "s/Copyright (C) [0-9]*/Copyright (C) $$yr/" $$Rfile;\
+	sed -i "s/Copyright (C) 2015-[0-9]*/Copyright (C) 2015-$$yr/" $$Rfile;\
 	done;\
 	dt=$$(date +"%Y-%m-%d");\
 	sed -i "s/Date: [0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}/Date: $$dt/" DESCRIPTION;
 
-clean: 
-	rm -rf *~ */*~ */*.Rd *.Rhistroy NAMESPACE *.tar.gz *.Rcheck/ .\#* 
+clean:
+	rm -rf *~ */*~ */*.Rd *.Rhistroy NAMESPACE *.tar.gz *.Rcheck/ .\#*
