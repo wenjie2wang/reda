@@ -19,11 +19,11 @@
 
 
 ## collation after class.R
-#' @include class.R
+##' @include class.R
 NULL
 
 ### internal function ==========================================================
-#' @importFrom plyr ddply
+##' @importFrom plyr ddply
 check_Survr <- function(dat) {
     ## check missing value on 'ID'
     if (any(is.na(dat$ID))) {
@@ -42,7 +42,7 @@ check_Survr <- function(dat) {
         dat$IDnam <- factor(dat$ID, levels = unique(dat$ID))
         dat$ID <- as.numeric(dat$IDnam)
     }
-    
+
     ## nonsense, just to suppress Note from R CMD check --as-cran
     mis_time1 <- mis_time0 <- censor1 <- censor2 <- event <- NULL
 
@@ -50,13 +50,13 @@ check_Survr <- function(dat) {
     ## stop if missing value of 'time' for event == 1
     ID_mis_time1 <- with(subset(outDat, mis_time1 == 1), unique(IDnam))
     if (length(ID_mis_time1) > 0) {
-        stop(paste("There is missing value on event time for subject:", 
+        stop(paste("There is missing value on event time for subject:",
                    paste0(ID_mis_time1, collapse = ", ")))
     }
     ## stop if missing value of 'time' for event == 0
     ID_mis_time0 <- with(subset(outDat, mis_time0 == 1), unique(IDnam))
     if (length(ID_mis_time0) > 0) {
-        stop(paste("Censoring time is missing for subject:", 
+        stop(paste("Censoring time is missing for subject:",
                    paste0(ID_mis_time0, collapse = ", ")))
     }
     ## stop if no censoring time or more than one censoring time
@@ -90,19 +90,19 @@ check_ddply <- function (subdat) {
     time1 <- with(subset(subdat, event == 1), time)
     time0 <- with(subset(subdat, event == 0), time)
     mis_time1 <- if (length(time1) > 0) {
-        ## missing indicator of time for event == 1
-        ifelse(any(is.na(time1)), 1, 0)
-    } else {2}
+                    ## missing indicator of time for event == 1
+                    ifelse(any(is.na(time1)), 1, 0)
+                } else {2}
     mis_time0 <- if (length(time0) > 0) {
-        ## missing indicator of time for event == 0
-        ifelse(any(is.na(time0)), 1, 0)
-    } else {2}
+                    ## missing indicator of time for event == 0
+                    ifelse(any(is.na(time0)), 1, 0)
+                } else {2}
     ## issue #1: without censoring time or more than one censoring time
     censor1 <- ifelse(sum(subdat$event == 0, na.rm = TRUE) != 1, 1, 0)
     ## issue #2: event time after censoring time
     censor2 <- if (mis_time1 == 0 && mis_time0 == 0) {
-        ifelse(max(time1) >= min(time0), 1, 0)
-    } else {2}
+                  ifelse(max(time1) >= min(time0), 1, 0)
+              } else {2}
     ## return
     cbind(subdat, mis_time1, mis_time0, censor1, censor2)
 }

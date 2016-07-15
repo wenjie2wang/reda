@@ -19,40 +19,40 @@
 
 
 ## collation after class.R
-#' @include class.R 
+##' @include class.R
 NULL
 
 
-#' Show an object.
-#' 
-#' An S4 class generic function that displays certain object.
-#' 
-#' \itemize{
-#'   \item For \code{\link{rateReg-class}} object, 
-#'       it prints out brief summary of the fitted model.
-#'   \item For \code{\link{summaryRateReg-class}} object, 
-#'       it prints out summary of the fitted model.
-#'   \item For \code{\link{sampleMcf-class}} object,
-#'       it prints out the function call, formula and
-#'       the sample MCF data frame.
-#'   \item For \code{\link{rateRegMcf-class}} object,
-#'       it prints formula, new data, confidence level,
-#'       and the estimated MCF data frame.
-#' }
-#' 
-#' @param object An object used to dispatch a method.
-#' @name show-method
-#' @seealso
-#' \code{\link{rateReg}} for model fitting;
-#' \code{\link{summary,rateReg-method}} for summary of a fitted model;
-#' \code{\link{mcf}} for estimation of MCF.
-#' @importFrom methods show
+##' Show an object.
+##'
+##' An S4 class generic function that displays certain object.
+##'
+##' \itemize{
+##'   \item For \code{\link{rateReg-class}} object,
+##'       it prints out brief summary of the fitted model.
+##'   \item For \code{\link{summaryRateReg-class}} object,
+##'       it prints out summary of the fitted model.
+##'   \item For \code{\link{sampleMcf-class}} object,
+##'       it prints out the function call, formula and
+##'       the sample MCF data frame.
+##'   \item For \code{\link{rateRegMcf-class}} object,
+##'       it prints formula, new data, confidence level,
+##'       and the estimated MCF data frame.
+##' }
+##'
+##' @param object An object used to dispatch a method.
+##' @name show-method
+##' @seealso
+##' \code{\link{rateReg}} for model fitting;
+##' \code{\link{summary,rateReg-method}} for summary of a fitted model;
+##' \code{\link{mcf}} for estimation of MCF.
+##' @importFrom methods show
 NULL
 
 
-#' @rdname show-method
-#' @aliases show,rateReg-method
-#' @export
+##' @rdname show-method
+##' @aliases show,rateReg-method
+##' @export
 setMethod(f = "show", signature = "rateReg",
           definition = function(object) {
               beta <- object@estimates$beta[, 1]
@@ -63,11 +63,11 @@ setMethod(f = "show", signature = "rateReg",
               names(alpha) <- row.names(object@estimates$alpha)
               cat("Call: \n")
               print(object@call)
-              cat("\nCoefficients of covariates: \n") 
+              cat("\nCoefficients of covariates: \n")
               print(beta)
               cat("\nFrailty parameter: ", theta, "\n")
               if (length(object@knots) > 0) {
-                  cat("\nInternal knots: \n") 
+                  cat("\nInternal knots: \n")
                   cat(object@knots, sep = ", ", fill = TRUE)
               }
               cat("\nBoundary knots: \n")
@@ -82,10 +82,10 @@ setMethod(f = "show", signature = "rateReg",
           })
 
 
-#' @rdname show-method 
-#' @aliases show,summaryRateReg-method
-#' @importFrom stats printCoefmat
-#' @export
+##' @rdname show-method
+##' @aliases show,summaryRateReg-method
+##' @importFrom stats printCoefmat
+##' @export
 setMethod(f = "show", signature = "summaryRateReg",
           definition = function(object) {
               if (attr(object@call, "show")) {
@@ -95,7 +95,7 @@ setMethod(f = "show", signature = "summaryRateReg",
                   print(Call)
                   cat("\n")
               }
-              cat("Coefficients of covariates: \n") 
+              cat("Coefficients of covariates: \n")
               printCoefmat(object@covarCoef)
               cat("\nParameter of frailty: \n")
               print(object@frailtyPar)
@@ -110,18 +110,18 @@ setMethod(f = "show", signature = "summaryRateReg",
               if (object@degree > 0) {
                   cat("\nDegree of spline bases:", object@degree, "\n")
                   cat("\nCoefficients of spline bases:\n")
-                  printCoefmat(object@baseRateCoef)    
+                  printCoefmat(object@baseRateCoef)
               } else {
                   cat("\nCoefficients of pieces:\n")
-                  printCoefmat(object@baseRateCoef)    
+                  printCoefmat(object@baseRateCoef)
               }
               cat("\nLoglikelihood: ", object@logL, "\n")
           })
 
 
-#' @rdname show-method
-#' @aliases show,sampleMcf-method 
-#' @export
+##' @rdname show-method
+##' @aliases show,sampleMcf-method
+##' @export
 setMethod(f = "show", signature = "sampleMcf",
           definition = function(object) {
               cat("Call: \n")
@@ -133,9 +133,9 @@ setMethod(f = "show", signature = "sampleMcf",
           })
 
 
-#' @rdname show-method 
-#' @aliases show,rateRegMcf-method
-#' @export
+##' @rdname show-method
+##' @aliases show,rateRegMcf-method
+##' @export
 setMethod(f = "show", signature = "rateRegMcf",
           definition = function(object) {
               cat("Formula:\n")

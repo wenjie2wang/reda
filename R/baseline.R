@@ -19,38 +19,37 @@
 
 
 ## collation after class.R
-#' @include class.R 
+##' @include class.R
 NULL
 
 
-#' Estimated Coefficients of Baseline Rate Function
-#' 
-#' An S4 class generic function that returns the estimated coefficients
-#' of baseline rate function. For \code{\link{rateReg-class}} object,
-#' it returns either coefficients of pieceswise (including one piece)
-#' constant rate function or coefficients of B-spline bases.
-#' 
-#' @param object An object used to dispatch a method.
-#' @param ... Other arguments for future usage.
-#' @return A named numeric vector.
-#' @aliases baseRate,rateReg-method
-#' @examples
-#' ## See examples given in function rateReg.
-#' @seealso
-#' \code{\link{rateReg}} for model fitting;
-#' \code{\link{summary,rateReg-method}} for summary of a fitted model.
-#' @export
+##' Estimated Coefficients of Baseline Rate Function
+##'
+##' An S4 class generic function that returns the estimated coefficients
+##' of baseline rate function. For \code{\link{rateReg-class}} object,
+##' it returns either coefficients of pieceswise (including one piece)
+##' constant rate function or coefficients of B-spline bases.
+##'
+##' @param object An object used to dispatch a method.
+##' @param ... Other arguments for future usage.
+##' @return A named numeric vector.
+##' @aliases baseRate,rateReg-method
+##' @examples
+##' ## See examples given in function rateReg.
+##' @seealso
+##' \code{\link{rateReg}} for model fitting;
+##' \code{\link{summary,rateReg-method}} for summary of a fitted model.
+##' @export
 setGeneric(name = "baseRate",
            def = function(object, ...) {
                standardGeneric("baseRate")
            })
 
 
-#' @describeIn baseRate Extract estiamted coefficients of
-#' baseline rate function from \code{rateReg-class} object.
-#' @export
+##' @describeIn baseRate Extract estiamted coefficients of
+##' baseline rate function from \code{rateReg-class} object.
+##' @export
 setMethod(f = "baseRate", signature = "rateReg",
           definition = function(object, ...) {
               object@estimates$alpha[, 1]
           })
-
