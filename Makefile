@@ -1,21 +1,23 @@
 pkg = reda
 cprt = COPYRIGHT
 
-Rpkg: Rd build
+Rpkg: build
 	make check
-	make INSTALL
 
-Rd:
+Rd: R/
 	Rscript -e "library(methods); roxygen2::roxygenise();"
 
-build:
+build: Rd
 	R CMD build ../$(pkg)
 
 check: $(pkg)_*.tar.gz
 	R CMD check --as-cran $(pkg)_*.tar.gz
 
-INSTALL: $(pkg)_*.tar.gz
+INSTALL: build
 	R CMD INSTALL --build $(pkg)_*.tar.gz
+
+preview:
+	Rscript -e "rmarkdown::render('vignettes/$(pkg)-intro.Rmd')"
 
 ## update copyright year in HEADER, R script and date in DESCRIPTION
 updateHeader:
@@ -34,4 +36,4 @@ updateHeader:
 	sed -i "s/Date: [0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}/Date: $$dt/" DESCRIPTION;
 
 clean:
-	rm -rf *~ */*~ */*.Rd *.Rhistroy NAMESPACE *.tar.gz *.Rcheck/ .\#*
+	rm -rf *~ */*~ *.Rhistroy *.tar.gz *.Rcheck/ .\#*

@@ -1,9 +1,9 @@
 Package: reda
 Title: Recurrent Event Data Analysis
-Version: 0.2.1
-Date: 2016-07-06
+Version: 0.2.1.9000
+Date: 2016-10-15
 Authors@R: c(
-    person(given = "Wenjie", family = "Wang", 
+    person(given = "Wenjie", family = "Wang",
            email = "wenjie.2.wang@uconn.edu",
            role = c("aut", "cre")),
     person(given = "Haoda", family = "Fu", role = "aut"),
@@ -19,13 +19,13 @@ Imports:
     grDevices,
     methods,
     plyr,
-    splines,
+    splines2,
     stats,
     utils
 Suggests:
     knitr
 Depends:
-    R (>= 3.2.0)
+    R (>= 3.2.3)
 License: GPL (>= 3)
 LazyData: true
 VignetteBuilder: knitr

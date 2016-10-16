@@ -1,9 +1,11 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
+^\.Rhistory$
+^\.travis\.yml$
 ^Makefile$
-^README.md$
-^NEWS.md$
 ^simulation$
 ^manuscript$
 ^reference$
-^HEADER$
+^COPYRIGHT$
+^LICENSE$
+^TODO\.org$

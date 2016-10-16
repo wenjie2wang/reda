@@ -19,7 +19,7 @@ or so-called Nelson-Aalen estimator. Most functions in this package
 are S4 methods that produce S4 class objects.
 
 In this vignette, we mainly introduce the basic usage of the functions
-provided in the package by examples. The details of function snytax
+provided in the package by examples. The details of function syntax
 and slots of the objects produced are available in the package manual,
 which will thus not be covered in this vignette.
 
@@ -41,11 +41,11 @@ from the fitted model.
 ## Simulated Sample Recurrent Event Data {#simuDat}
 
 ```{r setup}
-library(reda) # attach package 
+library(reda) # attach package
 data(simuDat) # attach sample dataset
 ```
 
-First of all, the sample recurrent event data 
+First of all, the sample recurrent event data
 we are going to use in the following examples is called `simuDat`,
 which contains totally `r nrow(simuDat)` observations of `r ncol(simuDat)`
 variables.
@@ -61,7 +61,7 @@ where
 * time: Event or censoring time.
 * event: Event indicator, 1 = event; 0 = censored.
 * group: Treatment group indicator.
-* x1: Continuous variable. 
+* x1: Continuous variable.
 
 The dataset is originally simulated by thinning method [@lewis1979]
 and further processed for a better demonstration purpose.
@@ -82,7 +82,7 @@ The checking rules include
 * Event time cannot not be later than censoring time.
 
 The subject's ID will be pinpointed if its observation violates any checking
-rule shown above. 
+rule shown above.
 
 ## Model Fitting {#rateReg}
 
@@ -94,7 +94,7 @@ which is equivalent to negative binomial regression of the same
 shape and rate parameter in gamma prior.
 
 In the following examples, we fit the models on the first 50 subjects
-by specifying argument `subset`. 
+by specifying argument `subset`.
 
 ```{r const}
 constFit <- rateReg(Survr(ID, time, event) ~ group + x1, data = simuDat,
@@ -103,7 +103,7 @@ constFit <- rateReg(Survr(ID, time, event) ~ group + x1, data = simuDat,
 constFit # or explicitly call show(constFit)
 ```
 
-The function `rateReg` returns `rateReg-class` object, which can be 
+The function `rateReg` returns `rateReg-class` object, which can be
 printed out by calling the object.
 (Internally, `show` method for `rateReg` object is called.)
 
@@ -125,7 +125,7 @@ event and censoring time.
 
 ```{r twoPieces}
 # two pieces' constant rate function i.e. one internal knot
-twoPiecesFit <- rateReg(Survr(ID, time, event) ~ group + x1, df = 2, 
+twoPiecesFit <- rateReg(Survr(ID, time, event) ~ group + x1, df = 2,
                         data = simuDat, subset = ID %in% 1:50)
 twoPiecesFit
 ```
@@ -168,7 +168,7 @@ plus one if intercept is included in spline bases.
 splineFit <- rateReg(Survr(ID, time, event) ~ group + x1, df = 6,
                      degree = 3L, data = simuDat, subset = ID %in% 1:50)
 ## internal knots are set as 33% and 67% quantiles of time variable
-splineFit 
+splineFit
 
 ## or internal knots are expicitly specified
 splineFit <- rateReg(Survr(ID, time, event) ~ group + x1, df = 2,
@@ -199,7 +199,7 @@ of the model fitted. Outputs of function call or knots,
 may be suppressed by specifying argument `showCall` or `showKnots`
 to be `FALSE`, respectively, in `summary` method, which would be
 especially useful for a relatively concise summary
-in a reproducible report using `Rmarkdown`, etc. 
+in a reproducible report using `Rmarkdown`, etc.
 
 What's more, the corresponding `coef` and `confint` method
 for point estimates and confidence interval for covariate coefficients
@@ -211,7 +211,7 @@ Let's take the fitted model with spline rate function as an example.
 ## point estimates of covariate coefficients
 coef(splineFit)
 ## confidence interval for covariate coefficients
-confint(splineFit, level = 0.95) 
+confint(splineFit, level = 0.95)
 ## estimated coefficients of baseline rate function
 baseRate(splineFit)
 ```
@@ -273,7 +273,7 @@ are plotted, respectively, as follows:
 ## plot overall sample MCF
 plotMcf(sampleMcf1)
 ## plot MCF for different groups
-plotMcf(sampleMcf2, mark.time = TRUE, 
+plotMcf(sampleMcf2, mark.time = TRUE,
         lty = c(1, 5), col = c("orange", "navy")) +
     ggplot2::xlab("Days") + ggplot2::theme_bw()
 ```
@@ -320,11 +320,11 @@ estimated MCFs and their confidence intervals correspondingly.
 
 ```{r splineMcf, fig.height = 5, fig.width = 7}
 newDat <- data.frame(x1 = rep(0, 2), group = c("Treat", "Contr"))
-estmcf <- mcf(splineFit, newdata = newDat, groupName = "Group", 
+estmcf <- mcf(splineFit, newdata = newDat, groupName = "Group",
               groupLevels = c("Treatment", "Control"))
 plotMcf(estmcf, conf.int = TRUE, col = c("royalblue", "red"), lty = c(1, 5)) +
     ggplot2::ggtitle("Control vs. Treatment") + ggplot2::xlab("Days") +
-    ggplot2::theme_bw() 
+    ggplot2::theme_bw()
 ```
 
 ## Reference
