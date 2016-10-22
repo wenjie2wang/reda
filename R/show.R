@@ -71,7 +71,7 @@ setMethod(f = "show", signature = "rateReg",
                   cat(object@knots, sep = ", ", fill = TRUE)
               }
               cat("\nBoundary knots: \n")
-              cat(object@boundaryKnots, sep = ", ", fill = TRUE)
+              cat(object@Boundary.knots, sep = ", ", fill = TRUE)
               if (object@degree > 0) {
                   cat("\nCoefficients of spline bases:\n")
                   print(alpha)
@@ -105,7 +105,7 @@ setMethod(f = "show", signature = "summaryRateReg",
                       cat(object@knots, sep = ", ", fill = TRUE)
                   }
                   cat("\nBoundary knots:\n")
-                  cat(object@boundaryKnots, sep = ", ", fill = TRUE)
+                  cat(object@Boundary.knots, sep = ", ", fill = TRUE)
               }
               if (object@degree > 0) {
                   cat("\nDegree of spline bases:", object@degree, "\n")

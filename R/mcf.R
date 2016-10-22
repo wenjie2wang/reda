@@ -269,11 +269,11 @@ setMethod(f = "mcf", signature = "rateReg",
               nBeta <- length(beta)
               knots <- object@knots
               degree <- object@degree
-              boundaryKnots <- object@boundaryKnots
-              bKnots <- c(knots, boundaryKnots[2])
+              Boundary.knots <- object@Boundary.knots
+              bKnots <- c(knots, Boundary.knots[2])
               interceptInd <- object@control$intercept
               controlist <- c(control, list("bKnots" = bKnots,
-                                           "boundaryKnots" = boundaryKnots))
+                                            "Boundary.knots" = Boundary.knots))
               control <- do.call("rateReg_mcf_control", controlist)
               gridTime <- control$grid
               n_xx <- control$length.out
@@ -282,14 +282,14 @@ setMethod(f = "mcf", signature = "rateReg",
                   ## B-spline bases at given time grid
                   bsMat_est = bs(gridTime, degree = degree,
                                  knots = knots,
-                                 Boundary.knots = boundaryKnots,
+                                 Boundary.knots = Boundary.knots,
                                  intercept = interceptInd)
               }
               ## estimated baseline mcf
               estMcf <- mu0(par_alpha = alpha, Tvec = gridTime,
-                           bKnots = bKnots, degree = degree,
-                           boundaryKnots = boundaryKnots,
-                           bsMat_est = bsMat_est)
+                            bKnots = bKnots, degree = degree,
+                            Boundary.knots = Boundary.knots,
+                            bsMat_est = bsMat_est)
 
               n_par <- nrow(object@fisher)
               ## covariance matrix of beta and alpha
@@ -311,17 +311,17 @@ setMethod(f = "mcf", signature = "rateReg",
                   rownames(X) <- "1"
               } else {
                   mf <- stats::model.frame(Terms, newdata,
-                                          na.action = na.action,
-                                          xlev = object@xlevels)
+                                           na.action = na.action,
+                                           xlev = object@xlevels)
                   if (is.null(attr(mf, "na.action"))) {
                       na.action <- options("na.action")[[1]]
                   } else {
                       na.action <- paste("na", class(attr(mf, "na.action")),
-                                        sep = ".")
+                                         sep = ".")
                   }
                   X <- stats::model.matrix(Terms, mf,
-                                          contrasts.arg =
-                                              object@contrasts$constracts)
+                                           contrasts.arg =
+                                               object@contrasts$constracts)
                   ## remove intercept and deplicated rows
                   X <- unique(base::subset(X, select = -`(Intercept)`))
                   if (ncol(X) != nBeta) {
@@ -340,11 +340,11 @@ setMethod(f = "mcf", signature = "rateReg",
               for (i in seq(ndesign)) {
                   ## Delta-method
                   gradMat <- gradDelta(Xi = X[i, ], estMcf = estMcf,
-                                      degree = degree, bKnots = bKnots,
-                                      boundaryKnots = boundaryKnots,
-                                      gridTime = gridTime,
-                                      bsMat_est = bsMat_est,
-                                      coveffi = coveff[i])
+                                       degree = degree, bKnots = bKnots,
+                                       Boundary.knots = Boundary.knots,
+                                       gridTime = gridTime,
+                                       bsMat_est = bsMat_est,
+                                       coveffi = coveff[i])
                   varTime <- apply(gradMat, 1, function (gradVec, covMat) {
                       crossprod(gradVec, covMat) %*% gradVec
                   }, covMat = covPar)
@@ -353,7 +353,7 @@ setMethod(f = "mcf", signature = "rateReg",
                   lower <- pmax(0, mcf_i - confBand)
                   upper <- mcf_i + confBand
                   ind <- seq(from = n_xx * (i - 1) + 1,
-                            to = n_xx * i, by = 1)
+                             to = n_xx * i, by = 1)
                   outDat[ind, 1] <- gridTime
                   outDat[ind, 2] <- mcf_i
                   outDat[ind, 3] <- lower
@@ -378,7 +378,7 @@ setMethod(f = "mcf", signature = "rateReg",
                          call = object@call,
                          formula = object@formula,
                          knots = knots, degree = degree,
-                         boundaryKnots = boundaryKnots,
+                         Boundary.knots = Boundary.knots,
                          newdata = X, MCF = outDat, level = level,
                          na.action = na.action, control = control,
                          multiGroup = multiGroup)
@@ -388,11 +388,11 @@ setMethod(f = "mcf", signature = "rateReg",
 
 
 ## internal function ===========================================================
-rateReg_mcf_control <- function (grid, length.out = 1e3, from, to,
-                                 bKnots, boundaryKnots) {
+rateReg_mcf_control <- function(grid, length.out = 1e3, from, to,
+                                bKnots, Boundary.knots) {
     ## controls for function MCF with signiture rateReg
-    from <- if (missing(from)) boundaryKnots[1]
-    to  <- if (missing(to)) boundaryKnots[2]
+    from <- if (missing(from)) Boundary.knots[1]
+    to  <- if (missing(to)) Boundary.knots[2]
     if (! missing(grid)) {
         if (! is.numeric(grid) || is.unsorted(grid)) {
             stop("'grid' specified must be a increasing numeric vector.")
@@ -403,7 +403,7 @@ rateReg_mcf_control <- function (grid, length.out = 1e3, from, to,
     } else {
         grid <- seq(from = from, to = to, length.out = length.out)
     }
-    if (min(grid) < boundaryKnots[1] || max(grid) > boundaryKnots[2]) {
+    if (min(grid) < Boundary.knots[1] || max(grid) > Boundary.knots[2]) {
         stop("'grid' must be within the coverage of boundary knots.")
     }
     ## return
@@ -435,12 +435,12 @@ sMcf <- function(inpDat, level) {
 }
 
 ## Delta-method, compute the gradient on beta and alpha
-gradDelta <- function (Xi, estMcf, degree, bKnots, boundaryKnots,
+gradDelta <- function(Xi, estMcf, degree, bKnots, Boundary.knots,
                       gridTime, bsMat_est, coveffi) {
     gradBeta <- estMcf %o% Xi * coveffi
-    allKnots <- c(boundaryKnots[1], bKnots)
+    allKnots <- c(Boundary.knots[1], bKnots)
     n_xx <- length(gridTime)
-    stepTime <- diff(c(boundaryKnots[1], gridTime))
+    stepTime <- diff(c(Boundary.knots[1], gridTime))
     if (degree == 0L) { ## if piecewise constant rate function
         gradAlpha <- matrix(NA, nrow = n_xx, ncol = length(bKnots))
         for (j in seq_along(bKnots)) {

@@ -64,7 +64,7 @@ Survr <- function (ID, time, event) {
 ##' @slot formula Formula.
 ##' @slot nObs A positive integer
 ##' @slot knots A numeric vector.
-##' @slot boundaryKnots A numeric vector.
+##' @slot Boundary.knots A numeric vector.
 ##' @slot degree A nonnegative integer.
 ##' @slot df A list of nonnegative numeric vectors.
 ##' @slot estimates A list.
@@ -84,7 +84,7 @@ setClass(Class = "rateReg",
                    formula = "formula",
                    nObs = "integer",
                    knots = "numeric",
-                   boundaryKnots = "numeric",
+                   Boundary.knots = "numeric",
                    degree = "integer",
                    df = "list",
                    estimates = "list",
@@ -103,8 +103,8 @@ setClass(Class = "rateReg",
              }
              ## check on knots
              if (length(object@knots) > 0) { # if there exists internal knots
-                 if (min(object@knots) < min(object@boundaryKnots) ||
-                     max(object@knots) > max(object@boundaryKnots)) {
+                 if (min(object@knots) < min(object@Boundary.knots) ||
+                     max(object@knots) > max(object@Boundary.knots)) {
                      return(paste("Internal knots must all lie in the",
                                   "coverage of boundary knots."))
                  }
@@ -132,7 +132,7 @@ setClass(Class = "rateReg",
 ##'
 ##' @slot call Function call.
 ##' @slot knots A numeric vector.
-##' @slot boundaryKnots A numeric vector.
+##' @slot Boundary.knots A numeric vector.
 ##' @slot covarCoef A numeric matrix.
 ##' @slot frailtyPar A numeric matrix.
 ##' @slot degree A nonnegative integer.
@@ -144,7 +144,7 @@ setClass(Class = "rateReg",
 setClass(Class = "summaryRateReg",
          slots = c(call = "call",
                    knots = "numeric",
-                   boundaryKnots = "numeric",
+                   Boundary.knots = "numeric",
                    covarCoef = "matrix",
                    frailtyPar = "matrix",
                    degree = "integer",
@@ -153,8 +153,8 @@ setClass(Class = "summaryRateReg",
          validity = function (object) {
              ## check on knots
              if (length(object@knots) > 0) { # if there exists internal knots
-                 if (min(object@knots) < min(object@boundaryKnots) ||
-                     max(object@knots) > max(object@boundaryKnots)) {
+                 if (min(object@knots) < min(object@Boundary.knots) ||
+                     max(object@knots) > max(object@Boundary.knots)) {
                      return(paste("Internal knots must all lie in the",
                                   "coverage of boundary knots."))
                  }
@@ -202,7 +202,7 @@ setClass(Class = "sampleMcf",
 ##' @slot formula Formula.
 ##' @slot knots A numeric vector.
 ##' @slot degree A nonnegative integer.
-##' @slot boundaryKnots A numeric vector.
+##' @slot Boundary.knots A numeric vector.
 ##' @slot newdata A numeric matrix.
 ##' @slot MCF A data frame.
 ##' @slot level A numeric value between 0 and 1.
@@ -217,7 +217,7 @@ setClass(Class = "rateRegMcf",
                    formula = "formula",
                    knots = "numeric",
                    degree = "integer",
-                   boundaryKnots = "numeric",
+                   Boundary.knots = "numeric",
                    newdata = "matrix",
                    MCF = "data.frame",
                    level = "numeric",
@@ -227,8 +227,8 @@ setClass(Class = "rateRegMcf",
          validity = function (object) {
              ## check on knots
              if (length(object@knots) > 0) { # if there exists internal knots
-                 if (min(object@knots) < min(object@boundaryKnots) ||
-                     max(object@knots) > max(object@boundaryKnots)) {
+                 if (min(object@knots) < min(object@Boundary.knots) ||
+                     max(object@knots) > max(object@Boundary.knots)) {
                      return(paste("Internal knots must all lie in the",
                                   "coverage of boundary knots."))
                  }

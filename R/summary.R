@@ -69,7 +69,7 @@ setMethod(f = "summary", signature = "rateReg",
               Call <- object@call
               attr(Call, "show") <- showCall
               knots <- object@knots
-              boundaryKnots <- object@boundaryKnots
+              Boundary.knots <- object@Boundary.knots
               attr(knots, "show") <- showKnots
               beta <- object@estimates$beta
               theta <- object@estimates$theta
@@ -78,7 +78,7 @@ setMethod(f = "summary", signature = "rateReg",
               results <- new("summaryRateReg",
                             call = Call,
                             knots = knots,
-                            boundaryKnots = boundaryKnots,
+                            Boundary.knots = Boundary.knots,
                             covarCoef = beta,
                             frailtyPar = theta,
                             degree = object@degree,
