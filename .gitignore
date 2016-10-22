@@ -1,6 +1,5 @@
-NAMESPACE
-man/
-reference
+reference/
+test/
 simulation/
 manuscript/
 TODO.md

@@ -9,7 +9,7 @@ Rd: R/
 	Rscript -e "library(methods); roxygen2::roxygenise();"
 
 build: Rd
-	R CMD build ../$(dir)
+	R CMD build $(dir)
 
 check: $(pkg)_*.tar.gz
 	R CMD check --as-cran $(pkg)_*.tar.gz
