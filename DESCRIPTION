@@ -23,7 +23,8 @@ Imports:
     stats,
     utils
 Suggests:
-    knitr
+    knitr,
+    rmarkdown
 Depends:
     R (>= 3.2.3)
 License: GPL (>= 3)
