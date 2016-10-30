@@ -226,7 +226,7 @@ setClass(Class = "rateRegMcf",
                    multiGroup = "logical"),
          validity = function (object) {
              ## check on knots
-             if (length(object@knots) > 0) { # if there exists internal knots
+             if (length(object@knots)) { # if there exists internal knots
                  if (min(object@knots) < min(object@Boundary.knots) ||
                      max(object@knots) > max(object@Boundary.knots)) {
                      return(paste("Internal knots must all lie in the",
@@ -234,13 +234,11 @@ setClass(Class = "rateRegMcf",
                  }
              }
              ## check on degree
-             if (object@degree < 0) {
+             if (object@degree < 0)
                  return("Degree of spline bases must be a nonnegative integer.")
-             }
              ## check on level
-             if (object@level <= 0 || object@level >= 1) {
+             if (object@level <= 0 || object@level >= 1)
                  return("Confidence level mush be between 0 and 1.")
-             }
              ## else return
              TRUE
          })

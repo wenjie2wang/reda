@@ -76,14 +76,14 @@ setMethod(f = "summary", signature = "rateReg",
               alpha <- object@estimates$alpha
               ## check on object validity by 'new', validObject(results)
               results <- new("summaryRateReg",
-                            call = Call,
-                            knots = knots,
-                            Boundary.knots = Boundary.knots,
-                            covarCoef = beta,
-                            frailtyPar = theta,
-                            degree = object@degree,
-                            baseRateCoef = alpha,
-                            logL = object@logL)
+                             call = Call,
+                             knots = knots,
+                             Boundary.knots = Boundary.knots,
+                             covarCoef = beta,
+                             frailtyPar = theta,
+                             degree = object@degree,
+                             baseRateCoef = alpha,
+                             logL = object@logL)
               ## return
               results
           })

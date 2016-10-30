@@ -22,17 +22,16 @@
 ##' @include class.R
 NULL
 
+
 ### internal function ==========================================================
 ##' @importFrom plyr ddply
 check_Survr <- function(dat) {
     ## check missing value on 'ID'
-    if (any(is.na(dat$ID))) {
+    if (any(is.na(dat$ID)))
         stop("'ID' cannot be missing.")
-    }
     ## check coding and missing value on 'event'
-    if (any(! dat$event %in% 0:1)) {
+    if (any(! dat$event %in% 0:1))
         stop("'event' must be coded as 0 (censoring) or 1 (event).")
-    }
     ## if dat input has an attr 'ID'
     nID <- attr(dat, "ID")
     if (! is.null(nID)) {

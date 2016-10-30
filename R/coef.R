@@ -92,13 +92,13 @@ setMethod(f = "coef", signature = "rateReg",
 setMethod(f = "confint", signature = "rateReg",
           definition = function(object, parm, level = 0.95, ...) {
               ## internal function
-              format.perc <- function (probs){
-                  paste(format(100 * probs, trim = TRUE,
-                               scientific = FALSE), "%", sep = "")
+              format.perc <- function (probs) {
+                  paste0(format(100 * probs, trim = TRUE,
+                                scientific = FALSE), "%")
               }
               betaMat <- object@estimates$beta
-              estCoef <- betaMat[, 1]
-              pnames <- attr(betaMat, "dimnames")[[1]]
+              estCoef <- betaMat[, 1L]
+              pnames <- attr(betaMat, "dimnames")[[1L]]
               if (missing(parm)) {
                   parm <- seq(nrow(betaMat))
               } else if (is.numeric(parm)) {
@@ -108,12 +108,12 @@ setMethod(f = "confint", signature = "rateReg",
               } else {
                   stop("invalid argument param")
               }
-              a <- (1 + c(-1, 1) * level)/2
+              a <- (1 + c(- 1, 1) * level) / 2
               fac <- stats::qnorm(a)
               pct <- format.perc(a)
               ci <- array(NA, dim = c(length(parm), 2L),
                          dimnames = list(parm, pct))
-              ses <- betaMat[parm, 2]
+              ses <- betaMat[parm, 2L]
               ci[] <- estCoef[parm] + ses %o% fac
               rownames(ci) <- pnames[parm]
               ## return

@@ -309,7 +309,7 @@ rateReg <- function(formula, df = NULL, knots = NULL, degree = 0L,
                            Boundary.knots = Boundary.knots)
 
     ## start' values for 'nlm'
-    startlist <- c(start, list(nBeta = nBeta, nAlpha = df))
+    startlist <- c(start, list(nBeta_ = nBeta, nAlpha_ = df))
     start <- do.call("rateReg_start", startlist)
     ini <- do.call("c", start)
     length_par <- length(ini)
@@ -470,7 +470,7 @@ logL_rateReg <- function(par, dat, bMat, iMat) {
 
 rateReg_control <- function(gradtol = 1e-6, stepmax = 1e5,
                             steptol = 1e-6, iterlim = 1e2,
-                            Boundary.knots = NULL) {
+                            Boundary.knots = NULL, ...) {
     ## controls for function stats::nlm
     if (! is.numeric(gradtol) || gradtol <= 0)
         stop("Value of 'gradtol' must be > 0.")
@@ -486,23 +486,25 @@ rateReg_control <- function(gradtol = 1e-6, stepmax = 1e5,
          Boundary.knots = Boundary.knots)
 }
 
-rateReg_start <- function (beta, theta = 0.5, alpha, ..., nBeta, nAlpha) {
+
+rateReg_start <- function (beta, theta = 0.5, alpha, ..., nBeta_, nAlpha_) {
     ## beta = starting value(s) for coefficients of covariates
     ## theta = starting value for random effects
     ## alpha = starting values for coefficients of baseline rate bases
     if (missing(beta)) {
-        beta <- rep(0.1, nBeta)
-    } else if (length(beta) != nBeta) {
+        beta <- rep(0.1, nBeta_)
+    } else if (length(beta) != nBeta_) {
         stop(paste("Number of starting values for coefficients of covariates",
                    "does not match with the specified formula."))
     }
     if (theta <= 0)
         stop("Value of parameter for random effects must be > 0.")
     if (missing(alpha))
-        alpha <- rep(0.05, nAlpha)
+        alpha <- rep(0.05, nAlpha_)
     ## return
     list(beta = beta, theta = theta, alpha = alpha)
 }
+
 
 ## generate intervals from specified baseline pieces
 nameBases <- function(degree, df, knots, Boundary.knots) {
