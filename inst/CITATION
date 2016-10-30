@@ -1,0 +1,16 @@
+citHeader("To cite reda in publications use:")
+
+citEntry(entry = "Manual",
+         Title = "{reda}: {R}ecurrent Event Data Analysis}",
+         Author = personList(as.person("Wenjie Wang"),
+                             as.person("Haoda Fu"),
+                             as.person("Jun Yan")),
+         Note =	"{R} package version 0.2.1",
+         Year =	"2015",
+         Url = "https://CRAN.R-project.org/package=reda",
+
+         textVersion = paste("Wang, W., Fu, H., Yan, J. (2015). reda:",
+                             "Recurrent Event Data Analysis.",
+                             "R package version 0.2.1.",
+                             "https://CRAN.R-project.org/package=reda")
+)
