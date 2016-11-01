@@ -9,15 +9,17 @@ rmd := vignettes/$(pkg)-intro.Rmd
 vignettes := vignettes/$(pkg)-intro.html
 cprt := COPYRIGHT
 
-$(tar): $(man)
+
+$(tar): $(objects) $(man)
 	R CMD build $(dir)
 
+.PHONY: check
 check: $(checkLog)
 
+.PHONY: preview
 preview: $(vignettes)
 
 $(man): $(objects)
-	rm -rf $(man)
 	Rscript -e "library(methods); devtools::document();"
 
 $(checkLog): $(tar)
@@ -30,7 +32,7 @@ INSTALL: $(tar)
 	R CMD INSTALL --build $(tar)
 
 ## update copyright year in HEADER, R script and date in DESCRIPTION
-.PHONY = updateHeader
+.PHONY: updateHeader
 updateHeader: $(cprt)
 	yr=$$(date +"%Y");\
 	sed -i "s/Copyright (C) 2015-[0-9]\{4\}/Copyright (C) 2015-$$yr/" $(cprt);\
@@ -46,6 +48,6 @@ updateHeader: $(cprt)
 	dt=$$(date +"%Y-%m-%d");\
 	sed -i "s/Date: [0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}/Date: $$dt/" DESCRIPTION;
 
-.PHONY = clean
+.PHONY: clean
 clean:
 	rm -rf *~ */*~ *.Rhistroy *.tar.gz *.Rcheck/ .\#*
