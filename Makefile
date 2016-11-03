@@ -10,6 +10,9 @@ vignettes := vignettes/$(pkg)-intro.html
 cprt := COPYRIGHT
 
 
+.PHONY: all
+all: $(tar)
+
 $(tar): $(objects)
 	Rscript -e "library(methods); devtools::document();";
 	R CMD build $(dir)
