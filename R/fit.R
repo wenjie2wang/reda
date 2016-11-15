@@ -27,11 +27,10 @@ NULL
 ##'
 ##' The default model is the gamma frailty model with one piece constant
 ##' baseline rate function, which is equivalent to negative binomial regression
-##' of the same shape and rate parameter in gamma prior.
-##' Spline and piecewise constant baseline rate function can be
-##' specified and applied to model fitting instead.
-##' \code{rateReg} returns the fitted model
-##' through a \code{\link{rateReg-class}} object.
+##' of the same shape and rate parameter in gamma prior.  Spline and piecewise
+##' constant baseline rate function can also be specified and applied to model
+##' fitting.  \code{rateReg} returns the fitted model through a
+##' \code{\link{rateReg-class}} object.
 ##'
 ##' @details
 ##' Function \code{\link{Survr}} in the formula response first checks
@@ -241,7 +240,11 @@ rateReg <- function(formula, df = NULL, knots = NULL, degree = 0L,
         stop("Argument 'formula' is required.")
     if (missing(data))
         data <- environment(formula)
-    if (! with(data, inherits(eval(Call[[2]][[2]]), "Survr")))
+
+    ## data frame constructed from Survr
+    dat3 <- with(data, eval(Call[[2]][[2]]))
+    check <- attr(dat3, "check")
+    if (! inherits(dat3, "Survr"))
         stop("Response in formula must be a survival recurrent object.")
 
     ## Prepare data: ID, time, event ~ X(s)
@@ -255,11 +258,14 @@ rateReg <- function(formula, df = NULL, knots = NULL, degree = 0L,
     mf <- eval(mcall, parent.frame())
     mt <- attr(mf, "terms")
     mm <- stats::model.matrix(formula, data = mf, contrasts.arg = contrasts)
-    ## get data.frame if na.action = na.pass for further data checking
-    mcall$na.action <- na.pass
-    mf_na <- eval(mcall, parent.frame())
-    mm_na <- stats::model.matrix(formula, data = mf_na,
-                                 contrasts.arg = contrasts)
+
+    if (check) {
+        ## get data.frame if na.action = na.pass for further data checking
+        mcall$na.action <- na.pass
+        mf_na <- eval(mcall, parent.frame())
+        mm_na <- stats::model.matrix(formula, data = mf_na,
+                                     contrasts.arg = contrasts)
+    }
 
     ## number of covariates excluding intercept
     if ((nBeta <- ncol(mm) - 1L) <= 0)
@@ -267,22 +273,32 @@ rateReg <- function(formula, df = NULL, knots = NULL, degree = 0L,
 
     ## covariates' names
     covar_names <- colnames(mm)[- 1L]
-    ## data
-    dat <- as.data.frame(cbind(mf[, 1L][, seq_len(3L)], mm[, - 1L]))
+
+    ## data matrix processed
+    xMat <- mm[, - 1L, drop = FALSE]
+    dat <- as.data.frame(cbind(mf[, 1L][, seq_len(3L)], xMat))
     colnames(dat) <- c("ID", "time", "event", covar_names)
     nObs <- nrow(dat)
 
     ## check the impact caused by missing value
     ## if there is missing value removed
-    if (nrow(mm_na) > nObs) {
+    if (check & nrow(mm_na) > nObs) {
         ## recover original ID names for possible pin-point
-        idFactor <- with(data, attr(eval(Call[[2L]][[2L]]), "ID"))
-        attr(dat, "ID") <- factor(levels(idFactor)[dat$ID],
-                                  levels = levels(idFactor))
+        idFactor <- attr(dat3, "IDnam")
+        attr(dat, "ID_") <- factor(levels(idFactor)[dat$ID],
+                                   levels = levels(idFactor))
         message("Observations with missing covariate value are removed.")
         message("Checking the new dataset again ... ", appendLF = FALSE)
-        check_Survr(dat)
+        dat <- check_Survr(dat, check = TRUE)
         message("done.")
+    }
+
+    ## sorted data by ID, time, and event
+    ord <- attr(dat, "ord")
+    if (! is.null(ord)) {
+        dat <- dat[ord, ]
+    } else {
+        dat <- dat[(ord <- with(dat, order(ID, time, event))), ]
     }
 
     ## 'control' for optimization and splines' boundary knots
@@ -315,11 +331,37 @@ rateReg <- function(formula, df = NULL, knots = NULL, degree = 0L,
     length_par <- length(ini)
 
     ## check whether the knots are reasonable
-    if (any(colSums(bMat[dat$event == 1, , drop = FALSE]) == 0))
-        stop("Some time segement contains zero events.")
+    if (any(colSums(bMat[dat$event == 1, , drop = FALSE]) == 0)) {
+        message("Some spline basis does not capture any event time.")
+        stop("Found redundent spline basis. Please adjust knots or degree.")
+    }
+
+
+    ## prepare anything needed in LogL_rateReg but free from parameters
+    nSub <- length(unique(dat$ID))
+
+    ## index for event and censoring
+    ind_event <- dat$event == 1
+    ind_cens <- ! ind_event
+
+    ## basis matrix at event times
+    bMat_event <- bMat[ind_event, , drop = FALSE]
+
+    ## n_ij: number of event for each subject
+    ## the following code makes sure the order will not change
+    ## if the patient ID is not ordered
+    ## not needed if data are already sorted by ID
+    ## n_ij <- table(dat$ID)[order(unique(dat$ID))] - 1L
+    n_ij <- table(dat$ID) - 1L
+    seq_n_ij <- sequence(n_ij)
+    dmu0_dalpha <- iMat[ind_cens, , drop = FALSE]
+    xMat_i <- xMat[ind_cens, , drop = FALSE]
 
     ## log likelihood
-    fit <- stats::nlm(logL_rateReg, ini, dat = dat, bMat = bMat, iMat = iMat,
+    fit <- stats::nlm(logL_rateReg, ini, nBeta = nBeta, nSub = nSub,
+                      xMat = xMat, ind_event = ind_event, ind_cens = ind_cens,
+                      bMat_event = bMat_event, n_ij = n_ij, seq_n_ij = seq_n_ij,
+                      dmu0_dalpha = dmu0_dalpha, xMat_i = xMat_i,
                       hessian = TRUE,
                       gradtol = control$gradtol, stepmax = control$stepmax,
                       steptol = control$steptol, iterlim = control$iterlim)
@@ -393,24 +435,25 @@ rateReg <- function(formula, df = NULL, knots = NULL, degree = 0L,
 
 ### internal functions =========================================================
 ## compute negative log likelihood
-logL_rateReg <- function(par, dat, bMat, iMat) {
+logL_rateReg <- function(par, nBeta, nSub, xMat, ind_event, ind_cens,
+                         bMat_event, n_ij, seq_n_ij, dmu0_dalpha, xMat_i) {
 
-    ## number of covariates, possibly zero
-    nBeta <- ncol(dat) - 3L
+    ## number of covariates
+    ## nBeta <- ncol(dat) - 3L
 
     ## par = \THETA in the paper
     par_theta <- max(par[nBeta + 1L], .Machine$double.eps)
     par_alpha <- par[(nBeta + 2L) : length(par)]
-    m <- length(unique(dat$ID))
-    xMat <- as.matrix(dat[, 4L : (3L + nBeta)])
+    ## nSub <- length(unique(dat$ID))
+    ## xMat <- as.matrix(dat[, 4L : (3L + nBeta)])
     expXBeta <- as.vector(exp(xMat %*% as.matrix(par[seq_len(nBeta)])))
 
     ## index for event and censoring
-    ind_event <- dat$event == 1L
-    ind_cens <- ! ind_event
+    ## ind_event <- dat$event == 1L
+    ## ind_cens <- ! ind_event
 
     ## basis matrix at event times
-    bMat_event <- bMat[ind_event, , drop = FALSE]
+    ## bMat_event <- bMat[ind_event, , drop = FALSE]
 
     ## baseline rate function
     rho_0_ij <- pmax(as.vector(bMat_event %*% par_alpha), .Machine$double.eps)
@@ -420,23 +463,26 @@ logL_rateReg <- function(par, dat, bMat, iMat) {
     ## n_ij: number of event for each subject
     ## the following code makes sure the order will not change
     ## if the patient ID is not ordered
-    n_ij <- table(dat$ID)[order(unique(dat$ID))] - 1L
+    ## not needed if data are already sorted by ID
+    ## n_ij <- table(dat$ID)[order(unique(dat$ID))] - 1L
+    ## n_ij <- table(dat$ID) - 1L
 
     ## if there is a subject with 0 event,
     ## the sequence will not be generated for this subject
     ## note that sequence(0L) leads to integer(0)
-    seq_n_ij <- sequence(n_ij)
+    ## seq_n_ij <- sequence(n_ij)
     theta_j_1 <- par_theta + seq_n_ij - 1
     sum_log_theta_j_1 <- sum(log(theta_j_1))
 
     ## baseline mcf, integral of rho_0 that involves censoring time tau
-    mu0i <- as.vector(iMat[ind_cens, , drop = FALSE] %*% par_alpha)
+    ## dmu0_dalpha <- iMat[ind_cens, , drop = FALSE]
+    mu0i <- as.vector(dmu0_dalpha %*% par_alpha)
     mui <- mu0i * expXBeta[ind_cens]
     mui_theta <- pmax(par_theta + mui, .Machine$double.eps)
     sum_log_theta_mui <- sum((n_ij_theta <- n_ij + par_theta) * log(mui_theta))
 
     ## log-likelihood function
-    logLH <- m * par_theta * log(par_theta) + sum_log_rho_i +
+    logLH <- nSub * par_theta * log(par_theta) + sum_log_rho_i +
         sum_log_theta_j_1 - sum_log_theta_mui
 
     ## or use constrOptim?
@@ -445,18 +491,18 @@ logL_rateReg <- function(par, dat, bMat, iMat) {
 
     ## Calculate the gradient
     ## on beta, vector
-    xMat_i <- xMat[ind_cens, , drop = FALSE]
+    ## xMat_i <- xMat[ind_cens, , drop = FALSE]
     dl_dbeta_i <- sweep(x = as.matrix(xMat_i), MARGIN = 1, FUN = "*",
                         STATS = par_theta * (n_ij - mui) / (par_theta + mui))
     dl_dbeta <- colSums(dl_dbeta_i)
 
     ## on theta
-    dl_dtheta <- m + m * log(par_theta) + sum(1 / (par_theta + seq_n_ij - 1)) -
+    dl_dtheta <- nSub + nSub * log(par_theta) +
+        sum(1 / (par_theta + seq_n_ij - 1)) -
         sum((n_ij + par_theta) / (par_theta + mui)) - sum(log(mui_theta))
 
     ## on alpha
     part1 <- crossprod(1 / rho_0_ij, bMat_event)
-    dmu0_dalpha <- iMat[ind_cens, , drop = FALSE]
     dl_dalpha_part2 <- sweep(dmu0_dalpha, MARGIN = 1, FUN = "*",
                              STATS = expXBeta[ind_cens] * n_ij_theta /
                                  mui_theta)

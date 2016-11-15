@@ -41,16 +41,18 @@
 ##' @param ID Identificator of each subject.
 ##' @param time Time of reccurence event or censoring.
 ##' @param event The status indicator, 0 = censored, 1 = event.
+##' @param check Logical value suggesting whether perform data checking
+##'     procedure. The default value is \code{TRUE}.
+##' @param ... Other arguments for future usage.
 ##' @aliases Survr
 ##' @seealso \code{\link{rateReg}} for model fitting.
 ##' @export
-Survr <- function (ID, time, event) {
-    inpDat <- data.frame(ID, time, event)
-    dat <- check_Survr(inpDat)
-    outDat <- with(dat, as.matrix(cbind(ID, time, event)))
-    attr(outDat, "ID") <- attr(dat, "ID")
-    oldClass(outDat) <- "Survr"
-    invisible(outDat)
+Survr <- function (ID, time, event, check = TRUE, ...) {
+    dat <- data.frame(ID = ID, time = time, event = event)
+    dat <- check_Survr(dat, check = check)
+    attr(dat, "check") <- check
+    oldClass(dat) <- "Survr"
+    invisible(dat)
 }
 
 

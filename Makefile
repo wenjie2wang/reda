@@ -1,10 +1,10 @@
 objects := $(wildcard R/*.R) DESCRIPTION
-man := $(wildcard man/*.Rd) NAMESPACE
 dir := $(shell pwd)
 version := $(shell grep "Version" DESCRIPTION | sed "s/Version: //")
 pkg := $(shell grep "Package" DESCRIPTION | sed "s/Package: //")
 tar := $(pkg)_$(version).tar.gz
 checkLog := $(pkg).Rcheck/00check.log
+
 rmd := vignettes/$(pkg)-intro.Rmd
 vignettes := vignettes/$(pkg)-intro.html
 cprt := COPYRIGHT
@@ -31,7 +31,7 @@ $(vignettes): $(rmd)
 
 .PHONY: INSTALL
 INSTALL: $(tar)
-	R CMD INSTALL --build $(tar)
+	R CMD INSTALL $(tar)
 
 ## update copyright year in HEADER, R script and date in DESCRIPTION
 .PHONY: updateHeader

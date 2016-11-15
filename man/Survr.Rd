@@ -4,7 +4,7 @@
 \alias{Survr}
 \title{Formula Response for Recurrent Event Data}
 \usage{
-Survr(ID, time, event)
+Survr(ID, time, event, check = TRUE, ...)
 }
 \arguments{
 \item{ID}{Identificator of each subject.}
@@ -12,6 +12,11 @@ Survr(ID, time, event)
 \item{time}{Time of reccurence event or censoring.}
 
 \item{event}{The status indicator, 0 = censored, 1 = event.}
+
+\item{check}{Logical value suggesting whether perform data checking
+procedure. The default value is \code{TRUE}.}
+
+\item{...}{Other arguments for future usage.}
 }
 \description{
 \code{Survr} is an S3 class that represents

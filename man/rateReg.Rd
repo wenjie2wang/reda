@@ -89,11 +89,10 @@ A \code{\link{rateReg-class}} object, whose slots include
 \description{
 The default model is the gamma frailty model with one piece constant
 baseline rate function, which is equivalent to negative binomial regression
-of the same shape and rate parameter in gamma prior.
-Spline and piecewise constant baseline rate function can be
-specified and applied to model fitting instead.
-\code{rateReg} returns the fitted model
-through a \code{\link{rateReg-class}} object.
+of the same shape and rate parameter in gamma prior.  Spline and piecewise
+constant baseline rate function can also be specified and applied to model
+fitting.  \code{rateReg} returns the fitted model through a
+\code{\link{rateReg-class}} object.
 }
 \details{
 Function \code{\link{Survr}} in the formula response first checks
