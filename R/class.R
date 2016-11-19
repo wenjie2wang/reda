@@ -51,7 +51,7 @@ Survr <- function (ID, time, event, check = TRUE, ...) {
     dat <- data.frame(ID = ID, time = time, event = event)
     dat <- check_Survr(dat, check = check)
     attr(dat, "check") <- check
-    oldClass(dat) <- "Survr"
+    class(dat) <- "Survr"
     invisible(dat)
 }
 

@@ -4,11 +4,19 @@
 \alias{rateReg}
 \title{Fit Recurrent Events Regression Based on Counts and Rate Function}
 \usage{
-rateReg(formula, df = NULL, knots = NULL, degree = 0L, data, subset,
+rateReg(formula, data, subset, df = NULL, knots = NULL, degree = 0L,
   na.action, start = list(), control = list(), contrasts = NULL, ...)
 }
 \arguments{
 \item{formula}{\code{Survr} object produced by function \code{\link{Survr}}.}
+
+\item{data}{An optional data frame, list or environment containing
+the variables in the model.  If not found in data, the variables are taken
+from \code{environment(formula)}, usually the environment from which
+function \code{\link{rateReg}} is called.}
+
+\item{subset}{An optional vector specifying a subset of observations
+to be used in the fitting process.}
 
 \item{df}{An optional nonnegative integer to specify the degree of freedom
 of baseline rate function. If argument \code{knots} or \code{degree} are
@@ -20,14 +28,6 @@ The default is \code{NULL}, representing no any internal knots.}
 
 \item{degree}{An optional nonnegative integer to specify the degree of
 spline bases.}
-
-\item{data}{An optional data frame, list or environment containing
-the variables in the model.  If not found in data, the variables are taken
-from \code{environment(formula)}, usually the environment from which
-function \code{\link{rateReg}} is called.}
-
-\item{subset}{An optional vector specifying a subset of observations
-to be used in the fitting process.}
 
 \item{na.action}{A function that indicates what should the procedure
 do if the data contains \code{NA}s.  The default is set by the
@@ -89,9 +89,10 @@ A \code{\link{rateReg-class}} object, whose slots include
 \description{
 The default model is the gamma frailty model with one piece constant
 baseline rate function, which is equivalent to negative binomial regression
-of the same shape and rate parameter in gamma prior.  Spline and piecewise
-constant baseline rate function can also be specified and applied to model
-fitting.  \code{rateReg} returns the fitted model through a
+of the same shape and rate parameter in gamma prior. Spline (including
+piecewise constant) baseline rate function can also be specified and applied
+to model fitting.  Both B-spline and M-spline bases are available.
+\code{rateReg} returns the fitted model through a
 \code{\link{rateReg-class}} object.
 }
 \details{

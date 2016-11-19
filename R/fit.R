@@ -27,9 +27,10 @@ NULL
 ##'
 ##' The default model is the gamma frailty model with one piece constant
 ##' baseline rate function, which is equivalent to negative binomial regression
-##' of the same shape and rate parameter in gamma prior.  Spline and piecewise
-##' constant baseline rate function can also be specified and applied to model
-##' fitting.  \code{rateReg} returns the fitted model through a
+##' of the same shape and rate parameter in gamma prior. Spline (including
+##' piecewise constant) baseline rate function can also be specified and applied
+##' to model fitting.  Both B-spline and M-spline bases are available.
+##' \code{rateReg} returns the fitted model through a
 ##' \code{\link{rateReg-class}} object.
 ##'
 ##' @details
@@ -92,6 +93,12 @@ NULL
 ##' }
 ##'
 ##' @param formula \code{Survr} object produced by function \code{\link{Survr}}.
+##' @param data An optional data frame, list or environment containing
+##' the variables in the model.  If not found in data, the variables are taken
+##' from \code{environment(formula)}, usually the environment from which
+##' function \code{\link{rateReg}} is called.
+##' @param subset An optional vector specifying a subset of observations
+##' to be used in the fitting process.
 ##' @param df An optional nonnegative integer to specify the degree of freedom
 ##' of baseline rate function. If argument \code{knots} or \code{degree} are
 ##' specified, \code{df} will be neglected whether it is specified or not.
@@ -100,12 +107,6 @@ NULL
 ##' The default is \code{NULL}, representing no any internal knots.
 ##' @param degree An optional nonnegative integer to specify the degree of
 ##' spline bases.
-##' @param data An optional data frame, list or environment containing
-##' the variables in the model.  If not found in data, the variables are taken
-##' from \code{environment(formula)}, usually the environment from which
-##' function \code{\link{rateReg}} is called.
-##' @param subset An optional vector specifying a subset of observations
-##' to be used in the fitting process.
 ##' @param na.action A function that indicates what should the procedure
 ##' do if the data contains \code{NA}s.  The default is set by the
 ##' na.action setting of \code{\link[base]{options}}.
@@ -113,6 +114,7 @@ NULL
 ##' Other possible values inlcude \code{\link{na.fail}},
 ##' \code{\link{na.exclude}}, and \code{\link{na.pass}}.
 ##' \code{help(na.fail)} for details.
+##' @param spline An optional character indicating the kind of splines
 ##' @param start An optional list of starting values for the parameters
 ##' to be estimated in the model.  See more in section details.
 ##' @param control An optional list of parameters to control the
@@ -229,11 +231,12 @@ NULL
 ##' @importFrom splines2 bSpline ibs
 ##' @importFrom stats na.fail na.omit na.exclude na.pass .getXlevels
 ##' @export
-rateReg <- function(formula, df = NULL, knots = NULL, degree = 0L,
-                    data, subset, na.action, start = list(), control = list(),
-                    contrasts = NULL, ...) {
+rateReg <- function(formula, data, subset, df = NULL, knots = NULL, degree = 0L,
+                    na.action, spline = c("bSpline", "mSpline"),
+                    start = list(), control = list(), contrasts = NULL, ...) {
     ## record the function call to return
     Call <- match.call()
+    spline <- match.arg(spline)
 
     ## arguments check
     if (missing(formula))
@@ -241,17 +244,22 @@ rateReg <- function(formula, df = NULL, knots = NULL, degree = 0L,
     if (missing(data))
         data <- environment(formula)
 
-    ## data frame constructed from Survr
-    dat3 <- with(data, eval(Call[[2]][[2]]))
-    check <- attr(dat3, "check")
-    if (! inherits(dat3, "Survr"))
-        stop("Response in formula must be a survival recurrent object.")
+    ## take care of subset individual for possible non-numeric ID
+    if (! missing(subset)) {
+        sSubset <- substitute(subset)
+        subIdx <- eval(sSubset, data, parent.frame())
+        if (! is.logical(subIdx))
+            stop("'subset' must be logical")
+        subIdx <- subIdx & ! is.na(subIdx)
+        data <- data[subIdx, ]
+    }
 
     ## Prepare data: ID, time, event ~ X(s)
     mcall <- match.call(expand.dots = FALSE)
-    mmcall <- match(c("formula", "data", "subset", "na.action"),
-                    names(mcall), 0L)
+    mmcall <- match(c("formula", "data", "na.action"), names(mcall), 0L)
     mcall <- mcall[c(1L, mmcall)]
+    ## re-define data
+    mcall[[3L]] <- substitute(data)
     ## drop unused levels in factors
     mcall$drop.unused.levels <- TRUE
     mcall[[1L]] <- quote(stats::model.frame)
@@ -259,47 +267,30 @@ rateReg <- function(formula, df = NULL, knots = NULL, degree = 0L,
     mt <- attr(mf, "terms")
     mm <- stats::model.matrix(formula, data = mf, contrasts.arg = contrasts)
 
-    if (check) {
-        ## get data.frame if na.action = na.pass for further data checking
-        mcall$na.action <- na.pass
-        mf_na <- eval(mcall, parent.frame())
-        mm_na <- stats::model.matrix(formula, data = mf_na,
-                                     contrasts.arg = contrasts)
-    }
+    ## check response constructed from Survr
+    resp <- model.extract(mf, "response")
+    if (! inherits(resp, "Survr"))
+        stop("Response in formula must be a survival recurrent object.")
+
+    ## get data.frame if na.action = na.pass for further data checking
+    mcall$na.action <- na.pass
+    mf_na <- eval(mcall, parent.frame())
+    mm_na <- stats::model.matrix(formula, data = mf_na,
+                                 contrasts.arg = contrasts)
 
     ## number of covariates excluding intercept
     if ((nBeta <- ncol(mm) - 1L) <= 0)
         stop("Covariates must be specified in formula.")
-
     ## covariates' names
     covar_names <- colnames(mm)[- 1L]
 
+    ## sorted data by ID, time, and event
+    ord <- order(resp[, "ID"], resp[, "time"])
     ## data matrix processed
-    xMat <- mm[, - 1L, drop = FALSE]
-    dat <- as.data.frame(cbind(mf[, 1L][, seq_len(3L)], xMat))
+    xMat <- mm[ord, - 1L, drop = FALSE]
+    dat <- as.data.frame(cbind(mf[ord, 1L][, seq_len(3L)], xMat))
     colnames(dat) <- c("ID", "time", "event", covar_names)
     nObs <- nrow(dat)
-
-    ## check the impact caused by missing value
-    ## if there is missing value removed
-    if (check & nrow(mm_na) > nObs) {
-        ## recover original ID names for possible pin-point
-        idFactor <- attr(dat3, "IDnam")
-        attr(dat, "ID_") <- factor(levels(idFactor)[dat$ID],
-                                   levels = levels(idFactor))
-        message("Observations with missing covariate value are removed.")
-        message("Checking the new dataset again ... ", appendLF = FALSE)
-        dat <- check_Survr(dat, check = TRUE)
-        message("done.")
-    }
-
-    ## sorted data by ID, time, and event
-    ord <- attr(dat, "ord")
-    if (! is.null(ord)) {
-        dat <- dat[ord, ]
-    } else {
-        dat <- dat[(ord <- with(dat, order(ID, time, event))), ]
-    }
 
     ## 'control' for optimization and splines' boundary knots
     control <- do.call("rateReg_control", control)
@@ -309,11 +300,37 @@ rateReg <- function(formula, df = NULL, knots = NULL, degree = 0L,
                           control$Boundary.knots
                       }
 
+    ## check the impact caused by missing value
+    ## if there is missing value removed
+    if (nrow(mm_na) > nObs) {
+        ## recover original ID names for possible pin-point
+        idFactor <- attr(dat3, "IDnam")
+        attr(dat, "ID_") <- factor(levels(idFactor)[dat$ID],
+                                   levels = levels(idFactor))
+        if (control$verbose)
+            message(paste("Observations with missing covariate",
+                          "value are removed.\n",
+                          "Checking the new dataset again ... "),
+                    appendLF = FALSE)
+        check_Survr(dat, check = TRUE)
+        if (control$verbose)
+            message("done.")
+    }
+
     ## generate knots if knots is unspecified
-    iMat <- splines2::ibs(x = dat$time, df = df, knots = knots,
-                          degree = degree, intercept = TRUE,
-                          Boundary.knots = Boundary.knots)
-    bMat <- attr(iMat, "bsMat")
+    if (spline == "bSpline") {
+        ## B-spline
+        iMat <- splines2::ibs(x = dat$time, df = df, knots = knots,
+                              degree = degree, intercept = TRUE,
+                              Boundary.knots = Boundary.knots)
+        bMat <- attr(iMat, "bsMat")
+    } else {
+        ## M-spline
+        iMat <- splines2::iSpline(x = dat$time, df = df, knots = knots,
+                                  degree = degree, intercept = TRUE,
+                                  Boundary.knots = Boundary.knots)
+        bMat <- attr(iMat, "msMat")
+    }
 
     ## update df, knots, degree, and Boundary.knots
     knots <- as.numeric(attr(iMat, "knots"))
@@ -321,8 +338,7 @@ rateReg <- function(formula, df = NULL, knots = NULL, degree = 0L,
     Boundary.knots <- attr(iMat, "Boundary.knots")
 
     ## name each basis for alpha output
-    alphaName <- nameBases(degree = degree, df = df, knots = knots,
-                           Boundary.knots = Boundary.knots)
+    alphaName <- nameBases(df = df, spline = spline)
 
     ## start' values for 'nlm'
     startlist <- c(start, list(nBeta_ = nBeta, nAlpha_ = df))
@@ -332,8 +348,9 @@ rateReg <- function(formula, df = NULL, knots = NULL, degree = 0L,
 
     ## check whether the knots are reasonable
     if (any(colSums(bMat[dat$event == 1, , drop = FALSE]) == 0)) {
-        message("Some spline basis does not capture any event time.")
-        stop("Found redundent spline basis. Please adjust knots or degree.")
+        stop(paste("Some spline basis does not capture any event time",
+                   "and thus is possibly redundent.",
+                   "\nPlease adjust knots or degree."))
     }
 
 
@@ -516,7 +533,7 @@ logL_rateReg <- function(par, nBeta, nSub, xMat, ind_event, ind_cens,
 
 rateReg_control <- function(gradtol = 1e-6, stepmax = 1e5,
                             steptol = 1e-6, iterlim = 1e2,
-                            Boundary.knots = NULL, ...) {
+                            Boundary.knots = NULL, verbose = FALSE, ...) {
     ## controls for function stats::nlm
     if (! is.numeric(gradtol) || gradtol <= 0)
         stop("Value of 'gradtol' must be > 0.")
@@ -526,10 +543,12 @@ rateReg_control <- function(gradtol = 1e-6, stepmax = 1e5,
         stop("Value of 'steptol' must be > 0.")
     if (! is.numeric(iterlim) || iterlim <= 0)
         stop("Maximum number of iterations must be > 0.")
+    if (! is.logical(verbose))
+        stop("'verbose' must be a logical value.")
     ## return
     list(gradtol = gradtol, stepmax = stepmax,
          steptol = steptol, iterlim = iterlim,
-         Boundary.knots = Boundary.knots)
+         Boundary.knots = Boundary.knots, verbose = verbose)
 }
 
 
@@ -553,12 +572,8 @@ rateReg_start <- function (beta, theta = 0.5, alpha, ..., nBeta_, nAlpha_) {
 
 
 ## generate intervals from specified baseline pieces
-nameBases <- function(degree, df, knots, Boundary.knots) {
-    leftVec <- c(Boundary.knots[1L], knots)
-    rightVec <- c(knots, Boundary.knots[2L])
-    if (! degree)
-        return(paste0("(", leftVec, ", ", rightVec, "]"))
-    ## else degree > 0
-    ## return
-    paste0("B-spline.", seq_len(df))
+nameBases <- function(df, spline) {
+    if (spline == "bSpline")
+        return(paste0("B-spline", seq_len(df)))
+    paste0("M-spline", seq_len(df))
 }

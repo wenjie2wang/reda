@@ -29,6 +29,10 @@ check_Survr <- function(dat, check, ...) {
     ## nonsense, just to suppress Note from R CMD check --as-cran
     event <- NULL
 
+    ## event time must be numeric
+    if (! is.numeric(dat$time))
+        stop("'time' must be numeric.")
+
     ## check missing value on 'ID'
     if (any(is.na(dat$ID)))
         stop("'ID' cannot be missing.")
@@ -37,53 +41,52 @@ check_Survr <- function(dat, check, ...) {
     if (any(! dat$event %in% c(0, 1)))
         stop("'event' must be coded as 0 (censoring) or 1 (event).")
 
-    ## sort the data by ID, time, and event
-    dat <- dat[(ord <- with(dat, order(ID, time, event))), ]
-
-    ## if dat input has an attr 'ID_'
+    ## if dat input has an attr 'ID_' for internal usage
     nID <- attr(dat, "ID_")
     if (is.null(nID)) {
         ## check whether 'ID' is numeric or not. convert if not.
-        dat$IDnam <- factor(dat$ID, levels = unique(dat$ID))
+        dat$IDnam <- factor(dat$ID)
         dat$ID <- as.numeric(dat$IDnam)
     } else {
         dat$IDnam <- nID
     }
 
     if (check) {
+        ## sort the data by ID, time, and event
+        sortDat <- dat[(ord <- with(dat, order(ID, time, event))), ]
+
         ## issue 1: event time after censoring time or without censoring time
-        idx1 <- ! duplicated(dat$ID, fromLast = TRUE) & dat$event != 0
+        idx1 <- ! duplicated(sortDat$ID, fromLast = TRUE) & sortDat$event != 0
         if (any(idx1)) {
-            warning(paste("Every subject must have one censored time",
-                          "later than event times."))
-            stop(paste("Please check subject:",
-                       paste(dat$IDnam[idx1], collapse = ", ")))
+            stop(paste("Every subject must have one censored time",
+                       "later than event times.",
+                       "\nPlease check subject:",
+                       paste(sortDat$IDnam[idx1], collapse = ", ")))
         }
 
         ## issue 2: more than one censoring time
-        cenID <- subset(dat, event != 1)[, "IDnam"]
+        cenID <- subset(sortDat, event != 1)[, "IDnam"]
         idx2 <- duplicated(cenID)
         if (any(idx2)) {
-            warning("Every subject must have only one censored time.")
-            stop(paste("Please check subject:",
+            stop(paste("Every subject must have only one censored time.",
+                       "\nPlease check subject:",
                        paste(cenID[idx2], collapse = ", ")))
         }
 
         ## stop if missing value of 'time'
-        idx3 <- is.na(dat$time)
+        idx3 <- is.na(sortDat$time)
         if (any(idx3)) {
-            tmpID <- unique(dat$IDnam[idx3])
-            warning("Event or censoring times cannot be missing.")
-            stop(paste("Please check subject:", paste(tmpID, collapse = ", ")))
+            tmpID <- unique(sortDat$IDnam[idx3])
+            stop(paste("Event or censoring times cannot be missing.",
+                       "\nPlease check subject:",
+                       paste(tmpID, collapse = ", ")))
         }
     }
 
-    ## return
     attr(dat, "ID_") <- dat$IDnam
     dat$IDnam <- NULL
     mat <- as.matrix(dat)
     attr(mat, "ID_") <- attr(dat, "ID_")
-    attr(mat, "ord") <- ord
     attr(mat, "check") <- check
     invisible(mat)
 }
