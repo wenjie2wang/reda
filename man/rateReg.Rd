@@ -5,7 +5,8 @@
 \title{Fit Recurrent Events Regression Based on Counts and Rate Function}
 \usage{
 rateReg(formula, data, subset, df = NULL, knots = NULL, degree = 0L,
-  na.action, start = list(), control = list(), contrasts = NULL, ...)
+  na.action, spline = c("bSpline", "mSpline"), start = list(),
+  control = list(), contrasts = NULL, ...)
 }
 \arguments{
 \item{formula}{\code{Survr} object produced by function \code{\link{Survr}}.}
@@ -36,6 +37,8 @@ The "factory-fresh" default is \code{\link[stats]{na.omit}}.
 Other possible values inlcude \code{\link{na.fail}},
 \code{\link{na.exclude}}, and \code{\link{na.pass}}.
 \code{help(na.fail)} for details.}
+
+\item{spline}{An optional character indicating the kind of splines}
 
 \item{start}{An optional list of starting values for the parameters
 to be estimated in the model.  See more in section details.}

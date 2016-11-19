@@ -228,8 +228,9 @@ NULL
 ##' rate function;
 ##' \code{\link{mcf,rateReg-method}} for estimated MCF from a fitted model;
 ##' \code{\link{plotMcf,rateRegMcf-method}} for plotting estimated MCF.
-##' @importFrom splines2 bSpline ibs
+##' @importFrom splines2 ibs iSpline
 ##' @importFrom stats na.fail na.omit na.exclude na.pass .getXlevels
+##' model.extract
 ##' @export
 rateReg <- function(formula, data, subset, df = NULL, knots = NULL, degree = 0L,
                     na.action, spline = c("bSpline", "mSpline"),
@@ -268,7 +269,7 @@ rateReg <- function(formula, data, subset, df = NULL, knots = NULL, degree = 0L,
     mm <- stats::model.matrix(formula, data = mf, contrasts.arg = contrasts)
 
     ## check response constructed from Survr
-    resp <- model.extract(mf, "response")
+    resp <- stats::model.extract(mf, "response")
     if (! inherits(resp, "Survr"))
         stop("Response in formula must be a survival recurrent object.")
 
@@ -285,7 +286,9 @@ rateReg <- function(formula, data, subset, df = NULL, knots = NULL, degree = 0L,
     covar_names <- colnames(mm)[- 1L]
 
     ## sorted data by ID, time, and event
-    ord <- order(resp[, "ID"], resp[, "time"])
+    if (length(attr(mf, "na.action")))
+        attr(resp, "ord") <- order(resp[, "ID"], resp[, "time"])
+    ord <- attr(resp, "ord")
     ## data matrix processed
     xMat <- mm[ord, - 1L, drop = FALSE]
     dat <- as.data.frame(cbind(mf[ord, 1L][, seq_len(3L)], xMat))
@@ -295,7 +298,7 @@ rateReg <- function(formula, data, subset, df = NULL, knots = NULL, degree = 0L,
     ## 'control' for optimization and splines' boundary knots
     control <- do.call("rateReg_control", control)
     Boundary.knots <- if (is.null(control$Boundary.knots)) {
-                          c(0, max(dat$time))
+                          c(0, max(dat$time, na.rm = TRUE))
                       } else {
                           control$Boundary.knots
                       }
@@ -303,16 +306,12 @@ rateReg <- function(formula, data, subset, df = NULL, knots = NULL, degree = 0L,
     ## check the impact caused by missing value
     ## if there is missing value removed
     if (nrow(mm_na) > nObs) {
-        ## recover original ID names for possible pin-point
-        idFactor <- attr(dat3, "IDnam")
-        attr(dat, "ID_") <- factor(levels(idFactor)[dat$ID],
-                                   levels = levels(idFactor))
         if (control$verbose)
             message(paste("Observations with missing covariate",
                           "value are removed.\n",
                           "Checking the new dataset again ... "),
                     appendLF = FALSE)
-        check_Survr(dat, check = TRUE)
+        check_Survr(resp, check = TRUE)
         if (control$verbose)
             message("done.")
     }
@@ -533,7 +532,7 @@ logL_rateReg <- function(par, nBeta, nSub, xMat, ind_event, ind_cens,
 
 rateReg_control <- function(gradtol = 1e-6, stepmax = 1e5,
                             steptol = 1e-6, iterlim = 1e2,
-                            Boundary.knots = NULL, verbose = FALSE, ...) {
+                            Boundary.knots = NULL, verbose = TRUE, ...) {
     ## controls for function stats::nlm
     if (! is.numeric(gradtol) || gradtol <= 0)
         stop("Value of 'gradtol' must be > 0.")
