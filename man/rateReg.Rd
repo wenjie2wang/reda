@@ -2,11 +2,11 @@
 % Please edit documentation in R/fit.R
 \name{rateReg}
 \alias{rateReg}
-\title{Fit Recurrent Events Regression Based on Counts and Rate Function}
+\title{Recurrent Events Regression Based on Counts and Rate Function}
 \usage{
-rateReg(formula, data, subset, df = NULL, knots = NULL, degree = 0L,
-  na.action, spline = c("bSpline", "mSpline"), start = list(),
-  control = list(), contrasts = NULL, ...)
+rateReg(formula, data, subset, df = NULL, knots = NULL,
+        degree = 0L, na.action, spline = c("bSpline", "mSpline"),
+        start = list(), control = list(), contrasts = NULL, ...)
 }
 \arguments{
 \item{formula}{\code{Survr} object produced by function \code{\link{Survr}}.}
@@ -38,15 +38,17 @@ Other possible values inlcude \code{\link{na.fail}},
 \code{\link{na.exclude}}, and \code{\link{na.pass}}.
 \code{help(na.fail)} for details.}
 
-\item{spline}{An optional character indicating the kind of splines}
+\item{spline}{An optional character that specifies the flavor of splines.
+The possible option is \code{bSpline} for B-spline or
+\code{mSpline} for M-spline.}
 
 \item{start}{An optional list of starting values for the parameters
-to be estimated in the model.  See more in section details.}
+to be estimated in the model.  See more in Section details.}
 
 \item{control}{An optional list of parameters to control the
 maximization process of negative log likelihood function
 and adjust the baseline rate function.
-See more in section details.}
+See more in Section details.}
 
 \item{contrasts}{An optional list, whose entries are values
 (numeric matrices or character strings naming functions) to be used
@@ -92,7 +94,7 @@ A \code{\link{rateReg-class}} object, whose slots include
 \description{
 The default model is the gamma frailty model with one piece constant
 baseline rate function, which is equivalent to negative binomial regression
-of the same shape and rate parameter in gamma prior. Spline (including
+with the same shape and rate parameter in gamma prior. Spline (including
 piecewise constant) baseline rate function can also be specified and applied
 to model fitting.  Both B-spline and M-spline bases are available.
 \code{rateReg} returns the fitted model through a
@@ -102,8 +104,8 @@ to model fitting.  Both B-spline and M-spline bases are available.
 Function \code{\link{Survr}} in the formula response first checks
 the dataset and will report an error if the dataset does not
 fall into recurrent event data framework.
-Subject's ID is pinpointed if its observation violates any checking rule.
-See \code{\link{Survr}} for all the checking rules.
+Subject's ID will be pinpointed if its observation violates any checking
+rule. See \code{\link{Survr}} for all the checking rules.
 
 Function \code{rateReg} first constructs the design matrix from
 the specified arguments: \code{formula}, \code{data}, \code{subset},
@@ -125,8 +127,8 @@ The available numeric vector elements in the list include
 \itemize{
     \item \code{beta}: Coefficient(s) of covariates,
         set to be 0.1 by default.
-    \item \code{theta}: Parameter of frailty random effect,
-        set to be 0.5 by default.
+    \item \code{theta}: Parameter in Gamma(theta, 1 / theta) for
+        frailty random effect, set to be 0.5 by default.
     \item \code{alpha}: Coefficient(s) of baseline rate function,
         set to be 0.05 by default.
 }
@@ -150,19 +152,16 @@ The available elements in the list include
         the boundary knots for baseline rate funtion. By default,
         the left boundary knot is zero and the right one takes the
         largest censoring time from data.
-    \item \code{intercept}: A logical value specifying whether
-        intercept is included in spline baseline rate function.
-        For piecewise constatn baseline (\code{df}=0), the specified
-        value would be neglected. The default value
-        is \code{TRUE}, i.e. the intercept is included.
+    \item \code{verbose}: A optional logical value with default \code{TRUE}.
+        Set it to be \code{FALSE} to supress any possible message
+        from this function.
 }
 }
 \examples{
 library(reda)
 
 ## constant rate function
-constFit <- rateReg(Survr(ID, time, event) ~ group + x1,
-                    data = simuDat, subset = ID \%in\% 1:50)
+constFit <- rateReg(Survr(ID, time, event) ~ group + x1, data = simuDat)
 
 ## 6 pieces' piecewise constant rate function
 piecesFit <- rateReg(Survr(ID, time, event) ~ group + x1,
@@ -170,8 +169,7 @@ piecesFit <- rateReg(Survr(ID, time, event) ~ group + x1,
                      knots = seq(28, 140, by = 28))
 
 ## fit rate function with cubic spline
-splineFit <- rateReg(Survr(ID, time, event) ~ group + x1,
-                     data = simuDat, subset = ID \%in\% 1:50,
+splineFit <- rateReg(Survr(ID, time, event) ~ group + x1, data = simuDat,
                      knots = c(56, 84, 112), degree = 3)
 
 ## brief summary of fitted models
@@ -215,9 +213,9 @@ plotMcf(splineMcf, conf.int = TRUE, lty = c(1, 5)) +
 
 }
 \references{
-Fu, H., Luo, L., & Qu Y. (2014). Hypoglycemic Events Analysis via
-Recurrent Time-to-Event (HEART) Models.
-\emph{Journal of biopharmaceutical statistics}, Epub 2014 Dec 1.
+Fu, H., Luo, J., & Qu, Y. (2016).
+Hypoglycemic events analysis via recurrent time-to-event (HEART) models.
+\emph{Journal Of Biopharmaceutical Statistics}, 26(2), 280--298.
 }
 \seealso{
 \code{\link{summary,rateReg-method}} for summary of fitted model;

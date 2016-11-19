@@ -47,7 +47,7 @@ check_Survr <- function(dat, check, ...) {
     if (is.null(ID_)) {
         ## check whether 'ID' is numeric or not. convert if not.
         IDnam <- factor(ID)
-        dat[, "ID"] <- as.numeric(IDnam)
+        dat[, "ID"] <- ID <- as.numeric(IDnam)
     } else {
         IDnam <- ID_
     }
@@ -60,7 +60,6 @@ check_Survr <- function(dat, check, ...) {
                } else {
                    as.data.frame(dat[ord, ])
                }
-    attr(dat, "ord") <- ord
 
     if (check) {
         sID <- sortDat[, "ID"]
@@ -99,6 +98,6 @@ check_Survr <- function(dat, check, ...) {
     mat <- as.matrix(dat)
     attr(mat, "ID_") <- IDnam
     attr(mat, "check") <- check
-    attr(mat, "ord") <- attr(dat, "ord")
+    attr(mat, "ord") <- ord
     invisible(mat)
 }

@@ -23,11 +23,11 @@
 NULL
 
 
-##' Fit Recurrent Events Regression Based on Counts and Rate Function
+##' Recurrent Events Regression Based on Counts and Rate Function
 ##'
 ##' The default model is the gamma frailty model with one piece constant
 ##' baseline rate function, which is equivalent to negative binomial regression
-##' of the same shape and rate parameter in gamma prior. Spline (including
+##' with the same shape and rate parameter in gamma prior. Spline (including
 ##' piecewise constant) baseline rate function can also be specified and applied
 ##' to model fitting.  Both B-spline and M-spline bases are available.
 ##' \code{rateReg} returns the fitted model through a
@@ -37,8 +37,8 @@ NULL
 ##' Function \code{\link{Survr}} in the formula response first checks
 ##' the dataset and will report an error if the dataset does not
 ##' fall into recurrent event data framework.
-##' Subject's ID is pinpointed if its observation violates any checking rule.
-##' See \code{\link{Survr}} for all the checking rules.
+##' Subject's ID will be pinpointed if its observation violates any checking
+##' rule. See \code{\link{Survr}} for all the checking rules.
 ##'
 ##' Function \code{rateReg} first constructs the design matrix from
 ##' the specified arguments: \code{formula}, \code{data}, \code{subset},
@@ -60,8 +60,8 @@ NULL
 ##' \itemize{
 ##'     \item \code{beta}: Coefficient(s) of covariates,
 ##'         set to be 0.1 by default.
-##'     \item \code{theta}: Parameter of frailty random effect,
-##'         set to be 0.5 by default.
+##'     \item \code{theta}: Parameter in Gamma(theta, 1 / theta) for
+##'         frailty random effect, set to be 0.5 by default.
 ##'     \item \code{alpha}: Coefficient(s) of baseline rate function,
 ##'         set to be 0.05 by default.
 ##' }
@@ -85,13 +85,14 @@ NULL
 ##'         the boundary knots for baseline rate funtion. By default,
 ##'         the left boundary knot is zero and the right one takes the
 ##'         largest censoring time from data.
-##'     \item \code{intercept}: A logical value specifying whether
-##'         intercept is included in spline baseline rate function.
-##'         For piecewise constatn baseline (\code{df}=0), the specified
-##'         value would be neglected. The default value
-##'         is \code{TRUE}, i.e. the intercept is included.
+##'     \item \code{verbose}: A optional logical value with default \code{TRUE}.
+##'         Set it to be \code{FALSE} to supress any possible message
+##'         from this function.
 ##' }
-##'
+##' @usage
+##' rateReg(formula, data, subset, df = NULL, knots = NULL,
+##'         degree = 0L, na.action, spline = c("bSpline", "mSpline"),
+##'         start = list(), control = list(), contrasts = NULL, ...)
 ##' @param formula \code{Survr} object produced by function \code{\link{Survr}}.
 ##' @param data An optional data frame, list or environment containing
 ##' the variables in the model.  If not found in data, the variables are taken
@@ -114,13 +115,15 @@ NULL
 ##' Other possible values inlcude \code{\link{na.fail}},
 ##' \code{\link{na.exclude}}, and \code{\link{na.pass}}.
 ##' \code{help(na.fail)} for details.
-##' @param spline An optional character indicating the kind of splines
+##' @param spline An optional character that specifies the flavor of splines.
+##' The possible option is \code{bSpline} for B-spline or
+##' \code{mSpline} for M-spline.
 ##' @param start An optional list of starting values for the parameters
-##' to be estimated in the model.  See more in section details.
+##' to be estimated in the model.  See more in Section details.
 ##' @param control An optional list of parameters to control the
 ##' maximization process of negative log likelihood function
 ##' and adjust the baseline rate function.
-##' See more in section details.
+##' See more in Section details.
 ##' @param contrasts An optional list, whose entries are values
 ##' (numeric matrices or character strings naming functions) to be used
 ##' as replacement values for the contrasts replacement function and
@@ -160,15 +163,14 @@ NULL
 ##' }
 ##'
 ##' @references
-##' Fu, H., Luo, L., & Qu Y. (2014). Hypoglycemic Events Analysis via
-##' Recurrent Time-to-Event (HEART) Models.
-##' \emph{Journal of biopharmaceutical statistics}, Epub 2014 Dec 1.
+##' Fu, H., Luo, J., & Qu, Y. (2016).
+##' Hypoglycemic events analysis via recurrent time-to-event (HEART) models.
+##' \emph{Journal Of Biopharmaceutical Statistics}, 26(2), 280--298.
 ##' @examples
 ##' library(reda)
 ##'
 ##' ## constant rate function
-##' constFit <- rateReg(Survr(ID, time, event) ~ group + x1,
-##'                     data = simuDat, subset = ID %in% 1:50)
+##' constFit <- rateReg(Survr(ID, time, event) ~ group + x1, data = simuDat)
 ##'
 ##' ## 6 pieces' piecewise constant rate function
 ##' piecesFit <- rateReg(Survr(ID, time, event) ~ group + x1,
@@ -176,8 +178,7 @@ NULL
 ##'                      knots = seq(28, 140, by = 28))
 ##'
 ##' ## fit rate function with cubic spline
-##' splineFit <- rateReg(Survr(ID, time, event) ~ group + x1,
-##'                      data = simuDat, subset = ID %in% 1:50,
+##' splineFit <- rateReg(Survr(ID, time, event) ~ group + x1, data = simuDat,
 ##'                      knots = c(56, 84, 112), degree = 3)
 ##'
 ##' ## brief summary of fitted models
@@ -238,8 +239,6 @@ rateReg <- function(formula, data, subset, df = NULL, knots = NULL, degree = 0L,
     ## record the function call to return
     Call <- match.call()
     spline <- match.arg(spline)
-
-    ## arguments check
     if (missing(formula))
         stop("Argument 'formula' is required.")
     if (missing(data))
@@ -273,48 +272,44 @@ rateReg <- function(formula, data, subset, df = NULL, knots = NULL, degree = 0L,
     if (! inherits(resp, "Survr"))
         stop("Response in formula must be a survival recurrent object.")
 
-    ## get data.frame if na.action = na.pass for further data checking
-    mcall$na.action <- na.pass
-    mf_na <- eval(mcall, parent.frame())
-    mm_na <- stats::model.matrix(formula, data = mf_na,
-                                 contrasts.arg = contrasts)
-
     ## number of covariates excluding intercept
     if ((nBeta <- ncol(mm) - 1L) <= 0)
         stop("Covariates must be specified in formula.")
     ## covariates' names
     covar_names <- colnames(mm)[- 1L]
 
-    ## sorted data by ID, time, and event
-    if (length(attr(mf, "na.action")))
-        attr(resp, "ord") <- order(resp[, "ID"], resp[, "time"])
-    ord <- attr(resp, "ord")
-    ## data matrix processed
-    xMat <- mm[ord, - 1L, drop = FALSE]
-    dat <- as.data.frame(cbind(mf[ord, 1L][, seq_len(3L)], xMat))
-    colnames(dat) <- c("ID", "time", "event", covar_names)
-    nObs <- nrow(dat)
-
     ## 'control' for optimization and splines' boundary knots
     control <- do.call("rateReg_control", control)
-    Boundary.knots <- if (is.null(control$Boundary.knots)) {
-                          c(0, max(dat$time, na.rm = TRUE))
-                      } else {
-                          control$Boundary.knots
-                      }
 
-    ## check the impact caused by missing value
-    ## if there is missing value removed
-    if (nrow(mm_na) > nObs) {
+    ## for possible missing values in covaraites
+    if (length(na.action <- attr(mf, "na.action"))) {
+        ## update if there is missing value removed
+        attr(resp, "ord") <- order(resp[, "ID"], resp[, "time"])
+        attr(resp, "ID_") <- attr(resp, "ID_")[- na.action]
+        ## check data for possible error caused by removal of missing values
         if (control$verbose)
-            message(paste("Observations with missing covariate",
-                          "value are removed.\n",
-                          "Checking the new dataset again ... "),
+            message(paste("Observations with missing value in covariates",
+                          "are removed.\nChecking the new dataset again... "),
                     appendLF = FALSE)
         check_Survr(resp, check = TRUE)
         if (control$verbose)
             message("done.")
     }
+
+    ## sorted data by ID, time, and event
+    ord <- attr(resp, "ord")
+    ## data matrix processed
+    xMat <- mm[ord, - 1L, drop = FALSE]
+    dat <- as.data.frame(cbind(resp[ord, ], xMat))
+    colnames(dat) <- c("ID", "time", "event", covar_names)
+    nObs <- nrow(dat)
+
+    ## set up boundary knots
+    Boundary.knots <- if (is.null(control$Boundary.knots)) {
+                          c(0, max(dat$time, na.rm = TRUE))
+                      } else {
+                          control$Boundary.knots
+                      }
 
     ## generate knots if knots is unspecified
     if (spline == "bSpline") {
@@ -335,7 +330,6 @@ rateReg <- function(formula, data, subset, df = NULL, knots = NULL, degree = 0L,
     knots <- as.numeric(attr(iMat, "knots"))
     df <- (degree <- attr(iMat, "degree")) + length(knots) + 1L
     Boundary.knots <- attr(iMat, "Boundary.knots")
-
     ## name each basis for alpha output
     alphaName <- nameBases(df = df, spline = spline)
 
@@ -352,17 +346,12 @@ rateReg <- function(formula, data, subset, df = NULL, knots = NULL, degree = 0L,
                    "\nPlease adjust knots or degree."))
     }
 
-
     ## prepare anything needed in LogL_rateReg but free from parameters
-    nSub <- length(unique(dat$ID))
-
     ## index for event and censoring
     ind_event <- dat$event == 1
     ind_cens <- ! ind_event
-
     ## basis matrix at event times
     bMat_event <- bMat[ind_event, , drop = FALSE]
-
     ## n_ij: number of event for each subject
     ## the following code makes sure the order will not change
     ## if the patient ID is not ordered
@@ -370,6 +359,7 @@ rateReg <- function(formula, data, subset, df = NULL, knots = NULL, degree = 0L,
     ## n_ij <- table(dat$ID)[order(unique(dat$ID))] - 1L
     n_ij <- table(dat$ID) - 1L
     seq_n_ij <- sequence(n_ij)
+    nSub <- length(n_ij)
     dmu0_dalpha <- iMat[ind_cens, , drop = FALSE]
     xMat_i <- xMat[ind_cens, , drop = FALSE]
 
@@ -383,33 +373,33 @@ rateReg <- function(formula, data, subset, df = NULL, knots = NULL, degree = 0L,
                       steptol = control$steptol, iterlim = control$iterlim)
 
     ## estimates for beta
-    est_beta <- matrix(NA, nrow = nBeta, ncol = 5)
+    est_beta <- matrix(NA, nrow = nBeta, ncol = 5L)
     colnames(est_beta) <- c("coef", "exp(coef)", "se(coef)", "z", "Pr(>|z|)")
     rownames(est_beta) <- covar_names
 
     se_vec <- sqrt(diag(solve(fit$hessian)))
-    est_beta[, 1] <- fit$estimate[1:nBeta]
-    est_beta[, 2] <- exp(est_beta[, 1])
-    est_beta[, 3] <- se_vec[1:nBeta]
-    est_beta[, 4] <- est_beta[, 1] / est_beta[, 3]
-    est_beta[, 5] <- 2 * stats::pnorm(- abs(est_beta[, 4]))
+    est_beta[, 1L] <- fit$estimate[seq_len(nBeta)]
+    est_beta[, 2L] <- exp(est_beta[, 1L])
+    est_beta[, 3L] <- se_vec[seq_len(nBeta)]
+    est_beta[, 4L] <- est_beta[, 1L] / est_beta[, 3L]
+    est_beta[, 5L] <- 2 * stats::pnorm(- abs(est_beta[, 4L]))
 
     ## estimates for theta
-    est_theta <- matrix(NA, nrow = 1, ncol = 2)
+    est_theta <- matrix(NA, nrow = 1L, ncol = 2L)
     colnames(est_theta) <- c("parameter", "se")
     rownames(est_theta) <- "Frailty"
-    est_theta[1, ] <- c(fit$estimate[nBeta + 1], se_vec[nBeta + 1])
+    est_theta[1L, ] <- c(fit$estimate[nBeta + 1L], se_vec[nBeta + 1L])
 
     ## estimates for alpha
     est_alpha <- matrix(NA, nrow = df, ncol = 2)
     colnames(est_alpha) <- c("coef", "se(coef)")
     rownames(est_alpha) <- alphaName
-    est_alpha[, 1] <- fit$estimate[(nBeta + 2):length_par]
-    est_alpha[, 2] <- se_vec[(nBeta + 2):length_par]
+    est_alpha[, 1L] <- fit$estimate[(tmpIdx <- (nBeta + 2L) : length_par)]
+    est_alpha[, 2L] <- se_vec[tmpIdx]
 
     ## output: na.action
-    na.action <- if (is.null(attr(mf, "na.action"))) {
-                     options("na.action")[[1]]
+    na.action <- if (is.null(na.action)) {
+                     options("na.action")[[1L]]
                  } else {
                      paste0("na.", class(attr(mf, "na.action")))
                  }
