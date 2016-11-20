@@ -29,8 +29,8 @@ $(checkLog): $(tar)
 $(vignettes): $(rmd)
 	Rscript -e "rmarkdown::render('$(rmd)')"
 
-.PHONY: INSTALL
-INSTALL: $(tar)
+.PHONY: install
+install: $(tar)
 	R CMD INSTALL $(tar)
 
 ## update copyright year in HEADER, R script and date in DESCRIPTION

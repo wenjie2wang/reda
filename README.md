@@ -14,7 +14,7 @@ sample (Nelson-Aalen estimator) and the fitted frailty model.
 You can install the released version from [CRAN][2].
 
 ```R
-install.packages("reda", dependencies = TRUE)
+install.packages("reda")
 ```
 
 
@@ -22,14 +22,20 @@ install.packages("reda", dependencies = TRUE)
 
 [![Build Status][5]][4]
 
-The latest version of package is under development
-at [GitHub][6] in branch 'dev'.  You may
-consider installing the latest version with the help of **devtools** if it is
-able to pass the building check by Travis CI.
+The latest version of package is under development at [GitHub][6] in branch
+'dev'.  If it is able to pass the building check by Travis CI, you may consider
+installing it with the help of **devtools** by
 
 ```R
-if (! require(devtools)) install.packages("devtools", dependencies = TRUE)
-devtools::install_git("git://github.com/wenjie2wang/reda.git", branch = "dev")
+devtools::install_github("wenjie2wang/reda", ref = "dev")
+```
+
+or cloning this reposotory to local and install by makefile as follows:
+
+```
+git clone https://github.com/wenjie2wang/reda.git
+cd reda
+make install
 ```
 
 
