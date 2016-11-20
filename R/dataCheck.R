@@ -33,11 +33,9 @@ check_Survr <- function(dat, check, ...) {
     ## event time must be numeric
     if (! is.numeric(time))
         stop("'time' must be numeric.")
-
     ## check missing value on 'ID'
     if (any(is.na(ID)))
         stop("'ID' cannot be missing.")
-
     ## check coding and missing value on 'event'
     if (any(! event %in% c(0, 1)))
         stop("'event' must be coded as 0 (censoring) or 1 (event).")

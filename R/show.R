@@ -55,24 +55,24 @@ NULL
 ##' @export
 setMethod(f = "show", signature = "rateReg",
           definition = function(object) {
-              beta <- object@estimates$beta[, 1]
+              beta <- object@estimates$beta[, 1L]
               names(beta) <- row.names(object@estimates$beta)
-              theta <- object@estimates$theta[, 1]
+              theta <- object@estimates$theta[, 1L]
               names(theta) <- NULL
-              alpha <- object@estimates$alpha[, 1]
+              alpha <- object@estimates$alpha[, 1L]
               names(alpha) <- row.names(object@estimates$alpha)
               cat("Call: \n")
               print(object@call)
               cat("\nCoefficients of covariates: \n")
               print(beta)
               cat("\nFrailty parameter: ", theta, "\n")
-              if (length(object@knots) > 0) {
+              if (length(object@knots)) {
                   cat("\nInternal knots: \n")
                   cat(object@knots, sep = ", ", fill = TRUE)
               }
               cat("\nBoundary knots: \n")
               cat(object@Boundary.knots, sep = ", ", fill = TRUE)
-              if (object@degree > 0) {
+              if (object@degree) {
                   cat("\nCoefficients of spline bases:\n")
                   print(alpha)
               } else {
@@ -100,14 +100,14 @@ setMethod(f = "show", signature = "summaryRateReg",
               cat("\nParameter of frailty: \n")
               print(object@frailtyPar)
               if (attr(object@knots, "show")) {
-                  if (length(object@knots) != 0) {
+                  if (length(object@knots)) {
                       cat("\nInternal knots: \n")
                       cat(object@knots, sep = ", ", fill = TRUE)
                   }
                   cat("\nBoundary knots:\n")
                   cat(object@Boundary.knots, sep = ", ", fill = TRUE)
               }
-              if (object@degree > 0) {
+              if (object@degree) {
                   cat("\nDegree of spline bases:", object@degree, "\n")
                   cat("\nCoefficients of spline bases:\n")
                   printCoefmat(object@baseRateCoef)

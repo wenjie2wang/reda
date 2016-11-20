@@ -19,10 +19,10 @@ baseRate(object, ...)
 A named numeric vector.
 }
 \description{
-An S4 class generic function that returns the estimated coefficients
-of baseline rate function. For \code{\link{rateReg-class}} object,
-it returns either coefficients of pieceswise (including one piece)
-constant rate function or coefficients of B-spline bases.
+An S4 class generic function that returns the estimated coefficients of
+baseline rate function. For \code{\link{rateReg-class}} object, it returns
+either coefficients of pieceswise (including one piece) constant rate
+function or coefficients of spline bases of degree at least one.
 }
 \section{Methods (by class)}{
 \itemize{

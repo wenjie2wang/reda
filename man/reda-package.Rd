@@ -6,8 +6,7 @@
 \title{Recurrent Event Data Analysis}
 \description{
 The package \pkg{reda} mainly provides function \code{\link{rateReg}}
-to fit parametric gamma frailty model with spline or piecewise constant
-baseline rate function.
+to fit parametric gamma frailty model with spline baseline rate function.
 Another main function \code{\link{mcf}} computes and plots
 the parametric mean cumulative function (MCF) from a fitted model
 as well as the nonparametric sample MCF (Nelson-Aelson estimator)

@@ -35,16 +35,11 @@ Under regularity condition (Shao, 2003,
 Theorem 4.16 and Theorem 4.17, page 287, 290),
 the approximate confidence intervals are constructed loosely
 based on Fisher information matrix and estimates of coefficients.
-See Fu et al. (2014) for details also.
 }
 \examples{
 ## See examples given in function rateReg.
 }
 \references{
-Fu, H., Luo, L., & Qu Y. (2014). Hypoglycemic Events Analysis via
-Recurrent Time-to-Event (HEART) Models.
-\emph{Journal of biopharmaceutical statistics}, Epub 2014 Dec 1.
-
 Shao, J. (2003), \emph{Mathematical statistics},
 Springer texts in statistics, New York: Springer, 2nd Edition.
 }

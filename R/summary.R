@@ -26,8 +26,7 @@ NULL
 ##' Summarizing a Fitted Model
 ##'
 ##' Summary of estimated coefficients of covariates, rate function bases,
-##' and estimated rate parameter of frailty random variable, etc.,
-##' which can be printed out by \code{show}.
+##' and estimated rate parameter of frailty random variable, etc.
 ##'
 ##' \code{summary,rateReg-method} returns a
 ##' \code{\link{summaryRateReg-class}} object,

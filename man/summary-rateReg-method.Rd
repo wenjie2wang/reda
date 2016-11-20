@@ -28,8 +28,7 @@ summaryRateReg-class object
 }
 \description{
 Summary of estimated coefficients of covariates, rate function bases,
-and estimated rate parameter of frailty random variable, etc.,
-which can be printed out by \code{show}.
+and estimated rate parameter of frailty random variable, etc.
 }
 \details{
 \code{summary,rateReg-method} returns a

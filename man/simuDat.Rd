@@ -21,15 +21,15 @@ where
 The sample dataset is originally simulated by the thinning
 method developed by Lewis and Shedler (1979) and
 further processed for a better demonstration purpose.
-See Fu et al. (2014) for details also.
+See Fu et al. (2016) for details also.
 }
 \references{
 Lewis, P. A., & Shedler, G. S. (1979).
 Simulation of nonhomogeneous Poisson processes by thinning.
 \emph{Naval Research Logistics Quarterly}, 26(3), 403--413.
 
-Fu, H., Luo, L., & Qu Y. (2014). Hypoglycemic Events Analysis via
-Recurrent Time-to-Event (HEART) Models.
-\emph{Journal of biopharmaceutical statistics}, Epub 2014 Dec 1.
+Fu, H., Luo, J., & Qu, Y. (2016).
+Hypoglycemic events analysis via recurrent time-to-event (HEART) models.
+\emph{Journal Of Biopharmaceutical Statistics}, 26(2), 280--298.
 }
 

@@ -45,7 +45,7 @@ NULL
 ##' @export
 setMethod(f = "coef", signature = "rateReg",
           definition = function(object, ...) {
-              object@estimates$beta[, 1]
+              object@estimates$beta[, 1L]
           })
 
 
@@ -59,7 +59,6 @@ setMethod(f = "coef", signature = "rateReg",
 ##' Theorem 4.16 and Theorem 4.17, page 287, 290),
 ##' the approximate confidence intervals are constructed loosely
 ##' based on Fisher information matrix and estimates of coefficients.
-##' See Fu et al. (2014) for details also.
 ##'
 ##' @param object rateReg-class object.
 ##' @param parm A specification of which parameters are
@@ -79,10 +78,6 @@ setMethod(f = "coef", signature = "rateReg",
 ##' of covariate coefficients;
 ##' \code{\link{summary,rateReg-method}} for summary of a fitted model.
 ##' @references
-##' Fu, H., Luo, L., & Qu Y. (2014). Hypoglycemic Events Analysis via
-##' Recurrent Time-to-Event (HEART) Models.
-##' \emph{Journal of biopharmaceutical statistics}, Epub 2014 Dec 1.
-##'
 ##' Shao, J. (2003), \emph{Mathematical statistics},
 ##' Springer texts in statistics, New York: Springer, 2nd Edition.
 ##' @examples
@@ -92,7 +87,7 @@ setMethod(f = "coef", signature = "rateReg",
 setMethod(f = "confint", signature = "rateReg",
           definition = function(object, parm, level = 0.95, ...) {
               ## internal function
-              format.perc <- function (probs) {
+              format.perc <- function(probs) {
                   paste0(format(100 * probs, trim = TRUE,
                                 scientific = FALSE), "%")
               }
@@ -112,7 +107,7 @@ setMethod(f = "confint", signature = "rateReg",
               fac <- stats::qnorm(a)
               pct <- format.perc(a)
               ci <- array(NA, dim = c(length(parm), 2L),
-                         dimnames = list(parm, pct))
+                          dimnames = list(parm, pct))
               ses <- betaMat[parm, 2L]
               ci[] <- estCoef[parm] + ses %o% fac
               rownames(ci) <- pnames[parm]

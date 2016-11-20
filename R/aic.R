@@ -58,26 +58,21 @@ setMethod(f = "AIC", signature = "rateReg",
           definition = function(object, ..., k = 2) {
               if (! missing(...)) {
                   inpList <- list(object, ...)
-
                   ## check on object class
                   checkRes <- sapply(inpList, objCheck)
-                  if (any(! checkRes)) {
+                  if (any(! checkRes))
                       stop("Objects should be all from 'rateReg-class'.")
-                  }
-
                   ## warning on different nObs
                   nObss <- sapply(inpList, nObsFun)
-                  if (length(unique(nObss)) != 1) {
+                  if (length(unique(nObss)) > 1)
                       warning(paste("Models are not all fitted to the same",
                                     "number of observations."))
-                  }
-
                   abics <- sapply(inpList, abic, penal = k)
                   dfs <- sapply(inpList, sumDf)
                   val <- data.frame(df = dfs, AIC = abics)
                   Call <- match.call()
                   Call$k <- NULL
-                  row.names(val) <- as.character(Call[-1L])
+                  row.names(val) <- as.character(Call[- 1L])
                   return(val)
               }
               ## else return
@@ -121,13 +116,10 @@ setMethod(f = "BIC", signature = "rateReg",
           definition = function(object, ...) {
               if (! missing(...)) {
                   inpList <- list(object, ...)
-
                   ## check on object class
                   checkRes <- sapply(inpList, objCheck)
-                  if (any(! checkRes)) {
+                  if (any(! checkRes))
                       stop("Objects should be all from 'rateReg-class'.")
-                  }
-
                   nObss <- sapply(inpList, nObsFun)
                   k <- log(nObss)
                   abics <- sapply(seq_along(inpList), function (ind) {
@@ -147,7 +139,7 @@ setMethod(f = "BIC", signature = "rateReg",
 
 
 ### internal functions =========================================================
-objCheck <- function (object) {
+objCheck <- function(object) {
     inherits(object, "rateReg")
 }
 
@@ -159,6 +151,6 @@ abic <- function(object, penal) {
     - 2 * object@logL + penal * sumDf(object)
 }
 
-nObsFun <- function (object) {
+nObsFun <- function(object) {
     object@nObs
 }

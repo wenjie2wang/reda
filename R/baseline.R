@@ -25,10 +25,10 @@ NULL
 
 ##' Estimated Coefficients of Baseline Rate Function
 ##'
-##' An S4 class generic function that returns the estimated coefficients
-##' of baseline rate function. For \code{\link{rateReg-class}} object,
-##' it returns either coefficients of pieceswise (including one piece)
-##' constant rate function or coefficients of B-spline bases.
+##' An S4 class generic function that returns the estimated coefficients of
+##' baseline rate function. For \code{\link{rateReg-class}} object, it returns
+##' either coefficients of pieceswise (including one piece) constant rate
+##' function or coefficients of spline bases of degree at least one.
 ##'
 ##' @param object An object used to dispatch a method.
 ##' @param ... Other arguments for future usage.
@@ -51,5 +51,5 @@ setGeneric(name = "baseRate",
 ##' @export
 setMethod(f = "baseRate", signature = "rateReg",
           definition = function(object, ...) {
-              object@estimates$alpha[, 1]
+              object@estimates$alpha[, 1L]
           })

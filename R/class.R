@@ -26,28 +26,30 @@
 ##' The last letter 'r' in 'Survr' represents 'rate'.
 ##'
 ##' This is a similar function to \code{Survr} in package
-##' \pkg{survrec} but with a better embedded checking procedure for
-##' recurrent event data modeled by methods
-##' based on counts and rate function.
+##' \pkg{survrec} but with a more considerate embedded checking procedure for
+##' recurrent event data modeled by methods based on counts and rate function.
 ##' The checking rules include that
 ##' \itemize{
 ##'     \item Identification of each subject cannot be missing.
 ##'     \item Event indicator must be coded as 0 (censored) or 1 (event).
-##'     \item Event time and censoring time cannot be missing.
-##'     \item Each subject must have one and only one censoring time.
+##'     \item Event time and censoring time must be numeric
+##'         and cannot be missing.
+##'     \item Each subject must have only one censoring time.
 ##'     \item Event time cannot not be later than censoring time.
 ##' }
 ##'
 ##' @param ID Identificator of each subject.
 ##' @param time Time of reccurence event or censoring.
 ##' @param event The status indicator, 0 = censored, 1 = event.
-##' @param check Logical value suggesting whether perform data checking
-##'     procedure. The default value is \code{TRUE}.
+##' @param check Logical value suggesting whether to perform data checking
+##'     procedure. The default value is \code{TRUE}. \code{FALSE} should be set
+##'     with caution and only for processed data already in recerruent event
+##'     data framework.
 ##' @param ... Other arguments for future usage.
 ##' @aliases Survr
 ##' @seealso \code{\link{rateReg}} for model fitting.
 ##' @export
-Survr <- function (ID, time, event, check = TRUE, ...) {
+Survr <- function(ID, time, event, check = TRUE, ...) {
     dat <- data.frame(ID = ID, time = time, event = event)
     dat <- check_Survr(dat, check = check)
     attr(dat, "check") <- check
@@ -98,29 +100,25 @@ setClass(Class = "rateReg",
                    convergCode = "integer",
                    logL = "numeric",
                    fisher = "matrix"),
-         validity = function (object) {
+         validity = function(object) {
              ## check on nObs
-             if (object@nObs <= 0) {
+             if (object@nObs <= 0)
                  return("Number of observations must be a positive integer.")
-             }
              ## check on knots
-             if (length(object@knots) > 0) { # if there exists internal knots
+             if (length(object@knots)) { # if there exists internal knots
                  if (min(object@knots) < min(object@Boundary.knots) ||
-                     max(object@knots) > max(object@Boundary.knots)) {
+                     max(object@knots) > max(object@Boundary.knots))
                      return(paste("Internal knots must all lie in the",
                                   "coverage of boundary knots."))
-                 }
              }
              ## check on degree
-             if (object@degree < 0) {
+             if (object@degree < 0)
                  return("Degree of spline bases must be a nonnegative integer.")
-             }
              ## check on df
              dfVec <- do.call("c", object@df)
              dfValid <- is.integer(dfVec) && all(dfVec >= 0)
-             if (! dfValid) {
+             if (! dfValid)
                  return("Degree of freedom must be nonnegative integers.")
-             }
              ## else return
              TRUE
          })
@@ -152,19 +150,17 @@ setClass(Class = "summaryRateReg",
                    degree = "integer",
                    baseRateCoef = "matrix",
                    logL = "numeric"),
-         validity = function (object) {
+         validity = function(object) {
              ## check on knots
-             if (length(object@knots) > 0) { # if there exists internal knots
+             if (length(object@knots)) { # if there exists internal knots
                  if (min(object@knots) < min(object@Boundary.knots) ||
-                     max(object@knots) > max(object@Boundary.knots)) {
+                     max(object@knots) > max(object@Boundary.knots))
                      return(paste("Internal knots must all lie in the",
                                   "coverage of boundary knots."))
-                 }
              }
              ## check on degree
-             if (object@degree < 0) {
+             if (object@degree < 0)
                  return("Degree of spline bases must be a nonnegative integer.")
-             }
              ## else return
              TRUE
          })
@@ -226,7 +222,7 @@ setClass(Class = "rateRegMcf",
                    na.action = "character",
                    control = "list",
                    multiGroup = "logical"),
-         validity = function (object) {
+         validity = function(object) {
              ## check on knots
              if (length(object@knots)) { # if there exists internal knots
                  if (min(object@knots) < min(object@Boundary.knots) ||
