@@ -66,13 +66,15 @@ setMethod(f = "show", signature = "rateReg",
               cat("\nCoefficients of covariates: \n")
               print(beta)
               cat("\nFrailty parameter: ", theta, "\n")
-              if (length(object@knots)) {
+              knots <- object@spline$knots
+              Boundary.knots <- object@spline$Boundary.knots
+              if (length(knots)) {
                   cat("\nInternal knots: \n")
-                  cat(object@knots, sep = ", ", fill = TRUE)
+                  cat(knots, sep = ", ", fill = TRUE)
               }
               cat("\nBoundary knots: \n")
-              cat(object@Boundary.knots, sep = ", ", fill = TRUE)
-              if (object@degree) {
+              cat(Boundary.knots, sep = ", ", fill = TRUE)
+              if (object@spline$degree) {
                   cat("\nCoefficients of spline bases:\n")
                   print(alpha)
               } else {
@@ -99,6 +101,7 @@ setMethod(f = "show", signature = "summaryRateReg",
               printCoefmat(object@covarCoef)
               cat("\nParameter of frailty: \n")
               print(object@frailtyPar)
+              ## on knots
               if (attr(object@knots, "show")) {
                   if (length(object@knots)) {
                       cat("\nInternal knots: \n")
@@ -107,14 +110,10 @@ setMethod(f = "show", signature = "summaryRateReg",
                   cat("\nBoundary knots:\n")
                   cat(object@Boundary.knots, sep = ", ", fill = TRUE)
               }
-              if (object@degree) {
-                  cat("\nDegree of spline bases:", object@degree, "\n")
-                  cat("\nCoefficients of spline bases:\n")
-                  printCoefmat(object@baseRateCoef)
-              } else {
-                  cat("\nCoefficients of pieces:\n")
-                  printCoefmat(object@baseRateCoef)
-              }
+              ## baseline rate function
+              cat("\nDegree of spline bases:", object@degree, "\n")
+              cat("\nCoefficients of spline bases:\n")
+              printCoefmat(object@baseRateCoef)
               cat("\nLoglikelihood: ", object@logL, "\n")
           })
 
@@ -124,9 +123,7 @@ setMethod(f = "show", signature = "summaryRateReg",
 ##' @export
 setMethod(f = "show", signature = "sampleMcf",
           definition = function(object) {
-              cat("Call: \n")
-              print(object@call)
-              cat("\nFormula:\n")
+              cat("Formula:\n")
               print(object@formula)
               cat("\nMCF:\n")
               print(object@MCF)

@@ -50,6 +50,12 @@
 ##' @seealso \code{\link{rateReg}} for model fitting.
 ##' @export
 Survr <- function(ID, time, event, check = TRUE, ...) {
+    if (missing(ID))
+        stop("'ID' cannot be missing.")
+    if (missing(time))
+        stop("'time' cannot be missing.")
+    if (missing(event))
+        stop("'event' cannot be missing.")
     dat <- data.frame(ID = ID, time = time, event = event)
     dat <- check_Survr(dat, check = check)
     attr(dat, "check") <- check
@@ -67,10 +73,7 @@ Survr <- function(ID, time, event, check = TRUE, ...) {
 ##' @slot call Function call.
 ##' @slot formula Formula.
 ##' @slot nObs A positive integer
-##' @slot knots A numeric vector.
-##' @slot Boundary.knots A numeric vector.
-##' @slot degree A nonnegative integer.
-##' @slot df A list of nonnegative numeric vectors.
+##' @slot spline A list.
 ##' @slot estimates A list.
 ##' @slot control A list.
 ##' @slot start A list.
@@ -87,10 +90,7 @@ setClass(Class = "rateReg",
          slots = c(call = "call",
                    formula = "formula",
                    nObs = "integer",
-                   knots = "numeric",
-                   Boundary.knots = "numeric",
-                   degree = "integer",
-                   df = "list",
+                   spline = "list",
                    estimates = "list",
                    control = "list",
                    start = "list",
@@ -105,17 +105,20 @@ setClass(Class = "rateReg",
              if (object@nObs <= 0)
                  return("Number of observations must be a positive integer.")
              ## check on knots
-             if (length(object@knots)) { # if there exists internal knots
-                 if (min(object@knots) < min(object@Boundary.knots) ||
-                     max(object@knots) > max(object@Boundary.knots))
+             knots <- object@spline$knots
+             Boundary.knots <- object@spline$Boundary.knots
+             if (length(knots)) { # if there exists internal knots
+                 if (min(knots) < min(Boundary.knots) ||
+                     max(knots) > max(Boundary.knots))
                      return(paste("Internal knots must all lie in the",
                                   "coverage of boundary knots."))
              }
              ## check on degree
-             if (object@degree < 0)
+             degree <- object@spline$degre
+             if (degree < 0)
                  return("Degree of spline bases must be a nonnegative integer.")
              ## check on df
-             dfVec <- do.call("c", object@df)
+             dfVec <- do.call("c", object@spline$df)
              dfValid <- is.integer(dfVec) && all(dfVec >= 0)
              if (! dfValid)
                  return("Degree of freedom must be nonnegative integers.")
@@ -131,6 +134,7 @@ setClass(Class = "rateReg",
 ##' \code{\link{summary,rateReg-method}} produces objects of this class.
 ##'
 ##' @slot call Function call.
+##' @slot spline A character.
 ##' @slot knots A numeric vector.
 ##' @slot Boundary.knots A numeric vector.
 ##' @slot covarCoef A numeric matrix.
@@ -143,6 +147,7 @@ setClass(Class = "rateReg",
 ##' @export
 setClass(Class = "summaryRateReg",
          slots = c(call = "call",
+                   spline = "character",
                    knots = "numeric",
                    Boundary.knots = "numeric",
                    covarCoef = "matrix",
@@ -171,23 +176,25 @@ setClass(Class = "summaryRateReg",
 ##' An S4 class that represents sample mean cumulative function (MCF) from data.
 ##' \code{\link{mcf}} produces objects of this class.
 ##'
-##' @slot call Function call
 ##' @slot formula Formula.
-##' @slot na.action A length-one character vector.
-##' @slot level A numeric value.
 ##' @slot MCF A data frame.
 ##' @slot multiGroup A logical value.
+##' @slot na.action A length-one character vector.
+##' @slot variance A character.
+##' @slot logConfInt A logical value.
+##' @slot level A numeric value.
 ##' @aliases sampleMcf-class
 ##' @seealso \code{\link{mcf,formula-method}} for details of slots.
 ##' @importFrom methods setClass
 ##' @export
 setClass(Class = "sampleMcf",
-         slots = c(call = "call",
-                   formula = "formula",
-                   na.action = "character",
-                   level = "numeric",
+         slots = c(formula = "formula",
                    MCF = "data.frame",
-                   multiGroup = "logical"))
+                   multiGroup = "logical",
+                   na.action = "character",
+                   variance = "character",
+                   logConfInt = "logical",
+                   level = "numeric"))
 
 
 ##' An S4 Class to Respresent Estimated MCF from a Fitted Model
@@ -198,6 +205,7 @@ setClass(Class = "sampleMcf",
 ##'
 ##' @slot call Function call.
 ##' @slot formula Formula.
+##' @slot spline A character.
 ##' @slot knots A numeric vector.
 ##' @slot degree A nonnegative integer.
 ##' @slot Boundary.knots A numeric vector.
@@ -213,6 +221,7 @@ setClass(Class = "sampleMcf",
 setClass(Class = "rateRegMcf",
          slots = c(call = "call",
                    formula = "formula",
+                   spline = "character",
                    knots = "numeric",
                    degree = "integer",
                    Boundary.knots = "numeric",

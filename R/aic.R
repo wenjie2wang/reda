@@ -144,7 +144,7 @@ objCheck <- function(object) {
 }
 
 sumDf <- function(object) {
-    sum(do.call("c", object@df))
+    sum(do.call("c", object@spline$df))
 }
 
 abic <- function(object, penal) {

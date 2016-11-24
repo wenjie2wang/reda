@@ -259,7 +259,7 @@ rateReg <- function(formula, data, subset, df = NULL, knots = NULL, degree = 0L,
     mmcall <- match(c("formula", "data", "na.action"), names(mcall), 0L)
     mcall <- mcall[c(1L, mmcall)]
     ## re-define data
-    mcall[[3L]] <- substitute(data)
+    mcall$data <- substitute(data)
     ## drop unused levels in factors
     mcall$drop.unused.levels <- TRUE
     mcall[[1L]] <- quote(stats::model.frame)
@@ -289,11 +289,11 @@ rateReg <- function(formula, data, subset, df = NULL, knots = NULL, degree = 0L,
         ## check data for possible error caused by removal of missing values
         if (control$verbose)
             message(paste("Observations with missing value in covariates",
-                          "are removed.\nChecking the new dataset again... "),
+                          "are removed.\nChecking the new dataset again."),
                     appendLF = FALSE)
         check_Survr(resp, check = TRUE)
         if (control$verbose)
-            message("done.")
+            message("Done.")
     }
 
     ## sorted data by ID, time, and event
@@ -419,10 +419,11 @@ rateReg <- function(formula, data, subset, df = NULL, knots = NULL, degree = 0L,
                             call = Call,
                             formula = formula,
                             nObs = nObs,
-                            knots = knots,
-                            Boundary.knots = Boundary.knots,
-                            degree = degree,
-                            df = df,
+                            spline = list(spline = spline,
+                                          df = df,
+                                          knots = knots,
+                                          degree = degree,
+                                          Boundary.knots = Boundary.knots),
                             estimates = list(beta = est_beta,
                                              theta = est_theta,
                                              alpha = est_alpha),

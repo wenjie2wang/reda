@@ -67,8 +67,8 @@ setMethod(f = "summary", signature = "rateReg",
                                 showKnots = TRUE, ...) {
               Call <- object@call
               attr(Call, "show") <- showCall
-              knots <- object@knots
-              Boundary.knots <- object@Boundary.knots
+              knots <- object@spline$knots
+              Boundary.knots <- object@spline$Boundary.knots
               attr(knots, "show") <- showKnots
               beta <- object@estimates$beta
               theta <- object@estimates$theta
@@ -76,11 +76,12 @@ setMethod(f = "summary", signature = "rateReg",
               ## check on object validity by 'new', validObject(results)
               results <- new("summaryRateReg",
                              call = Call,
+                             spline = object@spline$spline,
                              knots = knots,
                              Boundary.knots = Boundary.knots,
                              covarCoef = beta,
                              frailtyPar = theta,
-                             degree = object@degree,
+                             degree = object@spline$degree,
                              baseRateCoef = alpha,
                              logL = object@logL)
               ## return
