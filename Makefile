@@ -10,18 +10,19 @@ vignettes := vignettes/$(pkg)-intro.html
 cprt := COPYRIGHT
 
 
-.PHONY: all
-all: $(tar)
-
-$(tar): $(objects)
-	Rscript -e "library(methods); devtools::document();";
-	R CMD build $(dir)
-
 .PHONY: check
 check: $(checkLog)
 
+.PHONY: build
+build: $(tar)
+
 .PHONY: preview
 preview: $(vignettes)
+
+$(tar): $(objects)
+	Rscript -e "library(methods); devtools::document();";
+	make clean;
+	R CMD build $(dir)
 
 $(checkLog): $(tar)
 	R CMD check --as-cran $(tar)
