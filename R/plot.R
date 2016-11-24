@@ -39,7 +39,8 @@
 ##' @param col An optional character vector indicating
 ##' line colors specified to different groups.
 ##' @return A \code{ggplot} object.
-##' @seealso \code{\link{mcf}} for estimation of MCF;
+##' @seealso
+##' \code{\link{mcf}} for estimation of MCF;
 ##' \code{\link{rateReg}} for model fitting.
 ##' @examples
 ##' ## See examples given in function mcf and rateReg.

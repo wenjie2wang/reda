@@ -41,7 +41,7 @@ NULL
 ##' \code{\link{summary,rateReg-method}} for summary of a fitted model.
 ##' @export
 setGeneric(name = "baseRate",
-           def = function(object, ...) {
+           def = function(object, ...){
                standardGeneric("baseRate")
            })
 
@@ -50,6 +50,6 @@ setGeneric(name = "baseRate",
 ##' baseline rate function from \code{rateReg-class} object.
 ##' @export
 setMethod(f = "baseRate", signature = "rateReg",
-          definition = function(object, ...) {
+          definition = function(object, ...){
               object@estimates$alpha[, 1L]
           })

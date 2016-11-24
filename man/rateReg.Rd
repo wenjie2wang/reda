@@ -40,7 +40,7 @@ Other possible values inlcude \code{\link{na.fail}},
 
 \item{spline}{An optional character that specifies the flavor of splines.
 The possible option is \code{bSpline} for B-spline or
-\code{mSpline} for M-spline.}
+\code{mSpline} for M-spline. Partial matching on the names is allowed.}
 
 \item{start}{An optional list of starting values for the parameters
 to be estimated in the model.  See more in Section details.}
@@ -65,13 +65,17 @@ A \code{\link{rateReg-class}} object, whose slots include
     \item \code{call}: Function call of \code{rateReg}.
     \item \code{formula}: Formula used in the model fitting.
     \item \code{nObs}: Number of observations.
-    \item \code{knots}: Internal knots specified for the baseline
-        rate function.
-    \item \code{Boundary.knots}: Boundary knots specified for the baseline
-        rate function.
-    \item \code{degree}: Degree of spline bases specified in baseline
-        rate function.
-    \item \code{df}: Degree of freedom of the model specified.
+    \item \code{spline}: A list contains
+        \itemize{
+            \item \code{spline}: The name of splines used.
+            \item \code{knots}: Internal knots specified for the baseline
+                rate function.
+            \item \code{Boundary.knots}: Boundary knots specified for the
+                baseline rate function.
+            \item \code{degree}: Degree of spline bases specified in
+                baseline rate function.
+            \item \code{df}: Degree of freedom of the model specified.
+    }
     \item \code{estimates}: Estimated coefficients of covariates and
         baseline rate function, and estimated rate parameter of
         gamma frailty variable.
@@ -101,11 +105,11 @@ to model fitting.  Both B-spline and M-spline bases are available.
 \code{\link{rateReg-class}} object.
 }
 \details{
-Function \code{\link{Survr}} in the formula response first checks
-the dataset and will report an error if the dataset does not
-fall into recurrent event data framework.
-Subject's ID will be pinpointed if its observation violates any checking
-rule. See \code{\link{Survr}} for all the checking rules.
+Function \code{\link{Survr}} in the formula response by default first checks
+the dataset and will report an error if the dataset does not fall into
+recurrent event data framework.  Subject's ID will be pinpointed if its
+observation violates any checking rule. See \code{\link{Survr}} for all the
+checking rules.
 
 Function \code{rateReg} first constructs the design matrix from
 the specified arguments: \code{formula}, \code{data}, \code{subset},
@@ -161,21 +165,16 @@ The available elements in the list include
 library(reda)
 
 ## constant rate function
-constFit <- rateReg(Survr(ID, time, event) ~ group + x1, data = simuDat)
+(constFit <- rateReg(Survr(ID, time, event) ~ group + x1, data = simuDat))
 
 ## 6 pieces' piecewise constant rate function
-piecesFit <- rateReg(Survr(ID, time, event) ~ group + x1,
-                     data = simuDat, subset = ID \%in\% 1:50,
-                     knots = seq(28, 140, by = 28))
+(piecesFit <- rateReg(Survr(ID, time, event) ~ group + x1,
+                      data = simuDat, subset = ID \%in\% 1:50,
+                      spline = "bSpline", knots = seq(28, 140, by = 28)))
 
 ## fit rate function with cubic spline
-splineFit <- rateReg(Survr(ID, time, event) ~ group + x1, data = simuDat,
-                     knots = c(56, 84, 112), degree = 3)
-
-## brief summary of fitted models
-constFit
-piecesFit
-splineFit
+(splineFit <- rateReg(Survr(ID, time, event) ~ group + x1, data = simuDat,
+                      spline = "mSp", knots = c(56, 84, 112), degree = 3))
 
 ## more specific summary
 summary(constFit)
@@ -210,7 +209,6 @@ splineMcf <- mcf(splineFit, newdata = newDat, groupName = "Group",
                  groupLevels = c("Treatment", "Control"))
 plotMcf(splineMcf, conf.int = TRUE, lty = c(1, 5)) +
     ggplot2::xlab("Days") + ggplot2::theme_bw()
-
 }
 \references{
 Fu, H., Luo, J., & Qu, Y. (2016).

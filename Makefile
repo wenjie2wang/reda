@@ -21,7 +21,7 @@ preview: $(vignettes)
 
 $(tar): $(objects)
 	Rscript -e "library(methods); devtools::document();";
-	make clean;
+	@make clean;
 	R CMD build $(dir)
 
 $(checkLog): $(tar)

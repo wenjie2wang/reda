@@ -31,18 +31,20 @@ NULL
 ##'
 ##' For \code{formula} object with \code{\link{Survr}} object as response,
 ##' the covariate specified at the right hand side of the formula
-##' should be either 1 or any one factor variable in the data.
+##' should be either 1 or any "linear" conbination of factor variable
+##' in the data.
 ##' The former computes the overall sample MCF.
-##' The latter computes the sample MCF for each level of
-##' the factor variable specified, respectively.
+##' The latter computes the sample MCF for each level of the combination of
+##' the factor variable(s) specified, respectively.
 ##' The sample MCF is also called Nelson-Aalen nonparametric estimator
 ##' (Nelson, 2003) and computed on each time point from sample data.
 ##' The point estimate of sample MCF at each time point does not
-##' assume any particular underlying model. The variance
-##' of estimated MCF (ReliaWiki, 2012) at each time point is estimated
-##' and the approximate confidence intervals are provided as well,
+##' assume any particular underlying model. The variance estimates
+##' at each time point is given by Poisson process method (default)
+##' or Lawless and Nadeau method (LawLess and Nadeau, 1995).
+##' The approximate confidence intervals are provided as well,
 ##' which are constructed based on the asymptotic normality
-##' of log mean cumulative function.
+##' of logrithm of MCF (default) or MCF itself directly.
 ##'
 ##' For \code{\link{rateReg-class}} object,
 ##' \code{mcf} estimates the baseline MCF and its confidence interval
@@ -52,6 +54,13 @@ NULL
 ##'
 ##' @param object An object used to dispatch a method.
 ##' @param ... Other arguments for future usage.
+##' @param na.action A function that indicates what should the procedure do
+##' if the data contains \code{NA}s.  The default is set by the
+##' na.action setting of \code{\link[base]{options}}.
+##' The "factory-fresh" default is \code{\link[stats]{na.omit}}.
+##' Other possible values inlcude \code{\link{na.fail}},
+##' \code{\link{na.exclude}}, and \code{\link{na.pass}}.
+##' \code{help(na.fail)} for details.
 ##' @param level An optional numeric value
 ##' indicating the confidence level required. The default value is 0.95.
 ##' @return
@@ -65,7 +74,6 @@ NULL
 ##'     \item \code{newdata}: Given dataset used to estimate MCF.
 ##' }
 ##' For the meaning of other slots, see \code{\link{rateReg}}.
-##'
 ##' @references
 ##' Nelson, W. B. (2003). \emph{Recurrent events data analysis for product
 ##' repairs, disease recurrences, and other applications} (Vol. 10). SIAM.
@@ -82,13 +90,23 @@ NULL
 ##' @examples
 ##' library(reda)
 ##'
-##' ## sample MCF
-##' sampleMcf <- mcf(Survr(ID, time, event) ~ group,
-##'                  data = simuDat, subset = ID %in% 1:10)
+##' ### Example 1. valve-seat data
+##' valveMcf <- mcf(Survr(ID, Days, No.) ~ 1, data = valveSeats)
 ##'
 ##' ## plot sample MCF
-##' plotMcf(sampleMcf, lty = c(1, 3), col = c("orange", "navy"),
-##'         mark.time = TRUE) + ggplot2::xlab("Days") + ggplot2::theme_bw()
+##' plotMcf(valveMcf, conf.int = TRUE, mark.time = TRUE) + ggplot2::xlab("Days")
+##'
+##' ### Example 2. sample simulated data
+##' simuMcf <- mcf(Survr(ID, time, event) ~ group + gender,
+##'                data = simuDat, ID %in% 1 : 50, logConfInt = FALSE)
+##'
+##' ## create customized levels in legend
+##' levs <- with(simuDat, expand.grid(levels(group), levels(gender)))
+##' levs <- do.call(paste, c(as.list(levs), sep = " & "))
+##'
+##' ## plot sample MCF
+##' plotMcf(simuMcf, conf.int = TRUE, lty = 1 : 4,
+##'         legendName = "Treatment & Gender", legendLevels = levs)
 ##'
 ##' ## For estimated MCF from a fitted model,
 ##' ## see examples given in function rateReg.
@@ -107,17 +125,11 @@ setGeneric(name = "mcf",
 ##' the function is called.
 ##' @param subset An optional vector specifying a subset of observations
 ##' to be used in the fitting process.
-##' @param na.action A function that indicates what should the procedure do
-##' if the data contains \code{NA}s.  The default is set by the
-##' na.action setting of \code{\link[base]{options}}.
-##' The "factory-fresh" default is \code{\link[stats]{na.omit}}.
-##' Other possible values inlcude \code{\link{na.fail}},
-##' \code{\link{na.exclude}}, and \code{\link{na.pass}}.
-##' \code{help(na.fail)} for details.
 ##' @param variance An optional character specifying the variance estimator.
 ##' The available options are "Poisson" (default) for Poisson process method,
 ##' and "LawlessNadeau" for Lawless and Nadeau (1995) method. (A simple example
-##' is available at Reliawiki.)
+##' is available at Reliawiki, 2012.)
+##' Partial matching on the names is allowed.
 ##' @param logConfInt An optional logical value. If \code{TRUE} (default),
 ##' the confidence interval of given level will be constucted based on the
 ##' normality of logrithm of the MCF function. (Otherwise, the confidence

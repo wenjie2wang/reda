@@ -66,7 +66,8 @@ setMethod(f = "AIC", signature = "rateReg",
                   nObss <- sapply(inpList, nObsFun)
                   if (length(unique(nObss)) > 1)
                       warning(paste("Models are not all fitted to the same",
-                                    "number of observations."))
+                                    "number of observations.",
+                                    "Consider BIC instead?"))
                   abics <- sapply(inpList, abic, penal = k)
                   dfs <- sapply(inpList, sumDf)
                   val <- data.frame(df = dfs, AIC = abics)
@@ -122,14 +123,14 @@ setMethod(f = "BIC", signature = "rateReg",
                       stop("Objects should be all from 'rateReg-class'.")
                   nObss <- sapply(inpList, nObsFun)
                   k <- log(nObss)
-                  abics <- sapply(seq_along(inpList), function (ind) {
+                  abics <- sapply(seq_along(inpList), function(ind) {
                       abic(object = inpList[[ind]], penal = k[ind])
                   })
                   dfs <- sapply(inpList, sumDf)
                   val <- data.frame(df = dfs, BIC = abics)
                   Call <- match.call()
                   Call$k <- NULL
-                  row.names(val) <- as.character(Call[-1L])
+                  row.names(val) <- as.character(Call[- 1L])
                   return(val)
               }
               ## else return

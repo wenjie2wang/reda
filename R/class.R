@@ -26,7 +26,7 @@
 ##' The last letter 'r' in 'Survr' represents 'rate'.
 ##'
 ##' This is a similar function to \code{Survr} in package
-##' \pkg{survrec} but with a more considerate embedded checking procedure for
+##' \pkg{survrec} but with a more considerate checking procedure embedded for
 ##' recurrent event data modeled by methods based on counts and rate function.
 ##' The checking rules include that
 ##' \itemize{
@@ -47,7 +47,8 @@
 ##'     data framework.
 ##' @param ... Other arguments for future usage.
 ##' @aliases Survr
-##' @seealso \code{\link{rateReg}} for model fitting.
+##' @seealso
+##' \code{\link{rateReg}} for model fitting.
 ##' @export
 Survr <- function(ID, time, event, check = TRUE, ...) {
     if (missing(ID))
@@ -199,9 +200,8 @@ setClass(Class = "sampleMcf",
 
 ##' An S4 Class to Respresent Estimated MCF from a Fitted Model
 ##'
-##' An S4 class that represents estimated mean cumulative function (MCF)
-##' from Models.
-##' \code{\link{mcf}} produces objects of this class.
+##' An S4 class that represents estimated mean cumulative function (MCF) from
+##' Models.  \code{\link{mcf}} produces objects of this class.
 ##'
 ##' @slot call Function call.
 ##' @slot formula Formula.
@@ -216,7 +216,8 @@ setClass(Class = "sampleMcf",
 ##' @slot control A list.
 ##' @slot multiGroup A logical value.
 ##' @aliases rateRegMcf-class
-##' @seealso \code{\link{mcf,rateReg-method}} for details of slots.
+##' @seealso
+##' \code{\link{mcf,rateReg-method}} for details of slots.
 ##' @export
 setClass(Class = "rateRegMcf",
          slots = c(call = "call",

@@ -54,7 +54,8 @@ NULL
 ##' @aliases summary,rateReg-method
 ##' @examples
 ##' ## See examples given in function rateReg.
-##' @seealso \code{\link{rateReg}} for model fitting;
+##' @seealso
+##' \code{\link{rateReg}} for model fitting;
 ##' \code{\link{coef,rateReg-method}} for point estimates of
 ##' covariate coefficients;
 ##' \code{\link{confint,rateReg-method}} for confidence intervals

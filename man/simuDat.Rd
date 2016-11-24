@@ -4,17 +4,18 @@
 \name{simuDat}
 \alias{simuDat}
 \title{Simulated Sample Dataset for Demonstration}
-\format{A data frame with 500 rows and 5 variables.}
+\format{A data frame with 500 rows and 6 variables.}
 \description{
 A simulated data frame with covariates named
-\code{ID}, \code{time}, \code{event}, \code{group} and \code{x1},
-where
+\code{ID}, \code{time}, \code{event}, \code{group}, \code{x1},
+and \code{gender}, where
 \itemize{
     \item \code{ID}: Subjects identification;
     \item \code{time}: Event or censoring time;
     \item \code{event}: Event indicator, 1 = event, 0 = censored;
     \item \code{group}: Treatment group indicator;
     \item \code{x1}: Continuous variable.
+    \item \code{gender}: Gender of subjects.
 }
 }
 \details{
