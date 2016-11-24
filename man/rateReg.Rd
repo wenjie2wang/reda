@@ -167,7 +167,7 @@ library(reda)
 ## constant rate function
 (constFit <- rateReg(Survr(ID, time, event) ~ group + x1, data = simuDat))
 
-## 6 pieces' piecewise constant rate function
+## six pieces' piecewise constant rate function
 (piecesFit <- rateReg(Survr(ID, time, event) ~ group + x1,
                       data = simuDat, subset = ID \%in\% 1:50,
                       spline = "bSpline", knots = seq(28, 140, by = 28)))
