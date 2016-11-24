@@ -131,7 +131,7 @@ twoPiecesFit
 ```
 
 In the example shown above, the internal knots is set automatically to be
-`r twoPiecesFit@knots` and the baseline rate function is two pieces' constant.
+`r twoPiecesFit@spline$knots` and the baseline rate function is two pieces' constant.
 
 If internal `knots` are specified explicitly, the `df` will be neglected
 even if it is specified. An example of model with six pieces' constant rate
