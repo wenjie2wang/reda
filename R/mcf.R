@@ -53,8 +53,7 @@ NULL
 ##' @param object An object used to dispatch a method.
 ##' @param ... Other arguments for future usage.
 ##' @param level An optional numeric value
-##' indicating the confidence level required.
-##' The default value is 0.95.
+##' indicating the confidence level required. The default value is 0.95.
 ##' @return
 ##' \code{\link{sampleMcf-class}} or \code{\link{rateRegMcf-class}} object.
 ##' Their slots include
@@ -71,10 +70,14 @@ NULL
 ##' Nelson, W. B. (2003). \emph{Recurrent events data analysis for product
 ##' repairs, disease recurrences, and other applications} (Vol. 10). SIAM.
 ##'
+##' Lawless, J. F. and Nadeau, C. (1995). Some Simple Robust Methods for the
+##' Analysis of Recurrent Events. \emph{Technometrics}, 37, 158--168.
+##'
 ##' ReliaWiki. (2012, March 19). Recurrent Event Data Analysis.
 ##' Retrieved November 23, 2015, from
 ##' \url{http://reliawiki.org/index.php/Recurrent_Event_Data_Analysis}
-##' @seealso \code{\link{rateReg}} for model fitting;
+##' @seealso
+##' \code{\link{rateReg}} for model fitting;
 ##' \code{\link{plotMcf}} for plotting MCF.
 ##' @examples
 ##' library(reda)
@@ -89,7 +92,6 @@ NULL
 ##'
 ##' ## For estimated MCF from a fitted model,
 ##' ## see examples given in function rateReg.
-##'
 ##' @export
 setGeneric(name = "mcf",
            def = function(object, ...) {
@@ -112,100 +114,106 @@ setGeneric(name = "mcf",
 ##' Other possible values inlcude \code{\link{na.fail}},
 ##' \code{\link{na.exclude}}, and \code{\link{na.pass}}.
 ##' \code{help(na.fail)} for details.
-##'
+##' @param variance An optional character specifying the variance estimator.
+##' The available options are "Poisson" (default) for Poisson process method,
+##' and "LawlessNadeau" for Lawless and Nadeau (1995) method. (A simple example
+##' is available at Reliawiki.)
+##' @param logConfInt An optional logical value. If \code{TRUE} (default),
+##' the confidence interval of given level will be constucted based on the
+##' normality of logrithm of the MCF function. (Otherwise, the confidence
+##' interval will be constructed based on the normality of MCF function.)
 ##' @aliases mcf,formula-method
-##' @importFrom utils tail
 ##' @importFrom stats na.fail na.omit na.exclude na.pass
 ##' @export
 setMethod(
     f = "mcf", signature = "formula",
-    definition = function(object, data, subset, na.action, level = 0.95, ...) {
-        ## record the function call
-        Call <- match.call()
-        Call[[1]] <- as.name("mcf")
-        names(Call) <- sub(pattern = "object",
-                           replacement = "formula", names(Call))
-        mfnames <- c("formula", "data", "subset", "na.action")
-        mfind <- match(mfnames, names(Call), nomatch = 0L)
-        Call$formula <- eval(object)
-        Call$data <- eval(substitute(alist(data)))[[1]]
-        Call$subset <- eval(substitute(alist(subset)))[[1]]
-        Call$na.action <- eval(substitute(alist(na.action)))[[1]]
-        mcall <- Call[c(1, mfind)]
-        ## Call to return
-        Call <- mcall
-
-        ## drop unused levels in factors
-        mcall$drop.unused.levels <- TRUE
-        ## Prepare data: ID, time, event ~ X
-        mcall[[1]] <- quote(stats::model.frame)
-        mm <- if(is.R()) {
-                  eval.parent(mcall)
-              } else {
-                  eval(mcall, sys.parent())
-              }
-        if(missing(data))
-            data <- environment(object)
-
-        if (! with(data, inherits(eval(object[[2]]), "Survr")))
-            stop("Response in formula must be a 'Survr' object.")
-
-        Terms <- stats::terms(object)
-        ord <- attr(Terms, "order")
-        if (length(ord) & any(ord != 1))
-            stop("Interaction terms are not valid for this function.")
-
-        ## number of covariates excluding intercept
-        nBeta <- ncol(mm) - 1L
-        nSample <- nrow(mm)
-        if (nBeta == 0L) {
-            X <- covar_names <- NULL
-        } else {
-            X <- mm[, 2]
-            ## covariates' names
-            covar_names <- attr(Terms, "term.labels")
-        }
-        ## data
-        dat <- as.data.frame(cbind(mm[, 1], X))
-        colnames(dat) <- c("ID", "time", "event", covar_names)
-
+    definition = function(object, data, subset, na.action,
+                          variance = c("Poisson", "LawlessNadeau"),
+                          logConfInt = TRUE, level = 0.95, ...) {
+        ## specify the type of variance
+        variance <- match.arg(variance)
+        ## basic check on inputs
+        logConfInt <- logConfInt[1L]
+        if (! is.logical(logConfInt))
+            stop("'logConfint' has to be either 'TRUE' or 'FALSE'.")
         ## check on level specified
         level <- level[1L]
         if (level <= 0 || level >= 1)
             stop("Confidence level must be between 0 and 1.")
 
-        if (nBeta == 0L) { ## if no covariates specified
-            outDat <- sMcf(dat, level = level)
-            out <- new("sampleMcf", formula = object,
-                       MCF = outDat, multiGroup = FALSE)
-            return(out)
+        if (missing(data))
+            data <- environment(object)
+        ## take care of subset individual for possible non-numeric ID
+        if (! missing(subset)) {
+            sSubset <- substitute(subset)
+            subIdx <- eval(sSubset, data, parent.frame())
+            if (! is.logical(subIdx))
+                stop("'subset' must be logical")
+            subIdx <- subIdx & ! is.na(subIdx)
+            data <- data[subIdx, ]
         }
-        ## else one covariate specified
-        ## argument check
-        if (nBeta != 1L && ! is.factor(X))
-            stop("The covariate in object must be a factor or '1'.")
 
-        ## number of levels
-        num_levels <- length(levels(X))
-        if (num_levels == 1)
-            warning("The factor covariate has only one level.")
+        ## Prepare data: ID, time, event ~ 1 or X
+        mcall <- match.call(expand.dots = FALSE)
+        mcall[[1]] <- as.name("mcf")
+        names(mcall) <- sub(pattern = "object",
+                            replacement = "formula", names(mcall))
+        mfnames <- c("formula", "data", "na.action")
+        mfind <- match(mfnames, names(mcall), nomatch = 0L)
+        mcall$formula <- eval(object)
+        ## re-define data
+        mcall$data <- substitute(data)
+        ## match mcall
+        mmcall <- match(c("formula", "data", "na.action"), names(mcall), 0L)
+        mcall$na.action <- eval(substitute(alist(na.action)))[[1]]
+        mcall <- mcall[c(1L, mmcall)]
+        ## drop unused levels in factors
+        mcall$drop.unused.levels <- TRUE
+        mcall[[1L]] <- quote(stats::model.frame)
+        mf <- eval(mcall, parent.frame())
+        mt <- attr(mf, "terms")
+        mm <- stats::model.matrix(object, data = mf)
 
-        outDat <- data.frame(matrix(NA, nrow = nSample, ncol = 8))
-        for (i in seq(num_levels)) {
-            subdat <- base::subset(dat, subset = X %in% levels(X)[i])
-            rowInd <- if(i == 1L) {
-                          seq(nrow(subdat))
-                      } else {
-                          seq(from = utils::tail(rowInd, 1) + 1, by = 1,
-                              length.out = nrow(subdat))
-                      }
-            outDat[rowInd, seq_len(7)] <- sMcf(subdat, level = level)
-            outDat[rowInd, 8] <- i
+        ## check response constructed from Survr
+        resp <- stats::model.extract(mf, "response")
+        if (! inherits(resp, "Survr"))
+            stop("Response in formula must be a survival recurrent object.")
+        ## check covariate in formula
+        if (! NCOL(mm))
+            stop("'1' or covariates must be specified in formula.")
+        Terms <- stats::terms(object)
+        ord <- attr(Terms, "order")
+        if (length(ord) & any(ord != 1))
+            stop("Interaction terms are not valid for this function.")
+
+        ## for possible missing values in covaraites
+        if (length(na.action <- attr(mf, "na.action"))) {
+            ## update if there is missing value removed
+            attr(resp, "ord") <- order(resp[, "ID"], resp[, "time"])
+            attr(resp, "ID_") <- attr(resp, "ID_")[- na.action]
+            check_Survr(resp, check = TRUE)
         }
-        outDat[, 8] <- factor(outDat[, 8], levels = seq(num_levels),
-                              labels = levels(X))
-        colnames(outDat) <- c(colnames(dat)[1:3], "MCF",
-                              "var", "lower", "upper", covar_names)
+
+        ## Sorted data by ID, time, and event
+        ord <- attr(resp, "ord")
+        ## number of covariates excluding intercept
+        nBeta <- ncol(mm) - 1L
+
+        ## data matrix processed
+        if (nBeta) {
+            xMat <- mm[ord, - 1L, drop = FALSE]
+            ## covariates' names
+            covar_names <- colnames(mm)[- 1L]
+        } else {
+            xMat <- covar_names <- NULL
+        }
+        dat <- as.data.frame(cbind(resp[ord, ], xMat))
+        colnames(dat) <- c("ID", "time", "event", covar_names)
+        ## revert subject ID
+        dat$ID <- attr(resp, "ID_")[ord]
+
+        ## ouput: variable names in formula
+        varNames <- as.character(object[[2L]])[- 1L]
 
         ## output: na.action
         na.action <- if (is.null(attr(mm, "na.action"))) {
@@ -214,13 +222,62 @@ setMethod(
                          paste0("na.", class(attr(mm, "na.action")))
                      }
 
+        ## if no covariates specified
+        if (! nBeta) {
+            outDat <- sMcf(inpDat = dat, variance = variance,
+                           logConfInt = logConfInt, level = level)
+            colnames(outDat)[seq_len(3)] <- varNames
+            ## remove all censoring rows
+            ## outDat <- base::subset(outDat, event == 1)
+            rownames(outDat) <- NULL
+            out <- new("sampleMcf",
+                       formula = object,
+                       MCF = outDat,
+                       multiGroup = FALSE,
+                       na.action = na.action,
+                       variance = variance,
+                       logConfInt = logConfInt,
+                       level = level)
+            return(out)
+        }
+
+        ## else at least one covariate are specified
+        ## get the levels for each covaraite in form of grid
+        xGrid <- unique(xMat)
+        levs <- apply(xGrid, 1, paste, collapse = "_")
+        datLevs <- apply(xMat, 1, paste, collapse = "_")
+        ## number of levels
+        num_levels <- NROW(xGrid)
+        if (num_levels == 1L)
+            warning("The covariate has only one level.")
+
+        outDat <- data.frame(matrix(NA, nrow = nrow(mm), ncol = 7L + nBeta))
+        for (i in seq(num_levels)) {
+            subDat <- dat[datLevs %in% levs[i], ]
+            rowLen <- nrow(subDat)
+            rowInd <- if(i == 1L) {
+                          seq_len(rowLen)
+                      } else {
+                          seq(from = rowInd[length(rowInd)] + 1L, by = 1L,
+                              length.out = rowLen)
+                      }
+            outDat[rowInd, seq_len(7)] <- sMcf(subDat, variance,
+                                               logConfInt, level)
+            outDat[rowInd, - seq_len(7)] <- rep(xGrid[i, ], each = rowLen)
+        }
+        colnames(outDat) <- c(varNames, "MCF", "se",
+                              "lower", "upper", covar_names)
+        ## remove all censoring rows? not now for plotMcf
+        ## outDat <- base::subset(outDat, event == 1)
+        rownames(outDat) <- NULL
         out <- methods::new("sampleMcf",
-                            call = Call,
                             formula = object,
-                            na.action = na.action,
-                            level = level,
                             MCF = outDat,
-                            multiGroup = TRUE)
+                            multiGroup = TRUE,
+                            na.action = na.action,
+                            variance = variance,
+                            logConfInt = logConfInt,
+                            level = level)
         ## return
         out
     })
@@ -266,9 +323,9 @@ setMethod(
         fcovnames <- as.character(object@call[[2L]][[3L]])
         covnames <- fcovnames[fcovnames != "+"]
         nBeta <- length(beta)
-        knots <- object@knots
-        degree <- object@degree
-        Boundary.knots <- object@Boundary.knots
+        knots <- object@spline$knots
+        degree <- object@spline$degree
+        Boundary.knots <- object@spline$Boundary.knots
 
         ## control
         controlist <- c(control, list(Boundary.knots_ = Boundary.knots))
@@ -323,7 +380,7 @@ setMethod(
 
         ## mcf for possible multigroups
         ndesign <- nrow(X)
-        multiGroup <- ! (ndesign == 1)
+        multiGroup <- ndesign > 1
 
         coveff <- as.numeric(exp(X %*% beta))
         outDat <- matrix(NA, ncol = 4, nrow = ndesign * n_xx)
@@ -339,10 +396,10 @@ setMethod(
             lower <- pmax(0, mcf_i - confBand)
             upper <- mcf_i + confBand
             ind <- seq(from = n_xx * (i - 1) + 1, to = n_xx * i, by = 1)
-            outDat[ind, 1] <- gridTime
-            outDat[ind, 2] <- mcf_i
-            outDat[ind, 3] <- lower
-            outDat[ind, 4] <- upper
+            outDat[ind, 1L] <- gridTime
+            outDat[ind, 2L] <- mcf_i
+            outDat[ind, 3L] <- lower
+            outDat[ind, 4L] <- upper
         }
         outDat <- as.data.frame(outDat)
         colnames(outDat) <- c("time", "MCF", "lower", "upper")
@@ -353,12 +410,13 @@ setMethod(
                 groupName <- "group"
             tempcol <- factor(rep(groupLevels[seq(ndesign)], each = n_xx))
             outDat <- cbind(outDat, tempcol)
-            colnames(outDat) <- c("time", "MCF", "lower", "upper", groupName)
+            colnames(outDat)[5L] <- groupName
         }
         ## output
         out <- new("rateRegMcf",
                    call = object@call,
                    formula = object@formula,
+                   spline = object@spline$spline,
                    knots = knots, degree = degree,
                    Boundary.knots = Boundary.knots,
                    newdata = X, MCF = outDat, level = level,
@@ -371,27 +429,50 @@ setMethod(
 
 ### internal function ==========================================================
 ## compute sample MCF
-sMcf <- function(inpDat, level) {
+sMcf <- function(inpDat, variance, logConfInt, level) {
     ## if time ties, put event time before censoring time
-    tempDat <- with(inpDat, inpDat[base::order(time, 1 - event), seq_len(3)])
-    nSample <- nrow(tempDat)
-    num_pat <- length(unique(tempDat$ID))
-    num_at_risk <- num_pat - cumsum(tempDat$event == 0)
-    increment <- ifelse(tempDat$event == 1, 1 / num_at_risk, 0)
+    inpDat <- inpDat[with(inpDat, base::order(time, 1 - event)), seq_len(3)]
+
+    num_pat <- length(unique(inpDat$ID))
+    num_at_risk <- num_pat - cumsum(inpDat$event == 0)
+    increment <- ifelse(inpDat$event, 1 / num_at_risk, 0)
+
     ## index of unique event and censoring time
-    indx <- ! duplicated(tempDat$time, fromLast = TRUE)
+    ## indx <- ! duplicated(inpDat$time, fromLast = TRUE)
+
     ## sample mcf at each time point
     smcf <- cumsum(increment)
     inc2 <- increment ^ 2
-    inc12 <- (1 - increment) ^ 2
-    incre <- inc2 * (inc12 + (num_at_risk - 1) * inc2)
-    incre_var <- ifelse(tempDat$event == 0, 0, incre)
-    var_smcf <- cumsum(incre_var)
-    wtonexp <- stats::qnorm(0.5 + level / 2) * sqrt(var_smcf) / smcf
-    upper <- smcf * exp(wtonexp)
-    lower <- smcf * exp(- wtonexp)
+
+    ## sample variance estimator
+    if (variance == "Poisson") {
+        var_smcf <- cumsum(inc2)
+        se_smcf <- sqrt(var_smcf)
+    } else if (variance == "LawlessNadeau") {
+        inc12 <- (1 - increment) ^ 2
+        incre <- inc2 * (inc12 + (num_at_risk - 1) * inc2)
+        incre_var <- ifelse(inpDat$event == 0, 0, incre)
+        var_smcf <- cumsum(incre_var)
+        se_smcf <- sqrt(var_smcf)
+    } else {
+        stop("Invalid 'variance' specified.")
+    }
+
+    ## Confidence interval for log(MCF) or MCF
+    if (logConfInt) {
+        criVal <- stats::qnorm(0.5 + level / 2) * se_smcf / smcf
+        wtonexp <- exp(criVal)
+        upper <- smcf * wtonexp
+        lower <- smcf / wtonexp
+    } else {
+        criVal <- stats::qnorm(0.5 + level / 2) * se_smcf
+        upper <- smcf + criVal
+        lower <- smcf - criVal
+    }
+
     ## return
-    data.frame(tempDat, MCF = smcf, var = var_smcf, lower, upper)
+    data.frame(inpDat, MCF = smcf, se = se_smcf,
+               lower = lower, upper = upper)
 }
 
 
