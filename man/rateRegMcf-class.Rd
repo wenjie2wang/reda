@@ -16,6 +16,8 @@ from Models.
 
 \item{\code{formula}}{Formula.}
 
+\item{\code{spline}}{A character.}
+
 \item{\code{knots}}{A numeric vector.}
 
 \item{\code{degree}}{A nonnegative integer.}

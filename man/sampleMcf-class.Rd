@@ -11,17 +11,19 @@ An S4 class that represents sample mean cumulative function (MCF) from data.
 \section{Slots}{
 
 \describe{
-\item{\code{call}}{Function call}
-
 \item{\code{formula}}{Formula.}
-
-\item{\code{na.action}}{A length-one character vector.}
-
-\item{\code{level}}{A numeric value.}
 
 \item{\code{MCF}}{A data frame.}
 
 \item{\code{multiGroup}}{A logical value.}
+
+\item{\code{na.action}}{A length-one character vector.}
+
+\item{\code{variance}}{A character.}
+
+\item{\code{logConfInt}}{A logical value.}
+
+\item{\code{level}}{A numeric value.}
 }}
 \seealso{
 \code{\link{mcf,formula-method}} for details of slots.

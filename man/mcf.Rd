@@ -9,7 +9,9 @@
 \usage{
 mcf(object, ...)
 
-\S4method{mcf}{formula}(object, data, subset, na.action, level = 0.95, ...)
+\S4method{mcf}{formula}(object, data, subset, na.action,
+  variance = c("Poisson", "LawlessNadeau"), logConfInt = TRUE,
+  level = 0.95, ...)
 
 \S4method{mcf}{rateReg}(object, newdata, groupName, groupLevels, level = 0.95,
   na.action, control = list(), ...)
@@ -35,9 +37,18 @@ Other possible values inlcude \code{\link{na.fail}},
 \code{\link{na.exclude}}, and \code{\link{na.pass}}.
 \code{help(na.fail)} for details.}
 
+\item{variance}{An optional character specifying the variance estimator.
+The available options are "Poisson" (default) for Poisson process method,
+and "LawlessNadeau" for Lawless and Nadeau (1995) method. (A simple example
+is available at Reliawiki.)}
+
+\item{logConfInt}{An optional logical value. If \code{TRUE} (default),
+the confidence interval of given level will be constucted based on the
+normality of logrithm of the MCF function. (Otherwise, the confidence
+interval will be constructed based on the normality of MCF function.)}
+
 \item{level}{An optional numeric value
-indicating the confidence level required.
-The default value is 0.95.}
+indicating the confidence level required. The default value is 0.95.}
 
 \item{newdata}{An optional data frame. If specified, the data frame should
 have the same column names as the covariate names appearing in the formula
@@ -124,11 +135,13 @@ plotMcf(sampleMcf, lty = c(1, 3), col = c("orange", "navy"),
 
 ## For estimated MCF from a fitted model,
 ## see examples given in function rateReg.
-
 }
 \references{
 Nelson, W. B. (2003). \emph{Recurrent events data analysis for product
 repairs, disease recurrences, and other applications} (Vol. 10). SIAM.
+
+Lawless, J. F. and Nadeau, C. (1995). Some Simple Robust Methods for the
+Analysis of Recurrent Events. \emph{Technometrics}, 37, 158--168.
 
 ReliaWiki. (2012, March 19). Recurrent Event Data Analysis.
 Retrieved November 23, 2015, from

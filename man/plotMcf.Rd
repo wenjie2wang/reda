@@ -10,7 +10,7 @@
 plotMcf(object, conf.int = FALSE, ...)
 
 \S4method{plotMcf}{sampleMcf}(object, conf.int = FALSE, mark.time = FALSE,
-  lty, col, ...)
+  lty, col, legendName, legendLevels, ...)
 
 \S4method{plotMcf}{rateRegMcf}(object, conf.int = FALSE, lty, col, ...)
 }
@@ -34,6 +34,15 @@ line types specified to different groups:
 
 \item{col}{An optional character vector indicating
 line colors specified to different groups.}
+
+\item{legendName}{An optional length-one charactor vector to specify the
+name for grouping each unique row in \code{newdata}, such as "gender"
+for "male" and "female". The default value is generated from the
+\code{object}.}
+
+\item{legendLevels}{An optional charactor vector to specify the levels for
+each unique row in \code{newdata}, such as "treatment" and "control".
+The default values are generated from the \code{object}.}
 }
 \value{
 A \code{ggplot} object.

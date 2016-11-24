@@ -14,6 +14,8 @@ of \code{rateReg-class} object.  See ``Slots'' for details.
 \describe{
 \item{\code{call}}{Function call.}
 
+\item{\code{spline}}{A character.}
+
 \item{\code{knots}}{A numeric vector.}
 
 \item{\code{Boundary.knots}}{A numeric vector.}

@@ -18,13 +18,7 @@ See ``Slots'' for details.
 
 \item{\code{nObs}}{A positive integer}
 
-\item{\code{knots}}{A numeric vector.}
-
-\item{\code{Boundary.knots}}{A numeric vector.}
-
-\item{\code{degree}}{A nonnegative integer.}
-
-\item{\code{df}}{A list of nonnegative numeric vectors.}
+\item{\code{spline}}{A list.}
 
 \item{\code{estimates}}{A list.}
 
