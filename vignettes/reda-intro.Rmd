@@ -11,6 +11,7 @@ vignette: >
 output: rmarkdown::html_vignette
 ---
 
+
 The package **reda** mainly provides function to fit gamma frailty model with
 either a piecewise constant or a spline as the baseline rate function
 for recurrent event data. What's more, some handy functions are designed,
@@ -32,11 +33,12 @@ After then, the demonstration of the main function `rateReg` for
 and [spline](#splineFit) baseline rate function.
 What follows next are the examples of functions that
 [summarize](#summaryFit) the model fitted and
-functions for [model selection](#modSelect) based on AIC or BIC.
+functions for [model selection](#modelSelect) based on AIC or BIC.
 Last but not the least, the demonstration of estimation and
 the mean cumulative function (MCF) is given, which includes
 [sample MCF](#sampleMcf) and [estimated MCF](#rateRegMcf)
 from the fitted model.
+
 
 ## Simulated Sample Recurrent Event Data {#simuDat}
 
@@ -51,7 +53,7 @@ which contains totally `r nrow(simuDat)` observations of `r ncol(simuDat)`
 variables.
 
 ```{r data}
-head(simuDat, 10)
+head(simuDat)
 str(simuDat)
 ```
 
@@ -66,14 +68,14 @@ where
 The dataset is originally simulated by thinning method [@lewis1979]
 and further processed for a better demonstration purpose.
 
+
 ## Data Checking {#dataCheck}
 
-In the main function `rateReg` for model fitting,
-formula response is specified by function `Survr`,
-which has embedded data checking procedure for recurrent event data modeled
-by method based on counts and rate function. Therefore, before model fitting,
-the observations of the covariates specified in the formula will be checked.
-The checking rules include
+In the main function `rateReg` for model fitting, formula response is specified
+by function `Survr`, which has a considerate data checking procedure embedded
+for recurrent event data modeled by method based on counts and rate
+function. Therefore, before model fitting, the observations of the covariates
+specified in the formula will be checked.  The checking rules include
 
 * Identification of each subject cannot be missing.
 * Event indicator must be coded as 0 (censored) or 1 (event).
@@ -84,28 +86,24 @@ The checking rules include
 The subject's ID will be pinpointed if its observation violates any checking
 rule shown above.
 
+
 ## Model Fitting {#rateReg}
 
 ### Model with Constant Rate Function {#constFit}
 
 The default model when argument `df`, `knots`, and `degree` are not
 specified is gamma frailty model with (one piece) constant rate function,
-which is equivalent to negative binomial regression of the same
-shape and rate parameter in gamma prior.
-
-In the following examples, we fit the models on the first 50 subjects
-by specifying argument `subset`.
+which is equivalent to negative binomial regression with the same
+shape and rate parameter in the gamma prior.
 
 ```{r const}
-constFit <- rateReg(Survr(ID, time, event) ~ group + x1, data = simuDat,
-                    subset = ID %in% 1:50)
-# brief summary
-constFit # or explicitly call show(constFit)
+(constFit <- rateReg(Survr(ID, time, event) ~ group + x1, data = simuDat))
 ```
 
 The function `rateReg` returns `rateReg-class` object, which can be
 printed out by calling the object.
 (Internally, `show` method for `rateReg` object is called.)
+
 
 ### Model with Piecewise Constant Rate Function {#piecesFit}
 
@@ -119,63 +117,64 @@ Then piecewise constant rate function will be applied and the number of pieces
 will equal `df`. The internal knots will be automatically specified at
 suitable quantiles of the covariate representing event and censoring time.
 
-For example, two pieces' constant rate function can be simply specified
-by setting `df = 2`. The internal knot will be the median time of all the
-event and censoring time.
+For example, two pieces' constant rate function can be simply specified by
+setting `df = 2`. The internal knot will be the median time of all the event and
+censoring time. Also, we can fit the models on the first 50 subjects by
+specifying argument `subset`.
 
 ```{r twoPieces}
-# two pieces' constant rate function i.e. one internal knot
-twoPiecesFit <- rateReg(Survr(ID, time, event) ~ group + x1, df = 2,
-                        data = simuDat, subset = ID %in% 1:50)
-twoPiecesFit
+# two pieces' constant rate function
+(twoPiecesFit <- rateReg(Survr(ID, time, event) ~ group + x1, df = 2,
+                         data = simuDat, subset = ID %in% 1:50))
 ```
 
 In the example shown above, the internal knots is set automatically to be
-`r twoPiecesFit@spline$knots` and the baseline rate function is two pieces' constant.
+`r twoPiecesFit@spline$knots` and the baseline rate function is two
+pieces' constant.
 
 If internal `knots` are specified explicitly, the `df` will be neglected
 even if it is specified. An example of model with six pieces' constant rate
 function is given as follows:
 
 ```{r sixPieces}
-piecesFit <- rateReg(Survr(ID, time, event) ~ group + x1, df = 2,
-                     knots = seq(from = 28, to = 140, by = 28),
-                     data = simuDat, subset = ID %in% 1:50)
-piecesFit # note that df = 2 is neglected since knots are specified
+## df = 2 will be neglected since knots are explicitly specified
+(piecesFit <- rateReg(Survr(ID, time, event) ~ group + x1, df = 2,
+                      data = simuDat, subset = ID %in% 1:50,
+                      knots = seq(from = 28, to = 140, by = 28)))
 ```
+
 
 ### Model with Spline Rate Function {#splineFit}
 
-When argument `degree` is specified to be a positive integer,
-the baseline rate function is fitted by splines.
-Currently, B-splines are used.
+When argument `degree` is specified to be a positive integer, the baseline rate
+function is fitted by splines.  The type or flavor of the splines can be
+specified by argument `spline`.  The available option for `spline` are
+`bSplines` for B-splines and `mSplines` for M-splines. (See **R** package
+**spline2** for details about the spline functions used internally.)
+A partial matching on names is allowed.
 
 For example, one may want to fit the baseline rate function by
 a cubic spline with two internal knots. Then we may explicitly
 specify `degree = 3` and `knots` to be a length-two numeric vector.
 Or we may simply specify `degree = 3` and `df = 6`
-(if intercept is considered, which is default).
-Similarly, the internal knots will be automatically specified at
+Then the internal knots will be automatically specified at
 suitable quantiles of the covariate representing event and censoring time.
-
 Generally speaking, the degree of freedom of spline
 (or the number of spline bases) equals the summation of
 the number of internal knots and the degree of each spline base,
 plus one if intercept is included in spline bases.
 
 ```{r spline}
-## df can be simply specified
-splineFit <- rateReg(Survr(ID, time, event) ~ group + x1, df = 6,
-                     degree = 3L, data = simuDat, subset = ID %in% 1:50)
 ## internal knots are set as 33% and 67% quantiles of time variable
-splineFit
-
+(splineFit <- rateReg(Survr(ID, time, event) ~ group + x1,
+                      data = simuDat, subset = ID %in% 1:50,
+                      df = 6, degree = 3, spline = "mSplines"))
 ## or internal knots are expicitly specified
-splineFit <- rateReg(Survr(ID, time, event) ~ group + x1, df = 2,
-                     degree = 3L, knots = c(56, 112),
-                     data = simuDat, subset = ID %in% 1:50)
-splineFit # note that df = 2 is neglected similarly
+(splineFit <- rateReg(Survr(ID, time, event) ~ group + x1,
+                      data = simuDat, subset = ID %in% 1:50,
+                      spline = "bSplines", degree = 3L, knots = c(56, 112)))
 ```
+
 
 ## Summary of Model Fits {#summaryFit}
 
@@ -194,12 +193,12 @@ summary(splineFit, showCall = FALSE, showKnots = FALSE)
 The summary includes the function call, estimated covariate coefficients,
 estimated parameter of frailty variable, internal knots (if exist),
 boundary knots, degree of spline bases if splines are applied,
-coefficients of rate function bases (pieces), and log likelihood
+coefficients of rate function bases (pieces), and log-likelihood
 of the model fitted. Outputs of function call or knots,
 may be suppressed by specifying argument `showCall` or `showKnots`
 to be `FALSE`, respectively, in `summary` method, which would be
 especially useful for a relatively concise summary
-in a reproducible report using `Rmarkdown`, etc.
+in a reproducible report using **Rmarkdown**, etc.
 
 What's more, the corresponding `coef` and `confint` method
 for point estimates and confidence interval for covariate coefficients
@@ -216,17 +215,22 @@ confint(splineFit, level = 0.95)
 baseRate(splineFit)
 ```
 
-## Model Selection {#modSelect}
+
+## Model Selection {#modelSelect}
 
 Two handy functions are provided for model selection.
 We may compare and select the models with different baseline rate function
 based on Akaike Information Criterion (AIC) by function `AIC` or
 Bayesian Information Criterion (BIC) by function `BIC`.
 
+A friendly warning will be thrown out if the numbers of observation were
+different in the model comparison by AIC.
+
 ```{r }
 AIC(constFit, piecesFit, splineFit)
 BIC(constFit, piecesFit, splineFit)
 ```
+
 
 ## Mean Cumulative Function (MCF)
 
@@ -235,46 +239,55 @@ the estimated MCF from the fitted model is called `mcf`.
 Another related generic function called `plotMcf` plots the
 estimated MCF by using **ggplot2** plotting system.
 
+
 ### Sample MCF (Nelson-Aalen Estimator) {#sampleMcf}
 
 The nonparametric sample MCF is also called
 Nelson-Aalen Estimator [@nelson2003]. The point estimate of MCF
 at each time point does not assume any particular underlying model.
-The variance of estimated MCF [@reliawiki] at each time point is
-estimated and the approximate confidence intervals are provided as well,
-which is constructed based on the asymptotic normality of log MCF.
+The variance estimates
+at each time point is given by Poisson process method (by default)
+or Lawless and Nadeau method [@lawless1995some].
+The approximate confidence intervals are provided as well,
+which are constructed based on the asymptotic normality
+of logarithm of MCF (by default) or MCF itself directly.
+@reliawiki also provided a simple example.
 
-If a formula with `Survr` as response is specified in function `mcf`,
-the method for sample MCF will be called.
-The covariate specified at the right hand side of the formula
-should be either `1` or any one factor variable in the data.
-The former computes the overall sample MCF.
-The latter computes the sample MCF for each level of
-the factor variable specified, respectively.
+If a formula with `Survr` as response is specified in function `mcf`, the method
+for sample MCF will be called.  The covariate specified at the right hand side
+of the formula should be either `1` or any "linear" combination of factor
+variables in the data.  The former computes the overall sample MCF.  The latter
+computes the sample MCF for each level of the combination of the factor
+variable(s) specified, respectively.
+
+The valve-seat dataset in @nelson1995confidence and the sample simulated data
+are used for demonstration as folllows:
 
 ```{r sampleMcf}
-## overall sample MCF
-sampleMcf1 <- mcf(Survr(ID, time, event) ~ 1,
-                  data = simuDat, subset = ID %in% 1:10)
+## overall sample MCF for valve-seat data in Nelson (1995)
+valveMcf <- mcf(Survr(ID, Days, No.) ~ 1, data = valveSeats)
+
 ## sample MCF for different groups
-sampleMcf2 <- mcf(Survr(ID, time, event) ~ group,
-                  data = simuDat, subset = ID %in% 1:10)
+simuMcf <- mcf(Survr(ID, time, event) ~ group + gender,
+               data = simuDat, subset = ID %in% 1 : 50, logConfInt = FALSE)
 ```
 
-After estimation, we may plot the sample MCF by function `plotMcf`,
-which actually returns a `ggplot` object so that the plot produced
-can be easily further customized by functions in package **ggplot2**.
-
-For example, the overall sample MCF and the sample MCF
-for two groups (control vs. treatment) estimated above
-are plotted, respectively, as follows:
+After estimation, we may plot the sample MCF by function `plotMcf`, which
+actually returns a `ggplot` object so that the plot produced can be easily
+further customized by functions in package **ggplot2**.  The `legendname` and
+`legendLevels` can be used to customize the legend in the plot. Examples are
+given as follows:
 
 ```{r plot:sampleMcf, fig.height = 5, fig.width = 7}
-## plot overall sample MCF
-plotMcf(sampleMcf1)
-## plot MCF for different groups
-plotMcf(sampleMcf2, mark.time = TRUE,
-        lty = c(1, 5), col = c("orange", "navy")) +
+## Example 1. valve-seat data
+plotMcf(valveMcf, conf.int = TRUE, mark.time = TRUE) + ggplot2::xlab("Days")
+
+## Example 2. sample simulated data
+## plot after creating customized levels in legend
+levs <- with(simuDat, expand.grid(levels(group), levels(gender)))
+levs <- do.call(paste, c(as.list(levs), sep = " & "))
+plotMcf(simuMcf, conf.int = TRUE, lty = 1 : 4,
+        legendName = "Treatment & Gender", legendLevels = levs) +
     ggplot2::xlab("Days") + ggplot2::theme_bw()
 ```
 
@@ -282,6 +295,7 @@ Note that all the censoring time can be marked on the
 step curve by specifying `mark.time = TRUE`.
 The type and color of the line can be specified through
 `lty` and `col`, respectively.
+
 
 ### Estimated MCF from the fitted Model {#rateRegMcf}
 
@@ -323,8 +337,7 @@ newDat <- data.frame(x1 = rep(0, 2), group = c("Treat", "Contr"))
 estmcf <- mcf(splineFit, newdata = newDat, groupName = "Group",
               groupLevels = c("Treatment", "Control"))
 plotMcf(estmcf, conf.int = TRUE, col = c("royalblue", "red"), lty = c(1, 5)) +
-    ggplot2::ggtitle("Control vs. Treatment") + ggplot2::xlab("Days") +
-    ggplot2::theme_bw()
+    ggplot2::ggtitle("Control vs. Treatment") + ggplot2::xlab("Days")
 ```
 
 ## Reference
