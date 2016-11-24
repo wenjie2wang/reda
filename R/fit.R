@@ -27,7 +27,7 @@ NULL
 ##'
 ##' The default model is the gamma frailty model with one piece constant
 ##' baseline rate function, which is equivalent to negative binomial regression
-##' with the same shape and rate parameter in gamma prior. Spline (including
+##' with the same shape and rate parameter in the gamma prior. Spline (including
 ##' piecewise constant) baseline rate function can also be specified and applied
 ##' to model fitting.  Both B-spline and M-spline bases are available.
 ##' \code{rateReg} returns the fitted model through a
@@ -91,7 +91,7 @@ NULL
 ##' }
 ##' @usage
 ##' rateReg(formula, data, subset, df = NULL, knots = NULL,
-##'         degree = 0L, na.action, spline = c("bSpline", "mSpline"),
+##'         degree = 0L, na.action, spline = c("bSplines", "mSplines"),
 ##'         start = list(), control = list(), contrasts = NULL, ...)
 ##' @param formula \code{Survr} object produced by function \code{\link{Survr}}.
 ##' @param data An optional data frame, list or environment containing
@@ -116,8 +116,8 @@ NULL
 ##' \code{\link{na.exclude}}, and \code{\link{na.pass}}.
 ##' \code{help(na.fail)} for details.
 ##' @param spline An optional character that specifies the flavor of splines.
-##' The possible option is \code{bSpline} for B-spline or
-##' \code{mSpline} for M-spline. Partial matching on the names is allowed.
+##' The possible option is \code{bSplines} for B-splines or
+##' \code{mSplines} for M-splines. Partial matching on the names is allowed.
 ##' @param start An optional list of starting values for the parameters
 ##' to be estimated in the model.  See more in Section details.
 ##' @param control An optional list of parameters to control the
@@ -178,11 +178,11 @@ NULL
 ##' ## six pieces' piecewise constant rate function
 ##' (piecesFit <- rateReg(Survr(ID, time, event) ~ group + x1,
 ##'                       data = simuDat, subset = ID %in% 1:50,
-##'                       spline = "bSpline", knots = seq(28, 140, by = 28)))
+##'                       spline = "bSplines", knots = seq(28, 140, by = 28)))
 ##'
 ##' ## fit rate function with cubic spline
 ##' (splineFit <- rateReg(Survr(ID, time, event) ~ group + x1, data = simuDat,
-##'                       spline = "mSp", knots = c(56, 84, 112), degree = 3))
+##'                       spline = "mSpl", knots = c(56, 84, 112), degree = 3))
 ##'
 ##' ## more specific summary
 ##' summary(constFit)
@@ -231,7 +231,7 @@ NULL
 ##' model.extract
 ##' @export
 rateReg <- function(formula, data, subset, df = NULL, knots = NULL, degree = 0L,
-                    na.action, spline = c("bSpline", "mSpline"),
+                    na.action, spline = c("bSplines", "mSplines"),
                     start = list(), control = list(), contrasts = NULL, ...) {
     ## record the function call to return
     Call <- match.call()
@@ -309,7 +309,7 @@ rateReg <- function(formula, data, subset, df = NULL, knots = NULL, degree = 0L,
                       }
 
     ## generate knots if knots is unspecified
-    if (spline == "bSpline") {
+    if (spline == "bSplines") {
         ## B-spline
         iMat <- splines2::ibs(x = dat$time, df = df, knots = knots,
                               degree = degree, intercept = TRUE,
@@ -560,7 +560,7 @@ rateReg_start <- function (beta, theta = 0.5, alpha, ..., nBeta_, nAlpha_) {
 
 ## generate intervals from specified baseline pieces
 nameBases <- function(df, spline) {
-    if (spline == "bSpline")
+    if (spline == "bSplines")
         return(paste0("B-spline", seq_len(df)))
     paste0("M-spline", seq_len(df))
 }

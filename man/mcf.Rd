@@ -45,7 +45,7 @@ Partial matching on the names is allowed.}
 
 \item{logConfInt}{An optional logical value. If \code{TRUE} (default),
 the confidence interval of given level will be constucted based on the
-normality of logrithm of the MCF function. (Otherwise, the confidence
+normality of logarithm of the MCF function. (Otherwise, the confidence
 interval will be constructed based on the normality of MCF function.)}
 
 \item{level}{An optional numeric value
@@ -107,11 +107,11 @@ The sample MCF is also called Nelson-Aalen nonparametric estimator
 (Nelson, 2003) and computed on each time point from sample data.
 The point estimate of sample MCF at each time point does not
 assume any particular underlying model. The variance estimates
-at each time point is given by Poisson process method (default)
+at each time point is given by Poisson process method (by default)
 or Lawless and Nadeau method (LawLess and Nadeau, 1995).
 The approximate confidence intervals are provided as well,
 which are constructed based on the asymptotic normality
-of logrithm of MCF (default) or MCF itself directly.
+of logarithm of MCF (by default) or MCF itself directly.
 
 For \code{\link{rateReg-class}} object,
 \code{mcf} estimates the baseline MCF and its confidence interval
