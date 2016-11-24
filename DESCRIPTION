@@ -1,6 +1,6 @@
 Package: reda
 Title: Recurrent Event Data Analysis
-Version: 0.2.1.9000
+Version: 0.3.0
 Date: 2016-11-24
 Authors@R: c(
     person(given = "Wenjie", family = "Wang",
