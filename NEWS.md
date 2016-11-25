@@ -28,6 +28,8 @@
 
 * Updated object class of fitted model, `rateReg`.
 
+* Replaced generic function `plotMcf` with methods for function `plot`.
+
 * Updated data checking procedure for a better performance.
 
 * Added variable "gender" in sample simulated dataset, `simuDat` for a better
