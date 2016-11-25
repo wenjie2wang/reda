@@ -285,9 +285,8 @@ plot(valveMcf, conf.int = TRUE, mark.time = TRUE) + ggplot2::xlab("Days")
 ## plot after creating customized levels in legend
 levs <- with(simuDat, expand.grid(levels(group), levels(gender)))
 levs <- do.call(paste, c(as.list(levs), sep = " & "))
-plot(simuMcf, conf.int = TRUE, lty = 1 : 4,
-     legendName = "Treatment & Gender", legendLevels = levs) +
-    ggplot2::xlab("Days") + ggplot2::theme_bw()
+plot(simuMcf, conf.int = TRUE, lty = 1 : 4, legendName = "Treatment & Gender",
+     legendLevels = levs) + ggplot2::xlab("Days")
 ```
 
 Note that all the censoring time can be marked on the
@@ -309,8 +308,7 @@ with piecewise constant rate function is shown as follows:
 
 ```{r piecesMcf, fig.height = 5, fig.width = 7}
 piecesMcf <- mcf(piecesFit)
-plot(piecesMcf, conf.int = TRUE, col = "blueviolet") +
-    ggplot2::xlab("Days") + ggplot2::theme_bw()
+plot(piecesMcf, conf.int = TRUE, col = "blueviolet") + ggplot2::xlab("Days")
 ```
 
 The argument `newdata` allows one to estimate the MCF for a given dataset
