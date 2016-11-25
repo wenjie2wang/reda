@@ -1,7 +1,7 @@
 Package: reda
 Title: Recurrent Event Data Analysis
 Version: 0.3.0
-Date: 2016-11-24
+Date: 2016-11-25
 Authors@R: c(
     person(given = "Wenjie", family = "Wang",
            email = "wenjie.2.wang@uconn.edu",
@@ -16,6 +16,7 @@ Description: Functions that fit gamma frailty model with spline or piecewise
     Most functions are S4 methods that produce S4 class objects.
 Imports:
     ggplot2,
+    graphics,
     grDevices,
     methods,
     splines2,

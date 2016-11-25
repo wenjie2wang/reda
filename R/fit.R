@@ -208,14 +208,14 @@ NULL
 ##'
 ##' ## estimated baseline mean cumulative function (MCF) from a fitted model
 ##' piecesMcf <- mcf(piecesFit)
-##' plotMcf(piecesMcf, conf.int = TRUE, col = "blueviolet") +
+##' plot(piecesMcf, conf.int = TRUE, col = "blueviolet") +
 ##'     ggplot2::xlab("Days") + ggplot2::theme_bw()
 ##'
 ##' ## estimated MCF for given new data
 ##' newDat <- data.frame(x1 = rep(0, 2), group = c("Treat", "Contr"))
 ##' splineMcf <- mcf(splineFit, newdata = newDat, groupName = "Group",
 ##'                  groupLevels = c("Treatment", "Control"))
-##' plotMcf(splineMcf, conf.int = TRUE, lty = c(1, 5)) +
+##' plot(splineMcf, conf.int = TRUE, lty = c(1, 5)) +
 ##'     ggplot2::xlab("Days") + ggplot2::theme_bw()
 ##' @seealso
 ##' \code{\link{summary,rateReg-method}} for summary of fitted model;
@@ -225,7 +225,7 @@ NULL
 ##' \code{\link{baseRate,rateReg-method}} for estimated coefficients of baseline
 ##' rate function;
 ##' \code{\link{mcf,rateReg-method}} for estimated MCF from a fitted model;
-##' \code{\link{plotMcf,rateRegMcf-method}} for plotting estimated MCF.
+##' \code{\link{plot,rateRegMcf-method}} for plotting estimated MCF.
 ##' @importFrom splines2 ibs iSpline
 ##' @importFrom stats na.fail na.omit na.exclude na.pass .getXlevels
 ##' model.extract

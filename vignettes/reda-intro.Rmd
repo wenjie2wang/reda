@@ -234,10 +234,9 @@ BIC(constFit, piecesFit, splineFit)
 
 ## Mean Cumulative Function (MCF)
 
-The generic function to compute the sample MCF and
-the estimated MCF from the fitted model is called `mcf`.
-Another related generic function called `plotMcf` plots the
-estimated MCF by using **ggplot2** plotting system.
+The generic function computing the sample MCF and the estimated MCF from the
+fitted model is called `mcf`.  The related methods are dispatched by function
+`plot` for plotting the estimated MCF by using **ggplot2** plotting system.
 
 
 ### Sample MCF (Nelson-Aalen Estimator) {#sampleMcf}
@@ -272,7 +271,7 @@ simuMcf <- mcf(Survr(ID, time, event) ~ group + gender,
                data = simuDat, subset = ID %in% 1 : 50, logConfInt = FALSE)
 ```
 
-After estimation, we may plot the sample MCF by function `plotMcf`, which
+After estimation, we may plot the sample MCF by function `plot`, which
 actually returns a `ggplot` object so that the plot produced can be easily
 further customized by functions in package **ggplot2**.  The `legendname` and
 `legendLevels` can be used to customize the legend in the plot. Examples are
@@ -280,14 +279,14 @@ given as follows:
 
 ```{r plot:sampleMcf, fig.height = 5, fig.width = 7}
 ## Example 1. valve-seat data
-plotMcf(valveMcf, conf.int = TRUE, mark.time = TRUE) + ggplot2::xlab("Days")
+plot(valveMcf, conf.int = TRUE, mark.time = TRUE) + ggplot2::xlab("Days")
 
 ## Example 2. sample simulated data
 ## plot after creating customized levels in legend
 levs <- with(simuDat, expand.grid(levels(group), levels(gender)))
 levs <- do.call(paste, c(as.list(levs), sep = " & "))
-plotMcf(simuMcf, conf.int = TRUE, lty = 1 : 4,
-        legendName = "Treatment & Gender", legendLevels = levs) +
+plot(simuMcf, conf.int = TRUE, lty = 1 : 4,
+     legendName = "Treatment & Gender", legendLevels = levs) +
     ggplot2::xlab("Days") + ggplot2::theme_bw()
 ```
 
@@ -310,7 +309,7 @@ with piecewise constant rate function is shown as follows:
 
 ```{r piecesMcf, fig.height = 5, fig.width = 7}
 piecesMcf <- mcf(piecesFit)
-plotMcf(piecesMcf, conf.int = TRUE, col = "blueviolet") +
+plot(piecesMcf, conf.int = TRUE, col = "blueviolet") +
     ggplot2::xlab("Days") + ggplot2::theme_bw()
 ```
 
@@ -336,7 +335,7 @@ estimated MCFs and their confidence intervals correspondingly.
 newDat <- data.frame(x1 = rep(0, 2), group = c("Treat", "Contr"))
 estmcf <- mcf(splineFit, newdata = newDat, groupName = "Group",
               groupLevels = c("Treatment", "Control"))
-plotMcf(estmcf, conf.int = TRUE, col = c("royalblue", "red"), lty = c(1, 5)) +
+plot(estmcf, conf.int = TRUE, col = c("royalblue", "red"), lty = c(1, 5)) +
     ggplot2::ggtitle("Control vs. Treatment") + ggplot2::xlab("Days")
 ```
 

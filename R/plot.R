@@ -20,11 +20,17 @@
 
 ##' Plot Mean Cumulative Function (MCF)
 ##'
-##' An S4 class generic function dispatched to a certain method
-##' to plot mean cumulative function by using \code{ggplot2} plotting system.
+##'
+##' S4 class methods plotting sample MCF from data or
+##' estimated MCF from a fitted model
+##' by using \code{ggplot2} plotting system.
 ##' The plots generated are able to be further customized properly.
 ##'
-##' @param object An object used to dispatch a method.
+##' @name plotMcf-method
+##' @param x An object used to dispatch a method.
+##' @param y An argument that should be missing and ignored now.
+##' Its existence is just for satisfying the definition of generaic function
+##' \code{plot} in package \code{graphics} for methods' dispatching.
 ##' @param conf.int A logical value indicating
 ##' whether to plot confidence interval.
 ##' The default value is \code{FALSE}.
@@ -39,20 +45,16 @@
 ##' @param col An optional character vector indicating
 ##' line colors specified to different groups.
 ##' @return A \code{ggplot} object.
+##' @examples
+##' ## See examples given in function mcf and rateReg.
 ##' @seealso
 ##' \code{\link{mcf}} for estimation of MCF;
 ##' \code{\link{rateReg}} for model fitting.
-##' @examples
-##' ## See examples given in function mcf and rateReg.
-##' @export
-setGeneric(name = "plotMcf",
-           def = function(object, conf.int = FALSE, ...) {
-               standardGeneric("plotMcf")
-           })
+##' @importFrom graphics plot
+NULL
 
-
-##' @describeIn plotMcf Plot sample MCF from data.
-##' @aliases plotMcf,sampleMcf-method
+##' @rdname plotMcf-method
+##' @aliases plot,sampleMcf-method
 ##' @param legendName An optional length-one charactor vector to specify the
 ##' name for grouping each unique row in \code{newdata}, such as "gender"
 ##' for "male" and "female". The default value is generated from the
@@ -61,22 +63,22 @@ setGeneric(name = "plotMcf",
 ##' each unique row in \code{newdata}, such as "treatment" and "control".
 ##' The default values are generated from the \code{object}.
 ##' @importFrom ggplot2 ggplot geom_step aes aes_string scale_color_manual
-##' scale_linetype_manual ylab ggtitle geom_text
+##' scale_linetype_manual ylab ggtitle geom_text theme element_text
 ##' @export
 setMethod(
-    f = "plotMcf", signature = "sampleMcf",
-    definition = function(object, conf.int = FALSE, mark.time = FALSE,
+    f = "plot", signature = c("sampleMcf", "missing"),
+    definition = function(x, y, conf.int = FALSE, mark.time = FALSE,
                           lty, col, legendName, legendLevels, ...) {
 
         ## nonsense, just to suppress Note from R CMD check --as-cran
         MCF <- event <- lower <- upper <- design <- time <- NULL
 
         ## rename first three columns
-        MCFdat <- object@MCF
+        MCFdat <- x@MCF
         colnames(MCFdat)[seq_len(3)] <- c("ID", "time", "event")
 
         ## if MCF is just for one certain group
-        if (! object@multiGroup) {
+        if (! x@multiGroup) {
             ## add starting point at time 0
             MCFdat <- MCFdat[c(1L, seq_len(nrow(MCFdat))), ]
             MCFdat[1L, 2 : 7] <- 0
@@ -165,25 +167,27 @@ setMethod(
             }
         }
         p <- p + ylab("MCF") + ggtitle("Sample Mean Cumulative Function")
+        ## centered alignment
+        p <- p + theme(plot.title = element_text(hjust = 0.5))
         p
     })
 
 
-##' @describeIn plotMcf Plot estimated MCF from a fitted model.
-##' @aliases plotMcf,rateRegMcf-method
+##' @rdname plotMcf-method
+##' @aliases plot,rateRegMcf-method
 ##' @importFrom ggplot2 ggplot geom_line aes aes_string scale_color_manual
-##' scale_linetype_manual ylab ggtitle
+##' scale_linetype_manual ylab ggtitle theme element_text
 ##' @export
 setMethod(
-    f = "plotMcf", signature = "rateRegMcf",
-    definition = function(object, conf.int = FALSE, lty, col, ...) {
+    f = "plot", signature = c("rateRegMcf", "missing"),
+    definition = function(x, y, conf.int = FALSE, lty, col, ...) {
 
         ## nonsense, just to suppress Note from R CMD check --as-cran
         MCF <- lower <- upper <- time <- NULL
 
-        MCFdat <- object@MCF
+        MCFdat <- x@MCF
         ## if MCF is just for one certain group
-        if (! object@multiGroup) {
+        if (! x@multiGroup) {
             if (missing(lty)) lty <- 1
             if (missing(col)) col <- "black"
             p <- ggplot(data = MCFdat, aes_string(x = "Time")) +
@@ -231,6 +235,8 @@ setMethod(
             }
         }
         p <- p + ylab("MCF") + ggtitle("Estimated Mean Cumulative Function")
+        ## centered alignment
+        p <- p + theme(plot.title = element_text(hjust = 0.5))
         p
     })
 

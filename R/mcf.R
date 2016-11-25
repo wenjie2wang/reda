@@ -86,7 +86,7 @@ NULL
 ##' \url{http://reliawiki.org/index.php/Recurrent_Event_Data_Analysis}
 ##' @seealso
 ##' \code{\link{rateReg}} for model fitting;
-##' \code{\link{plotMcf}} for plotting MCF.
+##' \code{\link{plot}} for plotting MCF.
 ##' @examples
 ##' library(reda)
 ##'
@@ -94,7 +94,7 @@ NULL
 ##' valveMcf <- mcf(Survr(ID, Days, No.) ~ 1, data = valveSeats)
 ##'
 ##' ## plot sample MCF
-##' plotMcf(valveMcf, conf.int = TRUE, mark.time = TRUE) + ggplot2::xlab("Days")
+##' plot(valveMcf, conf.int = TRUE, mark.time = TRUE) + ggplot2::xlab("Days")
 ##'
 ##' ### Example 2. sample simulated data
 ##' simuMcf <- mcf(Survr(ID, time, event) ~ group + gender,
@@ -105,8 +105,8 @@ NULL
 ##' levs <- do.call(paste, c(as.list(levs), sep = " & "))
 ##'
 ##' ## plot sample MCF
-##' plotMcf(simuMcf, conf.int = TRUE, lty = 1 : 4,
-##'         legendName = "Treatment & Gender", legendLevels = levs)
+##' plot(simuMcf, conf.int = TRUE, lty = 1 : 4,
+##'      legendName = "Treatment & Gender", legendLevels = levs)
 ##'
 ##' ## For estimated MCF from a fitted model,
 ##' ## see examples given in function rateReg.
@@ -279,7 +279,7 @@ setMethod(
         }
         colnames(outDat) <- c(varNames, "MCF", "se",
                               "lower", "upper", covar_names)
-        ## remove all censoring rows? not now for plotMcf
+        ## remove all censoring rows? not now for plot
         ## outDat <- base::subset(outDat, event == 1)
         rownames(outDat) <- NULL
         out <- methods::new("sampleMcf",
