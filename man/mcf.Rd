@@ -132,7 +132,7 @@ library(reda)
 valveMcf <- mcf(Survr(ID, Days, No.) ~ 1, data = valveSeats)
 
 ## plot sample MCF
-plotMcf(valveMcf, conf.int = TRUE, mark.time = TRUE) + ggplot2::xlab("Days")
+plot(valveMcf, conf.int = TRUE, mark.time = TRUE) + ggplot2::xlab("Days")
 
 ### Example 2. sample simulated data
 simuMcf <- mcf(Survr(ID, time, event) ~ group + gender,
@@ -143,8 +143,8 @@ levs <- with(simuDat, expand.grid(levels(group), levels(gender)))
 levs <- do.call(paste, c(as.list(levs), sep = " & "))
 
 ## plot sample MCF
-plotMcf(simuMcf, conf.int = TRUE, lty = 1 : 4,
-        legendName = "Treatment & Gender", legendLevels = levs)
+plot(simuMcf, conf.int = TRUE, lty = 1 : 4,
+     legendName = "Treatment & Gender", legendLevels = levs)
 
 ## For estimated MCF from a fitted model,
 ## see examples given in function rateReg.
@@ -162,6 +162,6 @@ Retrieved November 23, 2015, from
 }
 \seealso{
 \code{\link{rateReg}} for model fitting;
-\code{\link{plotMcf}} for plotting MCF.
+\code{\link{plot}} for plotting MCF.
 }
 
