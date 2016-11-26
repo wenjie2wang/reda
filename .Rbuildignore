@@ -1,6 +1,12 @@
-^.*\.Rproj$
+\.tar\.gz$
+\.Rproj$
 ^\.Rproj\.user$
 ^\.Rhistory$
+\.Rcheck$
+^\.Rhistory$
+~$
+^\.\#
+^\#
 ^\.travis\.yml$
 ^\.git$
 ^Makefile$
