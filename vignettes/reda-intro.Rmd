@@ -226,7 +226,7 @@ Bayesian Information Criterion (BIC) by function `BIC`.
 A friendly warning will be thrown out if the numbers of observation were
 different in the model comparison by AIC.
 
-```{r }
+```{r modelSelect}
 AIC(constFit, piecesFit, splineFit)
 BIC(constFit, piecesFit, splineFit)
 ```
