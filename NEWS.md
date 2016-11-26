@@ -35,7 +35,7 @@
 * Added variable "gender" in sample simulated dataset, `simuDat` for a better
   demonstration of sample MCF function.
 
-# Minor changes
+## Minor changes
 
 * Renamed all slot named `boundaryKnots` to `Boundary.knots` for consistency
   with spline functions.
