@@ -31,8 +31,9 @@ Akaike information criterion (AIC) for one or several
 of parameters in the fitted model.
 }
 \details{
-When comparing models fitted by maximum likelihood to the same
-data, the smaller the AIC, the better the fit.
+When comparing models fitted by maximum likelihood to the same data, the
+smaller the AIC, the better the fit. A friendly warning will be thrown out
+if the numbers of observation were different in the model comparison.
 \code{help(AIC, stats)} for other details.
 }
 \examples{

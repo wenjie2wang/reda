@@ -200,15 +200,13 @@ baseRate(splineFit)
 
 ## estimated baseline mean cumulative function (MCF) from a fitted model
 piecesMcf <- mcf(piecesFit)
-plot(piecesMcf, conf.int = TRUE, col = "blueviolet") +
-    ggplot2::xlab("Days") + ggplot2::theme_bw()
+plot(piecesMcf, conf.int = TRUE, col = "blueviolet")
 
 ## estimated MCF for given new data
 newDat <- data.frame(x1 = rep(0, 2), group = c("Treat", "Contr"))
 splineMcf <- mcf(splineFit, newdata = newDat, groupName = "Group",
                  groupLevels = c("Treatment", "Control"))
-plot(splineMcf, conf.int = TRUE, lty = c(1, 5)) +
-    ggplot2::xlab("Days") + ggplot2::theme_bw()
+plot(splineMcf, conf.int = TRUE, lty = c(1, 5)) + ggplot2::xlab("Days")
 }
 \references{
 Fu, H., Luo, J., & Qu, Y. (2016).
