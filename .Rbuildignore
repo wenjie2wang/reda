@@ -3,7 +3,6 @@
 ^\.Rproj\.user$
 ^\.Rhistory$
 \.Rcheck$
-^\.Rhistory$
 ~$
 ^\.\#
 ^\#
