@@ -43,8 +43,7 @@ from the fitted model.
 ## Simulated Sample Recurrent Event Data {#simuDat}
 
 ```{r setup}
-library(reda) # attach package
-data(simuDat) # attach sample dataset
+library(reda)
 ```
 
 First of all, the sample recurrent event data
@@ -138,9 +137,8 @@ function is given as follows:
 
 ```{r sixPieces}
 ## df = 2 will be neglected since knots are explicitly specified
-(piecesFit <- rateReg(Survr(ID, time, event) ~ group + x1, df = 2,
-                      data = simuDat, subset = ID %in% 1:50,
-                      knots = seq(from = 28, to = 140, by = 28)))
+(piecesFit <- rateReg(Survr(ID, time, event) ~ group + x1, data = simuDat,
+                      df = 2, knots = seq(from = 28, to = 140, by = 28)))
 ```
 
 
@@ -166,12 +164,10 @@ plus one if intercept is included in spline bases.
 
 ```{r spline}
 ## internal knots are set as 33% and 67% quantiles of time variable
-(splineFit <- rateReg(Survr(ID, time, event) ~ group + x1,
-                      data = simuDat, subset = ID %in% 1:50,
+(splineFit <- rateReg(Survr(ID, time, event) ~ group + x1, data = simuDat,
                       df = 6, degree = 3, spline = "mSplines"))
 ## or internal knots are expicitly specified
-(splineFit <- rateReg(Survr(ID, time, event) ~ group + x1,
-                      data = simuDat, subset = ID %in% 1:50,
+(splineFit <- rateReg(Survr(ID, time, event) ~ group + x1, data = simuDat,
                       spline = "bSplines", degree = 3L, knots = c(56, 112)))
 ```
 
@@ -200,21 +196,26 @@ to be `FALSE`, respectively, in `summary` method, which would be
 especially useful for a relatively concise summary
 in a reproducible report using **Rmarkdown**, etc.
 
-What's more, the corresponding `coef` and `confint` method
-for point estimates and confidence interval for covariate coefficients
-are provided as well. The estimated coefficients of baseline rate function
-can be given by function `baseRate`.
-Let's take the fitted model with spline rate function as an example.
+What's more, the corresponding `coef` and `confint` method for point
+estimates and confidence interval for covariate coefficients are provided as
+well.  Let's take the fitted model with spline rate function as an example.
 
 ```{r est}
 ## point estimates of covariate coefficients
 coef(splineFit)
 ## confidence interval for covariate coefficients
 confint(splineFit, level = 0.95)
-## estimated coefficients of baseline rate function
-baseRate(splineFit)
 ```
 
+Function `baseRate` produces `baseRateReg-class` object representing the
+estimated baseline rate function for a fitter model. An associated `plot`
+method is available.
+
+
+```{r baseRate, fig.width = 7, fig.height = 5}
+baseRateObj <- baseRate(splineFit)
+plot(baseRateObj, conf.int = TRUE)
+```
 
 ## Model Selection {#modelSelect}
 
