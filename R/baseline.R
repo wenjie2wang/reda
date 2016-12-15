@@ -38,7 +38,8 @@ NULL
 ##' ## See examples given in function rateReg.
 ##' @seealso
 ##' \code{\link{rateReg}} for model fitting;
-##' \code{\link{summary,rateReg-method}} for summary of a fitted model.
+##' \code{\link{summary,rateReg-method}} for summary of a fitted model;
+##' \code{\link{plot,baseRateReg-method}} for ploting method.
 ##' @export
 setGeneric(name = "baseRate",
            def = function(object, ...) {

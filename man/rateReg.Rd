@@ -34,8 +34,8 @@ spline bases.}
 do if the data contains \code{NA}s.  The default is set by the
 na.action setting of \code{\link[base]{options}}.
 The "factory-fresh" default is \code{\link[stats]{na.omit}}.
-Other possible values inlcude \code{\link{na.fail}},
-\code{\link{na.exclude}}, and \code{\link{na.pass}}.
+Other possible values inlcude \code{\link[stats]{na.fail}},
+\code{\link[stats]{na.exclude}}, and \code{\link[stats]{na.pass}}.
 \code{help(na.fail)} for details.}
 
 \item{spline}{An optional character that specifies the flavor of splines.

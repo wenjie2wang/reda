@@ -51,6 +51,7 @@ function or coefficients of spline bases of degree at least one.
 }
 \seealso{
 \code{\link{rateReg}} for model fitting;
-\code{\link{summary,rateReg-method}} for summary of a fitted model.
+\code{\link{summary,rateReg-method}} for summary of a fitted model;
+\code{\link{plot,baseRateReg-method}} for ploting method.
 }
 
