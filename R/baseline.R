@@ -32,8 +32,8 @@ NULL
 ##'
 ##' @param object An object used to dispatch a method.
 ##' @param ... Other arguments for future usage.
-##' @return A named numeric vector.
-##' @aliases baseRate,rateReg-method
+##' @aliases baseRate
+##' @return A \code{baseRate} object.
 ##' @examples
 ##' ## See examples given in function rateReg.
 ##' @seealso
@@ -41,15 +41,84 @@ NULL
 ##' \code{\link{summary,rateReg-method}} for summary of a fitted model.
 ##' @export
 setGeneric(name = "baseRate",
-           def = function(object, ...){
+           def = function(object, ...) {
                standardGeneric("baseRate")
            })
 
 
-##' @describeIn baseRate Extract estiamted coefficients of
-##' baseline rate function from \code{rateReg-class} object.
+##' @describeIn baseRate Estiamted baseline rate from a fitted model.
+##'
+##' @param level An optional numeric value
+##' indicating the confidence level required. The default value is 0.95.
+##' @param control An optional list to specify the time grid
+##' where the baseline rate function is estimated.
+##' The availble elements of the control list include
+##' \code{grid}, \code{length.out}, \code{from} and \code{to}.
+##' The time grid can be directly specified via element \code{grid}.
+##' A dense time grid is suggested.
+##' Element \code{length.out} represents the length of grid points.
+##' The dafault value is 1,000.
+##' Element \code{from} means the starting point of grid with default 0.
+##' Element \code{to} represnts the endpoint of grid
+##' with the right boundary knot as default.
+##' When \code{grid} is missing, the grid will be generated
+##' by \code{seq} (from package \pkg{base})
+##' with arguments \code{from}, \code{to} and \code{length.out}.
+##' @aliases baseRate,rateReg-method
+##' @importFrom stats qnorm
+##' @importFrom splines2 bSpline mSpline
 ##' @export
-setMethod(f = "baseRate", signature = "rateReg",
-          definition = function(object, ...){
-              object@estimates$alpha[, 1L]
-          })
+setMethod(
+    f = "baseRate", signature = "rateReg",
+    definition = function(object, level = 0.95, control = list(), ...) {
+
+        ## baseline rate coefficients
+        alpha <- object@estimates$alpha[, 1L, drop = FALSE]
+
+        ## time grid
+        splinesList <- object@spline
+        knots <- splinesList$knots
+        degree <- splinesList$degree
+        Boundary.knots <- splinesList$Boundary.knots
+        controlist <- c(control, list(Boundary.knots_ = Boundary.knots))
+        control <- do.call("rateReg_mcf_control", controlist)
+        gridTime <- control$grid
+
+        ## remove the grid on the right boundary for piece-wise constant bases?
+        ## gridTime <- gridTime[gridTime < Boundary.knots[2L]]
+
+        ## reconstruct spline basis matrix
+        bList <- list(x = gridTime, knots = knots, degree = degree,
+                      intercept = TRUE, Boundary.knots = Boundary.knots)
+        splineName <- splinesList$spline
+        bMat <- if (splineName == "bSplines") {
+                    do.call(splines2::bSpline, bList)
+                } else if (splineName == "mSplines") {
+                    do.call(splines2::mSpline, bList)
+                } else {
+                    stop("Unknown splines type.")
+                }
+
+        ## point estimates
+        estVec <- as.numeric(bMat %*% alpha)
+
+        ## variance-covariance matrix
+        nBeta <- nrow(object@estimates$beta)
+        ind <- seq_len(nBeta + 1)
+        covMat <- solve(object@fisher)[- ind, - ind, drop = FALSE]
+        seVec <- apply(bMat, 1, function (bVec, covMat) {
+                sqrt(crossprod(bVec, covMat) %*% bVec)
+        }, covMat = covMat)
+
+        ## confidence interval for the given level
+        confBand <- stats::qnorm((1 + level) / 2) * seVec
+        lower <- pmax(0, estVec - confBand)
+        upper <- estVec + confBand
+
+        ## prepare for output
+        outDat <- data.frame(time = gridTime, baseRate = estVec,
+                             se = seVec, lower = lower, upper = upper)
+        out <- new("baseRateReg",
+                   baseRate = outDat,
+                   level = level)
+    })

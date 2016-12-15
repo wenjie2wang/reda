@@ -82,7 +82,7 @@ setMethod(f = "coef", signature = "rateReg",
 ##' Springer texts in statistics, New York: Springer, 2nd Edition.
 ##' @examples
 ##' ## See examples given in function rateReg.
-##' @importFrom stats confint
+##' @importFrom stats confint qnorm
 ##' @export
 setMethod(f = "confint", signature = "rateReg",
           definition = function(object, parm, level = 0.95, ...) {

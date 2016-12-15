@@ -250,3 +250,19 @@ setClass(Class = "rateRegMcf",
              ## else return
              TRUE
          })
+
+
+##' An S4 Class to Represent Estimated Baseline Rate Function
+##'
+##' An S4 class that represents Estimated Baseline Rate Function from model.
+##' \code{\link{baseRate}} produces objects of this class.
+##'
+##' @slot baseRate A data frame.
+##' @slot level A numeric value.
+##' @aliases baseRateReg-class
+##' @seealso \code{\link{baseRate,rateReg-method}} for details of slots.
+##' @importFrom methods setClass
+##' @export
+setClass(Class = "baseRateReg",
+         slots = c(baseRate = "data.frame",
+                   level = "numeric"))

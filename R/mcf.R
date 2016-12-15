@@ -135,7 +135,7 @@ setGeneric(name = "mcf",
 ##' normality of logarithm of the MCF function. (Otherwise, the confidence
 ##' interval will be constructed based on the normality of MCF function.)
 ##' @aliases mcf,formula-method
-##' @importFrom stats na.fail na.omit na.exclude na.pass
+##' @importFrom stats na.fail na.omit na.exclude na.pass qnorm
 ##' @export
 setMethod(
     f = "mcf", signature = "formula",
@@ -307,7 +307,7 @@ setMethod(
 ##' each unique row in \code{newdata}, such as "treatment" and "control".
 ##' The default values are capital letters starting from "A".
 ##' @param control An optional list to specify the time grid
-##' where the MCF are estimated.
+##' where the MCF is estimated.
 ##' The availble elements of the control list include
 ##' \code{grid}, \code{length.out}, \code{from} and \code{to}.
 ##' The time grid can be directly specified via element \code{grid}.

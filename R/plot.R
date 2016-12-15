@@ -18,15 +18,15 @@
 ################################################################################
 
 
-##' Plot Mean Cumulative Function (MCF)
+##' Plot Baseline Rate or Mean Cumulative Function (MCF)
 ##'
 ##'
-##' S4 class methods plotting sample MCF from data or
-##' estimated MCF from a fitted model
-##' by using \code{ggplot2} plotting system.
-##' The plots generated are able to be further customized properly.
+##' S4 class methods plotting sample MCF from data, estimated MCF, or
+##' esttimated baseline rate function from a fitted model by using
+##' \code{ggplot2} plotting system.  The plots generated are thus able to be
+##' further customized properly.
 ##'
-##' @name plotMcf-method
+##' @name plot-method
 ##' @param x An object used to dispatch a method.
 ##' @param y An argument that should be missing and ignored now.
 ##' Its existence is just for satisfying the definition of generaic function
@@ -53,7 +53,7 @@
 ##' @importFrom graphics plot
 NULL
 
-##' @rdname plotMcf-method
+##' @rdname plot-method
 ##' @aliases plot,sampleMcf-method
 ##' @param legendName An optional length-one charactor vector to specify the
 ##' name for grouping each unique row in \code{newdata}, such as "gender"
@@ -173,7 +173,7 @@ setMethod(
     })
 
 
-##' @rdname plotMcf-method
+##' @rdname plot-method
 ##' @aliases plot,rateRegMcf-method
 ##' @importFrom ggplot2 ggplot geom_line aes aes_string scale_color_manual
 ##' scale_linetype_manual ylab ggtitle theme element_text
@@ -235,6 +235,37 @@ setMethod(
             }
         }
         p <- p + ylab("MCF") + ggtitle("Estimated Mean Cumulative Function")
+        ## centered alignment
+        p <- p + theme(plot.title = element_text(hjust = 0.5))
+        p
+    })
+
+
+##' @rdname plot-method
+##' @aliases plot,baseRateReg-method
+##' @importFrom ggplot2 ggplot geom_line aes aes_string
+##' ylab ggtitle theme element_text
+##' @export
+setMethod(
+    f = "plot", signature = c("baseRateReg", "missing"),
+    definition = function(x, y, conf.int = FALSE, lty, col, ...) {
+        ## nonsense, just to suppress Note from R CMD check --as-cran
+        lower <- upper <- time <- NULL
+
+        dat <- x@baseRate
+        if (missing(lty)) lty <- 1
+        if (missing(col)) col <- "black"
+        p <- ggplot(data = dat, aes_string(x = "Time")) +
+            geom_line(mapping = aes(x = time, y = baseRate),
+                      linetype = lty, color = col)
+        if (conf.int) {
+            p <- p + geom_line(mapping = aes(x = time, y = lower),
+                               linetype = "3313", color = col) +
+                geom_line(mapping = aes(x = time, y = upper),
+                          linetype = "3313", color = col)
+        }
+        p <- p + ylab("Hazard Rate") +
+            ggtitle("Estimated Baseline Rate Function")
         ## centered alignment
         p <- p + theme(plot.title = element_text(hjust = 0.5))
         p
