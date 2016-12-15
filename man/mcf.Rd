@@ -64,7 +64,7 @@ each unique row in \code{newdata}, such as "treatment" and "control".
 The default values are capital letters starting from "A".}
 
 \item{control}{An optional list to specify the time grid
-where the MCF are estimated.
+where the MCF is estimated.
 The availble elements of the control list include
 \code{grid}, \code{length.out}, \code{from} and \code{to}.
 The time grid can be directly specified via element \code{grid}.

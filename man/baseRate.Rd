@@ -8,15 +8,33 @@
 \usage{
 baseRate(object, ...)
 
-\S4method{baseRate}{rateReg}(object, ...)
+\S4method{baseRate}{rateReg}(object, level = 0.95, control = list(), ...)
 }
 \arguments{
 \item{object}{An object used to dispatch a method.}
 
 \item{...}{Other arguments for future usage.}
+
+\item{level}{An optional numeric value
+indicating the confidence level required. The default value is 0.95.}
+
+\item{control}{An optional list to specify the time grid
+where the baseline rate function is estimated.
+The availble elements of the control list include
+\code{grid}, \code{length.out}, \code{from} and \code{to}.
+The time grid can be directly specified via element \code{grid}.
+A dense time grid is suggested.
+Element \code{length.out} represents the length of grid points.
+The dafault value is 1,000.
+Element \code{from} means the starting point of grid with default 0.
+Element \code{to} represnts the endpoint of grid
+with the right boundary knot as default.
+When \code{grid} is missing, the grid will be generated
+by \code{seq} (from package \pkg{base})
+with arguments \code{from}, \code{to} and \code{length.out}.}
 }
 \value{
-A named numeric vector.
+A \code{baseRate} object.
 }
 \description{
 An S4 class generic function that returns the estimated coefficients of
@@ -26,8 +44,7 @@ function or coefficients of spline bases of degree at least one.
 }
 \section{Methods (by class)}{
 \itemize{
-\item \code{rateReg}: Extract estiamted coefficients of
-baseline rate function from \code{rateReg-class} object.
+\item \code{rateReg}: Estiamted baseline rate from a fitted model.
 }}
 \examples{
 ## See examples given in function rateReg.

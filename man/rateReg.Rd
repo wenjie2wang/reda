@@ -194,9 +194,9 @@ confint(piecesFit)
 confint(splineFit, "x1", 0.9)
 confint(splineFit, 1, 0.975)
 
-## estimated coefficients for baseline rate function
-baseRate(piecesFit)
-baseRate(splineFit)
+## estimated baseline rate function
+splinesBase <- baseRate(splineFit)
+plot(splinesBase, conf.int = TRUE)
 
 ## estimated baseline mean cumulative function (MCF) from a fitted model
 piecesMcf <- mcf(piecesFit)
@@ -206,7 +206,17 @@ plot(piecesMcf, conf.int = TRUE, col = "blueviolet")
 newDat <- data.frame(x1 = rep(0, 2), group = c("Treat", "Contr"))
 splineMcf <- mcf(splineFit, newdata = newDat, groupName = "Group",
                  groupLevels = c("Treatment", "Control"))
-plot(splineMcf, conf.int = TRUE, lty = c(1, 5)) + ggplot2::xlab("Days")
+plot(splineMcf, conf.int = TRUE, lty = c(1, 5))
+
+## example of further customization by ggplot2
+\dontrun{
+library(ggplot2)
+plot(splineMcf) +
+    geom_ribbon(aes(x = time, ymin = lower,
+                    ymax = upper, fill = Group),
+                data = splineMcf@MCF, alpha = 0.2) +
+    xlab("Days")
+}
 }
 \references{
 Fu, H., Luo, J., & Qu, Y. (2016).
