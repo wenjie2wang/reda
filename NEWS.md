@@ -1,3 +1,20 @@
+# CHANGES IN reda VERSION 0.3.1
+
+## NEW FEATURES
+
+* Added estimated baseline rate function and its confidence band, and
+  corresponding plot method.
+
+## MAJOR CHANGES
+
+* Updated function `baseRate` for estimated baseline rate function instead of
+  the estimated coefficients of spline bases.
+
+## BUG FIXES
+
+* Fixed function `confint` by specifying the correct standard error column.
+
+
 # CHANGES IN reda VERSION 0.3.0
 
 ## NEW FEATURES
