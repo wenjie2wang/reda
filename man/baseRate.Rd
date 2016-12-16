@@ -4,7 +4,7 @@
 \name{baseRate}
 \alias{baseRate}
 \alias{baseRate,rateReg-method}
-\title{Estimated Coefficients of Baseline Rate Function}
+\title{Estimated Baseline Rate Function}
 \usage{
 baseRate(object, ...)
 
@@ -37,10 +37,8 @@ with arguments \code{from}, \code{to} and \code{length.out}.}
 A \code{baseRate} object.
 }
 \description{
-An S4 class generic function that returns the estimated coefficients of
-baseline rate function. For \code{\link{rateReg-class}} object, it returns
-either coefficients of pieceswise (including one piece) constant rate
-function or coefficients of spline bases of degree at least one.
+An S4 class generic function that returns the estimated baseline rate
+function.
 }
 \section{Methods (by class)}{
 \itemize{
