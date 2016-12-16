@@ -23,12 +23,10 @@
 NULL
 
 
-##' Estimated Coefficients of Baseline Rate Function
+##' Estimated Baseline Rate Function
 ##'
-##' An S4 class generic function that returns the estimated coefficients of
-##' baseline rate function. For \code{\link{rateReg-class}} object, it returns
-##' either coefficients of pieceswise (including one piece) constant rate
-##' function or coefficients of spline bases of degree at least one.
+##' An S4 class generic function that returns the estimated baseline rate
+##' function.
 ##'
 ##' @param object An object used to dispatch a method.
 ##' @param ... Other arguments for future usage.
@@ -105,9 +103,9 @@ setMethod(
 
         ## variance-covariance matrix
         nBeta <- nrow(object@estimates$beta)
-        ind <- seq_len(nBeta + 1)
+        ind <- seq_len(nBeta + 1L)
         covMat <- solve(object@fisher)[- ind, - ind, drop = FALSE]
-        seVec <- apply(bMat, 1, function (bVec, covMat) {
+        seVec <- apply(bMat, 1L, function (bVec, covMat) {
                 sqrt(crossprod(bVec, covMat) %*% bVec)
         }, covMat = covMat)
 

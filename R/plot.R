@@ -75,7 +75,7 @@ setMethod(
 
         ## rename first three columns
         MCFdat <- x@MCF
-        colnames(MCFdat)[seq_len(3)] <- c("ID", "time", "event")
+        colnames(MCFdat)[seq_len(3L)] <- c("ID", "time", "event")
 
         ## if MCF is just for one certain group
         if (! x@multiGroup) {

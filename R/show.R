@@ -55,11 +55,11 @@ NULL
 ##' @export
 setMethod(f = "show", signature = "rateReg",
           definition = function(object) {
-              beta <- object@estimates$beta[, 1L]
+              beta <- object@estimates$beta[, "coef"]
               names(beta) <- row.names(object@estimates$beta)
-              theta <- object@estimates$theta[, 1L]
+              theta <- object@estimates$theta[, "parameter"]
               names(theta) <- NULL
-              alpha <- object@estimates$alpha[, 1L]
+              alpha <- object@estimates$alpha[, "coef"]
               names(alpha) <- row.names(object@estimates$alpha)
               cat("Call: \n")
               print(object@call)

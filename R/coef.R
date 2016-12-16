@@ -45,7 +45,7 @@ NULL
 ##' @export
 setMethod(f = "coef", signature = "rateReg",
           definition = function(object, ...) {
-              object@estimates$beta[, 1L]
+              object@estimates$beta[, "coef"]
           })
 
 

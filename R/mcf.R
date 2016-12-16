@@ -330,8 +330,8 @@ setMethod(
                           level = 0.95, na.action, control = list(), ...) {
 
         ## extract model fitting information from object
-        beta <- object@estimates$beta[, 1L]
-        alpha <- object@estimates$alpha[, 1L]
+        beta <- object@estimates$beta[, "coef"]
+        alpha <- object@estimates$alpha[, "coef"]
         fcovnames <- as.character(object@call[[2L]][[3L]])
         covnames <- fcovnames[fcovnames != "+"]
         nBeta <- length(beta)
@@ -443,7 +443,7 @@ setMethod(
 ## compute sample MCF
 sMcf <- function(inpDat, variance, logConfInt, level) {
     ## if time ties, put event time before censoring time
-    inpDat <- inpDat[with(inpDat, base::order(time, 1 - event)), seq_len(3)]
+    inpDat <- inpDat[with(inpDat, base::order(time, 1 - event)), seq_len(3L)]
 
     num_pat <- length(unique(inpDat$ID))
     num_at_risk <- num_pat - cumsum(inpDat$event == 0)
@@ -501,8 +501,8 @@ gradDelta <- function(Xi, iMat, estMcf, coveffi) {
 rateReg_mcf_control <- function(grid, length.out = 1e3, from, to, ...,
                                 Boundary.knots_) {
     ## controls for function MCF with signiture rateReg
-    from <- if (missing(from)) Boundary.knots_[1]
-    to  <- if (missing(to)) Boundary.knots_[2]
+    from <- if (missing(from)) Boundary.knots_[1L]
+    to  <- if (missing(to)) Boundary.knots_[2L]
     if (! missing(grid)) {
         if (! is.numeric(grid) || is.unsorted(grid))
             stop("'grid' specified must be an increasing numeric vector.")
