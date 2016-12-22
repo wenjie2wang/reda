@@ -1,7 +1,7 @@
 Package: reda
 Title: Recurrent Event Data Analysis
-Version: 0.3.1
-Date: 2016-12-15
+Version: 0.3.1.9000
+Date: 2016-12-21
 Authors@R: c(
     person(given = "Wenjie", family = "Wang",
            email = "wenjie.2.wang@uconn.edu",
@@ -41,6 +41,7 @@ Collate:
     'plot.R'
     'reda.R'
     'show.R'
+    'simuData.R'
     'summary.R'
 URL: https://github.com/wenjie2wang/reda
 BugReports: https://github.com/wenjie2wang/reda/issues
