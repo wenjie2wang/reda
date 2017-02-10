@@ -233,4 +233,3 @@ rate function;
 \code{\link{mcf,rateReg-method}} for estimated MCF from a fitted model;
 \code{\link{plot,rateRegMcf-method}} for plotting estimated MCF.
 }
-

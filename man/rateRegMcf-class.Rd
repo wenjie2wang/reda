@@ -35,7 +35,7 @@ Models.  \code{\link{mcf}} produces objects of this class.
 
 \item{\code{multiGroup}}{A logical value.}
 }}
+
 \seealso{
 \code{\link{mcf,rateReg-method}} for details of slots.
 }
-

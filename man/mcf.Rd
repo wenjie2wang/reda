@@ -10,11 +10,11 @@
 mcf(object, ...)
 
 \S4method{mcf}{formula}(object, data, subset, na.action,
-    variance = c("Poisson", "LawlessNadeau"), logConfInt = TRUE,
-    level = 0.95, ...)
+  variance = c("Poisson", "LawlessNadeau"), logConfInt = TRUE,
+  level = 0.95, ...)
 
 \S4method{mcf}{rateReg}(object, newdata, groupName, groupLevels, level = 0.95,
-    na.action, control = list(), ...)
+  na.action, control = list(), ...)
 }
 \arguments{
 \item{object}{An object used to dispatch a method.}
@@ -125,6 +125,7 @@ for the given newdata based on Delta-method.
 
 \item \code{rateReg}: Estimated MCF from a fitted model.
 }}
+
 \examples{
 library(reda)
 
@@ -164,4 +165,3 @@ Retrieved November 23, 2015, from
 \code{\link{rateReg}} for model fitting;
 \code{\link{plot-method}} for plotting MCF.
 }
-

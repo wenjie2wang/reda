@@ -44,4 +44,3 @@ if the numbers of observation were different in the model comparison.
 \code{\link{summary,rateReg-method}} for summary of a fitted model;
 \code{\link{BIC,rateReg-method}} for BIC.
 }
-

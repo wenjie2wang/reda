@@ -1,9 +1,10 @@
 # reda
 
-The R package **reda** provides function fitting gamma frailty model with
-baseline rate function modeled by regression splines for recurrent event data,
-as well as functions computing and ploting the mean cumulative funciton from
-sample (Nelson-Aalen estimator) and the fitted frailty model.
+The R package **reda** provides function Functions that fit gamma frailty model
+with spline or piecewise constant baseline rate function for recurrent event
+data, compute and plot parametric mean cumulative function (MCF) from a fitted
+model as well as nonparametric sample MCF (Nelson-Aalen estimator) are provided.
+Most functions are S4 methods that produce S4 class objects.
 
 
 ## Installation of CRAN Version
@@ -28,14 +29,6 @@ installing it with the help of **devtools** by
 
 ```R
 devtools::install_github("wenjie2wang/reda", ref = "dev")
-```
-
-or cloning this reposotory to local and install by makefile as follows:
-
-```
-git clone https://github.com/wenjie2wang/reda.git
-cd reda
-make install
 ```
 
 

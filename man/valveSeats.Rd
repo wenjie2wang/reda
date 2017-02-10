@@ -23,4 +23,3 @@ Nelson, W. (1995), Confidence Limits for Recurrence
 Data-Applied to Cost or Number of Product Repairs, \emph{Technometrics},
 37, 147--157.
 }
-

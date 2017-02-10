@@ -30,7 +30,7 @@ of \code{rateReg-class} object.  See ``Slots'' for details.
 
 \item{\code{logL}}{A numeric value.}
 }}
+
 \seealso{
 \code{\link{summary,rateReg-method}} for details of slots.
 }
-

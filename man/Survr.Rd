@@ -43,4 +43,3 @@ The checking rules include that
 \seealso{
 \code{\link{rateReg}} for model fitting.
 }
-

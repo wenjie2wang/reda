@@ -38,7 +38,7 @@ See ``Slots'' for details.
 
 \item{\code{fisher}}{A numeric matrix.}
 }}
+
 \seealso{
 \code{\link{rateReg}} for details of slots.
 }
-

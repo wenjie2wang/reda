@@ -43,4 +43,3 @@ data, the smaller the BIC, the better the fit.
 \code{\link{summary,rateReg-method}} for summary of a fitted model;
 \code{\link{AIC,rateReg-method}} for AIC.
 }
-

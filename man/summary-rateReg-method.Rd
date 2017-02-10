@@ -54,4 +54,3 @@ of covariate coeffcients;
 \code{\link{baseRate,rateReg-method}} for coefficients of baseline
 rate function.
 }
-

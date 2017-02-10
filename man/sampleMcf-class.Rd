@@ -25,7 +25,7 @@ An S4 class that represents sample mean cumulative function (MCF) from data.
 
 \item{\code{level}}{A numeric value.}
 }}
+
 \seealso{
 \code{\link{mcf,formula-method}} for details of slots.
 }
-

@@ -2,17 +2,17 @@
 % Please edit documentation in R/plot.R
 \docType{methods}
 \name{plot-method}
-\alias{plot,baseRateReg,missing-method}
-\alias{plot,baseRateReg-method}
-\alias{plot,rateRegMcf,missing-method}
-\alias{plot,rateRegMcf-method}
+\alias{plot-method}
 \alias{plot,sampleMcf,missing-method}
 \alias{plot,sampleMcf-method}
-\alias{plot-method}
+\alias{plot,rateRegMcf,missing-method}
+\alias{plot,rateRegMcf-method}
+\alias{plot,baseRateReg,missing-method}
+\alias{plot,baseRateReg-method}
 \title{Plot Baseline Rate or Mean Cumulative Function (MCF)}
 \usage{
 \S4method{plot}{sampleMcf,missing}(x, y, conf.int = FALSE,
-     mark.time = FALSE, lty, col, legendName, legendLevels, ...)
+  mark.time = FALSE, lty, col, legendName, legendLevels, ...)
 
 \S4method{plot}{rateRegMcf,missing}(x, y, conf.int = FALSE, lty, col, ...)
 
@@ -68,4 +68,3 @@ further customized properly.
 \code{\link{mcf}} for estimation of MCF;
 \code{\link{rateReg}} for model fitting.
 }
-

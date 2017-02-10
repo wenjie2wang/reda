@@ -95,9 +95,9 @@ setMethod(f = "confint", signature = "rateReg",
               estCoef <- betaMat[, "coef"]
               pnames <- attr(betaMat, "dimnames")[[1L]]
               if (missing(parm)) {
-                  parm <- seq(nrow(betaMat))
+                  parm <- seq_len(nrow(betaMat))
               } else if (is.numeric(parm)) {
-                  parm <- intersect(seq(nrow(betaMat)), parm)
+                  parm <- intersect(seq_len(nrow(betaMat)), parm)
               } else if (is.character(parm)) {
                   parm <- match(parm, pnames, nomatch = NULL)
               } else {

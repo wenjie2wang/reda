@@ -49,4 +49,3 @@ Springer texts in statistics, New York: Springer, 2nd Edition.
 of covariate coefficients;
 \code{\link{summary,rateReg-method}} for summary of a fitted model.
 }
-

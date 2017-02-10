@@ -15,4 +15,3 @@ for recurrent event data.
 \details{
 See vignettes for introduction and demonstration.
 }
-

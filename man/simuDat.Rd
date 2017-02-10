@@ -33,4 +33,3 @@ Fu, H., Luo, J., & Qu, Y. (2016).
 Hypoglycemic events analysis via recurrent time-to-event (HEART) models.
 \emph{Journal Of Biopharmaceutical Statistics}, 26(2), 280--298.
 }
-

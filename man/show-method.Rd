@@ -2,11 +2,11 @@
 % Please edit documentation in R/show.R
 \docType{methods}
 \name{show-method}
-\alias{show,rateReg-method}
-\alias{show,rateRegMcf-method}
-\alias{show,sampleMcf-method}
-\alias{show,summaryRateReg-method}
 \alias{show-method}
+\alias{show,rateReg-method}
+\alias{show,summaryRateReg-method}
+\alias{show,sampleMcf-method}
+\alias{show,rateRegMcf-method}
 \title{Show an object.}
 \usage{
 \S4method{show}{rateReg}(object)
@@ -42,4 +42,3 @@ An S4 class generic function that displays certain object.
 \code{\link{summary,rateReg-method}} for summary of a fitted model;
 \code{\link{mcf}} for estimation of MCF.
 }
-

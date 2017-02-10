@@ -15,7 +15,7 @@ An S4 class that represents Estimated Baseline Rate Function from model.
 
 \item{\code{level}}{A numeric value.}
 }}
+
 \seealso{
 \code{\link{baseRate,rateReg-method}} for details of slots.
 }
-
