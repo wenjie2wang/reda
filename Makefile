@@ -28,7 +28,10 @@ preview: $(vignettes)
 
 
 $(tar): $(objects)
-	@make -s updateMeta
+	@if [ "$$(uname)" == "Darwin" ];\
+	then echo "remeber to update date and version number";\
+	else make -s updateMeta;\
+	fi;\
 	Rscript -e "library(methods); devtools::document();";
 	R CMD build $(dir)
 
