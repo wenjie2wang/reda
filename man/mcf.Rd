@@ -139,13 +139,9 @@ plot(valveMcf, conf.int = TRUE, mark.time = TRUE) + ggplot2::xlab("Days")
 simuMcf <- mcf(Survr(ID, time, event) ~ group + gender,
                data = simuDat, ID \%in\% 1 : 50, logConfInt = FALSE)
 
-## create customized levels in legend
-levs <- with(simuDat, expand.grid(levels(group), levels(gender)))
-levs <- do.call(paste, c(as.list(levs), sep = " & "))
-
 ## plot sample MCF
 plot(simuMcf, conf.int = TRUE, lty = 1 : 4,
-     legendName = "Treatment & Gender", legendLevels = levs)
+     legendName = "Treatment & Gender")
 
 ## For estimated MCF from a fitted model,
 ## see examples given in function rateReg.

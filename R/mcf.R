@@ -100,13 +100,9 @@ NULL
 ##' simuMcf <- mcf(Survr(ID, time, event) ~ group + gender,
 ##'                data = simuDat, ID %in% 1 : 50, logConfInt = FALSE)
 ##'
-##' ## create customized levels in legend
-##' levs <- with(simuDat, expand.grid(levels(group), levels(gender)))
-##' levs <- do.call(paste, c(as.list(levs), sep = " & "))
-##'
 ##' ## plot sample MCF
 ##' plot(simuMcf, conf.int = TRUE, lty = 1 : 4,
-##'      legendName = "Treatment & Gender", legendLevels = levs)
+##'      legendName = "Treatment & Gender")
 ##'
 ##' ## For estimated MCF from a fitted model,
 ##' ## see examples given in function rateReg.
@@ -195,6 +191,7 @@ setMethod(
             stop("'1' or covariates must be specified in formula.")
         Terms <- stats::terms(object)
         ord <- attr(Terms, "order")
+
         if (length(ord) & any(ord != 1))
             stop("Interaction terms are not valid for this function.")
 
@@ -206,25 +203,24 @@ setMethod(
             check_Survr(resp, check = TRUE)
         }
 
-        ## Sorted data by ID, time, and event
-        ord <- attr(resp, "ord")
-        ## number of covariates excluding intercept
-        nBeta <- ncol(mm) - 1L
+        ## number of covariates
+        nBeta <- length(mf) - 1L
 
-        ## data matrix processed
+        ## data processed
+        dat <- as.data.frame(mf[[1L]])
         if (nBeta) {
-            xMat <- mm[ord, - 1L, drop = FALSE]
             ## covariates' names
-            covar_names <- colnames(mm)[- 1L]
+            covar_names <- names(mf)[- 1L]
+            dat1 <- data.frame(lapply(mf[- 1L], factor))
+            dat <- cbind(dat, dat1)
         } else {
-            xMat <- covar_names <- NULL
+            covar_names <- NULL
         }
-        dat <- as.data.frame(cbind(resp[ord, ], xMat))
         colnames(dat) <- c("ID", "time", "event", covar_names)
         ## revert subject ID
-        dat$ID <- attr(resp, "ID_")[ord]
+        dat$ID <- attr(resp, "ID_")
 
-        ## ouput: variable names in formula
+        ## for ouput: get variable names in formula response
         varNames <- as.character(object[[2L]])[- 1L]
         argNames <- names(object[[2L]])[- 1L]
         ID_idx <- match("ID", argNames, 1L)
@@ -260,15 +256,17 @@ setMethod(
 
         ## else at least one covariate are specified
         ## get the levels for each covaraite in form of grid
-        xGrid <- unique(xMat)
+        xGrid <- unique(dat1)
         levs <- apply(xGrid, 1, paste, collapse = "_")
-        datLevs <- apply(xMat, 1, paste, collapse = "_")
+        datLevs <- apply(dat1, 1, paste, collapse = "_")
+
         ## number of levels
         num_levels <- NROW(xGrid)
         if (num_levels == 1L)
             warning("The covariate has only one level.")
 
         outDat <- data.frame(matrix(NA, nrow = nrow(mm), ncol = 7L + nBeta))
+        colIdx <- seq_len(7L)
         for (i in seq(num_levels)) {
             subDat <- dat[datLevs %in% levs[i], ]
             rowLen <- nrow(subDat)
@@ -278,15 +276,26 @@ setMethod(
                           seq(from = rowInd[length(rowInd)] + 1L, by = 1L,
                               length.out = rowLen)
                       }
-            outDat[rowInd, seq_len(7)] <- sMcf(subDat, variance,
-                                               logConfInt, level)
-            outDat[rowInd, - seq_len(7)] <- rep(xGrid[i, ], each = rowLen)
+            outDat[rowInd, colIdx] <- sMcf(subDat, variance,
+                                           logConfInt, level)
+            outDat[rowInd, - colIdx] <- xGrid[i, ]
         }
+        ## revert original ID
+        outDat[, 1L] <- factor(levels(attr(resp, "ID_"))[outDat[, 1L]])
         colnames(outDat) <- c(varNames, "MCF", "se",
                               "lower", "upper", covar_names)
-        ## remove all censoring rows? not now for plot
+
+        ## factorize covariates
+        outCol <- ncol(outDat)
+        for (j in seq_len(nBeta)) {
+            outDat[, outCol + 1 - j] <-
+                factor(levels(dat1[[nBeta + 1 - j]])[outDat[, outCol + 1 - j]])
+        }
+
+        ## remove all censoring rows? no for plot
         ## outDat <- base::subset(outDat, event == 1)
         rownames(outDat) <- NULL
+
         out <- methods::new("sampleMcf",
                             formula = object,
                             MCF = outDat,
