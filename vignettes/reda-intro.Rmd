@@ -1,5 +1,5 @@
 ---
-title: "Introduction to reda by Examples"
+title: "Introduction to reda through Examples"
 author: Wenjie Wang
 date: "`r Sys.Date()`"
 bibliography:
@@ -137,9 +137,8 @@ even if it is specified. An example of model with six pieces' constant rate
 function is given as follows:
 
 ```{r sixPieces}
-## df = 2 will be neglected since knots are explicitly specified
 (piecesFit <- rateReg(Survr(ID, time, event) ~ group + x1, data = simuDat,
-                      df = 2, knots = seq(from = 28, to = 140, by = 28)))
+                      knots = seq(from = 28, to = 140, by = 28)))
 ```
 
 
@@ -287,11 +286,8 @@ given as follows:
 plot(valveMcf, conf.int = TRUE, mark.time = TRUE) + ggplot2::xlab("Days")
 
 ## Example 2. sample simulated data
-## plot after creating customized levels in legend
-levs <- with(simuDat, expand.grid(levels(group), levels(gender)))
-levs <- do.call(paste, c(as.list(levs), sep = " & "))
-plot(simuMcf, conf.int = TRUE, lty = 1 : 4, legendName = "Treatment & Gender",
-     legendLevels = levs) + ggplot2::xlab("Days")
+plot(simuMcf, conf.int = TRUE, lty = 1 : 4,
+     legendName = "Treatment & Gender") + ggplot2::xlab("Days")
 ```
 
 Note that all the censoring time can be marked on the
