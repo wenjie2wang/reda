@@ -54,7 +54,7 @@ check_Survr <- function(dat, check, ...) {
     ord <- attr(dat, "ord")
     sortDat <- if (is.null(ord)) {
                    ## sort the data by ID, time, and event
-                   as.data.frame(dat[(ord <- order(ID, time, event)), ])
+                   as.data.frame(dat[(ord <- order(ID, time, 1 - event)), ])
                } else {
                    as.data.frame(dat[ord, ])
                }
