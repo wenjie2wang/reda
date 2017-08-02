@@ -1,7 +1,7 @@
 citHeader("To cite reda in publications use:")
 
 citEntry(entry = "Manual",
-         Title = "{reda}: {R}ecurrent Event Data Analysis}",
+         Title = "{reda}: {R}ecurrent Event Data Analysis",
          Author = personList(as.person("Wenjie Wang"),
                              as.person("Haoda Fu"),
                              as.person("Jun Yan")),
