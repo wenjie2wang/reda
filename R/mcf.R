@@ -226,6 +226,11 @@ setMethod(
 
         ## ouput: variable names in formula
         varNames <- as.character(object[[2L]])[- 1L]
+        argNames <- names(object[[2L]])[- 1L]
+        ID_idx <- match("ID", argNames, 1L)
+        time_idx <- match("time", argNames, 2L)
+        event_idx <- match("event", argNames, 3L)
+        varNames <- varNames[c(ID_idx, time_idx, event_idx)]
 
         ## output: na.action
         na.action <- if (is.null(attr(mm, "na.action"))) {
@@ -446,7 +451,7 @@ sMcf <- function(inpDat, variance, logConfInt, level) {
     inpDat <- inpDat[with(inpDat, base::order(time, 1 - event)), seq_len(3L)]
 
     num_pat <- length(unique(inpDat$ID))
-    num_at_risk <- num_pat - cumsum(inpDat$event == 0)
+    num_at_risk <- num_pat - cumsum(inpDat$event != 1)
     increment <- ifelse(inpDat$event, 1 / num_at_risk, 0)
 
     ## index of unique event and censoring time
@@ -472,7 +477,9 @@ sMcf <- function(inpDat, variance, logConfInt, level) {
 
     ## Confidence interval for log(MCF) or MCF
     if (logConfInt) {
-        criVal <- stats::qnorm(0.5 + level / 2) * se_smcf / smcf
+        criVal <- ifelse(smcf > 0,
+                         stats::qnorm(0.5 + level / 2) * se_smcf / smcf,
+                         0)
         wtonexp <- exp(criVal)
         upper <- smcf * wtonexp
         lower <- smcf / wtonexp
