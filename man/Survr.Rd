@@ -4,14 +4,19 @@
 \alias{Survr}
 \title{Formula Response for Recurrent Event Data}
 \usage{
-Survr(ID, time, event, check = TRUE, ...)
+Survr(ID, time, event, origin = 0, check = TRUE, ...)
 }
 \arguments{
-\item{ID}{Identificator of each subject.}
+\item{ID}{Subject identificator.}
 
-\item{time}{Time of reccurence event or censoring.}
+\item{time}{Time of reccurence event or censoring. In addition to numeric
+values, \code{Date} and \code{difftime} are also supported.}
 
-\item{event}{The status indicator, 0 = censored, 1 = event.}
+\item{event}{The event indicator, \code{0 = censored}, \code{1 = event}.}
+
+\item{origin}{The time origin of each subject or process. Different subjects
+may have different origins. However, one subject must have the same
+origin.}
 
 \item{check}{Logical value suggesting whether to perform data checking
 procedure. The default value is \code{TRUE}. \code{FALSE} should be set
@@ -30,14 +35,15 @@ The last letter 'r' in 'Survr' represents 'rate'.
 This is a similar function to \code{Survr} in package
 \pkg{survrec} but with a more considerate checking procedure embedded for
 recurrent event data modeled by methods based on counts and rate function.
-The checking rules include that
+The checking rules apply to each subject and include that
 \itemize{
-    \item Identification of each subject cannot be missing.
+    \item Subject identification, event times, censoring time, and event
+        indicator cannot be missing or contain missing values.
     \item Event indicator must be coded as 0 (censored) or 1 (event).
-    \item Event time and censoring time must be numeric
-        and cannot be missing.
-    \item Each subject must have only one censoring time.
-    \item Event time cannot not be later than censoring time.
+    \item There has to be only one censoring time not earlier than
+        any event time.
+    \item The time origin has to be the same and not later than any event
+        time.
 }
 }
 \seealso{
