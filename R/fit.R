@@ -236,7 +236,7 @@ NULL
 ##' \code{\link{plot,rateRegMcf-method}} for plotting estimated MCF.
 ##' @importFrom splines2 ibs iSpline
 ##' @importFrom stats na.fail na.omit na.exclude na.pass .getXlevels
-##' model.extract
+##' model.extract predict
 ##' @export
 rateReg <- function(formula, data, subset, df = NULL, knots = NULL, degree = 0L,
                     na.action, spline = c("bSplines", "mSplines"),
@@ -293,8 +293,8 @@ rateReg <- function(formula, data, subset, df = NULL, knots = NULL, degree = 0L,
         attr(resp, "ID_") <- attr(resp, "ID_")[- na.action]
         ## check data for possible error caused by removal of missing values
         if (control$verbose)
-            message(paste("Observations with missing value in covariates",
-                          "are removed.\nChecking the new dataset again."),
+            message("Observations with missing value in covariates ",
+                    "are removed.\nChecking the new dataset again.",
                     appendLF = FALSE)
         check_Survr(resp, check = TRUE)
         if (control$verbose)
@@ -306,12 +306,13 @@ rateReg <- function(formula, data, subset, df = NULL, knots = NULL, degree = 0L,
     ## data matrix processed
     xMat <- mm[ord, - 1L, drop = FALSE]
     dat <- as.data.frame(cbind(resp[ord, ], xMat))
-    colnames(dat) <- c("ID", "time", "event", covar_names)
+    colnames(dat) <- c("ID", "time", "event", "origin", covar_names)
     nObs <- nrow(dat)
 
     ## set up boundary knots
     Boundary.knots <- if (is.null(control$Boundary.knots)) {
-                          c(0, max(dat$time, na.rm = TRUE))
+                          with(dat, c(min(origin, na.rm = TRUE),
+                                      max(time, na.rm = TRUE)))
                       } else {
                           control$Boundary.knots
                       }
@@ -330,6 +331,8 @@ rateReg <- function(formula, data, subset, df = NULL, knots = NULL, degree = 0L,
                                   Boundary.knots = Boundary.knots)
         bMat <- attr(iMat, "msMat")
     }
+    iMat0 <- predict(iMat, dat$origin)
+    iMat <- iMat - iMat0
 
     ## update df, knots, degree, and Boundary.knots
     knots <- as.numeric(attr(iMat, "knots"))
@@ -346,9 +349,9 @@ rateReg <- function(formula, data, subset, df = NULL, knots = NULL, degree = 0L,
 
     ## check whether the knots are reasonable
     if (any(colSums(bMat[dat$event == 1, , drop = FALSE]) == 0)) {
-        stop(paste("Some spline basis does not capture any event time",
-                   "and thus is possibly redundent.",
-                   "\nPlease adjust knots or degree."))
+        stop("Some spline basis does not capture any event time ",
+             "and thus is possibly redundent.",
+             "\nPlease adjust spline knots or degree.")
     }
 
     ## prepare anything needed in LogL_rateReg but free from parameters
@@ -554,8 +557,8 @@ rateReg_start <- function (beta, theta = 0.5, alpha, ..., nBeta_, nAlpha_) {
     if (missing(beta)) {
         beta <- rep(0.1, nBeta_)
     } else if (length(beta) != nBeta_) {
-        stop(paste("Number of starting values for coefficients of covariates",
-                   "does not match with the specified formula."))
+        stop("Number of starting values for coefficients of covariates ",
+             "does not match with the specified formula.")
     }
     if (theta <= 0)
         stop("Value of parameter for random effects must be > 0.")

@@ -29,16 +29,20 @@ check_Survr <- function(dat, check, ...) {
     ID <- dat[, "ID"]
     time <- dat[, "time"]
     event <- dat[, "event"]
+    origin <- dat[, "origin"]
 
-    ## event time must be numeric
-    if (! is.numeric(time))
-        stop("'time' must be numeric.")
-    ## check missing value on 'ID'
     if (any(is.na(ID)))
-        stop("'ID' cannot be missing.")
-    ## check coding and missing value on 'event'
+        stop("'ID' cannot contain missing values.")
+    if (inherits(time, "difftime") || inherits(time, "Date"))
+        time <- unclass(time)
+    if (! is.numeric(time))
+        stop("Time variable must be 'numeric', 'difftime' or 'Date'.")
     if (any(! event %in% c(0, 1)))
         stop("'event' must be coded as 0 (censoring) or 1 (event).")
+    if (inherits(origin, "Date"))
+        origin <- unclass(origin)
+    if (! is.numeric(origin))
+        stop("Origin variable must be 'numeric' or 'Date'.")
 
     ## if dat input has an attr 'ID_' for internal usage
     ID_ <- attr(dat, "ID_")
@@ -63,33 +67,55 @@ check_Survr <- function(dat, check, ...) {
         sID <- sortDat[, "ID"]
         sTime <- sortDat[, "time"]
         sEvent <- sortDat[, "event"]
+        sOrigin <- sortDat[, "origin"]
         sIDnam <- IDnam[ord]
 
         ## issue 1: event time after censoring time or without censoring time
-        idx1 <- ! duplicated(sID, fromLast = TRUE) & sEvent != 0
-        if (any(idx1)) {
-            stop(paste("Every subject must have one censored time",
-                       "later than event times.",
-                       "\nPlease check subject:",
-                       paste(sIDnam[idx1], collapse = ", ")))
+        idx <- ! duplicated(sID, fromLast = TRUE) & sEvent != 0
+        if (any(idx)) {
+            stop("Every subject must have one censored time ",
+                 "not earlier than any event time.",
+                 "\nPlease check subject: ",
+                 paste(sIDnam[idx], collapse = ", "), ".")
         }
 
         ## issue 2: more than one censoring time
         cenID <- sIDnam[sEvent != 1]
-        idx2 <- duplicated(cenID)
-        if (any(idx2)) {
-            stop(paste("Every subject must have only one censored time.",
-                       "\nPlease check subject:",
-                       paste(cenID[idx2], collapse = ", ")))
+        idx <- duplicated(cenID)
+        if (any(idx)) {
+            stop("Every subject must have only one censored time.",
+                 "\nPlease check subject: ",
+                 paste(cenID[idx], collapse = ", "), ".")
         }
 
         ## stop if missing value of 'time'
-        idx3 <- is.na(sTime)
-        if (any(idx3)) {
-            tmpID <- unique(sIDnam[idx3])
-            stop(paste("Event or censoring times cannot be missing.",
-                       "\nPlease check subject:",
-                       paste(tmpID, collapse = ", ")))
+        idx <- is.na(sTime)
+        if (any(idx)) {
+            tmpID <- unique(sIDnam[idx])
+            stop("Event or censoring times cannot be missing.",
+                 "\nPlease check subject: ",
+                 paste(tmpID, collapse = ", "), ".")
+        }
+
+        ## 'time' has to be later than the 'origin'
+        idx <- sTime < sOrigin
+        if (any(idx)) {
+            tmpID <- unique(sIDnam[idx])
+            stop("Event times cannot be earlier than the origin time.",
+                 "\nPlease check subject: ",
+                 paste(tmpID, collapse = ", "), ".")
+        }
+
+        ## For one subject, the 'origin' has to be the same
+        tmp <- tapply(sOrigin, sIDnam, function(a) {
+            length(unique(a))
+        })
+        idx <- tmp > 1
+        if (any(idx)) {
+            tmpID <- unique(names(tmp)[idx])
+            stop("The origin variable has to be the same for one subject.",
+                 "\nPlease check subject: ",
+                 paste(tmpID, collapse = ", "), ".")
         }
     }
     ## return
