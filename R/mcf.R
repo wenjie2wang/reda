@@ -346,8 +346,7 @@ setMethod(
         ## extract model fitting information from object
         beta <- object@estimates$beta[, "coef"]
         alpha <- object@estimates$alpha[, "coef"]
-        fcovnames <- as.character(object@call[[2L]][[3L]])
-        covnames <- fcovnames[fcovnames != "+"]
+        covnames <- names(beta)
         nBeta <- length(beta)
         knots <- object@spline$knots
         degree <- object@spline$degree
@@ -360,10 +359,19 @@ setMethod(
         n_xx <- control$length.out
 
         ## baseline rate basis matrix
-        iMat <- splines2::ibs(x = gridTime, knots = knots,
-                              degree = degree, intercept = TRUE,
-                              Boundary.knots = Boundary.knots)
-        bMat <- attr(iMat, "bsMat")
+        spline <- object@spline$spline
+        if (identical(spline, "bSplines")) {
+            iMat <- splines2::ibs(x = gridTime, knots = knots,
+                                  degree = degree, intercept = TRUE,
+                                  Boundary.knots = Boundary.knots)
+            bMat <- attr(iMat, "bsMat")
+        } else if (identical(spline, "mSplines")) {
+            iMat <- splines2::iSpline(x = gridTime, knots = knots,
+                                      degree = degree, intercept = TRUE,
+                                      Boundary.knots = Boundary.knots)
+            bMat <- attr(iMat, "msMat")
+        } else
+            stop("Unknown splines.")
 
         ## estimated MCF
         estMcf <- as.vector(iMat %*% alpha)
