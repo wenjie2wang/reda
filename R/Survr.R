@@ -18,9 +18,56 @@
 ################################################################################
 
 
-## collation after class.R
-##' @include class.R
-NULL
+##' Formula Response for Recurrent Event Data
+##'
+##' \code{Survr} is an S3 class that represents
+##' formula response for recurrent event data
+##' modeled by methods based on counts and rate function.
+##' The last letter 'r' in 'Survr' represents 'rate'.
+##'
+##' This is a similar function to \code{Survr} in package
+##' \pkg{survrec} but with a more considerate checking procedure embedded for
+##' recurrent event data modeled by methods based on counts and rate function.
+##' The checking rules apply to each subject and include that
+##' \itemize{
+##'     \item Subject identification, event times, censoring time, and event
+##'         indicator cannot be missing or contain missing values.
+##'     \item Event indicator must be coded as 0 (censored) or 1 (event).
+##'     \item There has to be only one censoring time not earlier than
+##'         any event time.
+##'     \item The time origin has to be the same and not later than any event
+##'         time.
+##' }
+##'
+##' @param ID Subject identificator.
+##' @param time Time of reccurence event or censoring. In addition to numeric
+##'     values, \code{Date} and \code{difftime} are also supported.
+##' @param event The event indicator, \code{0 = censored}, \code{1 = event}.
+##' @param origin The time origin of each subject or process. Different subjects
+##'     may have different origins. However, one subject must have the same
+##'     origin.
+##' @param check Logical value suggesting whether to perform data checking
+##'     procedure. The default value is \code{TRUE}. \code{FALSE} should be set
+##'     with caution and only for processed data already in recerruent event
+##'     data framework.
+##' @param ... Other arguments for future usage.
+##' @aliases Survr
+##' @seealso \code{\link{rateReg}} for model fitting.
+##' @export
+Survr <- function(ID, time, event, origin = 0, check = TRUE, ...) {
+    if (missing(ID))
+        stop("ID variable cannot be missing.")
+    if (missing(time))
+        stop("Time varibale cannot be missing.")
+    if (missing(event))
+        stop("Event variable cannot be missing.")
+
+    dat <- data.frame(ID = ID, time = time, event = event, origin = origin)
+    dat <- check_Survr(dat, check = check)
+    attr(dat, "check") <- check
+    class(dat) <- c("matrix", "Survr")
+    invisible(dat)
+}
 
 
 ### internal function ==========================================================
