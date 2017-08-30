@@ -25,15 +25,14 @@ NULL
 
 ##' Formula Response for Recurrent Event Data
 ##'
-##' \code{Survr} is an S3 class that represents
+##' \code{Survr} is an S4 class that represents
 ##' formula response for recurrent event data
 ##' modeled by methods based on counts and rate function.
-##' The last letter 'r' in 'Survr' represents 'rate'.
 ##'
 ##' This is a similar function to \code{Survr} in package
 ##' \pkg{survrec} but with a more considerate checking procedure embedded for
 ##' recurrent event data modeled by methods based on counts and rate function.
-##' The checking rules apply to each subject and include that
+##' The checking rules apply to each subject respectively and include that
 ##' \itemize{
 ##'     \item Subject identification, event times, censoring time, and event
 ##'         indicator cannot be missing or contain missing values.

@@ -25,10 +25,7 @@
 ##' See ``Slots'' for details.
 ##'
 ##' @slot .Data A numeric matrix object.
-##' @slot ID Charactrer vector for subject identificator.
-##' @slot time Numeric vector for times of reccurence event or censoring.
-##' @slot event Integer vector for event indicator, 0 = censored, 1 = event.
-##' @slot origin Numeric vector for origin times.
+##' @slot ID Charactrer vector for original subject identificator.
 ##' @slot check Logical value indicating whether to performance data checking.
 ##' @slot ord integer vector for increasingly ordering data by ID, time, and 1 -
 ##'     event.
@@ -36,9 +33,6 @@
 ##' @export
 setClass("Survr", contains = "matrix",
          slots = c(ID = "factor",
-                   time = "numeric",
-                   event = "integer",
-                   origin = "numeric",
                    check = "logical",
                    ord = "integer"))
 

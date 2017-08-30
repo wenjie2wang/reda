@@ -14,13 +14,7 @@ See ``Slots'' for details.
 \describe{
 \item{\code{.Data}}{A numeric matrix object.}
 
-\item{\code{ID}}{Charactrer vector for subject identificator.}
-
-\item{\code{time}}{Numeric vector for times of reccurence event or censoring.}
-
-\item{\code{event}}{Integer vector for event indicator, 0 = censored, 1 = event.}
-
-\item{\code{origin}}{Numeric vector for origin times.}
+\item{\code{ID}}{Charactrer vector for original subject identificator.}
 
 \item{\code{check}}{Logical value indicating whether to performance data checking.}
 
