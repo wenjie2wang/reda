@@ -3,7 +3,7 @@
 \docType{class}
 \name{rateReg-class}
 \alias{rateReg-class}
-\title{An S4 Class to Represent a Fitted Model}
+\title{An S4 Class Representing a Fitted Model}
 \description{
 \code{rateReg-class} is an S4 class that represents a fitted model.
 \code{\link{rateReg}} produces objects of this class.

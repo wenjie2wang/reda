@@ -18,6 +18,11 @@
 ################################################################################
 
 
+## collation after class.R
+##' @include class.R
+NULL
+
+
 ##' Formula Response for Recurrent Event Data
 ##'
 ##' \code{Survr} is an S3 class that represents
@@ -63,10 +68,7 @@ Survr <- function(ID, time, event, origin = 0, check = TRUE, ...) {
         stop("Event variable cannot be missing.")
 
     dat <- data.frame(ID = ID, time = time, event = event, origin = origin)
-    dat <- check_Survr(dat, check = check)
-    attr(dat, "check") <- check
-    class(dat) <- c("matrix", "Survr")
-    invisible(dat)
+    check_Survr(dat, check = check)
 }
 
 
@@ -92,7 +94,7 @@ check_Survr <- function(dat, check, ...) {
         stop("Origin variable must be 'numeric' or 'Date'.")
 
     ## if dat input has an attr 'ID_' for internal usage
-    ID_ <- attr(dat, "ID_")
+    ID_ <- attr(dat, "ID")
     if (is.null(ID_)) {
         ## check whether 'ID' is numeric or not. convert if not.
         IDnam <- factor(ID)
@@ -167,8 +169,12 @@ check_Survr <- function(dat, check, ...) {
     }
     ## return
     mat <- as.matrix(dat)
-    attr(mat, "ID_") <- IDnam
-    attr(mat, "check") <- check
-    attr(mat, "ord") <- ord
-    invisible(mat)
+    out <- methods::new("Survr", mat,
+                        ID = IDnam,
+                        time = dat[, "time"],
+                        event = dat[, "event"],
+                        origin = dat[, "origin"],
+                        check = check,
+                        ord = ord)
+    invisible(out)
 }
