@@ -1,5 +1,4 @@
 objects := $(wildcard R/*.R) DESCRIPTION
-dir := $(shell pwd)
 version := $(shell grep "Version" DESCRIPTION | sed "s/Version: //")
 pkg := $(shell grep "Package" DESCRIPTION | sed "s/Package: //")
 tar := $(pkg)_$(version).tar.gz
@@ -33,7 +32,7 @@ $(tar): $(objects)
 	else make -s updateMeta;\
 	fi;\
 	Rscript -e "library(methods); devtools::document();";
-	R CMD build $(dir)
+	R CMD build .
 
 $(checkLog): $(tar)
 	R CMD check --as-cran $(tar)
