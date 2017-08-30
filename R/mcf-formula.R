@@ -48,7 +48,8 @@ setMethod(
     f = "mcf", signature = "formula",
     definition = function(object, data, subset, na.action,
                           variance = c("Poisson", "LawlessNadeau"),
-                          logConfInt = TRUE, level = 0.95, ...) {
+                          logConfInt = TRUE, level = 0.95, ...)
+    {
         ## specify the type of variance
         variance <- match.arg(variance)
         ## basic check on inputs
@@ -67,16 +68,15 @@ setMethod(
             sSubset <- substitute(subset)
             subIdx <- eval(sSubset, data, parent.frame())
             if (! is.logical(subIdx))
-                stop("'subset' must be logical")
+                stop("'subset' must be logical.")
             subIdx <- subIdx & ! is.na(subIdx)
             data <- data[subIdx, ]
         }
 
-        ## Prepare data: ID, time, event ~ 1 or X
+        ## Prepare data: ID, time, event, origin ~ 1 or X
         mcall <- match.call(expand.dots = FALSE)
         mcall[[1]] <- as.name("mcf")
-        names(mcall) <- sub(pattern = "object",
-                            replacement = "formula", names(mcall))
+        names(mcall) <- sub("object", "formula", names(mcall))
         mfnames <- c("formula", "data", "na.action")
         mfind <- match(mfnames, names(mcall), nomatch = 0L)
         mcall$formula <- eval(object)
@@ -104,13 +104,13 @@ setMethod(
         ord <- attr(Terms, "order")
 
         if (length(ord) & any(ord != 1))
-            stop("Interaction terms are not valid for this function.")
+            stop("Interaction term is not supported for this function.")
 
         ## for possible missing values in covaraites
         if (length(na.action <- attr(mf, "na.action"))) {
             ## update if there is missing value removed
             attr(resp, "ord") <- order(resp[, "ID"], resp[, "time"])
-            attr(resp, "ID_") <- attr(resp, "ID_")[- na.action]
+            attr(resp, "ID") <- attr(resp, "ID")[- na.action]
             check_Survr(resp, check = TRUE)
         }
 
@@ -127,17 +127,10 @@ setMethod(
         } else {
             covar_names <- NULL
         }
-        colnames(dat) <- c("ID", "time", "event", covar_names)
+        const_colnames <- c("ID", "time", "event", "origin")
+        colnames(dat) <- c(const_colnames, covar_names)
         ## revert subject ID
-        dat$ID <- attr(resp, "ID_")
-
-        ## for ouput: get variable names in formula response
-        varNames <- as.character(object[[2L]])[- 1L]
-        argNames <- names(object[[2L]])[- 1L]
-        ID_idx <- match("ID", argNames, 1L)
-        time_idx <- match("time", argNames, 2L)
-        event_idx <- match("event", argNames, 3L)
-        varNames <- varNames[c(ID_idx, time_idx, event_idx)]
+        dat$ID <- attr(resp, "ID")
 
         ## output: na.action
         na.action <- if (is.null(attr(mm, "na.action"))) {
@@ -148,10 +141,9 @@ setMethod(
 
         ## if no covariates specified
         if (! nBeta) {
-            outDat <- sMcf(inpDat = dat, variance = variance,
-                           logConfInt = logConfInt, level = level)
-            colnames(outDat)[seq_len(3)] <- varNames
-            ## remove all censoring rows
+            outDat <- sMcf0(inpDat = dat, variance = variance,
+                            logConfInt = logConfInt, level = level)
+            ## remove all censoring rows? probably no for the plot method
             ## outDat <- base::subset(outDat, event == 1)
             rownames(outDat) <- NULL
             out <- new("sampleMcf",
@@ -174,10 +166,14 @@ setMethod(
         ## number of levels
         num_levels <- NROW(xGrid)
         if (num_levels == 1L)
-            warning("The covariate has only one level.")
+            warning("There is only one level in the covariates.")
 
-        outDat <- data.frame(matrix(NA, nrow = nrow(mm), ncol = 7L + nBeta))
-        colIdx <- seq_len(7L)
+        mcf_colnames <- c(const_colnames, "numRisk", "instRate",
+                          "MCF", "se", "lower", "upper")
+        const_ncol <- length(mcf_colnames)
+        outDat <- data.frame(matrix(NA, nrow = nrow(mm),
+                                    ncol = const_ncol + nBeta))
+        colIdx <- seq_len(const_ncol)
         for (i in seq(num_levels)) {
             subDat <- dat[datLevs %in% levs[i], ]
             rowLen <- nrow(subDat)
@@ -187,14 +183,11 @@ setMethod(
                           seq(from = rowInd[length(rowInd)] + 1L, by = 1L,
                               length.out = rowLen)
                       }
-            outDat[rowInd, colIdx] <- sMcf(subDat, variance,
-                                           logConfInt, level)
+            outDat[rowInd, colIdx] <- sMcf0(subDat, variance,
+                                            logConfInt, level)
             outDat[rowInd, - colIdx] <- xGrid[i, ]
         }
-        ## revert original ID
-        outDat[, 1L] <- factor(levels(attr(resp, "ID_"))[outDat[, 1L]])
-        colnames(outDat) <- c(varNames, "MCF", "se",
-                              "lower", "upper", covar_names)
+        colnames(outDat) <- c(mcf_colnames, covar_names)
 
         ## factorize covariates
         outCol <- ncol(outDat)
@@ -202,9 +195,6 @@ setMethod(
             outDat[, outCol + 1 - j] <-
                 factor(levels(dat1[[nBeta + 1 - j]])[outDat[, outCol + 1 - j]])
         }
-
-        ## remove all censoring rows? no for plot
-        ## outDat <- base::subset(outDat, event == 1)
         rownames(outDat) <- NULL
 
         out <- methods::new("sampleMcf",
@@ -220,10 +210,11 @@ setMethod(
     })
 
 ### internal function ==========================================================
-## compute sample MCF
-sMcf <- function(inpDat, variance, logConfInt, level) {
+## compute sample MCF for all zero origin
+sMcf0 <- function(inpDat, variance, logConfInt, level)
+{
     ## if time ties, put event time before censoring time
-    inpDat <- inpDat[with(inpDat, base::order(time, 1 - event)), seq_len(3L)]
+    inpDat <- inpDat[with(inpDat, base::order(time, 1 - event)), seq_len(4L)]
 
     num_pat <- length(unique(inpDat$ID))
     num_at_risk <- num_pat - cumsum(inpDat$event != 1)
@@ -243,7 +234,7 @@ sMcf <- function(inpDat, variance, logConfInt, level) {
     } else if (variance == "LawlessNadeau") {
         inc12 <- (1 - increment) ^ 2
         incre <- inc2 * (inc12 + (num_at_risk - 1) * inc2)
-        incre_var <- ifelse(inpDat$event == 0, 0, incre)
+        incre_var <- ifelse(inpDat$event < 1, 0, incre)
         var_smcf <- cumsum(incre_var)
         se_smcf <- sqrt(var_smcf)
     } else {
@@ -261,10 +252,15 @@ sMcf <- function(inpDat, variance, logConfInt, level) {
     } else {
         criVal <- stats::qnorm(0.5 + level / 2) * se_smcf
         upper <- smcf + criVal
-        lower <- smcf - criVal
+        lower <- pmax(smcf - criVal, 0)
     }
 
     ## return
-    data.frame(inpDat, MCF = smcf, se = se_smcf,
-               lower = lower, upper = upper)
+    data.frame(inpDat,
+               numRisk = num_at_risk,
+               instRate = increment,
+               MCF = smcf,
+               se = se_smcf,
+               lower = lower,
+               upper = upper)
 }

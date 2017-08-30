@@ -68,20 +68,19 @@ NULL
 setMethod(
     f = "plot", signature = c("sampleMcf", "missing"),
     definition = function(x, y, conf.int = FALSE, mark.time = FALSE,
-                          lty, col, legendName, legendLevels, ...) {
-
+                          lty, col, legendName, legendLevels, ...)
+    {
         ## nonsense, just to suppress Note from R CMD check --as-cran
         MCF <- event <- lower <- upper <- design <- time <- NULL
-
-        ## rename first three columns
+        ## mcf data
         MCFdat <- x@MCF
-        colnames(MCFdat)[seq_len(3L)] <- c("ID", "time", "event")
-
         ## if MCF is just for one certain group
         if (! x@multiGroup) {
-            ## add starting point at time 0
+            ## add starting point at origin time
             MCFdat <- MCFdat[c(1L, seq_len(nrow(MCFdat))), ]
-            MCFdat[1L, 2 : 7] <- 0
+            MCFdat[1L, 2 : 10] <- 0
+            MCFdat[1L, "origin"] <- min(MCFdat[, "origin"])
+            ## set default line type and color
             if (missing(lty)) lty <- 1
             if (missing(col)) col <- "black"
             p <- ggplot(data = MCFdat, aes_string(x = "Time")) +
@@ -89,7 +88,7 @@ setMethod(
                           linetype = lty, color = col)
             ## mark censoring time
             if (mark.time) {
-                cenDat <- base::subset(MCFdat, time > 0 & event == 0)
+                cenDat <- base::subset(MCFdat, time > 0 & event < 1)
                 p <- p + geom_text(data = cenDat,
                                    aes(label = "+", x = time, y = MCF),
                                    vjust = 0.3, hjust = 0.5,
@@ -103,11 +102,19 @@ setMethod(
                               linetype = "3313", color = col)
             }
         } else {
-            desDat <- MCFdat[, - seq_len(7), drop = FALSE]
+            desDat <- MCFdat[, - seq_len(10L), drop = FALSE]
             groupName <- paste(colnames(desDat), collapse = "&")
             desList <- as.list(desDat)
             MCFdat$design <- factor(do.call(paste, c(desList, sep = "&")))
             nDesign = length(desLevs <- levels(MCFdat$design))
+            ## add starting point at origin time for each group
+            MCFdat <- MCFdat[c(rep(1L, nDesign), seq_len(nrow(MCFdat))), ]
+            tmpIdx <- seq_len(nDesign)
+            MCFdat[tmpIdx, 2 : 10] <- 0
+            MCFdat[tmpIdx, "origin"] <- with(
+                MCFdat, tapply(origin, design, min)
+            )
+            MCFdat[tmpIdx, "design"] <- desLevs
 
             ## set possibly customized group name and levels
             legendName <- if (missing(legendName)) {
@@ -117,8 +124,8 @@ setMethod(
                           }
             if (! missing(legendLevels)) {
                 if (length(legendLevels) != nDesign)
-                    stop(paste("The length of 'legendLevels' must",
-                               "match the number of designs."))
+                    stop("The length of 'legendLevels' must ",
+                         "match the number of designs.")
                 desLevs <- levels(MCFdat$design) <-
                     as.character(legendLevels)
             }
@@ -128,7 +135,7 @@ setMethod(
             sortIdx <- sort(c(idx, seq_len(nrow(MCFdat))))
             MCFdat <- MCFdat[sortIdx, ]
             desInd <- seq_len(nDesign)
-            MCFdat[idx + desInd - 1, 2 : 7] <- 0
+            MCFdat[idx + desInd - 1, 2 : 10] <- 0
 
             ## about lty
             ## 0 = blank, 1 = solid, 2 = dashed, 3 = dotted,
@@ -180,11 +187,11 @@ setMethod(
 ##' @export
 setMethod(
     f = "plot", signature = c("rateRegMcf", "missing"),
-    definition = function(x, y, conf.int = FALSE, lty, col, ...) {
-
+    definition = function(x, y, conf.int = FALSE, lty, col, ...)
+    {
         ## nonsense, just to suppress Note from R CMD check --as-cran
         MCF <- lower <- upper <- time <- NULL
-
+        ## mcf data
         MCFdat <- x@MCF
         ## if MCF is just for one certain group
         if (! x@multiGroup) {
