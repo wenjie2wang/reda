@@ -23,20 +23,23 @@ Imports:
     stats
 Suggests:
     knitr,
-    rmarkdown
+    rmarkdown,
+    testthat
 Depends:
     R (>= 3.2.3)
 License: GPL (>= 3)
 LazyData: true
 VignetteBuilder: knitr
-Collate: 
-    'Survr.R'
+Collate:
     'class.R'
+    'Survr.R'
     'aic.R'
     'baseline.R'
     'coef.R'
     'data.R'
-    'mcf.R'
+    'mcf-generic.R'
+    'mcf-formula.R'
+    'mcf-rateReg.R'
     'plot.R'
     'rateReg.R'
     'reda.R'
