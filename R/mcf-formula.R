@@ -53,12 +53,11 @@ setMethod(
         ## specify the type of variance
         variance <- match.arg(variance)
         ## basic check on inputs
-        logConfInt <- logConfInt[1L]
-        if (! is.logical(logConfInt))
+        if (length(logConfInt) > 1 || ! is.logical(logConfInt))
             stop("'logConfint' has to be either 'TRUE' or 'FALSE'.")
         ## check on level specified
-        level <- level[1L]
-        if (level <= 0 || level >= 1)
+        if (length(level) > 1 || ! is.numeric(level) ||
+            level <= 0 || level >= 1)
             stop("Confidence level must be between 0 and 1.")
 
         if (missing(data))
@@ -141,8 +140,8 @@ setMethod(
 
         ## if no covariates specified
         if (! nBeta) {
-            outDat <- sMcf0(inpDat = dat, variance = variance,
-                            logConfInt = logConfInt, level = level)
+            outDat <- sMcf(dat, variance = variance,
+                           logConfInt = logConfInt, level = level)
             ## remove all censoring rows? probably no for the plot method
             ## outDat <- base::subset(outDat, event == 1)
             rownames(outDat) <- NULL
@@ -183,8 +182,8 @@ setMethod(
                           seq(from = rowInd[length(rowInd)] + 1L, by = 1L,
                               length.out = rowLen)
                       }
-            outDat[rowInd, colIdx] <- sMcf0(subDat, variance,
-                                            logConfInt, level)
+            outDat[rowInd, colIdx] <- sMcf(subDat, variance,
+                                           logConfInt, level)
             outDat[rowInd, - colIdx] <- xGrid[i, ]
         }
         colnames(outDat) <- c(mcf_colnames, covar_names)
@@ -209,15 +208,40 @@ setMethod(
         out
     })
 
-### internal function ==========================================================
-## compute sample MCF for all zero origin
-sMcf0 <- function(inpDat, variance, logConfInt, level)
-{
-    ## if time ties, put event time before censoring time
-    inpDat <- inpDat[with(inpDat, base::order(time, 1 - event)), seq_len(4L)]
 
-    num_pat <- length(unique(inpDat$ID))
-    num_at_risk <- num_pat - cumsum(inpDat$event != 1)
+### internal function ==========================================================
+## simple wrapper function for sMcf_point and addVar_sMcf
+sMcf <- function(dat, variance, logConfInt, level) {
+    sMcf_dat <- sMcf_point(dat)
+    addVar_sMcf(sMcf_dat, variance, logConfInt, level)
+}
+
+## sample MCF point estimates
+sMcf_point <- function(inpDat)
+{
+    ## throw out warning if no any event
+    if (all(! inpDat$event))
+        warning("No event found.")
+
+    ## origin are all zero?
+    origin_idx <- all(! inpDat$origin)
+    if (origin_idx) {
+        ## already sorted by ID, time, and (1 - event) by Survr
+        dup_idx <- duplicated(inpDat$ID)
+        originVec <- inpDat$origin[! dup_idx]
+        rightVec <- inpDat[! inpDat$event, "time"]
+    }
+    ## if time ties, put event time before censoring time
+    inpDat <- inpDat[with(inpDat, order(time, 1 - event)), seq_len(4L)]
+    num_at_risk <- if (origin_idx) {
+                   ## for non-zero origin
+                   sapply(inpDat$time, function(xTime) {
+                       sum(xTime >= originVec & xTime <= rightVec)
+                   })
+               } else {
+                   ## for all zero origin
+                   length(unique(inpDat$ID)) - cumsum(inpDat$event != 1)
+               }
     increment <- ifelse(inpDat$event, 1 / num_at_risk, 0)
 
     ## index of unique event and censoring time
@@ -225,22 +249,35 @@ sMcf0 <- function(inpDat, variance, logConfInt, level)
 
     ## sample mcf at each time point
     smcf <- cumsum(increment)
-    inc2 <- increment ^ 2
 
+    ## return
+    data.frame(inpDat,
+               numRisk = num_at_risk,
+               instRate = increment,
+               MCF = smcf,
+               se = NA,
+               lower = NA,
+               upper = NA)
+}
+
+## add variance estimates for sample MCF point estimates
+addVar_sMcf <- function(smcf_dat, variance, logConfInt, level)
+{
+    increment <- smcf_dat$instRate
+    num_at_risk <- smcf_dat$numRisk
+    smcf <- smcf_dat$MCF
+    inc2 <- increment ^ 2
     ## sample variance estimator
-    if (variance == "Poisson") {
+    if (identical(variance, "Poisson")) {
         var_smcf <- cumsum(inc2)
         se_smcf <- sqrt(var_smcf)
-    } else if (variance == "LawlessNadeau") {
+    } else if (identical(variance, "LawlessNadeau")) {
         inc12 <- (1 - increment) ^ 2
         incre <- inc2 * (inc12 + (num_at_risk - 1) * inc2)
-        incre_var <- ifelse(inpDat$event < 1, 0, incre)
+        incre_var <- ifelse(smcf_dat$event < 1, 0, incre)
         var_smcf <- cumsum(incre_var)
         se_smcf <- sqrt(var_smcf)
-    } else {
-        stop("Invalid 'variance' specified.")
     }
-
     ## Confidence interval for log(MCF) or MCF
     if (logConfInt) {
         criVal <- ifelse(smcf > 0,
@@ -254,13 +291,10 @@ sMcf0 <- function(inpDat, variance, logConfInt, level)
         upper <- smcf + criVal
         lower <- pmax(smcf - criVal, 0)
     }
-
+    ## update mcf data
+    smcf_dat$se <- se_smcf
+    smcf_dat$lower <- lower
+    smcf_dat$upper <- upper
     ## return
-    data.frame(inpDat,
-               numRisk = num_at_risk,
-               instRate = increment,
-               MCF = smcf,
-               se = se_smcf,
-               lower = lower,
-               upper = upper)
+    smcf_dat
 }

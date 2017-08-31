@@ -34,16 +34,13 @@
 ##' @param conf.int A logical value indicating
 ##' whether to plot confidence interval.
 ##' The default value is \code{FALSE}.
-##' @param ... Other arguments for further usage.
-##' @param mark.time A logical value with default \code{FALSE}.
-##' If \code{TRUE}, each censoring time is marked by "+" on the MCF curves.
-##' Otherwise, the censoring time would not be marked.
 ##' @param lty An optional numeric vector indicating
 ##' line types specified to different groups:
 ##' 0 = blank, 1 = solid, 2 = dashed, 3 = dotted,
 ##' 4 = dotdash, 5 = longdash, 6 = twodash.
 ##' @param col An optional character vector indicating
 ##' line colors specified to different groups.
+##' @param ... Other arguments for further usage.
 ##' @return A \code{ggplot} object.
 ##' @examples
 ##' ## See examples given in function mcf and rateReg.
@@ -53,8 +50,12 @@
 ##' @importFrom graphics plot
 NULL
 
+
 ##' @rdname plot-method
 ##' @aliases plot,sampleMcf-method
+##' @param mark.time A logical value with default \code{FALSE}.
+##' If \code{TRUE}, each censoring time is marked by "+" on the MCF curves.
+##' Otherwise, the censoring time would not be marked.
 ##' @param legendName An optional length-one charactor vector to specify the
 ##' name for grouping each unique row in \code{newdata}, such as "gender"
 ##' for "male" and "female". The default value is generated from the
@@ -62,13 +63,16 @@ NULL
 ##' @param legendLevels An optional charactor vector to specify the levels for
 ##' each unique row in \code{newdata}, such as "treatment" and "control".
 ##' The default values are generated from the \code{object}.
+##' @param addOrigin A logical value indicating whether the MCF curves start
+##' from origin time. The default value is \code{TRUE}.
 ##' @importFrom ggplot2 ggplot geom_step aes aes_string scale_color_manual
 ##' scale_linetype_manual ylab ggtitle geom_text theme element_text
 ##' @export
 setMethod(
     f = "plot", signature = c("sampleMcf", "missing"),
     definition = function(x, y, conf.int = FALSE, mark.time = FALSE,
-                          lty, col, legendName, legendLevels, ...)
+                          lty, col, legendName, legendLevels,
+                          addOrigin = TRUE, ...)
     {
         ## nonsense, just to suppress Note from R CMD check --as-cran
         MCF <- event <- lower <- upper <- design <- time <- NULL
@@ -76,10 +80,12 @@ setMethod(
         MCFdat <- x@MCF
         ## if MCF is just for one certain group
         if (! x@multiGroup) {
-            ## add starting point at origin time
-            MCFdat <- MCFdat[c(1L, seq_len(nrow(MCFdat))), ]
-            MCFdat[1L, 2 : 10] <- 0
-            MCFdat[1L, "origin"] <- min(MCFdat[, "origin"])
+            if (addOrigin) {
+                ## add starting point at origin time
+                MCFdat <- MCFdat[c(1L, seq_len(nrow(MCFdat))), ]
+                MCFdat[1L, 2 : 10] <- 0
+                MCFdat[1L, "time"] <- min(MCFdat[, "origin"])
+            }
             ## set default line type and color
             if (missing(lty)) lty <- 1
             if (missing(col)) col <- "black"
@@ -88,7 +94,7 @@ setMethod(
                           linetype = lty, color = col)
             ## mark censoring time
             if (mark.time) {
-                cenDat <- base::subset(MCFdat, time > 0 & event < 1)
+                cenDat <- base::subset(MCFdat, event < 1)
                 p <- p + geom_text(data = cenDat,
                                    aes(label = "+", x = time, y = MCF),
                                    vjust = 0.3, hjust = 0.5,
@@ -106,16 +112,16 @@ setMethod(
             groupName <- paste(colnames(desDat), collapse = "&")
             desList <- as.list(desDat)
             MCFdat$design <- factor(do.call(paste, c(desList, sep = "&")))
-            nDesign = length(desLevs <- levels(MCFdat$design))
-            ## add starting point at origin time for each group
-            MCFdat <- MCFdat[c(rep(1L, nDesign), seq_len(nrow(MCFdat))), ]
-            tmpIdx <- seq_len(nDesign)
-            MCFdat[tmpIdx, 2 : 10] <- 0
-            MCFdat[tmpIdx, "origin"] <- with(
-                MCFdat, tapply(origin, design, min)
-            )
-            MCFdat[tmpIdx, "design"] <- desLevs
-
+            nDesign <- length(desLevs <- levels(MCFdat$design))
+            desInd <- seq_len(nDesign)
+            if (addOrigin) {
+                ## add starting point at origin time for each group
+                originVec <- with(MCFdat, tapply(origin, design, min))
+                MCFdat <- MCFdat[c(rep(1L, nDesign), seq_len(nrow(MCFdat))), ]
+                MCFdat[desInd, 2 : 10] <- 0
+                MCFdat[desInd, "time"] <- originVec
+                MCFdat[desInd, "design"] <- desLevs
+            }
             ## set possibly customized group name and levels
             legendName <- if (missing(legendName)) {
                               groupName
@@ -129,13 +135,6 @@ setMethod(
                 desLevs <- levels(MCFdat$design) <-
                     as.character(legendLevels)
             }
-
-            ## add starting point at time 0 before each level
-            idx <- which(! duplicated(MCFdat$design))
-            sortIdx <- sort(c(idx, seq_len(nrow(MCFdat))))
-            MCFdat <- MCFdat[sortIdx, ]
-            desInd <- seq_len(nDesign)
-            MCFdat[idx + desInd - 1, 2 : 10] <- 0
 
             ## about lty
             ## 0 = blank, 1 = solid, 2 = dashed, 3 = dotted,

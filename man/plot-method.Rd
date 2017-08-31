@@ -12,7 +12,8 @@
 \title{Plot Baseline Rate or Mean Cumulative Function (MCF)}
 \usage{
 \S4method{plot}{sampleMcf,missing}(x, y, conf.int = FALSE,
-  mark.time = FALSE, lty, col, legendName, legendLevels, ...)
+  mark.time = FALSE, lty, col, legendName, legendLevels, addOrigin = TRUE,
+  ...)
 
 \S4method{plot}{rateRegMcf,missing}(x, y, conf.int = FALSE, lty, col, ...)
 
@@ -49,6 +50,9 @@ for "male" and "female". The default value is generated from the
 \item{legendLevels}{An optional charactor vector to specify the levels for
 each unique row in \code{newdata}, such as "treatment" and "control".
 The default values are generated from the \code{object}.}
+
+\item{addOrigin}{A logical value indicating whether the MCF curves start
+from origin time. The default value is \code{TRUE}.}
 
 \item{...}{Other arguments for further usage.}
 }
