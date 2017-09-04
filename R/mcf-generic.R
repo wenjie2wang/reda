@@ -53,7 +53,6 @@ NULL
 ##' for the given newdata based on Delta-method.
 ##'
 ##' @param object An object used to dispatch a method.
-##' @param ... Other arguments for future usage.
 ##' @param na.action A function that indicates what should the procedure do
 ##' if the data contains \code{NA}s.  The default is set by the
 ##' na.action setting of \code{\link[base]{options}}.
@@ -63,6 +62,33 @@ NULL
 ##' \code{help(na.fail)} for details.
 ##' @param level An optional numeric value
 ##' indicating the confidence level required. The default value is 0.95.
+##' @param control An optional list to specify the time grid
+##' where the MCF is estimated for \code{rateReg-class} object and other options
+##' for the formula method.
+##' The available named elements include
+##' \itemize{
+##'    \item \code{grid}: The time grid where MCF is estimated. A dense grid is
+##'        suggested for further using the plot method.
+##'    \item \code{length.out}: The length of grid points. The dafault value
+##'        is 1,000.
+##'    \item \code{from}: The starting point of grid. The default value is the
+##'        left boundary knots (for \code{rateReg-class} object).
+##'    \item \code{to}: The endpoint of grid. The default value is the right
+##'        boundary knots (for \code{rateReg-class} object).
+##'    \item \code{B}: The number of bootstrap replicates for using bootstrap
+##'        method for variance estimates of sample MCF estimates. The default
+##'        value is 1,000.
+##'    \item \code{se.method}: The method used for SE estimates for bootstrap.
+##'        The default method is \code{"sampleSE"}, which takes the
+##'        sample SE of point estimates from bootstrap samples.
+##'    \item \code{ci.method}: The method used for confidence interval for
+##'        bootstrap. The default method is the normal method.
+##' }
+##' The option \code{length.out}, \code{from}, \code{to} will be ignored if
+##' \code{grid} is specified directly. Otherwise, the grid will be generated
+##' by function \code{\link[base]{seq.int}} with specified \code{from},
+##' \code{to} and \code{length.out}.
+##' @param ... Other arguments for future usage.
 ##' @return
 ##' \code{\link{sampleMcf-class}} or \code{\link{rateRegMcf-class}} object.
 ##' Their slots include

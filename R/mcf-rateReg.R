@@ -35,20 +35,6 @@ NULL
 ##' @param groupLevels An optional charactor vector to specify the levels for
 ##' each unique row in \code{newdata}, such as "treatment" and "control".
 ##' The default values are capital letters starting from "A".
-##' @param control An optional list to specify the time grid
-##' where the MCF is estimated.
-##' The availble elements of the control list include
-##' \code{grid}, \code{length.out}, \code{from} and \code{to}.
-##' The time grid can be directly specified via element \code{grid}.
-##' A dense time grid is suggested.
-##' Element \code{length.out} represents the length of grid points.
-##' The dafault value is 1,000.
-##' Element \code{from} means the starting point of grid with default 0.
-##' Element \code{to} represnts the endpoint of grid
-##' with the right boundary knot as default.
-##' When \code{grid} is missing, the grid will be generated
-##' by \code{seq} (from package \pkg{base})
-##' with arguments \code{from}, \code{to} and \code{length.out}.
 ##' @aliases mcf,rateReg-method
 ##' @importFrom stats na.fail na.omit na.exclude na.pass
 ##' @importFrom splines2 ibs iSpline
@@ -188,7 +174,8 @@ gradDelta <- function(Xi, iMat, estMcf, coveffi) {
 
 ## control function
 rateReg_mcf_control <- function(grid, length.out = 1e3, from, to, ...,
-                                Boundary.knots_) {
+                                Boundary.knots_)
+{
     ## controls for function MCF with signiture rateReg
     from <- if (missing(from)) Boundary.knots_[1L]
     to  <- if (missing(to)) Boundary.knots_[2L]
@@ -199,7 +186,7 @@ rateReg_mcf_control <- function(grid, length.out = 1e3, from, to, ...,
         from <- min(grid)
         to <- max(grid)
     } else {
-        grid <- seq(from = from, to = to, length.out = length.out)
+        grid <- seq.int(from = from, to = to, length.out = length.out)
     }
     if (min(grid) < Boundary.knots_[1] || max(grid) > Boundary.knots_[2])
         stop("'grid' must be within the coverage of boundary knots.")

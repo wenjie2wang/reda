@@ -10,8 +10,8 @@
 mcf(object, ...)
 
 \S4method{mcf}{formula}(object, data, subset, na.action,
-  variance = c("Poisson", "LawlessNadeau"), logConfInt = TRUE,
-  level = 0.95, ...)
+  variance = c("Poisson", "LawlessNadeau", "bootstrap"), logConfInt = TRUE,
+  level = 0.95, control = list(), ...)
 
 \S4method{mcf}{rateReg}(object, newdata, groupName, groupLevels, level = 0.95,
   na.action, control = list(), ...)
@@ -21,13 +21,13 @@ mcf(object, ...)
 
 \item{...}{Other arguments for future usage.}
 
-\item{data}{An optional data frame, list or environment containing
-the variables in the model.  If not found in data, the variables are taken
-from \code{environment(formula)}, usually the environment from which
-the function is called.}
+\item{data}{An optional data frame, list or environment containing the
+variables in the model.  If not found in data, the variables are taken
+from \code{environment(formula)}, usually the environment from which the
+function is called.}
 
-\item{subset}{An optional vector specifying a subset of observations
-to be used in the fitting process.}
+\item{subset}{An optional vector specifying a subset of observations to be
+used in the fitting process.}
 
 \item{na.action}{A function that indicates what should the procedure do
 if the data contains \code{NA}s.  The default is set by the
@@ -37,19 +37,47 @@ Other possible values inlcude \code{\link[stats]{na.fail}},
 \code{\link[stats]{na.exclude}}, and \code{\link[stats]{na.pass}}.
 \code{help(na.fail)} for details.}
 
-\item{variance}{An optional character specifying the variance estimator.
-The available options are "Poisson" (default) for Poisson process method,
-and "LawlessNadeau" for Lawless and Nadeau (1995) method. (A simple example
-is available at Reliawiki, 2012.)
-Partial matching on the names is allowed.}
+\item{variance}{An optional character specifying the method for variance
+estimates.  The available options are \code{"Poisson"} (default) for
+Poisson process method, \code{"LawlessNadeau"} for Lawless and Nadeau
+(1995) method, and \code{"bootstrap"} for bootstrapping method. (A
+simple example is available at Reliawiki, 2012.)  Partial matching on
+the names is allowed.}
 
-\item{logConfInt}{An optional logical value. If \code{TRUE} (default),
-the confidence interval of given level will be constucted based on the
+\item{logConfInt}{An optional logical value. If \code{TRUE} (default), the
+confidence interval of given level will be constucted based on the
 normality of logarithm of the MCF function. (Otherwise, the confidence
 interval will be constructed based on the normality of MCF function.)}
 
 \item{level}{An optional numeric value
 indicating the confidence level required. The default value is 0.95.}
+
+\item{control}{An optional list to specify the time grid
+where the MCF is estimated for \code{rateReg-class} object and other options
+for the formula method.
+The available named elements include
+\itemize{
+   \item \code{grid}: The time grid where MCF is estimated. A dense grid is
+       suggested for further using the plot method.
+   \item \code{length.out}: The length of grid points. The dafault value
+       is 1,000.
+   \item \code{from}: The starting point of grid. The default value is the
+       left boundary knots (for \code{rateReg-class} object).
+   \item \code{to}: The endpoint of grid. The default value is the right
+       boundary knots (for \code{rateReg-class} object).
+   \item \code{B}: The number of bootstrap replicates for using bootstrap
+       method for variance estimates of sample MCF estimates. The default
+       value is 1,000.
+   \item \code{se.method}: The method used for SE estimates for bootstrap.
+       The default method is \code{"sampleSE"}, which takes the
+       sample SE of point estimates from bootstrap samples.
+   \item \code{ci.method}: The method used for confidence interval for
+       bootstrap. The default method is the normal method.
+}
+The option \code{length.out}, \code{from}, \code{to} will be ignored if
+\code{grid} is specified directly. Otherwise, the grid will be generated
+by function \code{\link[base]{seq.int}} with specified \code{from},
+\code{to} and \code{length.out}.}
 
 \item{newdata}{An optional data frame. If specified, the data frame should
 have the same column names as the covariate names appearing in the formula
@@ -62,21 +90,6 @@ for "male" and "female". The default value is "group".}
 \item{groupLevels}{An optional charactor vector to specify the levels for
 each unique row in \code{newdata}, such as "treatment" and "control".
 The default values are capital letters starting from "A".}
-
-\item{control}{An optional list to specify the time grid
-where the MCF is estimated.
-The availble elements of the control list include
-\code{grid}, \code{length.out}, \code{from} and \code{to}.
-The time grid can be directly specified via element \code{grid}.
-A dense time grid is suggested.
-Element \code{length.out} represents the length of grid points.
-The dafault value is 1,000.
-Element \code{from} means the starting point of grid with default 0.
-Element \code{to} represnts the endpoint of grid
-with the right boundary knot as default.
-When \code{grid} is missing, the grid will be generated
-by \code{seq} (from package \pkg{base})
-with arguments \code{from}, \code{to} and \code{length.out}.}
 }
 \value{
 \code{\link{sampleMcf-class}} or \code{\link{rateRegMcf-class}} object.
