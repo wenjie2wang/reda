@@ -89,8 +89,8 @@ A \code{\link{rateReg-class}} object, whose slots include
     \item \code{contrasts}: Contrasts specified and used for each
         factor variable.
     \item \code{convergCode}: \code{code} returned by function
-        \code{\link[stats]{nlm}}, which is an integer indicating why the
-        optimization process terminated. \code{help(nlm)} for details.
+        \code{\link[stats]{optim}}, which is an integer indicating why the
+        optimization process terminated. \code{help(optim)} for details.
     \item \code{logL}: Log likelihood of the fitted model.
     \item \code{fisher}: Observed Fisher information matrix.
 }
@@ -119,9 +119,8 @@ fit the recurrent event data framework
 if any observation with missing covariates is removed.
 
 The model fitting process involves minimization of negative log
-likelihood function, which calls function \code{\link[stats]{nlm}}
-from package \pkg{stats} internally.
-\code{help(nlm)} for more details.
+likelihood function, which calls function \code{\link[stats]{constrOptim}}
+internally. \code{help(constrOptim)} for more details.
 
 The argument \code{start} is an optional list
 that allows users to specify the initial guess for
@@ -130,32 +129,23 @@ negative log likelihood function.
 The available numeric vector elements in the list include
 \itemize{
     \item \code{beta}: Coefficient(s) of covariates,
-        set to be 0.1 by default.
+        set to be all 0.1 by default.
     \item \code{theta}: Parameter in Gamma(theta, 1 / theta) for
         frailty random effect, set to be 0.5 by default.
     \item \code{alpha}: Coefficient(s) of baseline rate function,
-        set to be 0.05 by default.
+        set to be all 0.05 by default.
 }
 The argument \code{control} is an optional list
 that allows users to control the process of minimization of
-negative log likelihood function and to specify the boundary knots,
-intercept for baseline rate function.
-The available elements in the list include
+negative log likelihood function passed to \code{constrOptim}
+and specify the boundary knots of baseline rate function.
+The available options additional to those that can be passed to
+\code{control} in \code{constrOptim} include
 \itemize{
-    \item \code{gradtol}: A positive scalar giving the tolerance at
-        which the scaled gradient is considered close enough to zero
-        to terminate the algorithm. The default value is 1e-6.
-    \item \code{stepmax}: A positive scalar that gives the maximum
-        allowable scaled step length. The default value is 1e5.
-    \item \code{steptol}: A positive scalar providing the minimum
-        allowable relative step length. The default value is 1e-6.
-    \item \code{iterlim}: A positive integer specifying the maximum
-        number of iterations to be performed before
-        the program is terminated. The default value is 1e2.
     \item \code{Boundary.knots}: A length-two numeric vector to specify
         the boundary knots for baseline rate funtion. By default,
-        the left boundary knot is zero and the right one takes the
-        largest censoring time from data.
+        the left boundary knot is the smallest origin time and
+        the right one takes the largest censoring time from data.
     \item \code{verbose}: A optional logical value with default \code{TRUE}.
         Set it to be \code{FALSE} to supress any possible message
         from this function.

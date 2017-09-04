@@ -48,9 +48,8 @@ NULL
 ##' if any observation with missing covariates is removed.
 ##'
 ##' The model fitting process involves minimization of negative log
-##' likelihood function, which calls function \code{\link[stats]{nlm}}
-##' from package \pkg{stats} internally.
-##' \code{help(nlm)} for more details.
+##' likelihood function, which calls function \code{\link[stats]{constrOptim}}
+##' internally. \code{help(constrOptim)} for more details.
 ##'
 ##' The argument \code{start} is an optional list
 ##' that allows users to specify the initial guess for
@@ -59,32 +58,23 @@ NULL
 ##' The available numeric vector elements in the list include
 ##' \itemize{
 ##'     \item \code{beta}: Coefficient(s) of covariates,
-##'         set to be 0.1 by default.
+##'         set to be all 0.1 by default.
 ##'     \item \code{theta}: Parameter in Gamma(theta, 1 / theta) for
 ##'         frailty random effect, set to be 0.5 by default.
 ##'     \item \code{alpha}: Coefficient(s) of baseline rate function,
-##'         set to be 0.05 by default.
+##'         set to be all 0.05 by default.
 ##' }
 ##' The argument \code{control} is an optional list
 ##' that allows users to control the process of minimization of
-##' negative log likelihood function and to specify the boundary knots,
-##' intercept for baseline rate function.
-##' The available elements in the list include
+##' negative log likelihood function passed to \code{constrOptim}
+##' and specify the boundary knots of baseline rate function.
+##' The available options additional to those that can be passed to
+##' \code{control} in \code{constrOptim} include
 ##' \itemize{
-##'     \item \code{gradtol}: A positive scalar giving the tolerance at
-##'         which the scaled gradient is considered close enough to zero
-##'         to terminate the algorithm. The default value is 1e-6.
-##'     \item \code{stepmax}: A positive scalar that gives the maximum
-##'         allowable scaled step length. The default value is 1e5.
-##'     \item \code{steptol}: A positive scalar providing the minimum
-##'         allowable relative step length. The default value is 1e-6.
-##'     \item \code{iterlim}: A positive integer specifying the maximum
-##'         number of iterations to be performed before
-##'         the program is terminated. The default value is 1e2.
 ##'     \item \code{Boundary.knots}: A length-two numeric vector to specify
 ##'         the boundary knots for baseline rate funtion. By default,
-##'         the left boundary knot is zero and the right one takes the
-##'         largest censoring time from data.
+##'         the left boundary knot is the smallest origin time and
+##'         the right one takes the largest censoring time from data.
 ##'     \item \code{verbose}: A optional logical value with default \code{TRUE}.
 ##'         Set it to be \code{FALSE} to supress any possible message
 ##'         from this function.
@@ -160,8 +150,8 @@ NULL
 ##'     \item \code{contrasts}: Contrasts specified and used for each
 ##'         factor variable.
 ##'     \item \code{convergCode}: \code{code} returned by function
-##'         \code{\link[stats]{nlm}}, which is an integer indicating why the
-##'         optimization process terminated. \code{help(nlm)} for details.
+##'         \code{\link[stats]{optim}}, which is an integer indicating why the
+##'         optimization process terminated. \code{help(optim)} for details.
 ##'     \item \code{logL}: Log likelihood of the fitted model.
 ##'     \item \code{fisher}: Observed Fisher information matrix.
 ##' }
@@ -341,7 +331,7 @@ rateReg <- function(formula, data, subset, df = NULL, knots = NULL, degree = 0L,
     ## name each basis for alpha output
     alphaName <- nameBases(df = df, spline = spline)
 
-    ## start' values for 'nlm'
+    ## start' values
     startlist <- c(start, list(nBeta_ = nBeta, nAlpha_ = df))
     start <- do.call("rateReg_start", startlist)
     ini <- do.call("c", start)
@@ -372,13 +362,24 @@ rateReg <- function(formula, data, subset, df = NULL, knots = NULL, degree = 0L,
     xMat_i <- xMat[ind_cens, , drop = FALSE]
 
     ## log likelihood
-    fit <- stats::nlm(logL_rateReg, ini, nBeta = nBeta, nSub = nSub,
-                      xMat = xMat, ind_event = ind_event, ind_cens = ind_cens,
-                      bMat_event = bMat_event, n_ij = n_ij, seq_n_ij = seq_n_ij,
-                      dmu0_dalpha = dmu0_dalpha, xMat_i = xMat_i,
-                      hessian = TRUE,
-                      gradtol = control$gradtol, stepmax = control$stepmax,
-                      steptol = control$steptol, iterlim = control$iterlim)
+    ## theta > 0 and alph >= 0
+    fit <- stats::constrOptim(ini, f = logL_rateReg, grad = logL_rateReg_grad,
+                              ui = cbind(matrix(0, length_par - nBeta, nBeta),
+                                         diag(length_par - nBeta)),
+                              ci = c(sqrt(.Machine$double.eps),
+                                     rep(0, length_par - nBeta - 1)),
+                              hessian = TRUE,
+                              nBeta = nBeta,
+                              nSub = nSub,
+                              xMat = xMat,
+                              ind_event = ind_event,
+                              ind_cens = ind_cens,
+                              bMat_event = bMat_event,
+                              n_ij = n_ij,
+                              seq_n_ij = seq_n_ij,
+                              dmu0_dalpha = dmu0_dalpha,
+                              xMat_i = xMat_i,
+                              control = control)
 
     ## estimates for beta
     est_beta <- matrix(NA, nrow = nBeta, ncol = 5L)
@@ -386,7 +387,7 @@ rateReg <- function(formula, data, subset, df = NULL, knots = NULL, degree = 0L,
     rownames(est_beta) <- covar_names
 
     se_vec <- sqrt(diag(solve(fit$hessian)))
-    est_beta[, 1L] <- fit$estimate[seq_len(nBeta)]
+    est_beta[, 1L] <- fit$par[seq_len(nBeta)]
     est_beta[, 2L] <- exp(est_beta[, 1L])
     est_beta[, 3L] <- se_vec[seq_len(nBeta)]
     est_beta[, 4L] <- est_beta[, 1L] / est_beta[, 3L]
@@ -396,13 +397,13 @@ rateReg <- function(formula, data, subset, df = NULL, knots = NULL, degree = 0L,
     est_theta <- matrix(NA, nrow = 1L, ncol = 2L)
     colnames(est_theta) <- c("parameter", "se")
     rownames(est_theta) <- "Frailty"
-    est_theta[1L, ] <- c(fit$estimate[nBeta + 1L], se_vec[nBeta + 1L])
+    est_theta[1L, ] <- c(fit$par[nBeta + 1L], se_vec[nBeta + 1L])
 
     ## estimates for alpha
     est_alpha <- matrix(NA, nrow = df, ncol = 2)
     colnames(est_alpha) <- c("coef", "se(coef)")
     rownames(est_alpha) <- alphaName
-    est_alpha[, 1L] <- fit$estimate[(tmpIdx <- (nBeta + 2L) : length_par)]
+    est_alpha[, 1L] <- fit$par[(tmpIdx <- (nBeta + 2L) : length_par)]
     est_alpha[, 2L] <- se_vec[tmpIdx]
 
     ## output: na.action
@@ -440,8 +441,8 @@ rateReg <- function(formula, data, subset, df = NULL, knots = NULL, degree = 0L,
                             na.action = na.action,
                             xlevels = .getXlevels(mt, mf),
                             contrasts = contrasts,
-                            convergCode = fit$code,
-                            logL = - fit$minimum,
+                            convergCode = fit$convergence,
+                            logL = - fit$value,
                             fisher = fit$hessian)
     ## return
     results
@@ -451,62 +452,78 @@ rateReg <- function(formula, data, subset, df = NULL, knots = NULL, degree = 0L,
 ### internal functions =========================================================
 ## compute negative log likelihood
 logL_rateReg <- function(par, nBeta, nSub, xMat, ind_event, ind_cens,
-                         bMat_event, n_ij, seq_n_ij, dmu0_dalpha, xMat_i) {
-
-    ## number of covariates
-    ## nBeta <- ncol(dat) - 3L
-
+                         bMat_event, n_ij, seq_n_ij, dmu0_dalpha, xMat_i)
+{
     ## par = \THETA in the paper
     par_theta <- max(par[nBeta + 1L], .Machine$double.eps)
     par_alpha <- par[(nBeta + 2L) : length(par)]
-    ## nSub <- length(unique(dat$ID))
-    ## xMat <- as.matrix(dat[, 4L : (3L + nBeta)])
     expXBeta <- as.vector(exp(xMat %*% as.matrix(par[seq_len(nBeta)])))
-
-    ## index for event and censoring
-    ## ind_event <- dat$event == 1L
-    ## ind_cens <- ! ind_event
-
-    ## basis matrix at event times
-    ## bMat_event <- bMat[ind_event, , drop = FALSE]
 
     ## baseline rate function
     rho_0_ij <- pmax(as.vector(bMat_event %*% par_alpha), .Machine$double.eps)
     rho_i <- pmax(expXBeta[ind_event] * rho_0_ij, .Machine$double.eps)
     sum_log_rho_i <- sum(log(rho_i))
 
-    ## n_ij: number of event for each subject
-    ## the following code makes sure the order will not change
-    ## if the patient ID is not ordered
-    ## not needed if data are already sorted by ID
-    ## n_ij <- table(dat$ID)[order(unique(dat$ID))] - 1L
-    ## n_ij <- table(dat$ID) - 1L
-
-    ## if there is a subject with 0 event,
-    ## the sequence will not be generated for this subject
-    ## note that sequence(0L) leads to integer(0)
-    ## seq_n_ij <- sequence(n_ij)
     theta_j_1 <- par_theta + seq_n_ij - 1
     sum_log_theta_j_1 <- sum(log(theta_j_1))
 
     ## baseline mcf, integral of rho_0 that involves censoring time tau
-    ## dmu0_dalpha <- iMat[ind_cens, , drop = FALSE]
     mu0i <- as.vector(dmu0_dalpha %*% par_alpha)
     mui <- mu0i * expXBeta[ind_cens]
     mui_theta <- pmax(par_theta + mui, .Machine$double.eps)
     sum_log_theta_mui <- sum((n_ij_theta <- n_ij + par_theta) * log(mui_theta))
 
-    ## log-likelihood function
+    ## log likelihood function
     logLH <- nSub * par_theta * log(par_theta) + sum_log_rho_i +
         sum_log_theta_j_1 - sum_log_theta_mui
 
-    ## or use constrOptim?
-    penal <- ifelse(par_theta < 0 || min(par_alpha) < 0, 1e50, 0)
-    negLH <- - logLH + penal
+    ## return negative log likelihood
+    negLH <- - logLH
+
+    ## ## Calculate the gradient
+    ## ## on beta, vector
+    ## dl_dbeta_i <- sweep(x = as.matrix(xMat_i), MARGIN = 1, FUN = "*",
+    ##                     STATS = par_theta * (n_ij - mui) / (par_theta + mui))
+    ## dl_dbeta <- colSums(dl_dbeta_i)
+
+    ## ## on theta
+    ## dl_dtheta <- nSub + nSub * log(par_theta) +
+    ##     sum(1 / (par_theta + seq_n_ij - 1)) -
+    ##     sum((n_ij + par_theta) / (par_theta + mui)) - sum(log(mui_theta))
+
+    ## ## on alpha
+    ## part1 <- crossprod(1 / rho_0_ij, bMat_event)
+    ## dl_dalpha_part2 <- sweep(dmu0_dalpha, MARGIN = 1, FUN = "*",
+    ##                          STATS = expXBeta[ind_cens] * n_ij_theta /
+    ##                              mui_theta)
+    ## part2 <- colSums(dl_dalpha_part2)
+    ## dl_dalpha <-  part1 - part2
+    ## ## return gradient as one attribute
+    ## attr(negLH, "gradient") <- - c(dl_dbeta, dl_dtheta, dl_dalpha)
+    negLH
+}
+
+
+## compute negative log likelihood
+logL_rateReg_grad <- function(par, nBeta, nSub, xMat, ind_event, ind_cens,
+                              bMat_event, n_ij, seq_n_ij, dmu0_dalpha, xMat_i)
+{
+    ## par = \THETA in the paper
+    par_theta <- max(par[nBeta + 1L], .Machine$double.eps)
+    n_ij_theta <- n_ij + par_theta
+    par_alpha <- par[(nBeta + 2L) : length(par)]
+    expXBeta <- as.vector(exp(xMat %*% as.matrix(par[seq_len(nBeta)])))
+
+    ## baseline rate function
+    rho_0_ij <- pmax(as.vector(bMat_event %*% par_alpha), .Machine$double.eps)
+
+    ## baseline mcf, integral of rho_0 that involves censoring time tau
+    mu0i <- as.vector(dmu0_dalpha %*% par_alpha)
+    mui <- mu0i * expXBeta[ind_cens]
+    mui_theta <- pmax(par_theta + mui, .Machine$double.eps)
 
     ## Calculate the gradient
     ## on beta, vector
-    ## xMat_i <- xMat[ind_cens, , drop = FALSE]
     dl_dbeta_i <- sweep(x = as.matrix(xMat_i), MARGIN = 1, FUN = "*",
                         STATS = par_theta * (n_ij - mui) / (par_theta + mui))
     dl_dbeta <- colSums(dl_dbeta_i)
@@ -523,34 +540,28 @@ logL_rateReg <- function(par, nBeta, nSub, xMat, ind_event, ind_cens,
                                  mui_theta)
     part2 <- colSums(dl_dalpha_part2)
     dl_dalpha <-  part1 - part2
-    ## return gradient as one attribute
-    attr(negLH, "gradient") <- - c(dl_dbeta, dl_dtheta, dl_dalpha)
-    negLH
+    ## return gradient
+    - c(dl_dbeta, dl_dtheta, dl_dalpha)
 }
 
 
-rateReg_control <- function(gradtol = 1e-6, stepmax = 1e5,
-                            steptol = 1e-6, iterlim = 1e2,
-                            Boundary.knots = NULL, verbose = TRUE, ...) {
-    ## controls for function stats::nlm
-    if (! is.numeric(gradtol) || gradtol <= 0)
-        stop("Value of 'gradtol' must be > 0.")
-    if (! is.numeric(stepmax) || stepmax <= 0)
-        stop("Value of 'stepmax' must be > 0.")
-    if (! is.numeric(steptol) || steptol <= 0)
-        stop("Value of 'steptol' must be > 0.")
-    if (! is.numeric(iterlim) || iterlim <= 0)
-        stop("Maximum number of iterations must be > 0.")
+rateReg_control <- function(maxit = 1e2,
+                            reltol = sqrt(.Machine$double.eps),
+                            Boundary.knots = NULL,
+                            verbose = TRUE, ...)
+{
     if (! is.logical(verbose))
         stop("'verbose' must be a logical value.")
     ## return
-    list(gradtol = gradtol, stepmax = stepmax,
-         steptol = steptol, iterlim = iterlim,
-         Boundary.knots = Boundary.knots, verbose = verbose)
+    list(maxit = maxit,
+         reltol = reltol,
+         Boundary.knots = Boundary.knots,
+         verbose = verbose, ...)
 }
 
 
-rateReg_start <- function (beta, theta = 0.5, alpha, ..., nBeta_, nAlpha_) {
+rateReg_start <- function (beta, theta = 0.5, alpha, ..., nBeta_, nAlpha_)
+{
     ## beta = starting value(s) for coefficients of covariates
     ## theta = starting value for random effects
     ## alpha = starting values for coefficients of baseline rate bases
@@ -570,7 +581,8 @@ rateReg_start <- function (beta, theta = 0.5, alpha, ..., nBeta_, nAlpha_) {
 
 
 ## generate intervals from specified baseline pieces
-nameBases <- function(df, spline) {
+nameBases <- function(df, spline)
+{
     if (spline == "bSplines")
         return(paste0("B-spline", seq_len(df)))
     paste0("M-spline", seq_len(df))
