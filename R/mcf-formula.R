@@ -131,8 +131,6 @@ setMethod(
         }
         const_colnames <- c("ID", "time", "event", "origin")
         colnames(dat) <- c(const_colnames, covar_names)
-        ## revert subject ID
-        dat$ID <- attr(resp, "ID")
 
         ## output: na.action
         na.action <- if (is.null(attr(mm, "na.action"))) {
@@ -143,6 +141,8 @@ setMethod(
 
         ## if no covariates specified
         if (! nBeta) {
+            ## revert subject ID
+            dat$ID <- attr(resp, "ID")
             outDat <- sMcf(dat,
                            variance = variance,
                            logConfInt = logConfInt,
@@ -193,6 +193,8 @@ setMethod(
             outDat[rowInd, - colIdx] <- xGrid[i, ]
         }
         colnames(outDat) <- c(mcf_colnames, covar_names)
+        ## revert subject ID
+        outDat$ID <- levels(attr(resp, "ID"))[outDat$ID]
 
         ## factorize covariates
         outCol <- ncol(outDat)
