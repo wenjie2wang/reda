@@ -275,6 +275,8 @@ rateReg <- function(formula, data, subset, df = NULL, knots = NULL, degree = 0L,
 
     ## 'control' for optimization and splines' boundary knots
     control <- do.call("rateReg_control", control)
+    control4rateReg <- control$control4rateReg
+    control4optim <- control$control4optim
 
     ## for possible missing values in covaraites
     if (length(na.action <- attr(mf, "na.action"))) {
@@ -282,12 +284,12 @@ rateReg <- function(formula, data, subset, df = NULL, knots = NULL, degree = 0L,
         resp@ord <- order(resp[, "ID"], resp[, "time"])
         resp@ID <- resp@ID[- na.action]
         ## check data for possible error caused by removal of missing values
-        if (control$verbose)
+        if (control4rateReg$verbose)
             message("Observations with missing value in covariates ",
                     "are removed.\nChecking the new dataset again.\n",
                     appendLF = FALSE)
         check_Survr(resp, check = TRUE)
-        if (control$verbose)
+        if (control4rateReg$verbose)
             message("Done.")
     }
 
@@ -300,11 +302,11 @@ rateReg <- function(formula, data, subset, df = NULL, knots = NULL, degree = 0L,
     nObs <- nrow(dat)
 
     ## set up boundary knots
-    Boundary.knots <- if (is.null(control$Boundary.knots)) {
+    Boundary.knots <- if (is.null(control4rateReg$Boundary.knots)) {
                           with(dat, c(min(origin, na.rm = TRUE),
                                       max(time, na.rm = TRUE)))
                       } else {
-                          control$Boundary.knots
+                          control4rateReg$Boundary.knots
                       }
 
     ## generate knots if knots is unspecified
@@ -379,7 +381,7 @@ rateReg <- function(formula, data, subset, df = NULL, knots = NULL, degree = 0L,
                               seq_n_ij = seq_n_ij,
                               dmu0_dalpha = dmu0_dalpha,
                               xMat_i = xMat_i,
-                              control = control)
+                              control = control4optim)
 
     ## estimates for beta
     est_beta <- matrix(NA, nrow = nBeta, ncol = 5L)
@@ -545,18 +547,15 @@ logL_rateReg_grad <- function(par, nBeta, nSub, xMat, ind_event, ind_cens,
 }
 
 
-rateReg_control <- function(maxit = 1e2,
-                            reltol = sqrt(.Machine$double.eps),
-                            Boundary.knots = NULL,
+rateReg_control <- function(Boundary.knots = NULL,
                             verbose = TRUE, ...)
 {
     if (! is.logical(verbose))
         stop("'verbose' must be a logical value.")
     ## return
-    list(maxit = maxit,
-         reltol = reltol,
-         Boundary.knots = Boundary.knots,
-         verbose = verbose, ...)
+    list(control4rateReg = list(Boundary.knots = Boundary.knots,
+                                verbose = verbose),
+         control4optim = list(...))
 }
 
 
