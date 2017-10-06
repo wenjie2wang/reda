@@ -75,16 +75,19 @@ setMethod(
                           addOrigin = TRUE, ...)
     {
         ## nonsense, just to suppress Note from R CMD check --as-cran
-        MCF <- event <- lower <- upper <- design <- time <- NULL
+        MCF <- instRate <- lower <- upper <- design <- time <- NULL
+
         ## mcf data
         MCFdat <- x@MCF
-        ## if MCF is just for one certain group
+        ## if it is overall sample MCF
         if (! x@multiGroup) {
             if (addOrigin) {
                 ## add starting point at origin time
-                MCFdat <- MCFdat[c(1L, seq_len(nrow(MCFdat))), ]
-                MCFdat[1L, 2 : 10] <- 0
-                MCFdat[1L, "time"] <- min(MCFdat[, "origin"])
+                originDat <- MCFdat[1L, ]
+                originDat[, ] <- 0
+                originDat[, "time"] <- x@origin
+                originDat[, "instRate"] <- NA
+                MCFdat <- rbind(originDat, MCFdat)
             }
             ## set default line type and color
             if (missing(lty)) lty <- 1
@@ -94,7 +97,8 @@ setMethod(
                           linetype = lty, color = col)
             ## mark censoring time
             if (mark.time) {
-                cenDat <- base::subset(MCFdat, event < 1)
+                cenDat <- base::subset(MCFdat, ! is.na(instRate) &
+                                               instRate <= 0)
                 p <- p + geom_text(data = cenDat,
                                    aes(label = "+", x = time, y = MCF),
                                    vjust = 0.3, hjust = 0.5,
@@ -108,19 +112,24 @@ setMethod(
                               linetype = "3313", color = col)
             }
         } else {
-            desDat <- MCFdat[, - seq_len(10L), drop = FALSE]
+            ## if it is MCF for multiple groups
+            ## caution: this value may vary if mcf-formula method changes
+            numColMcf <- 7L
+            desDat <- MCFdat[, - seq_len(numColMcf), drop = FALSE]
             groupName <- paste(colnames(desDat), collapse = "&")
-            desList <- as.list(desDat)
-            MCFdat$design <- factor(do.call(paste, c(desList, sep = "&")))
-            nDesign <- length(desLevs <- levels(MCFdat$design))
+            desVec <- do.call(paste, c(as.list(desDat), sep = "&"))
+            desLevs <- unique(desVec)
+            MCFdat$design <- factor(desVec, levels = desLevs)
+            nDesign <- length(desLevs)
             desInd <- seq_len(nDesign)
             if (addOrigin) {
                 ## add starting point at origin time for each group
-                originVec <- with(MCFdat, tapply(origin, design, min))
-                MCFdat <- MCFdat[c(rep(1L, nDesign), seq_len(nrow(MCFdat))), ]
-                MCFdat[desInd, 2 : 10] <- 0
-                MCFdat[desInd, "time"] <- originVec
-                MCFdat[desInd, "design"] <- desLevs
+                originDat <- MCFdat[rep(1L, nDesign),]
+                originDat[, 2 : numColMcf] <- 0
+                originDat[, "time"] <- x@origin
+                originDat[, "design"] <- desLevs
+                originDat[, "instRate"] <- NA
+                MCFdat <- rbind(originDat, MCFdat)
             }
             ## set possibly customized group name and levels
             legendName <- if (missing(legendName)) {
@@ -156,10 +165,11 @@ setMethod(
                 scale_color_manual(values = lcs, name = legendName) +
                 scale_linetype_manual(values= lts, name = legendName)
             if (mark.time) {
-                cenDat <- base::subset(MCFdat, time > 0 & event == 0)
+                cenDat <- base::subset(MCFdat, ! is.na(instRate) &
+                                               instRate <= 0)
                 p <- p + geom_text(data = cenDat,
-                                   aes(label = "+", x = time, y = MCF,
-                                       linetype = design, color = design),
+                                   aes(label = "+", x = time,
+                                       y = MCF, color = design),
                                    vjust = 0.3, hjust = 0.5,
                                    show.legend = FALSE)
             }
