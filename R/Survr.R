@@ -36,7 +36,6 @@ NULL
 ##' \itemize{
 ##'     \item Subject identification, event times, censoring time, and event
 ##'         indicator cannot be missing or contain missing values.
-##'     \item Event indicator must be coded as 0 (censored) or 1 (event).
 ##'     \item There has to be only one censoring time not earlier than
 ##'         any event time.
 ##'     \item The time origin has to be the same and not later than any event
@@ -46,10 +45,13 @@ NULL
 ##' @param ID Subject identificator.
 ##' @param time Time of reccurence event or censoring. In addition to numeric
 ##'     values, \code{Date} and \code{difftime} are also supported.
-##' @param event The event indicator, \code{0 = censored}, \code{1 = event}.
-##' @param origin The time origin of each subject or process. Different subjects
-##'     may have different origins. However, one subject must have the same
-##'     origin.
+##' @param event Numeric vector indicating failure cost or event indicator
+##'     taking positive values as events, and non-positive values as censoring.
+##'     Logical vector is allowed and will be converted to numeric vector.
+##' @param origin The time origin of each subject or process. In addition to
+##'     numeric values, \code{Date} and \code{difftime} are also supported.
+##'     Different subjects may have different origins. However, one subject must
+##'     have the same origin.
 ##' @param check Logical value suggesting whether to perform data checking
 ##'     procedure. The default value is \code{TRUE}. \code{FALSE} should be set
 ##'     with caution and only for processed data already in recerruent event
@@ -58,7 +60,8 @@ NULL
 ##' @aliases Survr
 ##' @seealso \code{\link{rateReg}} for model fitting.
 ##' @export
-Survr <- function(ID, time, event, origin = 0, check = TRUE, ...) {
+Survr <- function(ID, time, event, origin = 0, check = TRUE, ...)
+{
     if (missing(ID))
         stop("ID variable cannot be missing.")
     if (missing(time))
@@ -72,8 +75,8 @@ Survr <- function(ID, time, event, origin = 0, check = TRUE, ...) {
 
 
 ### internal function ==========================================================
-check_Survr <- function(dat, check, ...) {
-
+check_Survr <- function(dat, check, ...)
+{
     ID <- dat[, "ID"]
     time <- dat[, "time"]
     event <- dat[, "event"]
@@ -85,12 +88,15 @@ check_Survr <- function(dat, check, ...) {
         time <- unclass(time)
     if (! is.numeric(time))
         stop("Time variable must be 'numeric', 'difftime' or 'Date'.")
-    if (any(! event %in% c(0, 1)))
-        stop("'event' must be coded as 0 (censoring) or 1 (event).")
     if (inherits(origin, "Date"))
         origin <- unclass(origin)
     if (! is.numeric(origin))
         stop("Origin variable must be 'numeric' or 'Date'.")
+    if (is.logical(event))
+        event <- as.numeric(event)
+    ## convert non-positive event all to zero
+    ## for ease of later computing sample MCF
+    event[event <= 0] <- 0
 
     ## if dat input has an attr 'ID_' for internal usage
     ID_ <- attr(dat, "ID")
@@ -106,7 +112,7 @@ check_Survr <- function(dat, check, ...) {
     ord <- attr(dat, "ord")
     sortDat <- if (is.null(ord)) {
                    ## sort the data by ID, time, and event
-                   as.data.frame(dat[(ord <- order(ID, time, 1 - event)), ])
+                   as.data.frame(dat[(ord <- order(ID, time, - event)), ])
                } else {
                    as.data.frame(dat[ord, ])
                }
@@ -119,39 +125,47 @@ check_Survr <- function(dat, check, ...) {
         sIDnam <- IDnam[ord]
 
         ## issue 1: event time after censoring time or without censoring time
-        idx <- ! duplicated(sID, fromLast = TRUE) & sEvent != 0
+        idx <- ! duplicated(sID, fromLast = TRUE) & sEvent > 0
         if (any(idx)) {
-            stop("Every subject must have one censored time ",
-                 "not earlier than any event time.",
-                 "\nPlease check subject: ",
-                 paste(sIDnam[idx], collapse = ", "), ".")
+            stop(wrapMessages(
+                "Every subject must have one censored time",
+                "not earlier than any event time.",
+                "Please check subject:",
+                paste0(paste(sIDnam[idx], collapse = ", "), ".")
+            ))
         }
 
         ## issue 2: more than one censoring time
-        cenID <- sIDnam[sEvent != 1]
+        cenID <- sIDnam[sEvent <= 0]
         idx <- duplicated(cenID)
         if (any(idx)) {
-            stop("Every subject must have only one censored time.",
-                 "\nPlease check subject: ",
-                 paste(cenID[idx], collapse = ", "), ".")
+            stop(wrapMessages(
+                "Every subject must have only one censored time.",
+                "Please check subject:",
+                paste0(paste(cenID[idx], collapse = ", "), ".")
+            ))
         }
 
         ## stop if missing value of 'time'
         idx <- is.na(sTime)
         if (any(idx)) {
             tmpID <- unique(sIDnam[idx])
-            stop("Event or censoring times cannot be missing.",
-                 "\nPlease check subject: ",
-                 paste(tmpID, collapse = ", "), ".")
+            stop(wrapMessages(
+                "Event or censoring times cannot be missing.",
+                "Please check subject:",
+                paste0(paste(tmpID, collapse = ", "), ".")
+            ))
         }
 
         ## 'time' has to be later than the 'origin'
         idx <- sTime < sOrigin
         if (any(idx)) {
             tmpID <- unique(sIDnam[idx])
-            stop("Event times cannot be earlier than the origin time.",
-                 "\nPlease check subject: ",
-                 paste(tmpID, collapse = ", "), ".")
+            stop(wrapMessages(
+                "Event times cannot be earlier than the origin time.",
+                "Please check subject:",
+                paste0(paste(tmpID, collapse = ", "), ".")
+            ))
         }
 
         ## For one subject, the 'origin' has to be the same
@@ -161,18 +175,18 @@ check_Survr <- function(dat, check, ...) {
         idx <- tmp > 1
         if (any(idx)) {
             tmpID <- unique(names(tmp)[idx])
-            stop("The origin variable has to be the same for one subject.",
-                 "\nPlease check subject: ",
-                 paste(tmpID, collapse = ", "), ".")
+            stop(wrapMessages(
+                "The origin variable has to be the same for one subject.",
+                "Please check subject:",
+                paste0(paste(tmpID, collapse = ", "), ".")
+            ))
         }
     }
     ## return
-    mat <- as.matrix(dat)
+    mat <- as.matrix(cbind(ID = ID, time = time,
+                           event = event, origin = origin))
     out <- methods::new("Survr", mat,
                         ID = IDnam,
-                        time = dat[, "time"],
-                        event = dat[, "event"],
-                        origin = dat[, "origin"],
                         check = check,
                         ord = ord)
     invisible(out)
