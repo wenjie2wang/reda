@@ -33,15 +33,14 @@ NULL
 ##' @param subset An optional vector specifying a subset of observations to be
 ##'     used in the fitting process.
 ##' @param variance An optional character specifying the method for variance
-##'     estimates.  The available options are \code{"Poisson"} (default) for
-##'     Poisson process method, \code{"LawlessNadeau"} for Lawless and Nadeau
-##'     (1995) method, and \code{"bootstrap"} for bootstrapping method. (A
-##'     simple example is available at Reliawiki, 2012.)  Partial matching on
-##'     the names is allowed.
+##'     estimates.  The available options are \code{"LawlessNadeau"} (default)
+##'     for Lawless and Nadeau (1995) method, \code{"Poisson"} for Poisson
+##'     process method, and \code{"bootstrap"} for bootstrapping method.
+##'     Partial matching on the names is allowed.
 ##' @param logConfInt An optional logical value. If \code{TRUE} (default), the
-##'     confidence interval of given level will be constucted based on the
-##'     normality of logarithm of the MCF function. (Otherwise, the confidence
-##'     interval will be constructed based on the normality of MCF function.)
+##'     confidence intervals of given level are constucted based on the
+##'     normality of logarithm of the MCF estimates. Otherwise, the confidence
+##'     interval are constructed based on the normality of the MCF estimates.
 ##'
 ##' @aliases mcf,formula-method
 ##' @importFrom stats na.fail na.omit na.exclude na.pass qnorm quantile sd
@@ -49,7 +48,8 @@ NULL
 setMethod(
     f = "mcf", signature = "formula",
     definition = function(object, data, subset, na.action,
-                          variance = c("Poisson", "LawlessNadeau", "bootstrap"),
+                          variance = c("LawlessNadeau", "Nelson",
+                                       "Poisson", "bootstrap"),
                           logConfInt = TRUE, level = 0.95,
                           control = list(), ...)
     {
@@ -58,14 +58,13 @@ setMethod(
         ## basic check on inputs
         if (length(logConfInt) > 1 || ! is.logical(logConfInt))
             stop("'logConfint' has to be either 'TRUE' or 'FALSE'.")
-        ## check on level specified
         if (length(level) > 1 || ! is.numeric(level) ||
             level <= 0 || level >= 1)
             stop("Confidence level must be between 0 and 1.")
 
+        ## get the data and take care of the possible subset
         if (missing(data))
             data <- environment(object)
-        ## take care of subset individual for possible non-numeric ID
         if (! missing(subset)) {
             sSubset <- substitute(subset)
             subIdx <- eval(sSubset, data, parent.frame())
@@ -129,8 +128,7 @@ setMethod(
         } else {
             covar_names <- NULL
         }
-        const_colnames <- c("ID", "time", "event", "origin")
-        colnames(dat) <- c(const_colnames, covar_names)
+        colnames(dat) <- c("ID", "time", "event", "origin", covar_names)
 
         ## output: na.action
         na.action <- if (is.null(attr(mm, "na.action"))) {
@@ -154,6 +152,7 @@ setMethod(
             out <- new("sampleMcf",
                        formula = object,
                        MCF = outDat,
+                       origin = min(dat$origin),
                        multiGroup = FALSE,
                        na.action = na.action,
                        variance = variance,
@@ -167,34 +166,26 @@ setMethod(
         xGrid <- unique(dat1)
         levs <- apply(xGrid, 1, paste, collapse = "_")
         datLevs <- apply(dat1, 1, paste, collapse = "_")
-
         ## number of levels
         num_levels <- NROW(xGrid)
         if (num_levels == 1L)
             warning("There is only one level in the covariates.")
 
-        mcf_colnames <- c(const_colnames, "numRisk", "instRate",
-                          "MCF", "se", "lower", "upper")
-        const_ncol <- length(mcf_colnames)
-        outDat <- data.frame(matrix(NA, nrow = nrow(mm),
-                                    ncol = const_ncol + nBeta))
-        colIdx <- seq_len(const_ncol)
-        for (i in seq(num_levels)) {
+        ## initialize origin for each level...
+        originVec <- rep(NA, num_levels)
+        ## loop part
+        outList <- lapply(seq(num_levels), function(i) {
             subDat <- dat[datLevs %in% levs[i], ]
-            rowLen <- nrow(subDat)
-            rowInd <- if(i == 1L) {
-                          seq_len(rowLen)
-                      } else {
-                          seq(from = rowInd[length(rowInd)] + 1L, by = 1L,
-                              length.out = rowLen)
-                      }
-            outDat[rowInd, colIdx] <- sMcf(subDat, variance,
-                                           logConfInt, level, control)
-            outDat[rowInd, - colIdx] <- xGrid[i, ]
-        }
-        colnames(outDat) <- c(mcf_colnames, covar_names)
-        ## revert subject ID
-        outDat$ID <- levels(attr(resp, "ID"))[outDat$ID]
+            ## ...compute origin for each level
+            originVec[i] <<- min(subDat$origin)
+            oneSmcfDat <- sMcf(subDat, variance,
+                               logConfInt, level, control)
+            do.call(data.frame, c(as.list(oneSmcfDat),
+                                  as.list(xGrid[i, , drop = FALSE])))
+        })
+        outDat <- do.call(rbind, outList)
+        ## name origin vector
+        names(originVec) <- levs
 
         ## factorize covariates
         outCol <- ncol(outDat)
@@ -207,6 +198,7 @@ setMethod(
         out <- methods::new("sampleMcf",
                             formula = object,
                             MCF = outDat,
+                            origin = originVec,
                             multiGroup = TRUE,
                             na.action = na.action,
                             variance = variance,
@@ -219,7 +211,8 @@ setMethod(
 
 ### internal function ==========================================================
 ## simple wrapper function for sMcf_point and addVar_sMcf
-sMcf <- function(dat, variance, logConfInt, level, control) {
+sMcf <- function(dat, variance, logConfInt, level, control)
+{
     sMcfDat <- sMcf_point(dat)
     addVar_sMcf(dat, sMcfDat, variance, logConfInt, level, control)
 }
@@ -230,8 +223,7 @@ sMcf_point <- function(inpDat)
     ## throw out warning if no any event
     if (all(! inpDat$event))
         warning("No event found.")
-
-    ## origin all the same?
+    ## different origins?
     origin_idx <- length(unique(inpDat$origin)) > 1
     if (origin_idx) {
         ## already sorted by ID, time, and (1 - event) by Survr
@@ -240,28 +232,29 @@ sMcf_point <- function(inpDat)
         rightVec <- inpDat[! inpDat$event, "time"]
     }
     ## if time ties, put event time before censoring time
-    inpDat <- inpDat[with(inpDat, order(time, 1 - event)), seq_len(4L)]
+    inpDat <- inpDat[with(inpDat, order(time, - event)), seq_len(4L)]
     num_at_risk <- if (origin_idx) {
                        ## for non-zero origin
                        sapply(inpDat$time, function(xTime) {
                            sum(xTime >= originVec & xTime <= rightVec)
                        })
                    } else {
-                       ## for all zero origin
-                       length(unique(inpDat$ID)) - cumsum(inpDat$event != 1)
+                       ## for all equal origin
+                       length(unique(inpDat$ID)) - cumsum(inpDat$event <= 0)
                    }
-    increment <- ifelse(inpDat$event, 1 / num_at_risk, 0)
+    increment <- with(inpDat, ifelse(event > 0, event / num_at_risk, 0))
 
     ## index of unique event and censoring time
-    ## indx <- ! duplicated(inpDat$time, fromLast = TRUE)
+    uni_first_idx <- ! duplicated(inpDat$time, fromLast = FALSE)
+    uni_last_idx <- ! duplicated(inpDat$time, fromLast = TRUE)
 
-    ## sample mcf at each time point
-    smcf <- cumsum(increment)
+    ## sample mcf at each unique time point
+    smcf <- cumsum(increment)[uni_last_idx]
 
     ## return
-    data.frame(inpDat,
-               numRisk = num_at_risk,
-               instRate = increment,
+    data.frame(time = inpDat$time[uni_first_idx],
+               numRisk = num_at_risk[uni_first_idx],
+               instRate = diff(c(0, smcf)),
                MCF = smcf,
                se = NA,
                lower = NA,
@@ -271,20 +264,13 @@ sMcf_point <- function(inpDat)
 ## add variance estimates for sample MCF point estimates
 addVar_sMcf <- function(dat, sMcfDat, variance, logConfInt, level, control)
 {
-    increment <- sMcfDat$instRate
-    num_at_risk <- sMcfDat$numRisk
-    smcf <- sMcfDat$MCF
-    inc2 <- increment ^ 2
-
     ## sample variance estimator
-    if (identical(variance, "Poisson")) {
-        var_smcf <- cumsum(inc2)
+    if (identical(variance, "LawlessNadeau")) {
+        var_smcf <- var_lawlessNadeau(dat, sMcfDat)
         se_smcf <- sqrt(var_smcf)
-    } else if (identical(variance, "LawlessNadeau")) {
-        inc12 <- (1 - increment) ^ 2
-        incre <- inc2 * (inc12 + (num_at_risk - 1) * inc2)
-        incre_var <- ifelse(sMcfDat$event < 1, 0, incre)
-        var_smcf <- cumsum(incre_var)
+    } else if (identical(variance, "Poisson")) {
+        varVec <- with(sMcfDat, ifelse(numRisk > 0, instRate / numRisk, 0))
+        var_smcf <- cumsum(varVec)
         se_smcf <- sqrt(var_smcf)
     } else if (identical(variance, "bootstrap")) {
         control <- do.call(addVar_sMcf_control, control)
@@ -300,6 +286,7 @@ addVar_sMcf <- function(dat, sMcfDat, variance, logConfInt, level, control)
         lower <- ciMat[1L, ]
         upper <- ciMat[2L, ]
     } else {
+        smcf <- sMcfDat$MCF
         ## Confidence interval for log(MCF) or MCF
         if (logConfInt) {
             criVal <- ifelse(smcf > 0,
@@ -321,6 +308,52 @@ addVar_sMcf <- function(dat, sMcfDat, variance, logConfInt, level, control)
     sMcfDat$upper <- upper
     ## return
     sMcfDat
+}
+
+## function computing variance estimates by Lawless and Nadeau (1995)
+var_lawlessNadeau <- function(dat, sMcfDat)
+{
+    ## following notations in Lawless and Nadeau (1995)
+    ## at unique time points...
+    tj <- sMcfDat$time
+    ## ... number of processes under risk
+    delta_tj <- sMcfDat$numRisk
+    ## ... and events or costs
+    m_tj <- sMcfDat$instRate
+
+    ## function for each process
+    var_comp <- function(subDat, tj, delta_tj, m_tj) {
+        ## compute delta_i(tj) as delta_i_tj
+        origin <- subDat$origin[1L]
+        cenTime <- with(subDat, time[event <= 0])
+        delta_i_tj <- as.numeric(tj >= origin & tj <= cenTime)
+        ## compute n_i(t_j) as n_i_tj
+        n_i_tj <- rep(0, length(tj))
+        names(n_i_tj) <- as.character(tj)
+        ## if multiple events exists at the same time
+        tj_i <- unique(subDat$time)
+        n_i_tj[as.character(tj_i)] <- if (any(duplicated(subDat$time)))
+                                          with(subDat, tapply(event, time, sum))
+                                      else
+                                          subDat$event
+
+        ## apply formula (2.3)--(2.5)
+        res_ij <- ifelse(delta_tj > 0,
+                         delta_i_tj / delta_tj * (n_i_tj - m_tj),
+                         0)
+        ## return
+        cumsum(res_ij) ^ 2
+    }
+
+    ## apply var_comp to each process
+    varList <- by(dat[, c("ID", "time", "event", "origin")], dat$ID,
+                  var_comp, tj = tj, delta_tj = delta_tj, m_tj = m_tj,
+                  simplify = FALSE)
+    ## just in case dimension was dropped
+    if (nrow(sMcfDat) > 1)
+        colSums(do.call(rbind, varList))
+    else
+        sum(do.call(c, varList))
 }
 
 ## function preparing control
@@ -384,14 +417,17 @@ sMcf_boot_one <- function(dat, idTab, uID, numSub, rowIndList, grid, ...)
 seBoot_normal <- function(sMcfBootMat, upperQuan = 0.75)
 {
     if (! is.numeric(upperQuan) || upperQuan >= 1 || upperQuan <= 0.5)
-        stop("The upper quantile ('upperQuan') has to be between 0.5 and 1.")
+        stop(wrapMessages(
+            "The upper quantile ('upperQuan') has to be between 0.5 and 1."
+        ))
     quanDiff <- qnorm(upperQuan) - qnorm(1 - upperQuan)
     tmp <- apply(sMcfBootMat, 1L, quan_fun, level = 2 * upperQuan - 1)
     (tmp[2L, ] - tmp[1L, ]) / quanDiff
 }
 
 ## estimate SE by sample SE
-seBoot_sample <- function(sMcfBootMat) {
+seBoot_sample <- function(sMcfBootMat)
+{
     apply(sMcfBootMat, 1L, stats::sd)
 }
 

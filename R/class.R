@@ -151,6 +151,7 @@ setClass(Class = "summaryRateReg",
 ##'
 ##' @slot formula Formula.
 ##' @slot MCF A data frame.
+##' @slot origin A named numeric vector.
 ##' @slot multiGroup A logical value.
 ##' @slot na.action A length-one character vector.
 ##' @slot variance A character.
@@ -163,6 +164,7 @@ setClass(Class = "summaryRateReg",
 setClass(Class = "sampleMcf",
          slots = c(formula = "formula",
                    MCF = "data.frame",
+                   origin = "numeric",
                    multiGroup = "logical",
                    na.action = "character",
                    variance = "character",

@@ -101,15 +101,12 @@ NULL
 ##' }
 ##' For the meaning of other slots, see \code{\link{rateReg}}.
 ##' @references
-##' Nelson, W. B. (2003). \emph{Recurrent events data analysis for product
-##' repairs, disease recurrences, and other applications} (Vol. 10). SIAM.
-##'
 ##' Lawless, J. F. and Nadeau, C. (1995). Some Simple Robust Methods for the
 ##' Analysis of Recurrent Events. \emph{Technometrics}, 37, 158--168.
 ##'
-##' ReliaWiki. (2012, March 19). Recurrent Event Data Analysis.
-##' Retrieved November 23, 2015, from
-##' \url{http://reliawiki.org/index.php/Recurrent_Event_Data_Analysis}
+##' Nelson, W. B. (2003). \emph{Recurrent events data analysis for product
+##' repairs, disease recurrences, and other applications} (Vol. 10). SIAM.
+##'
 ##' @seealso
 ##' \code{\link{rateReg}} for model fitting;
 ##' \code{\link{plot-method}} for plotting MCF.
