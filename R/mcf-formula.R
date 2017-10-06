@@ -298,7 +298,7 @@ addVar_sMcf <- function(dat, sMcfDat, variance, logConfInt, level, control)
         } else {
             criVal <- stats::qnorm(0.5 + level / 2) * se_smcf
             upper <- smcf + criVal
-            lower <- pmax(smcf - criVal, 0)
+            lower <- smcf - criVal
         }
     }
 
