@@ -1,7 +1,7 @@
 Package: reda
 Title: Recurrent Event Data Analysis
 Version: 0.4.0.9000
-Date: 2017-09-04
+Date: 2017-10-05
 Authors@R: c(
     person(given = "Wenjie", family = "Wang",
            email = "wenjie.2.wang@uconn.edu",
@@ -30,7 +30,7 @@ Depends:
 License: GPL (>= 3)
 LazyData: true
 VignetteBuilder: knitr
-Collate:
+Collate: 
     'class.R'
     'Survr.R'
     'aic.R'
@@ -40,6 +40,7 @@ Collate:
     'mcf-generic.R'
     'mcf-formula.R'
     'mcf-rateReg.R'
+    'misc.R'
     'plot.R'
     'rateReg.R'
     'reda.R'

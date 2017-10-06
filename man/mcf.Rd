@@ -10,8 +10,8 @@
 mcf(object, ...)
 
 \S4method{mcf}{formula}(object, data, subset, na.action,
-  variance = c("Poisson", "LawlessNadeau", "bootstrap"), logConfInt = TRUE,
-  level = 0.95, control = list(), ...)
+  variance = c("LawlessNadeau", "Nelson", "Poisson", "bootstrap"),
+  logConfInt = TRUE, level = 0.95, control = list(), ...)
 
 \S4method{mcf}{rateReg}(object, newdata, groupName, groupLevels, level = 0.95,
   na.action, control = list(), ...)
@@ -38,16 +38,15 @@ Other possible values inlcude \code{\link[stats]{na.fail}},
 \code{help(na.fail)} for details.}
 
 \item{variance}{An optional character specifying the method for variance
-estimates.  The available options are \code{"Poisson"} (default) for
-Poisson process method, \code{"LawlessNadeau"} for Lawless and Nadeau
-(1995) method, and \code{"bootstrap"} for bootstrapping method. (A
-simple example is available at Reliawiki, 2012.)  Partial matching on
-the names is allowed.}
+estimates.  The available options are \code{"LawlessNadeau"} (default)
+for Lawless and Nadeau (1995) method, \code{"Poisson"} for Poisson
+process method, and \code{"bootstrap"} for bootstrapping method.
+Partial matching on the names is allowed.}
 
 \item{logConfInt}{An optional logical value. If \code{TRUE} (default), the
-confidence interval of given level will be constucted based on the
-normality of logarithm of the MCF function. (Otherwise, the confidence
-interval will be constructed based on the normality of MCF function.)}
+confidence intervals of given level are constucted based on the
+normality of logarithm of the MCF estimates. Otherwise, the confidence
+interval are constructed based on the normality of the MCF estimates.}
 
 \item{level}{An optional numeric value
 indicating the confidence level required. The default value is 0.95.}
@@ -160,15 +159,11 @@ plot(simuMcf, conf.int = TRUE, lty = 1 : 4,
 ## see examples given in function rateReg.
 }
 \references{
-Nelson, W. B. (2003). \emph{Recurrent events data analysis for product
-repairs, disease recurrences, and other applications} (Vol. 10). SIAM.
-
 Lawless, J. F. and Nadeau, C. (1995). Some Simple Robust Methods for the
 Analysis of Recurrent Events. \emph{Technometrics}, 37, 158--168.
 
-ReliaWiki. (2012, March 19). Recurrent Event Data Analysis.
-Retrieved November 23, 2015, from
-\url{http://reliawiki.org/index.php/Recurrent_Event_Data_Analysis}
+Nelson, W. B. (2003). \emph{Recurrent events data analysis for product
+repairs, disease recurrences, and other applications} (Vol. 10). SIAM.
 }
 \seealso{
 \code{\link{rateReg}} for model fitting;

@@ -12,11 +12,14 @@ Survr(ID, time, event, origin = 0, check = TRUE, ...)
 \item{time}{Time of reccurence event or censoring. In addition to numeric
 values, \code{Date} and \code{difftime} are also supported.}
 
-\item{event}{The event indicator, \code{0 = censored}, \code{1 = event}.}
+\item{event}{Numeric vector indicating failure cost or event indicator
+taking positive values as events, and non-positive values as censoring.
+Logical vector is allowed and will be converted to numeric vector.}
 
-\item{origin}{The time origin of each subject or process. Different subjects
-may have different origins. However, one subject must have the same
-origin.}
+\item{origin}{The time origin of each subject or process. In addition to
+numeric values, \code{Date} and \code{difftime} are also supported.
+Different subjects may have different origins. However, one subject must
+have the same origin.}
 
 \item{check}{Logical value suggesting whether to perform data checking
 procedure. The default value is \code{TRUE}. \code{FALSE} should be set
@@ -38,7 +41,6 @@ The checking rules apply to each subject respectively and include that
 \itemize{
     \item Subject identification, event times, censoring time, and event
         indicator cannot be missing or contain missing values.
-    \item Event indicator must be coded as 0 (censored) or 1 (event).
     \item There has to be only one censoring time not earlier than
         any event time.
     \item The time origin has to be the same and not later than any event

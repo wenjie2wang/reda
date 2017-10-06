@@ -15,6 +15,8 @@ An S4 class that represents sample mean cumulative function (MCF) from data.
 
 \item{\code{MCF}}{A data frame.}
 
+\item{\code{origin}}{A named numeric vector.}
+
 \item{\code{multiGroup}}{A logical value.}
 
 \item{\code{na.action}}{A length-one character vector.}
