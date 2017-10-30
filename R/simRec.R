@@ -18,89 +18,229 @@
 ################################################################################
 
 
-##' Generate Simulated Recurrent Events for One Process
+##' Generate Simulated Survival Data or Recurrent Events for One Process
 ##'
+##' The Cox proportional hazard model (Cox) Andersen
 ##' The thinning method (Lewis and Shedler, 1979) is applied for generating
 ##' simulated recurrent event times from Gamma frailty model for one process or
 ##' usually one subject or machine in applications. Conditional on predictors
 ##' (or covariates) and the unobserved Gamma frailty effect, the process is a
 ##' Poisson process.
 ##'
-##' x and beta can be vector of length more than one.
-##' alpha should be vector of length more than one if df > 1
-##' if knots and degree are set, df will be ignore
-##' tau can be different for different processes
+##' For argument \code{z}, \code{zCoef}, and \code{rho}, a function of time can
+##' be specified for time-varying effect.  The (first) argument of the input
+##' function has to be the time (not need to be named as "time" though). Other
+##' arguments of the function can be specified through a named list in
+##' \code{arguments}.
+##'
+##' @param z Time-invariant or time-varying covariates. The default value is
+##'     \code{0} for no covariate effect.  This argument should be a numeric
+##'     vector for time-invariant covariates or a function of time that returns
+##'     a numeric vector for time-varying covariates.
+##' @param zCoef Time-invariant or time-varying coefficients of covariates. The
+##'     default value is \code{1}. Similar to the argument \code{x}, this
+##'     argument should be a numeric vector for time-invariant coefficients or a
+##'     function of time that returns a numeric vector for time-varying
+##'     coefficients. The length of the numeric vector specified or returned
+##'     from \code{x} and \code{x.coef} has to be always the same.
+##' @param rho Baseline rate (or intensity) function for the Poisson process.
+##'     The default is \code{1} for a homogenous Poisson process of unit
+##'     intensity. This argument can be either a non-negative numeric value for
+##'     a homogenous Poisson process or a function of time for a non-homogenous
+##'     process.
+##' @param rhoCoef Coefficients of baseline rate function. The default value is
+##'     \code{1}. It can be useful when \code{rho} is a function generating
+##'     spline bases.
+##' @param origin The time origin set to be \code{0} by default.
+##' @param endTime The end of follow-up time set to be \code{5} by default.
+##' @param frailty Frailty effect.
+##'
+##' @param arguments Other arguments that can be specified through a named list
+##'     for those time-varying functions.
+##' @param ... Other arguemtns for future usage.
+##'
 ##'
 ##' @references
+##'
+##' Cox, D. R. (1972). Regression models and life-tables.
+##' \emph{Journal of the Royal Statistical Society. Series B
+##' (Methodological)}, 34(2), 187--220.
+##'
 ##' Lewis, P. A., & G. S. Shedler. (1979). Simulation of
 ##' Nonhomogeneous Poisson Processes by Thinning.
 ##' \emph{Naval Research Logistics Quarterly},
 ##' 26(3), Wiley Online Library: 403--13.
 ##'
+##' @examples
+##' library(reda)
+##' set.seed(1216)
+##'
+##' ### example of customized time-varying baseline rate function
+##' ## the baseline rate function has to be non-negative
+##' simRec(rho = function(timeVec) { sin(timeVec) + 1 })
+##' ## other arguments can be specified through a named list in 'arguments'
+##' simRec(rho = function(a, b) { cos(a + b) + 1 },
+##'        arguments = list(rho = list(b = 1)))
+##' ## use quadratic M-splines without one internal knot
+##' simRec(rho = "mSpline", rhoCoef = c(0.2, 0.5, 0.3, 0.4),
+##'        arguments = list(rho = list(degree = 2, df = 4, intercept = TRUE,
+##'                         Boundary.knots = c(0, 5))))
+##'
+##' ### example of time-invariant covariates and coefficients
+##' simRec(z = 1, zCoef = 0.5)
+##' simRec(z = c(0.5, 1), zCoef = c(1, 0))
+##'
+##' ### example of time-varying covariates and time-varying coefficients
+##' zFun <- function(timeVec, intercept) {
+##'    c(timeVec / 10 + intercept, as.numeric(timeVec > 3))
+##' }
+##' zCoefFun <- function(timeVec, shift) {
+##'   c(sqrt(timeVec + shift), 1)
+##' }
+##' simRec(z = zFun, zCoef = zCoefFun,
+##'        arguments = list(z = list(intercept = 0.1),
+##'                         zCoef = list(shift = 0.1)))
+##'
+##' ### example of frailty effect
+##' ## The default distribution is Gamma distribution
+##' simRec(z = c(0.5, 1), zCoef = c(1, 0), frailty = TRUE,
+##'        arguments = list(frailty = list(shape = 2, scale = 0.5)))
+##' ## equivalent to the following function call
+##' simRec(z = c(0.5, 1), zCoef = c(1, 0), frailty = "rgamma",
+##'        arguments = list(frailty = list(shape = 2, scale = 0.5)))
+##' ## lognormal with mean zero
+##' logNorm <- function(a) exp(rnorm(n = 1, mean = 0, sd = a))
+##' simRec(z = c(0.5, 1), zCoef = c(1, 0), frailty = logNorm,
+##'        arguments = list(frailty = list(a = 1)))
+##'
 ##' @importFrom stats optimize rexp qexp
-simRec <- function(x = 0, x.coef = 1,
-                   origin = 0, endTime = 5,
-                   rho.fun = function(x) 1,
-                   rho.args = list(),
-                   rho.coef = 1,
-                   frailty.fun = rgamma,
-                   frailty.args = list(shape = 0.5, scale = 2),
+simRec <- function(z = 0, zCoef = 1, rho = 1, rhoCoef = 1,
+                   origin = 0, endTime = 5, frailty = FALSE,
+                   recurrent = TRUE,
+                   arguments = list(x = list(),
+                                    xCoef = list(),
+                                    rho = list(),
+                                    frailty = list()),
                    ...)
 {
-    ## TODO: add checks on inputs
-    ## if (any(bsRateFun < 0))
-    ##         stop("Baseline rate function must be nonnegative")
-    ## }
+    ## simple internal functions
+    isNumVector <- function(x) is.numeric(x) & is.vector(x)
+    isCharOne <- function(x) {
+        is.character(x) & is.vector(x) & identical(length(x), 1L)
+    }
 
-    ## covariate effect
-    expXbeta <- as.numeric(exp(x %*% x.coef))
+    ## quick checks
+    zVecIdx <- isNumVector(z)
+    if (! (zVecIdx | is.function(z) | isCharOne(z)))
+        stop(wrapMessages(
+            "'z' has to be a numeric vector, a function or a function name"
+        ))
+    zCoefVecIdx <- isNumVector(zCoef)
+    if (! (zCoefVecIdx | is.function(zCoef) | isCharOne(zCoef)))
+        stop(wrapMessages(
+            "'zCoef' has to be a numeric vector, a function or a function name"
+        ))
+    rhoVecIdx <- isNumVector(rho) & identical(length(rho), 1L)
+    if (! (is.function(rho) | rhoVecIdx | isCharOne(rho)))
+        stop("'rho' has to be a numeric vector or a function")
+    if (rhoVecIdx & rho < 0)
+        stop("The baseline rate function 'rho' has to be non-negative.")
+
+    ## gpet arguments
+    z_args <- arguments$z
+    zCoef_args <- arguments$zCoef
+    rho_args <- arguments$rho
+    frailty_args <- arguments$frailty
+
+    ## covariate: time-varying or time-invariant
+    zFun <- ifelse(zVecIdx, function(zVec) z, z)
+    zCoefFun <- ifelse(zCoefVecIdx, function(zVec) zCoef, zCoef)
+    rhoFun <- ifelse(rhoVecIdx, function(zVec) rho, rho)
 
     ## prepare frailty effect
-    frailty.args <- c(list(n = 1), frailty.args[names(frailty.args) != "n"])
-    frailty <- do.call(frailty.fun, frailty.args)
+    noFrailty <- FALSE
+    if (is.logical(frailty)) {
+        if (frailty) {
+            ## default as Gamma distribution
+            frailty <- "rgamma"
+        } else {
+            noFrailty <- TRUE
+            frailtyEffect <- 1
+        }
+    }
+    if (is.function(frailty) |
+        (is.character(frailty) & identical(length(frailty), 1L))) {
+        argsNames <- names(as.list(args(frailty)))
+        ## add "n = 1" for common distribution from stats library
+        if ("n" %in% argsNames) {
+            frailty_args <- c(list(n = 1),
+                              frailty_args[names(frailty_args) != "n"])
+        }
+        frailtyEffect <- do.call(frailty, frailty_args)
+    } else if (! noFrailty) {
+        stop(wrapMessages(
+            "The argument 'frailty' has to be a logical value (TRUE or FALSE),",
+            "a function (or its name)."
+        ))
+    }
 
     ## rate function
-    rateFun <- function(xVec) {
-        rhoMat <- do.call(rho.fun, c(list(xVec), rho.args))
-        rhoVec <- as.numeric(rhoMat %*% rho.coef)
-        frailty * rhoVec * expXbeta
+    rateFun <- function(timeNum) {
+        zVec <- do.call(zFun, c(list(timeNum), z_args))
+        zCoefVec <- do.call(zCoefFun, c(list(timeNum), zCoef_args))
+        covEffect <- as.numeric(exp(zVec %*% zCoefVec))
+        rhoMat <- do.call(rhoFun, c(list(timeNum), rho_args))
+        rhoVec <- as.numeric(rhoMat %*% rhoCoef)
+        out <- frailtyEffect * rhoVec * covEffect
+        out
     }
 
     ## step 1: calculate the supremum value of rate function
-    rhoMaxObj <- stats::optimize(rateFun,
-                                 lower = origin,
-                                 upper = endTime,
+    rhoMaxObj <- stats::optimize(rateFun, interval = c(origin, endTime),
                                  maximum = TRUE)
     rho_max <- rhoMaxObj$objective
 
     ## step 2: generate W_i in batch for possible better performance
     ## estimate the number of W_i before censoring
-    batchNum <- ceiling((endTime - origin) / stats::qexp(0.10, rho_max))
-    eventTime <- NULL
-    lastEventTime <- origin
-    while (lastEventTime < endTime) {
-        W <- stats::rexp(n = batchNum, rate = rho_max)
-        ## step 3: update evnet times
-        eventTime <- c(eventTime, lastEventTime + cumsum(W))
-        lastEventTime <- eventTime[length(eventTime)]
+    if (recurrent) {
+        batchNum <- ceiling((endTime - origin) / stats::qexp(0.10, rho_max))
+        eventTime <- NULL
+        lastEventTime <- origin
+        while (lastEventTime < endTime) {
+            W <- stats::rexp(n = batchNum, rate = rho_max)
+            ## step 3: update evnet times
+            eventTime <- c(eventTime, lastEventTime + cumsum(W))
+            lastEventTime <- eventTime[length(eventTime)]
+        }
+    } else {
+        eventTime <- origin + stats::rexp(n = 1, rate = rho_max)
     }
+    ## only keep event time before end time
     eventTime <- eventTime[eventTime <= endTime]
-
-    ## prepare output in a list
-    outList <- list(x = x, x.coef = x.coef,
-                    origin = origin, endTime = endTime)
-    if (! length(eventTime)) {
+    len_eventTime <- length(eventTime)
+    if (! len_eventTime) {
         ## no any event
-        out <- numeric(0)
+        xOut <- numeric(0)
     } else {
         ## step 4: thinning
-        rho_t <- rateFun(eventTime)
-        U <- runif(n = length(eventTime))
+        rho_t <- sapply(eventTime, rateFun)
+        U <- runif(n = len_eventTime)
         ind <- U <= rho_t / rho_max
-        out <- eventTime[ind]
+        xOut <- eventTime[ind]
     }
     ## return
-    attr(out, "settings") <- outList
+    out <- list(x = xOut,
+                z = z,
+                zCoef = zCoef,
+                rho = rho,
+                rhoCoef = rhoCoef,
+                origin = origin,
+                endTime = endTime,
+                frailty = frailty,
+                frailtyEffect = frailtyEffect,
+                recurrent = recurrent,
+                arguments = arguments)
+    class(out) <- "simRec"
     out
 }
 
@@ -169,3 +309,8 @@ simRecData <- function(nProcess,
     ## return
     do.call(rbind, resList)
 }
+
+foo <- function(a) {exp(rnorm(n = 1, mean = 0, sd = a))}
+simRec(z = c(0.5, 1), zCoef = c(1, 0),
+       frailty = "foo",
+       arguments = list(frailty = list(a = 1)))
