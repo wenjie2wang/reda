@@ -46,7 +46,6 @@ Collate:
     'reda.R'
     'show.R'
     'simRec.R'
-    'simRecData.R'
     'summary.R'
 URL: https://github.com/wenjie2wang/reda
 BugReports: https://github.com/wenjie2wang/reda/issues

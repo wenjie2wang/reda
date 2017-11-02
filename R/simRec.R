@@ -18,6 +18,11 @@
 ################################################################################
 
 
+## collation after class.R
+##' @include class.R
+NULL
+
+
 ##' Simulated Survival time or Recurrent Events
 ##'
 ##' This function generates simulated recurrent events or survival time (the
