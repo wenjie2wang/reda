@@ -82,7 +82,7 @@ setMethod(f = "show", signature = "rateReg",
                   print(alpha)
               }
               ## invisible return
-              invisble(object)
+              invisible(object)
           })
 
 
