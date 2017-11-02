@@ -20,9 +20,9 @@
 
 ##' An S4 Class Representing Formula Response
 ##'
-##' \code{Survr-class} is an S4 that represents a formula response for recurrent
-##' event data model.  \code{\link{Survr}} produces objects of this class.
-##' See ``Slots'' for details.
+##' The class \code{Survr-class} is an S4 that represents a formula response for
+##' recurrent event data model.  The function \code{\link{Survr}} produces
+##' objects of this class.  See ``Slots'' for details.
 ##'
 ##' @slot .Data A numeric matrix object.
 ##' @slot ID Charactrer vector for original subject identificator.
@@ -39,8 +39,8 @@ setClass("Survr", contains = "matrix",
 
 ##' An S4 Class Representing a Fitted Model
 ##'
-##' \code{rateReg-class} is an S4 class that represents a fitted model.
-##' \code{\link{rateReg}} produces objects of this class.
+##' The class \code{rateReg-class} is an S4 class that represents a fitted
+##' model.  The function \code{\link{rateReg}} produces objects of this class.
 ##' See ``Slots'' for details.
 ##'
 ##' @slot call Function call.
@@ -100,10 +100,10 @@ setClass(Class = "rateReg",
          })
 
 
-##' An S4 Class to Represent Summary of a Fitted Model
+##' An S4 Class Representing Summary of a Fitted Model
 ##'
-##' \code{summaryRateReg-class} is an S4 class with selective slots
-##' of \code{rateReg-class} object.  See ``Slots'' for details.
+##' The class \code{summaryRateReg-class} is an S4 class with selective slots of
+##' \code{rateReg-class} object.  See ``Slots'' for details.  The function
 ##' \code{\link{summary,rateReg-method}} produces objects of this class.
 ##'
 ##' @slot call Function call.
@@ -144,10 +144,10 @@ setClass(Class = "summaryRateReg",
          })
 
 
-##' An S4 Class to Represent Sample MCF
+##' An S4 Class Representing Sample MCF
 ##'
 ##' An S4 class that represents sample mean cumulative function (MCF) from data.
-##' \code{\link{mcf}} produces objects of this class.
+##' The function \code{\link{mcf}} produces objects of this class.
 ##'
 ##' @slot formula Formula.
 ##' @slot MCF A data frame.
@@ -159,7 +159,6 @@ setClass(Class = "summaryRateReg",
 ##' @slot level A numeric value.
 ##' @aliases sampleMcf-class
 ##' @seealso \code{\link{mcf,formula-method}} for details of slots.
-##' @importFrom methods setClass
 ##' @export
 setClass(Class = "sampleMcf",
          slots = c(formula = "formula",
@@ -172,10 +171,10 @@ setClass(Class = "sampleMcf",
                    level = "numeric"))
 
 
-##' An S4 Class to Respresent Estimated MCF from a Fitted Model
+##' An S4 Class Respresenting Estimated MCF from a Fitted Model
 ##'
 ##' An S4 class that represents estimated mean cumulative function (MCF) from
-##' Models.  \code{\link{mcf}} produces objects of this class.
+##' Models. The function \code{\link{mcf}} produces objects of this class.
 ##'
 ##' @slot call Function call.
 ##' @slot formula Formula.
@@ -226,17 +225,49 @@ setClass(Class = "rateRegMcf",
          })
 
 
-##' An S4 Class to Represent Estimated Baseline Rate Function
+##' An S4 Class Representing Estimated Baseline Rate Function
 ##'
 ##' An S4 class that represents Estimated Baseline Rate Function from model.
-##' \code{\link{baseRate}} produces objects of this class.
+##' The function \code{\link{baseRate}} produces objects of this class.
 ##'
 ##' @slot baseRate A data frame.
 ##' @slot level A numeric value.
 ##' @aliases baseRateReg-class
 ##' @seealso \code{\link{baseRate,rateReg-method}} for details of slots.
-##' @importFrom methods setClass
 ##' @export
 setClass(Class = "baseRateReg",
-         slots = c(baseRate = "data.frame",
-                   level = "numeric"))
+         slots = c(
+             baseRate = "data.frame",
+             level = "numeric"
+         ))
+
+##' An S4 Class for Simulated Recurrent Event from One Process
+##'
+##' An S4 class that represents simulated recurrent event or survival data from
+##' one process. The function \code{\link{simRec}} produces objects of this
+##' class.
+##'
+##' @slot .Data A numerical vector of possibly length zero.
+##' @slot z A list.
+##' @slot zCoef A list.
+##' @slot rho A list.
+##' @slot rhoCoef A numerical vector.
+##' @slot origin A numeric vector.
+##' @slot endTime A numeric vector.
+##' @slot frailty A list.
+##' @slot recurrent A logical vector.
+##' @seealso \code{\link{simRec}} for details of slots.
+##' @export
+setClass(Class = "simRec", contains = "numeric",
+         slots = c(
+             call = "call",
+             z = "list",
+             zCoef = "list",
+             rho = "list",
+             rhoCoef = "numeric",
+             origin = "numeric",
+             endTime = "numeric",
+             frailty = "list",
+             recurrent = "logical",
+             method = "character"
+         ))

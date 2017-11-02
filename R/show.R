@@ -81,6 +81,8 @@ setMethod(f = "show", signature = "rateReg",
                   cat("\nCoefficients of pieces:\n")
                   print(alpha)
               }
+              ## invisible return
+              invisble(object)
           })
 
 
@@ -115,6 +117,8 @@ setMethod(f = "show", signature = "summaryRateReg",
               cat("\nCoefficients of spline bases:\n")
               printCoefmat(object@baseRateCoef)
               cat("\nLoglikelihood: ", object@logL, "\n")
+              ## invisible return
+              invisible(object)
           })
 
 
@@ -127,6 +131,8 @@ setMethod(f = "show", signature = "sampleMcf",
               print(object@formula)
               cat("\nMCF:\n")
               print(object@MCF)
+              ## invisible return
+              invisible(object)
           })
 
 
@@ -145,4 +151,20 @@ setMethod(f = "show", signature = "rateRegMcf",
                         "%", sep = ""), "\n")
               cat("\nMCF:\n")
               print(object@MCF)
+              ## invisible return
+              invisible(object)
           })
+
+
+##' @rdname show-method
+##' @aliases show,simRec-method
+##' @export
+setMethod(
+    f = "show",
+    signature = "simRec",
+    definition = function(object) {
+        cat("'simRec' S4 class object:\n")
+        print(object@.Data)
+        ## invisible return
+        invisible(object)
+    })
