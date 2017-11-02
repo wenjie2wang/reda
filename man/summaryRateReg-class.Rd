@@ -3,10 +3,10 @@
 \docType{class}
 \name{summaryRateReg-class}
 \alias{summaryRateReg-class}
-\title{An S4 Class to Represent Summary of a Fitted Model}
+\title{An S4 Class Representing Summary of a Fitted Model}
 \description{
-\code{summaryRateReg-class} is an S4 class with selective slots
-of \code{rateReg-class} object.  See ``Slots'' for details.
+The class \code{summaryRateReg-class} is an S4 class with selective slots of
+\code{rateReg-class} object.  See ``Slots'' for details.  The function
 \code{\link{summary,rateReg-method}} produces objects of this class.
 }
 \section{Slots}{

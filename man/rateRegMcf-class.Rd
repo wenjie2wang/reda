@@ -3,10 +3,10 @@
 \docType{class}
 \name{rateRegMcf-class}
 \alias{rateRegMcf-class}
-\title{An S4 Class to Respresent Estimated MCF from a Fitted Model}
+\title{An S4 Class Respresenting Estimated MCF from a Fitted Model}
 \description{
 An S4 class that represents estimated mean cumulative function (MCF) from
-Models.  \code{\link{mcf}} produces objects of this class.
+Models. The function \code{\link{mcf}} produces objects of this class.
 }
 \section{Slots}{
 

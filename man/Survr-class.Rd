@@ -5,9 +5,9 @@
 \alias{Survr-class}
 \title{An S4 Class Representing Formula Response}
 \description{
-\code{Survr-class} is an S4 that represents a formula response for recurrent
-event data model.  \code{\link{Survr}} produces objects of this class.
-See ``Slots'' for details.
+The class \code{Survr-class} is an S4 that represents a formula response for
+recurrent event data model.  The function \code{\link{Survr}} produces
+objects of this class.  See ``Slots'' for details.
 }
 \section{Slots}{
 

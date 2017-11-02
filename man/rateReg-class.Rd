@@ -5,8 +5,8 @@
 \alias{rateReg-class}
 \title{An S4 Class Representing a Fitted Model}
 \description{
-\code{rateReg-class} is an S4 class that represents a fitted model.
-\code{\link{rateReg}} produces objects of this class.
+The class \code{rateReg-class} is an S4 class that represents a fitted
+model.  The function \code{\link{rateReg}} produces objects of this class.
 See ``Slots'' for details.
 }
 \section{Slots}{

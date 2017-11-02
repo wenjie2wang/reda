@@ -3,10 +3,10 @@
 \docType{class}
 \name{baseRateReg-class}
 \alias{baseRateReg-class}
-\title{An S4 Class to Represent Estimated Baseline Rate Function}
+\title{An S4 Class Representing Estimated Baseline Rate Function}
 \description{
 An S4 class that represents Estimated Baseline Rate Function from model.
-\code{\link{baseRate}} produces objects of this class.
+The function \code{\link{baseRate}} produces objects of this class.
 }
 \section{Slots}{
 

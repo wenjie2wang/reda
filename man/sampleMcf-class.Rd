@@ -3,10 +3,10 @@
 \docType{class}
 \name{sampleMcf-class}
 \alias{sampleMcf-class}
-\title{An S4 Class to Represent Sample MCF}
+\title{An S4 Class Representing Sample MCF}
 \description{
 An S4 class that represents sample mean cumulative function (MCF) from data.
-\code{\link{mcf}} produces objects of this class.
+The function \code{\link{mcf}} produces objects of this class.
 }
 \section{Slots}{
 
