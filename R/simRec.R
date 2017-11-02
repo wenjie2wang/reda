@@ -75,20 +75,21 @@
 ##' library(reda)
 ##' set.seed(1216)
 ##'
+##' ### example of time-invariant covariates and coefficients
+##' simRec(z = c(0.5, 1), zCoef = c(1, 0))
+##' simRec(z = 1, zCoef = 0.5, recurrent = FALSE)
+##'
 ##' ### example of customized time-varying baseline rate function
 ##' ## the baseline rate function has to be non-negative
 ##' simRec(rho = function(timeVec) { sin(timeVec) + 1 })
 ##' ## other arguments can be specified through a named list in 'arguments'
 ##' simRec(rho = function(a, b) { cos(a + b) + 1 },
 ##'        arguments = list(rho = list(b = 1)))
-##' ## use quadratic M-splines without one internal knot
-##' simRec(rho = "mSpline", rhoCoef = c(0.2, 0.5, 0.3, 0.4),
+##' ## quadratic I-splines with one internal knot
+##' ## (using function 'iSpline' from splines2 package)
+##' simRec(rho = "iSpline", rhoCoef = c(0.2, 0.5, 0.3, 0.4),
 ##'        arguments = list(rho = list(degree = 2, df = 4, intercept = TRUE,
 ##'                         Boundary.knots = c(0, 5))))
-##'
-##' ### example of time-invariant covariates and coefficients
-##' simRec(z = 1, zCoef = 0.5)
-##' simRec(z = c(0.5, 1), zCoef = c(1, 0))
 ##'
 ##' ### example of time-varying covariates and time-varying coefficients
 ##' zFun <- function(timeVec, intercept) {
@@ -115,38 +116,54 @@
 ##'
 ##' @importFrom stats optimize rexp qexp
 simRec <- function(z = 0, zCoef = 1, rho = 1, rhoCoef = 1,
-                   origin = 0, endTime = 5, frailty = FALSE,
+                   origin = 0, endTime = 5,
+                   frailty = FALSE,
                    recurrent = TRUE,
                    arguments = list(x = list(),
                                     xCoef = list(),
                                     rho = list(),
                                     frailty = list()),
+                   method = c("thinning", "inverse.cdf"),
                    ...)
 {
-    ## simple internal functions
-    isNumVector <- function(x) is.numeric(x) & is.vector(x)
+    ## record function call
+    Call <- match.call()
+    ## match method
+    method <- match.arg(method)
+
+    ## some simple internal functions
+    isNumVector <- function(x) is.numeric(x) && is.vector(x)
+    isNumOne <- function(x) isNumVector(x) && identical(length(x), 1L)
     isCharOne <- function(x) {
-        is.character(x) & is.vector(x) & identical(length(x), 1L)
+        is.character(x) && is.vector(x) && identical(length(x), 1L)
     }
 
-    ## quick checks
+    ## check covariate z
     zVecIdx <- isNumVector(z)
-    if (! (zVecIdx | is.function(z) | isCharOne(z)))
+    if (! (zVecIdx || is.function(z) || isCharOne(z)))
         stop(wrapMessages(
             "'z' has to be a numeric vector, a function or a function name"
         ))
+    ## check coefficients zCoef
     zCoefVecIdx <- isNumVector(zCoef)
-    if (! (zCoefVecIdx | is.function(zCoef) | isCharOne(zCoef)))
+    if (! (zCoefVecIdx || is.function(zCoef) || isCharOne(zCoef)))
         stop(wrapMessages(
             "'zCoef' has to be a numeric vector, a function or a function name"
         ))
-    rhoVecIdx <- isNumVector(rho) & identical(length(rho), 1L)
-    if (! (is.function(rho) | rhoVecIdx | isCharOne(rho)))
+    ## check baseline rate function rho
+    rhoVecIdx <- isNumOne(rho)
+    if (! (rhoVecIdx || is.function(rho) || isCharOne(rho)))
         stop("'rho' has to be a numeric vector or a function")
-    if (rhoVecIdx & rho < 0)
+    if (rhoVecIdx && rho < 0)
         stop("The baseline rate function 'rho' has to be non-negative.")
+    ## check origin and endTime
+    if (! (isNumOne(origin) && isNumOne(endTime) && origin < endTime))
+        stop(wrapMessages(
+            "The 'origin' and 'endTime'",
+            "has to be two numerical values s.t. 'origin' < 'endTime'."
+        ))
 
-    ## gpet arguments
+    ## get arguments
     z_args <- arguments$z
     zCoef_args <- arguments$zCoef
     rho_args <- arguments$rho
@@ -158,18 +175,11 @@ simRec <- function(z = 0, zCoef = 1, rho = 1, rhoCoef = 1,
     rhoFun <- ifelse(rhoVecIdx, function(zVec) rho, rho)
 
     ## prepare frailty effect
-    noFrailty <- FALSE
     if (is.logical(frailty)) {
-        if (frailty) {
-            ## default as Gamma distribution
-            frailty <- "rgamma"
-        } else {
-            noFrailty <- TRUE
-            frailtyEffect <- 1
-        }
+        ## default as Gamma distribution
+        frailty <- if(frailty) "rgamma" else NULL
     }
-    if (is.function(frailty) |
-        (is.character(frailty) & identical(length(frailty), 1L))) {
+    if (is.function(frailty) || isCharOne(frailty)) {
         argsNames <- names(as.list(args(frailty)))
         ## add "n = 1" for common distribution from stats library
         if ("n" %in% argsNames) {
@@ -177,7 +187,16 @@ simRec <- function(z = 0, zCoef = 1, rho = 1, rhoCoef = 1,
                               frailty_args[names(frailty_args) != "n"])
         }
         frailtyEffect <- do.call(frailty, frailty_args)
-    } else if (! noFrailty) {
+        ## check frailty effect of length one numeric
+        if (! isNumOne(frailtyEffect)) {
+            stop(wrapMessages(
+                "The Frailty effect (returned from function)",
+                "must be of length one."
+            ))
+        }
+    } else if (is.null(frailty)) {
+        frailtyEffect <- 1
+    } else {
         stop(wrapMessages(
             "The argument 'frailty' has to be a logical value (TRUE or FALSE),",
             "a function (or its name)."
@@ -185,132 +204,197 @@ simRec <- function(z = 0, zCoef = 1, rho = 1, rhoCoef = 1,
     }
 
     ## rate function
-    rateFun <- function(timeNum) {
+    rateFun <- function(timeNum, forOptimize = TRUE) {
         zVec <- do.call(zFun, c(list(timeNum), z_args))
         zCoefVec <- do.call(zCoefFun, c(list(timeNum), zCoef_args))
         covEffect <- as.numeric(exp(zVec %*% zCoefVec))
         rhoMat <- do.call(rhoFun, c(list(timeNum), rho_args))
         rhoVec <- as.numeric(rhoMat %*% rhoCoef)
-        out <- frailtyEffect * rhoVec * covEffect
-        out
+        rho_t <- frailtyEffect * rhoVec * covEffect
+        if (forOptimize)
+            return(rho_t)
+        ## else return
+        list(rho_t = rho_t,
+             rhoMat = matrix(rhoMat, nrow = 1),
+             zVec = matrix(zVec, nrow = 1),
+             zCoefVec = matrix(zCoefVec, nrow = 1))
     }
+
+    ## the baseline rate function has to be non-negative
+    rhoMinObj <- stats::optimize(rateFun, interval = c(origin, endTime),
+                                 maximum = FALSE)
+    if (rhoMinObj$objective < 0)
+        stop(wrapMessages(
+            "The rate function has to be non-negative",
+            "from 'origin' to 'endTime'."
+        ))
 
     ## step 1: calculate the supremum value of rate function
     rhoMaxObj <- stats::optimize(rateFun, interval = c(origin, endTime),
                                  maximum = TRUE)
     rho_max <- rhoMaxObj$objective
+    ## if the supremum is finite, use thinning method
+    if (is.infinite(rho_max) && identical(method, "thinning")) {
+        method <- "inverse.cdf"
+        warning(wrapMessages(
+            "The rate function may go to infinite.",
+            "The Inverse CDF method was used."
+        ))
+    }
 
-    ## step 2: generate W_i in batch for possible better performance
-    ## estimate the number of W_i before censoring
-    if (recurrent) {
-        batchNum <- ceiling((endTime - origin) / stats::qexp(0.10, rho_max))
-        eventTime <- NULL
-        lastEventTime <- origin
-        while (lastEventTime < endTime) {
-            W <- stats::rexp(n = batchNum, rate = rho_max)
-            ## step 3: update evnet times
-            eventTime <- c(eventTime, lastEventTime + cumsum(W))
-            lastEventTime <- eventTime[length(eventTime)]
+    ## thinning method
+    if (identical(method, "thinning")) {
+        ## step 2: generate W_i in batch for possible better performance
+        ## estimate the number of W_i before censoring
+        if (recurrent) {
+            batchNum <- ceiling((endTime - origin) / stats::qexp(0.10, rho_max))
+            eventTime <- NULL
+            lastEventTime <- origin
+            while (lastEventTime < endTime) {
+                W <- stats::rexp(n = batchNum, rate = rho_max)
+                ## step 3: update evnet times
+                eventTime <- c(eventTime, lastEventTime + cumsum(W))
+                lastEventTime <- eventTime[length(eventTime)]
+            }
+        } else {
+            eventTime <- origin + stats::rexp(n = 1, rate = rho_max)
         }
-    } else {
-        eventTime <- origin + stats::rexp(n = 1, rate = rho_max)
-    }
-    ## only keep event time before end time
-    eventTime <- eventTime[eventTime <= endTime]
-    len_eventTime <- length(eventTime)
-    if (! len_eventTime) {
-        ## no any event
-        xOut <- numeric(0)
-    } else {
-        ## step 4: thinning
-        rho_t <- sapply(eventTime, rateFun)
-        U <- runif(n = len_eventTime)
-        ind <- U <= rho_t / rho_max
-        xOut <- eventTime[ind]
-    }
-    ## return
-    out <- list(x = xOut,
-                z = z,
-                zCoef = zCoef,
-                rho = rho,
-                rhoCoef = rhoCoef,
-                origin = origin,
-                endTime = endTime,
-                frailty = frailty,
-                frailtyEffect = frailtyEffect,
-                recurrent = recurrent,
-                arguments = arguments)
-    class(out) <- "simRec"
-    out
-}
+        ## only keep event time before end time
+        eventTime <- eventTime[eventTime <= endTime]
+        len_eventTime <- length(eventTime)
+        if (! len_eventTime) {
+            ## no any event
+            xOut <- numeric(0)
+        } else {
+            ## step 4: thinning
+            resList <- lapply(eventTime, rateFun, forOptimize = FALSE)
+            rho_t <- sapply(resList, function(a) a$rho_t)
+            U <- runif(n = len_eventTime)
+            ind <- U <= rho_t / rho_max
+            xOut <- eventTime[ind]
+        }
+        ## update zMat, zCoefMat, and rhoMat
+        if (length(xOut)) {
+            zMat <- do.call(rbind, lapply(resList[ind], function(a) {
+                a$zVec
+            }))
+            zCoefMat <- do.call(rbind, lapply(resList[ind], function(a) {
+                a$zCoefVec
+            }))
+            rhoMat <- do.call(rbind, lapply(resList[ind], function(a) {
+                a$rhoMat
+            }))
+        } else {
+            ## only return values on end time
+            resList <- rateFun(endTime, forOptimize = FALSE)
+            zMat <- resList$zVec
+            zCoefMat <- resList$zCoefVec
+            rhoMat <- resList$rhoMat
+        }
 
-
-##' Generate dataset for a given number of subjects
-simRecData <- function(nProcess,
-                       x = 0,
-                       x.coef = 1,
-                       origin = 0, endTime = 5,
-                       rho.fun = function(x) 1,
-                       rho.args = list(),
-                       rho.coef = 1,
-                       frailty.fun = rgamma,
-                       frailty.args = list(shape = 0.5, scale = 2),
-                       ...)
-{
-    xMat <- as.matrix(x)
-    ## determine number of process from x
-    if (missing(nProcess)) {
-        nProcess <- nrow(xMat)
     } else {
-        ## prepare x, x.coef, origin, and endTime
-        xMat <- if (nrow(xMat) < nProcess) {
-                    apply(xMat, 2L, function(oneCol) {
-                        rep(oneCol, length.out = nProcess)
-                    })
+        ## (naive) method based on inverse CDF
+        vecRateFun <- Vectorize(rateFun)
+        intRate <- tryCatch(
+            stats::integrate(vecRateFun, lower = origin,
+                             upper = endTime)$value,
+            error = function(e) e)
+        if ("error" %in% class(intRate))
+            stop(wrapMessages(
+                "The integral of rate function",
+                "is probably divergent"
+            ))
+        numEvent <- stats::rpois(n = 1, lambda = intRate)
+        if (! recurrent)
+            numEvent <- min(numEvent, 1)
+        if (! length(numEvent)) {
+            xOut <- numeric(0)
+            xVec <- endTime
+        } else {
+            U <- sort(runif(n = numEvent))
+            ## denFun may still go to infinite
+            ## hard to apply rejection sampling
+            ## use inverse CDF method numerically / the hard way
+            invFun <- function(prob) {
+                foo <- function(timeNum) {
+                    stats::integrate(vecRateFun, lower = origin,
+                                         upper = timeNum)$value / intRate - prob
                 }
+                stats::uniroot(foo, interval = c(origin + .Machine$double.eps,
+                                                 endTime))$root
+            }
+            xVec <- xOut <- sapply(U, invFun)
+        }
+        ## compute zMat, zCoefMat, and rhoMat
+        resList <- lapply(xVec, rateFun, forOptimize = FALSE)
+        zMat <- do.call(rbind, lapply(resList, function(a) a$zVec))
+        zCoefMat <- do.call(rbind, lapply(resList, function(a) a$zCoefVec))
+        rhoMat <- do.call(rbind, lapply(resList, function(a) a$rhoMat))
     }
-    x.coef <- rep(x.coef, length.out = ncol(xMat))
-    origin <- rep(origin, length.out = nProcess)
-    endTime <- rep(endTime, length.out = nProcess)
-    ## function convert results from simRec to data.frame
-    simRec2data <- function(ID, obj) {
-        timeVec <- as.numeric(obj)
-        attrList <- attr(obj, "settings")
-        xVec <- attrList$x
-        ## if no event
-        if (! length(obj))
-            return(data.frame(ID = ID,
-                              origin = attrList$origin,
-                              time = attrList$endTime,
-                              event = 0,
-                              as.list(xVec)))
-        ## else for any event
-        data.frame(ID = ID,
-                   origin = attrList$origin,
-                   time = c(timeVec, attrList$endTime),
-                   event = c(rep(1, length(timeVec)), 0),
-                   as.list(xVec))
-    }
-    ## generate simulated data for each process
-    resList <- lapply(seq_len(nProcess), function(i) {
-        res <- simRec(x = xMat[i, ],
-                      x.coef = x.coef,
-                      origin = origin[i],
-                      endTime = endTime[i],
-                      rho.fun = rho.fun,
-                      rho.args = rho.args,
-                      rho.coef = rho.coef,
-                      frailty.fun = frailty.fun,
-                      frailty.args = frailty.args,
-                      ...
-                      )
-        simRec2data(ID = i, res)
-    })
-    ## return
-    do.call(rbind, resList)
-}
 
-foo <- function(a) {exp(rnorm(n = 1, mean = 0, sd = a))}
-simRec(z = c(0.5, 1), zCoef = c(1, 0),
-       frailty = "foo",
-       arguments = list(frailty = list(a = 1)))
+    ## prepare outputs
+    ## for covariates
+    if (zVecIdx) {
+        zFun <- zArgs <- NULL
+    } else {
+        zFun <- z
+        zArgs <- if (length(z_args)) z_args else list()
+    }
+    z <- zMat
+    ## for covariate coefficients
+    if (zCoefVecIdx) {
+        zCoefFun <- zArgs <- NULL
+    } else {
+        zCoefFun <- zCoef
+        zArgs <- if (length(zCoef_args)) zCoef_args else list()
+    }
+    zCoef <- zCoefMat
+    ## for baseline rate function
+    if (rhoVecIdx) {
+        rhoFun <- rhoArgs <- NULL
+    } else {
+        rhoFun <- rho
+        rhoArgs <- if (length(rho_args)) rho_args else list()
+    }
+    rho <- rhoMat
+    ## for frailty
+    frailtyArgs <- if (is.null(frailty)) {
+                       NULL
+                   } else {
+                       if (length(frailty_args)) frailty_args else list()
+                   }
+
+    ## return
+    methods::new("simRec", xOut,
+                 call = Call,
+                 z = list(
+                     z = z,
+                     zFun = zFun,
+                     zArgs = zArgs,
+                     zTimeVarying = ! zVecIdx
+                 ),
+                 zCoef = list(
+                     zCoef = zCoef,
+                     zCoefFun = zCoefFun,
+                     zArgs = zArgs,
+                     zCoefTimeVarying = ! zCoefVecIdx
+                 ),
+                 rho = list(
+                     rho = rho,
+                     rhoFun = rhoFun,
+                     rhoArgs = rhoArgs,
+                     rhoTimeVarying = ! rhoVecIdx
+                 ),
+                 rhoCoef = rhoCoef,
+                 origin = origin,
+                 endTime = endTime,
+                 frailty = list(
+                     frailtyEffect = frailtyEffect,
+                     frailtyFun = frailty,
+                     frailtyArgs = frailtyArgs
+                 ),
+                 recurrent = recurrent,
+                 method = method
+                 )
+
+}
