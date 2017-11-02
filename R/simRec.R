@@ -23,7 +23,7 @@
 NULL
 
 
-##' Simulated Survival time or Recurrent Events
+##' Simulated Survival times or Recurrent Events
 ##'
 ##' This function generates simulated recurrent events or survival time (the
 ##' first event time) from one stochastic process. For each process, a
@@ -45,6 +45,8 @@ NULL
 ##' function has to be the time (not need to be named as "time" though). Other
 ##' arguments of the function can be specified through a named list in
 ##' \code{arguments}.
+##'
+##' @aliases simRec
 ##'
 ##' @usage
 ##' simRec(z = 0, zCoef = 1, rho = 1, rhoCoef = 1, origin = 0,
@@ -102,6 +104,8 @@ NULL
 ##'     for those time-varying functions.
 ##' @param ... Other arguemtns for future usage.
 ##'
+##' @return A \code{simRec} S4 class object.
+##'
 ##' @references
 ##'
 ##' Andersen, P. K., & Gill, R. D. (1982). Cox's regression model for counting
@@ -121,25 +125,19 @@ NULL
 ##' library(reda)
 ##' set.seed(1216)
 ##'
-##' ### example of time-invariant covariates and coefficients
+##' ### time-invariant covariates and coefficients
+##' ## one process
 ##' simRec(z = c(0.5, 1), zCoef = c(1, 0))
 ##' simRec(z = 1, zCoef = 0.5, recurrent = FALSE)
 ##'
-##' ### example of customized time-varying baseline rate function
-##' ## the baseline rate function has to be non-negative
-##' simRec(rho = function(timeVec) { sin(timeVec) + 1 })
-##' ## other arguments can be specified through a named list in 'arguments'
-##' simRec(rho = function(a, b) { cos(a + b) + 1 },
-##'        arguments = list(rho = list(b = 1)))
-##' ## quadratic I-splines with one internal knot
-##' ## (using function 'iSpline' from splines2 package)
-##' simRec(rho = "iSpline", rhoCoef = c(0.2, 0.5, 0.3, 0.4),
-##'        arguments = list(rho = list(degree = 2, df = 4, intercept = TRUE,
-##'                         Boundary.knots = c(0, 5))))
+##' ## simulated data
+##' simRecData(1, z = c(0.5, 1), zCoef = c(1, 0), endTime = 2)
+##' simRecData(3, z = cbind(rnorm(3), 1), zCoef = c(1, 0))
+##' simRecData(5, z = matrix(rnorm(5)), zCoef = 0.5, recurrent = FALSE)
 ##'
-##' ### example of time-varying covariates and time-varying coefficients
+##' ### time-varying covariates and time-varying coefficients
 ##' zFun <- function(timeVec, intercept) {
-##'    c(timeVec / 10 + intercept, as.numeric(timeVec > 3))
+##'    c(timeVec / 10 + intercept, as.numeric(timeVec > 1))
 ##' }
 ##' zCoefFun <- function(timeVec, shift) {
 ##'   c(sqrt(timeVec + shift), 1)
@@ -148,7 +146,40 @@ NULL
 ##'        arguments = list(z = list(intercept = 0.1),
 ##'                         zCoef = list(shift = 0.1)))
 ##'
-##' ### example of frailty effect
+##' ## same function of time for all processes
+##' simRecData(3, z = zFun, zCoef = zCoefFun,
+##'            arguments = list(z = list(intercept = 0.1),
+##'                             zCoef = list(shift = 0.1)))
+##'
+##' ## same function within one process but different between processes
+##' ## use quote function in the arguments
+##' simDat <- simRecData(3, z = zFun, zCoef = zCoefFun,
+##'                      arguments = list(
+##'                          z = list(intercept = quote(rnorm(1) / 10)),
+##'                          zCoef = list(shift = 0.1)
+##'                     ))
+##' ## check the intercept randomly generated,
+##' ## which should be the same within each ID but different between IDs.
+##' with(simDat, cbind(ID, intercept = X.1 - time / 10))
+##'
+##' ### non-negative time-varying baseline hazard rate function
+##' simRec(rho = function(timeVec) { sin(timeVec) + 1 })
+##' simRecData(3, origin = rnorm(3), endTime = rnorm(3, 5),
+##'            rho = function(timeVec) { sin(timeVec) + 1 })
+##' ## specify other arguments
+##' simRec(rho = function(a, b) { cos(a + b) + 1 },
+##'        arguments = list(rho = list(b = 1)))
+##' simRecData(z = cbind(rnorm(3), rbinom(3, 1, 0.5)),
+##'            rho = function(a, b) { cos(a + b) + 1 },
+##'            arguments = list(rho = list(b = 1)))
+##'
+##' ## quadratic I-splines with one internal knot at "time = 1"
+##' ## (using function 'iSpline' from splines2 package)
+##' simRec(rho = "iSpline", rhoCoef = c(0.2, 0.5, 0.3, 0.4),
+##'        arguments = list(rho = list(degree = 2, knots = 1, intercept = TRUE,
+##'                                    Boundary.knots = c(0, 3))))
+##'
+##' ### frailty effect
 ##' ## The default distribution is Gamma distribution
 ##' simRec(z = c(0.5, 1), zCoef = c(1, 0), frailty = TRUE,
 ##'        arguments = list(frailty = list(shape = 2, scale = 0.5)))
@@ -177,31 +208,26 @@ simRec <- function(z = 0, zCoef = 1, rho = 1, rhoCoef = 1,
     ## match method
     method <- match.arg(method)
 
-    ## some simple internal functions
-    isNumVector <- function(x) is.numeric(x) && is.vector(x)
-    isNumOne <- function(x) isNumVector(x) && identical(length(x), 1L)
-    isCharOne <- function(x) {
-        is.character(x) && is.vector(x) && identical(length(x), 1L)
-    }
-
     ## check covariate z
     zVecIdx <- isNumVector(z)
     if (! (zVecIdx || is.function(z) || isCharOne(z)))
         stop(wrapMessages(
-            "'z' has to be a numeric vector, a function or a function name"
+            "The covariates 'z' has to be a numeric vector / matrix,",
+            "a function or its name."
         ))
     ## check coefficients zCoef
     zCoefVecIdx <- isNumVector(zCoef)
     if (! (zCoefVecIdx || is.function(zCoef) || isCharOne(zCoef)))
         stop(wrapMessages(
-            "'zCoef' has to be a numeric vector, a function or a function name"
+            "The covariate coefficients 'zCoef' has to be a numeric vector,",
+            "a function or its name."
         ))
     ## check baseline rate function rho
     rhoVecIdx <- isNumOne(rho)
     if (! (rhoVecIdx || is.function(rho) || isCharOne(rho)))
         stop("'rho' has to be a numeric vector or a function")
     if (rhoVecIdx && rho < 0)
-        stop("The baseline rate function 'rho' has to be non-negative.")
+        stop("The baseline hazard rate function 'rho' has to be non-negative.")
     ## check origin and endTime
     if (! (isNumOne(origin) && isNumOne(endTime) &&
            origin < endTime) && is.finite(endTime))
@@ -211,10 +237,10 @@ simRec <- function(z = 0, zCoef = 1, rho = 1, rhoCoef = 1,
         ))
 
     ## get arguments
-    z_args <- arguments$z
-    zCoef_args <- arguments$zCoef
-    rho_args <- arguments$rho
-    frailty_args <- arguments$frailty
+    z_args <- lapply(arguments[["z"]], eval)
+    zCoef_args <- lapply(arguments[["zCoef"]], eval)
+    rho_args <- lapply(arguments[["rho"]], eval)
+    frailty_args <- lapply(arguments[["frailty"]], eval)
 
     ## covariate: time-varying or time-invariant
     zFun <- ifelse(zVecIdx, function(zVec) z, z)
@@ -289,6 +315,12 @@ simRec <- function(z = 0, zCoef = 1, rho = 1, rhoCoef = 1,
         ))
     }
 
+    ## values at end time (censoring time)
+    cenList <- rateFun(endTime, forOptimize = FALSE)
+    zMat_cen <- cenList$zVec
+    zCoefMat_cen <- cenList$zCoefVec
+    rhoMat_cen <- cenList$rhoMat
+
     ## thinning method
     if (identical(method, "thinning")) {
         ## step 2: generate W_i in batch for possible better performance
@@ -320,6 +352,7 @@ simRec <- function(z = 0, zCoef = 1, rho = 1, rhoCoef = 1,
             ind <- U <= rho_t / rho_max
             xOut <- eventTime[ind]
         }
+
         ## update zMat, zCoefMat, and rhoMat
         if (length(xOut)) {
             zMat <- do.call(rbind, lapply(resList[ind], function(a) {
@@ -333,10 +366,9 @@ simRec <- function(z = 0, zCoef = 1, rho = 1, rhoCoef = 1,
             }))
         } else {
             ## only return values on end time
-            resList <- rateFun(endTime, forOptimize = FALSE)
-            zMat <- resList$zVec
-            zCoefMat <- resList$zCoefVec
-            rhoMat <- resList$rhoMat
+            zMat <- zMat_cen
+            zCoefMat <- zCoefMat_cen
+            rhoMat <- rhoMat_cen
         }
 
     } else {
@@ -352,14 +384,17 @@ simRec <- function(z = 0, zCoef = 1, rho = 1, rhoCoef = 1,
                 "is probably divergent"
             ))
         numEvent <- stats::rpois(n = 1, lambda = intRate)
-        if (! recurrent)
-            numEvent <- min(numEvent, 1)
-        if (! length(numEvent)) {
+        if (identical(numEvent, 0)) {
             xOut <- numeric(0)
-            xVec <- endTime
+            ## only return values on end time
+            zMat <- zMat_cen
+            zCoefMat <- zCoefMat_cen
+            rhoMat <- rhoMat_cen
         } else {
             U <- sort(runif(n = numEvent))
-            ## denFun may still go to infinite
+            if (! recurrent)
+                U <- U[1L]
+            ## density function may go to infinite
             ## hard to apply rejection sampling
             ## use inverse CDF method numerically / the hard way
             invFun <- function(prob) {
@@ -370,13 +405,13 @@ simRec <- function(z = 0, zCoef = 1, rho = 1, rhoCoef = 1,
                 stats::uniroot(foo, interval = c(origin + .Machine$double.eps,
                                                  endTime))$root
             }
-            xVec <- xOut <- sapply(U, invFun)
+            xOut <- sapply(U, invFun)
+            ## compute zMat, zCoefMat, and rhoMat
+            resList <- lapply(xOut, rateFun, forOptimize = FALSE)
+            zMat <- do.call(rbind, lapply(resList, function(a) a$zVec))
+            zCoefMat <- do.call(rbind, lapply(resList, function(a) a$zCoefVec))
+            rhoMat <- do.call(rbind, lapply(resList, function(a) a$rhoMat))
         }
-        ## compute zMat, zCoefMat, and rhoMat
-        resList <- lapply(xVec, rateFun, forOptimize = FALSE)
-        zMat <- do.call(rbind, lapply(resList, function(a) a$zVec))
-        zCoefMat <- do.call(rbind, lapply(resList, function(a) a$zCoefVec))
-        rhoMat <- do.call(rbind, lapply(resList, function(a) a$rhoMat))
     }
 
     ## prepare outputs
@@ -387,7 +422,6 @@ simRec <- function(z = 0, zCoef = 1, rho = 1, rhoCoef = 1,
         zFun <- z
         zArgs <- if (length(z_args)) z_args else list()
     }
-    z <- zMat
     ## for covariate coefficients
     if (zCoefVecIdx) {
         zCoefFun <- zArgs <- NULL
@@ -395,7 +429,6 @@ simRec <- function(z = 0, zCoef = 1, rho = 1, rhoCoef = 1,
         zCoefFun <- zCoef
         zArgs <- if (length(zCoef_args)) zCoef_args else list()
     }
-    zCoef <- zCoefMat
     ## for baseline rate function
     if (rhoVecIdx) {
         rhoFun <- rhoArgs <- NULL
@@ -403,7 +436,6 @@ simRec <- function(z = 0, zCoef = 1, rho = 1, rhoCoef = 1,
         rhoFun <- rho
         rhoArgs <- if (length(rho_args)) rho_args else list()
     }
-    rho <- rhoMat
     ## for frailty
     frailtyArgs <- if (is.null(frailty)) {
                        NULL
@@ -415,33 +447,157 @@ simRec <- function(z = 0, zCoef = 1, rho = 1, rhoCoef = 1,
     methods::new("simRec", xOut,
                  call = Call,
                  z = list(
-                     z = z,
+                     z = zMat,
                      zFun = zFun,
                      zArgs = zArgs,
                      zTimeVarying = ! zVecIdx
                  ),
                  zCoef = list(
-                     zCoef = zCoef,
+                     zCoef = zCoefMat,
                      zCoefFun = zCoefFun,
                      zArgs = zArgs,
                      zCoefTimeVarying = ! zCoefVecIdx
                  ),
                  rho = list(
-                     rho = rho,
+                     rho = rhoMat,
                      rhoFun = rhoFun,
                      rhoArgs = rhoArgs,
                      rhoTimeVarying = ! rhoVecIdx
                  ),
                  rhoCoef = rhoCoef,
-                 origin = origin,
-                 endTime = endTime,
                  frailty = list(
                      frailtyEffect = frailtyEffect,
                      frailtyFun = frailty,
                      frailtyArgs = frailtyArgs
                  ),
+                 origin = origin,
+                 endTime = endTime,
+                 censoring = list(
+                     z = zMat_cen,
+                     zCoef = zCoefMat_cen,
+                     rho = rhoMat_cen
+                 ),
                  recurrent = recurrent,
                  method = method
                  )
 
+}
+
+
+##' @rdname simRec
+##' @aliases simRecData
+##' @usage
+##' simRecData(nProcess = 1, z = 0, zCoef = 1, rho = 1, rhoCoef = 1,
+##'            origin = 0, endTime = 3, frailty = FALSE, recurrent = TRUE,
+##'            method = c("thinning", "inverse.cdf"),
+##'            arguments = list(z = list(), zCoef = list(),
+##'                             rho = list(), frailty = list()), ...)
+##'
+##' @param nProcess Number of stochastic processes. A positive number should be
+##'     speicified. The default value is \code{1}.
+##'
+##' @export
+simRecData <- function(nProcess = 1, z = 0, zCoef = 1,
+                       rho = 1, rhoCoef = 1,
+                       origin = 0, endTime = 3,
+                       frailty = FALSE, recurrent = TRUE,
+                       method = c("thinning", "inverse.cdf"),
+                       arguments = list(z = list(),
+                                        zCoef = list(),
+                                        rho = list(),
+                                        frailty = list()),
+                       ...)
+{
+    ## record function call
+    Call <- match.call()
+    ## match method
+    method <- match.arg(method)
+
+    ## check covariate z
+    if (isNumVector(z)) z <- matrix(z, nrow = 1)  # convert vector z to matrix
+    if (! (is.matrix(z) || is.function(z) || isCharOne(z)))
+        stop(wrapMessages(
+            "The covariates 'z' has to be a numeric vector / matrix,",
+            "a function or its name."
+        ))
+
+    ## if covariates are given as a matrix
+    if (isZmatIdx <- is.matrix(z)) {
+        if (missing(nProcess)) {
+            ## determine number of process from z
+            nProcess <- nrow(z)
+        } else {
+            ## recycle z if necessary
+            if (nrow(z) < nProcess) {
+                z <- apply(z, 2L, function(oneCol) {
+                    rep(oneCol, length.out = nProcess)
+                })
+            }
+        }
+        zCoef <- rep(zCoef, length.out = ncol(z))
+    }
+
+    origin <- rep(origin, length.out = nProcess)
+    endTime <- rep(endTime, length.out = nProcess)
+
+    ## generate simulated data for each process
+    resList <- if (isZmatIdx) {
+                   lapply(seq_len(nProcess), function(i) {
+                       res <- simRec(z = z[i, ],
+                                     zCoef = zCoef,
+                                     rho = rho,
+                                     rhoCoef = rhoCoef,
+                                     origin = origin[i],
+                                     endTime = endTime[i],
+                                     frailty = frailty,
+                                     recurrent = recurrent,
+                                     method = method,
+                                     arguments = arguments,
+                                     ...)
+                       simRec2data(ID = i, res)
+                   })
+               } else {
+                   lapply(seq_len(nProcess), function(i) {
+                       res <- simRec(z = z,
+                                     zCoef = zCoef,
+                                     rho = rho,
+                                     rhoCoef = rhoCoef,
+                                     origin = origin[i],
+                                     endTime = endTime[i],
+                                     frailty = frailty,
+                                     recurrent = recurrent,
+                                     method = method,
+                                     arguments = arguments,
+                                     ...)
+                       simRec2data(ID = i, res)
+                   })
+               }
+    ## prepare for output
+    out <- do.call(rbind, resList)
+    if (! recurrent) {
+        uniIdx <- duplicated(out$ID, fromLast = TRUE)
+        out <- out[uniIdx, ]
+    }
+    ## return
+    out
+}
+
+
+### internal functions =========================================================
+## function convert results from simRec to data.frame
+simRec2data <- function(ID, obj) {
+    timeVec <- obj@.Data
+    ## if no event
+    if (! length(timeVec))
+        return(data.frame(ID = ID,
+                          time = obj@endTime,
+                          event = 0,
+                          origin = obj@origin,
+                          X = obj@censoring$z))
+    ## else for any event
+    data.frame(ID = ID,
+               time = c(timeVec, obj@endTime),
+               event = c(rep(1, length(timeVec)), 0),
+               origin = obj@origin,
+               X = rbind(obj@z$z, obj@censoring$z))
 }

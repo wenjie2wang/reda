@@ -25,3 +25,18 @@ wrapMessages <- function(..., strwrap.args = list()) {
     wrap_x <- do.call(strwrap, c(list(x = x), strwrap.args))
     paste(wrap_x, collapse = "\n")
 }
+
+## is x a numeric vector
+isNumVector <- function(x) {
+    is.numeric(x) && is.vector(x)
+}
+
+## is x a numeric value
+isNumOne <- function(x) {
+    isNumVector(x) && identical(length(x), 1L)
+}
+
+## is x a character value
+isCharOne <- function(x) {
+    is.character(x) && is.vector(x) && identical(length(x), 1L)
+}
