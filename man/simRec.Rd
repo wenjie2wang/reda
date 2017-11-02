@@ -2,13 +2,20 @@
 % Please edit documentation in R/simRec.R
 \name{simRec}
 \alias{simRec}
-\title{Simulated Survival time or Recurrent Events}
+\alias{simRecData}
+\title{Simulated Survival times or Recurrent Events}
 \usage{
 simRec(z = 0, zCoef = 1, rho = 1, rhoCoef = 1, origin = 0,
        endTime = 3, frailty = FALSE, recurrent = TRUE,
        method = c("thinning", "inverse.cdf"),
        arguments = list(x = list(), xCoef = list(),
                         rho = list(), frailty = list()), ...)
+
+simRecData(nProcess = 1, z = 0, zCoef = 1, rho = 1, rhoCoef = 1,
+           origin = 0, endTime = 3, frailty = FALSE, recurrent = TRUE,
+           method = c("thinning", "inverse.cdf"),
+           arguments = list(z = list(), zCoef = list(),
+                            rho = list(), frailty = list()), ...)
 }
 \arguments{
 \item{z}{Time-invariant or time-varying covariates. The default value is
@@ -69,6 +76,12 @@ specified.}
 for those time-varying functions.}
 
 \item{...}{Other arguemtns for future usage.}
+
+\item{nProcess}{Number of stochastic processes. A positive number should be
+speicified. The default value is \code{1}.}
+}
+\value{
+A \code{simRec} S4 class object.
 }
 \description{
 This function generates simulated recurrent events or survival time (the
@@ -97,25 +110,19 @@ arguments of the function can be specified through a named list in
 library(reda)
 set.seed(1216)
 
-### example of time-invariant covariates and coefficients
+### time-invariant covariates and coefficients
+## one process
 simRec(z = c(0.5, 1), zCoef = c(1, 0))
 simRec(z = 1, zCoef = 0.5, recurrent = FALSE)
 
-### example of customized time-varying baseline rate function
-## the baseline rate function has to be non-negative
-simRec(rho = function(timeVec) { sin(timeVec) + 1 })
-## other arguments can be specified through a named list in 'arguments'
-simRec(rho = function(a, b) { cos(a + b) + 1 },
-       arguments = list(rho = list(b = 1)))
-## quadratic I-splines with one internal knot
-## (using function 'iSpline' from splines2 package)
-simRec(rho = "iSpline", rhoCoef = c(0.2, 0.5, 0.3, 0.4),
-       arguments = list(rho = list(degree = 2, df = 4, intercept = TRUE,
-                        Boundary.knots = c(0, 5))))
+## simulated data
+simRecData(1, z = c(0.5, 1), zCoef = c(1, 0), endTime = 2)
+simRecData(3, z = cbind(rnorm(3), 1), zCoef = c(1, 0))
+simRecData(5, z = matrix(rnorm(5)), zCoef = 0.5, recurrent = FALSE)
 
-### example of time-varying covariates and time-varying coefficients
+### time-varying covariates and time-varying coefficients
 zFun <- function(timeVec, intercept) {
-   c(timeVec / 10 + intercept, as.numeric(timeVec > 3))
+   c(timeVec / 10 + intercept, as.numeric(timeVec > 1))
 }
 zCoefFun <- function(timeVec, shift) {
   c(sqrt(timeVec + shift), 1)
@@ -124,7 +131,40 @@ simRec(z = zFun, zCoef = zCoefFun,
        arguments = list(z = list(intercept = 0.1),
                         zCoef = list(shift = 0.1)))
 
-### example of frailty effect
+## same function of time for all processes
+simRecData(3, z = zFun, zCoef = zCoefFun,
+           arguments = list(z = list(intercept = 0.1),
+                            zCoef = list(shift = 0.1)))
+
+## same function within one process but different between processes
+## use quote function in the arguments
+simDat <- simRecData(3, z = zFun, zCoef = zCoefFun,
+                     arguments = list(
+                         z = list(intercept = quote(rnorm(1) / 10)),
+                         zCoef = list(shift = 0.1)
+                    ))
+## check the intercept randomly generated,
+## which should be the same within each ID but different between IDs.
+with(simDat, cbind(ID, intercept = X.1 - time / 10))
+
+### non-negative time-varying baseline hazard rate function
+simRec(rho = function(timeVec) { sin(timeVec) + 1 })
+simRecData(3, origin = rnorm(3), endTime = rnorm(3, 5),
+           rho = function(timeVec) { sin(timeVec) + 1 })
+## specify other arguments
+simRec(rho = function(a, b) { cos(a + b) + 1 },
+       arguments = list(rho = list(b = 1)))
+simRecData(z = cbind(rnorm(3), rbinom(3, 1, 0.5)),
+           rho = function(a, b) { cos(a + b) + 1 },
+           arguments = list(rho = list(b = 1)))
+
+## quadratic I-splines with one internal knot at "time = 1"
+## (using function 'iSpline' from splines2 package)
+simRec(rho = "iSpline", rhoCoef = c(0.2, 0.5, 0.3, 0.4),
+       arguments = list(rho = list(degree = 2, knots = 1, intercept = TRUE,
+                                   Boundary.knots = c(0, 3))))
+
+### frailty effect
 ## The default distribution is Gamma distribution
 simRec(z = c(0.5, 1), zCoef = c(1, 0), frailty = TRUE,
        arguments = list(frailty = list(shape = 2, scale = 0.5)))

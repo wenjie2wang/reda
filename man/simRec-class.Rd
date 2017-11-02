@@ -3,11 +3,11 @@
 \docType{class}
 \name{simRec-class}
 \alias{simRec-class}
-\title{An S4 Class for Simulated Recurrent Event from One Process}
+\title{An S4 Class for Simulated Recurrent Event or Survival Times}
 \description{
-An S4 class that represents simulated recurrent event or survival data from
-one process. The function \code{\link{simRec}} produces objects of this
-class.
+An S4 class that represents simulated recurrent event or survival time from
+one stochastic process. The function \code{\link{simRec}} produces objects
+of this class.
 }
 \section{Slots}{
 
@@ -24,11 +24,13 @@ class.
 
 \item{\code{rhoCoef}}{A numerical vector.}
 
+\item{\code{frailty}}{A list.}
+
 \item{\code{origin}}{A numeric vector.}
 
 \item{\code{endTime}}{A numeric vector.}
 
-\item{\code{frailty}}{A list.}
+\item{\code{censoring}}{A list.}
 
 \item{\code{recurrent}}{A logical vector.}
 
