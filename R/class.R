@@ -241,6 +241,7 @@ setClass(Class = "baseRateReg",
              level = "numeric"
          ))
 
+
 ##' An S4 Class for Simulated Recurrent Event from One Process
 ##'
 ##' An S4 class that represents simulated recurrent event or survival data from
@@ -248,6 +249,7 @@ setClass(Class = "baseRateReg",
 ##' class.
 ##'
 ##' @slot .Data A numerical vector of possibly length zero.
+##' @slot call A function call.
 ##' @slot z A list.
 ##' @slot zCoef A list.
 ##' @slot rho A list.
@@ -256,6 +258,7 @@ setClass(Class = "baseRateReg",
 ##' @slot endTime A numeric vector.
 ##' @slot frailty A list.
 ##' @slot recurrent A logical vector.
+##' @slot method A character vector.
 ##' @seealso \code{\link{simRec}} for details of slots.
 ##' @export
 setClass(Class = "simRec", contains = "numeric",

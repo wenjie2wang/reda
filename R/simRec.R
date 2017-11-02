@@ -18,20 +18,35 @@
 ################################################################################
 
 
-##' Generate Simulated Survival Data or Recurrent Events for One Process
+##' Simulated Survival time or Recurrent Events
 ##'
-##' The Cox proportional hazard model (Cox) Andersen
-##' The thinning method (Lewis and Shedler, 1979) is applied for generating
-##' simulated recurrent event times from Gamma frailty model for one process or
-##' usually one subject or machine in applications. Conditional on predictors
-##' (or covariates) and the unobserved Gamma frailty effect, the process is a
-##' Poisson process.
+##' This function generates simulated recurrent events or survival time (the
+##' first event time) from one stochastic process. For each process, a
+##' time-invariant or time-varying baseline hazard rate (intensity) function of
+##' failure can be specified.  Covariates and their coefficients can be
+##' specified and are incorporated based on the Cox proportional hazard model
+##' (Cox, 1972) for survival data or Andersen-Gill model (Andersen and Gill,
+##' 1982) for recurrent events. In addition, a frailty effect can be considered.
+##' Conditional on predictors (or covariates) and the unobserved frailty effect,
+##' the process is a Poisson process.
 ##'
-##' For argument \code{z}, \code{zCoef}, and \code{rho}, a function of time can
-##' be specified for time-varying effect.  The (first) argument of the input
+##' The thinning method (Lewis and Shedler, 1979) is applied for bounded hazard
+##' rate function by default. The method based on inverse cumulative
+##' distribution function (CDF) is also available for possibly unbounded but
+##' integrable rate function over the given time period.
+##'
+##' For \code{z}, \code{zCoef}, and \code{rho}, a function of time can be
+##' specified for time-varying effect.  The (first) argument of the input
 ##' function has to be the time (not need to be named as "time" though). Other
 ##' arguments of the function can be specified through a named list in
 ##' \code{arguments}.
+##'
+##' @usage
+##' simRec(z = 0, zCoef = 1, rho = 1, rhoCoef = 1, origin = 0,
+##'        endTime = 3, frailty = FALSE, recurrent = TRUE,
+##'        method = c("thinning", "inverse.cdf"),
+##'        arguments = list(x = list(), xCoef = list(),
+##'                         rho = list(), frailty = list()), ...)
 ##'
 ##' @param z Time-invariant or time-varying covariates. The default value is
 ##'     \code{0} for no covariate effect.  This argument should be a numeric
@@ -42,7 +57,7 @@
 ##'     argument should be a numeric vector for time-invariant coefficients or a
 ##'     function of time that returns a numeric vector for time-varying
 ##'     coefficients. The length of the numeric vector specified or returned
-##'     from \code{x} and \code{x.coef} has to be always the same.
+##'     from \code{z} and \code{zCoef} has to be always the same.
 ##' @param rho Baseline rate (or intensity) function for the Poisson process.
 ##'     The default is \code{1} for a homogenous Poisson process of unit
 ##'     intensity. This argument can be either a non-negative numeric value for
@@ -52,15 +67,41 @@
 ##'     \code{1}. It can be useful when \code{rho} is a function generating
 ##'     spline bases.
 ##' @param origin The time origin set to be \code{0} by default.
-##' @param endTime The end of follow-up time set to be \code{5} by default.
-##' @param frailty Frailty effect.
-##'
+##' @param endTime The end of follow-up time set to be \code{3} by default.
+##' @param frailty Frailty effect. An optional logical value indicating whether
+##'     to consider a frailty model or a function that produces the frailty
+##'     effect.  The default value is \code{FALSE} for no frailty effect. If
+##'     \code{TRUE}, a frailty factor from Gamma distribution will be used and
+##'     the shape and scale parameter has to be specified through a list named
+##'     \code{frailty} in \code{arguments}. Similar to \code{z}, \code{zCoef},
+##'     and \code{rho}, a function or its name can be specified for other
+##'     distribution of the frailty effect. The specified function should
+##'     randomly return a positive numeric value. For example, the functions
+##'     that generate random numbers following a certain distribution from
+##'     \code{stats} package can directly used. Again, all the arguments of the
+##'     function can be specified through a list named \code{frailty} in
+##'     \code{arguments}. Note that \code{n = 1} will be implicitly specified if
+##'     the function has an argument named \code{n}, which is designed for those
+##'     common functions generating random numbers from \code{stats} package.
+##' @param recurrent A logical value with default value \code{TRUE} indicating
+##'     whether to generate recurrent event data or survival data (i.e. the
+##'     first event only).
+##' @param method A character string specifying the method for generating
+##'     simulated recurrent or survival data. The default method is thinning
+##'     method (Lewis and Shedler, 1979). Another available option is the method
+##'     based on inverse cumulative distribution function (CDF). When the rate
+##'     function may go to infinite, the inverse CDF method is used and a
+##'     warning will be thrown out if the thinning method is initially
+##'     specified.
 ##' @param arguments Other arguments that can be specified through a named list
 ##'     for those time-varying functions.
 ##' @param ... Other arguemtns for future usage.
 ##'
-##'
 ##' @references
+##'
+##' Andersen, P. K., & Gill, R. D. (1982). Cox's regression model for counting
+##' processes: A large sample study. \emph{The annals of statistics}, 10(4),
+##' 1100--1120.
 ##'
 ##' Cox, D. R. (1972). Regression models and life-tables.
 ##' \emph{Journal of the Royal Statistical Society. Series B
@@ -114,16 +155,16 @@
 ##' simRec(z = c(0.5, 1), zCoef = c(1, 0), frailty = logNorm,
 ##'        arguments = list(frailty = list(a = 1)))
 ##'
-##' @importFrom stats optimize rexp qexp
+##' @importFrom stats integrate optimize qexp rexp runif rgamma rpois uniroot
+##' @export
 simRec <- function(z = 0, zCoef = 1, rho = 1, rhoCoef = 1,
-                   origin = 0, endTime = 5,
-                   frailty = FALSE,
-                   recurrent = TRUE,
+                   origin = 0, endTime = 3,
+                   frailty = FALSE, recurrent = TRUE,
+                   method = c("thinning", "inverse.cdf"),
                    arguments = list(x = list(),
                                     xCoef = list(),
                                     rho = list(),
                                     frailty = list()),
-                   method = c("thinning", "inverse.cdf"),
                    ...)
 {
     ## record function call
@@ -157,10 +198,11 @@ simRec <- function(z = 0, zCoef = 1, rho = 1, rhoCoef = 1,
     if (rhoVecIdx && rho < 0)
         stop("The baseline rate function 'rho' has to be non-negative.")
     ## check origin and endTime
-    if (! (isNumOne(origin) && isNumOne(endTime) && origin < endTime))
+    if (! (isNumOne(origin) && isNumOne(endTime) &&
+           origin < endTime) && is.finite(endTime))
         stop(wrapMessages(
             "The 'origin' and 'endTime'",
-            "has to be two numerical values s.t. 'origin' < 'endTime'."
+            "has to be two numerical values s.t. 'origin' < 'endTime < Inf'."
         ))
 
     ## get arguments
