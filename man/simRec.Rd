@@ -73,7 +73,10 @@ warning will be thrown out if the thinning method is initially
 specified.}
 
 \item{arguments}{Other arguments that can be specified through a named list
-for those time-varying functions.}
+for those time-varying functions. The input arguments will be evaluated
+within function \code{simRec} before feed into the function, which can
+be useful for randomly setting function parameters for each process in
+function \code{simRecData}.}
 
 \item{...}{Other arguemtns for future usage.}
 
@@ -81,30 +84,34 @@ for those time-varying functions.}
 speicified. The default value is \code{1}.}
 }
 \value{
-A \code{simRec} S4 class object.
+The function \code{simRec} returns a \code{simRec} S4 class object
+    and the function \code{simRecData} returns a \code{data.frame}.
 }
 \description{
-This function generates simulated recurrent events or survival time (the
-first event time) from one stochastic process. For each process, a
-time-invariant or time-varying baseline hazard rate (intensity) function of
-failure can be specified.  Covariates and their coefficients can be
-specified and are incorporated based on the Cox proportional hazard model
-(Cox, 1972) for survival data or Andersen-Gill model (Andersen and Gill,
-1982) for recurrent events. In addition, a frailty effect can be considered.
-Conditional on predictors (or covariates) and the unobserved frailty effect,
-the process is a Poisson process.
+The function \code{simRec} generates simulated recurrent events or survival
+time (the first event time) from one stochastic process. The function
+\code{simRecData} generates simulated recurrent event data or survival data
+with the help of the function \code{simRec}.
 }
 \details{
+For each process, a time-invariant or time-varying baseline hazard rate
+(intensity) function of failure can be specified.  Covariates and their
+coefficients can be specified and are incorporated based on the Cox
+proportional hazard model (Cox, 1972) for survival data or Andersen-Gill
+model (Andersen and Gill, 1982) for recurrent events. In addition, a frailty
+effect can be considered.  Conditional on predictors (or covariates) and the
+unobserved frailty effect, the process is a Poisson process.
+
 The thinning method (Lewis and Shedler, 1979) is applied for bounded hazard
 rate function by default. The method based on inverse cumulative
 distribution function (CDF) is also available for possibly unbounded but
 integrable rate function over the given time period.
 
-For \code{z}, \code{zCoef}, and \code{rho}, a function of time can be
-specified for time-varying effect.  The (first) argument of the input
-function has to be the time (not need to be named as "time" though). Other
-arguments of the function can be specified through a named list in
-\code{arguments}.
+For covariates \code{z}, covariate coefficients \code{zCoef}, and baseline
+hazard rate function \code{rho}, a function of time can be specified for
+time-varying effect.  The (first) argument of the input function has to be
+the time (not need to be named as "time" though). Other arguments of the
+function can be specified through a named list in \code{arguments}.
 }
 \examples{
 library(reda)
@@ -145,7 +152,7 @@ simDat <- simRecData(3, z = zFun, zCoef = zCoefFun,
                     ))
 ## check the intercept randomly generated,
 ## which should be the same within each ID but different between IDs.
-with(simDat, cbind(ID, intercept = X.1 - time / 10))
+unique(with(simDat, cbind(ID, intercept = round(X.1 - time / 10, 3))))
 
 ### non-negative time-varying baseline hazard rate function
 simRec(rho = function(timeVec) { sin(timeVec) + 1 })
