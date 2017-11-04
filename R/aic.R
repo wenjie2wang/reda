@@ -60,7 +60,7 @@ setMethod(f = "AIC", signature = "rateReg",
               if (! missing(...)) {
                   inpList <- list(object, ...)
                   ## check on object class
-                  checkRes <- sapply(inpList, objCheck)
+                  checkRes <- sapply(inpList, is.rateReg)
                   if (any(! checkRes))
                       stop("Objects should be all from 'rateReg-class'.")
                   ## warning on different nObs
@@ -119,7 +119,7 @@ setMethod(f = "BIC", signature = "rateReg",
               if (! missing(...)) {
                   inpList <- list(object, ...)
                   ## check on object class
-                  checkRes <- sapply(inpList, objCheck)
+                  checkRes <- sapply(inpList, is.rateReg)
                   if (any(! checkRes))
                       stop("Objects should be all from 'rateReg-class'.")
                   nObss <- sapply(inpList, nObsFun)
@@ -141,10 +141,6 @@ setMethod(f = "BIC", signature = "rateReg",
 
 
 ### internal functions =========================================================
-objCheck <- function(object) {
-    inherits(object, "rateReg")
-}
-
 sumDf <- function(object) {
     sum(do.call("c", object@spline$df))
 }

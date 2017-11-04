@@ -264,7 +264,7 @@ rateReg <- function(formula, data, subset, df = NULL, knots = NULL, degree = 0L,
 
     ## check response constructed from Survr
     resp <- stats::model.extract(mf, "response")
-    if (! inherits(resp, "Survr"))
+    if (! is.Survr(resp))
         stop("Response in formula must be a survival recurrent object.")
 
     ## number of covariates excluding intercept

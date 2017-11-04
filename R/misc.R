@@ -40,3 +40,18 @@ isNumOne <- function(x) {
 isCharOne <- function(x) {
     is.character(x) && is.vector(x) && identical(length(x), 1L)
 }
+
+## is x a Survr object
+is.Survr <- function(x) {
+    inherits(x, "Survr")
+}
+
+## is x a sampleMcf object
+is.sampleMcf <- function(x) {
+    inherits(x, "sampleMcf")
+}
+
+## is x a rateReg object
+is.rateReg <- function(x) {
+    inherits(x, "rateReg")
+}

@@ -96,7 +96,7 @@ setMethod(
 
         ## check response constructed from Survr
         resp <- stats::model.extract(mf, "response")
-        if (! inherits(resp, "Survr"))
+        if (! is.Survr(resp))
             stop("Response in formula must be a survival recurrent object.")
         ## check covariate in formula
         if (! NCOL(mm))
@@ -277,7 +277,7 @@ addVar_sMcf <- function(dat, sMcfDat, variance, logConfInt, level, control)
         sMcfBootMat <- sMcf_boot(dat, sMcfDat, B = control$B)
         se_smcf <- seBoot_normal(sMcfBootMat, upperQuan = 0.75)
     } else
-        stop("Unknown variance type.")
+        stop("Have not been implemented.")
 
     ## confidence interval
     if (identical(variance, "bootstrap") && control$ci.method != "normal") {
