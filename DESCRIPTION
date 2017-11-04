@@ -1,7 +1,7 @@
 Package: reda
 Title: Recurrent Event Data Analysis
 Version: 0.4.0.9000
-Date: 2017-11-02
+Date: 2017-11-04
 Authors@R: c(
     person(given = "Wenjie", family = "Wang",
            email = "wenjie.2.wang@uconn.edu",
@@ -40,6 +40,7 @@ Collate:
     'mcf-generic.R'
     'mcf-formula.R'
     'mcf-rateReg.R'
+    'mcfDiff.R'
     'misc.R'
     'plot.R'
     'rateReg.R'

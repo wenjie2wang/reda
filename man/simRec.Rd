@@ -24,7 +24,7 @@ vector for time-invariant covariates or a function of time that returns
 a numeric vector for time-varying covariates.}
 
 \item{zCoef}{Time-invariant or time-varying coefficients of covariates. The
-default value is \code{1}. Similar to the argument \code{x}, this
+default value is \code{1}. Similar to the argument \code{z}, this
 argument should be a numeric vector for time-invariant coefficients or a
 function of time that returns a numeric vector for time-varying
 coefficients. The length of the numeric vector specified or returned
@@ -90,8 +90,8 @@ The function \code{simRec} returns a \code{simRec} S4 class object
 \description{
 The function \code{simRec} generates simulated recurrent events or survival
 time (the first event time) from one stochastic process. The function
-\code{simRecData} generates simulated recurrent event data or survival data
-with the help of the function \code{simRec}.
+\code{simRecData} calls \code{simRec} internally and collects the generated
+survival data or recurrent events into a data frame.
 }
 \details{
 For each process, a time-invariant or time-varying baseline hazard rate

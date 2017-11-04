@@ -18,7 +18,7 @@
 ################################################################################
 
 
-## collation after class.R and mcf-generic.R
+### collation after class.R and mcf-generic.R
 ##' @include class.R
 ##' @include mcf-generic.R
 NULL
@@ -58,8 +58,7 @@ setMethod(
         ## basic check on inputs
         if (length(logConfInt) > 1 || ! is.logical(logConfInt))
             stop("'logConfint' has to be either 'TRUE' or 'FALSE'.")
-        if (length(level) > 1 || ! is.numeric(level) ||
-            level <= 0 || level >= 1)
+        if (! isNumOne(level) || level <= 0 || level >= 1)
             stop("Confidence level must be between 0 and 1.")
 
         ## get the data and take care of the possible subset

@@ -9,15 +9,20 @@
 \alias{plot,rateRegMcf-method}
 \alias{plot,baseRateReg,missing-method}
 \alias{plot,baseRateReg-method}
+\alias{plot,mcfDiff,missing-method}
+\alias{plot,mcfDiff-method}
 \title{Plot Baseline Rate or Mean Cumulative Function (MCF)}
 \usage{
 \S4method{plot}{sampleMcf,missing}(x, y, conf.int = FALSE,
-  mark.time = FALSE, lty, col, legendName, legendLevels, addOrigin = TRUE,
+  mark.time = FALSE, lty, col, legendName, legendLevels, addOrigin = FALSE,
   ...)
 
 \S4method{plot}{rateRegMcf,missing}(x, y, conf.int = FALSE, lty, col, ...)
 
 \S4method{plot}{baseRateReg,missing}(x, y, conf.int = FALSE, lty, col, ...)
+
+\S4method{plot}{mcfDiff,missing}(x, y, conf.int = TRUE, lty, col, legendName,
+  legendLevels, addOrigin = FALSE, ...)
 }
 \arguments{
 \item{x}{An object used to dispatch a method.}

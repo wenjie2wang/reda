@@ -21,7 +21,7 @@ The function \code{\link{mcf}} produces objects of this class.
 
 \item{\code{na.action}}{A length-one character vector.}
 
-\item{\code{variance}}{A character.}
+\item{\code{variance}}{A character vector.}
 
 \item{\code{logConfInt}}{A logical value.}
 
