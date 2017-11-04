@@ -72,7 +72,7 @@ setMethod(
     f = "plot", signature = c("sampleMcf", "missing"),
     definition = function(x, y, conf.int = FALSE, mark.time = FALSE,
                           lty, col, legendName, legendLevels,
-                          addOrigin = TRUE, ...)
+                          addOrigin = FALSE, ...)
     {
         ## nonsense, just to suppress Note from R CMD check --as-cran
         MCF <- instRate <- lower <- upper <- design <- time <- NULL
@@ -118,7 +118,7 @@ setMethod(
             desDat <- MCFdat[, - seq_len(numColMcf), drop = FALSE]
             groupName <- paste(colnames(desDat), collapse = "&")
             desVec <- do.call(paste, c(as.list(desDat), sep = "&"))
-            desLevs <- unique(desVec)
+            desLevs <- sort(unique(desVec))
             MCFdat$design <- factor(desVec, levels = desLevs)
             nDesign <- length(desLevs)
             desInd <- seq_len(nDesign)
@@ -264,7 +264,8 @@ setMethod(
 ##' @export
 setMethod(
     f = "plot", signature = c("baseRateReg", "missing"),
-    definition = function(x, y, conf.int = FALSE, lty, col, ...) {
+    definition = function(x, y, conf.int = FALSE, lty, col, ...)
+    {
         ## nonsense, just to suppress Note from R CMD check --as-cran
         lower <- upper <- time <- NULL
 
@@ -287,6 +288,44 @@ setMethod(
         p
     })
 
+
+##' @rdname plot-method
+##' @aliases plot,mcfDiff-method
+##' @export
+setMethod(
+    f = "plot", signature = c("mcfDiff", "missing"),
+    definition = function(x, y, conf.int = TRUE,
+                          lty, col, legendName, legendLevels,
+                          addOrigin = FALSE, ...)
+    {
+        ## nonsense, just to suppress Note from R CMD check --as-cran
+        MCF <- lower <- upper <- time <- NULL
+
+        ## mcf data
+        MCFdat <- x@MCF
+        if (addOrigin) {
+            ## add starting point at origin time
+            originDat <- MCFdat[1L, ]
+            originDat[1L, ] <- 0
+            originDat[, "time"] <- x@origin
+            MCFdat <- rbind(originDat, MCFdat)
+        }
+        ## set default line type and color
+        if (missing(lty)) lty <- 1
+        if (missing(col)) col <- "black"
+        p <- ggplot(data = MCFdat, aes_string(x = "Time")) +
+            geom_step(mapping = aes(x = time, y = MCF),
+                      linetype = lty, color = col)
+        ## confidence interval
+        if (conf.int) {
+            p <- p + geom_step(mapping = aes(x = time, y = lower),
+                               linetype = "3313", color = col) +
+                geom_step(mapping = aes(x = time, y = upper),
+                          linetype = "3313", color = col)
+        }
+        p <- p + ylab("MCF Difference")
+        p
+    })
 
 
 ### internal function ==========================================================
