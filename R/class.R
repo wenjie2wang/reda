@@ -154,7 +154,7 @@ setClass(Class = "summaryRateReg",
 ##' @slot origin A named numeric vector.
 ##' @slot multiGroup A logical value.
 ##' @slot na.action A length-one character vector.
-##' @slot variance A character.
+##' @slot variance A character vector.
 ##' @slot logConfInt A logical value.
 ##' @slot level A numeric value.
 ##' @aliases sampleMcf-class
@@ -210,8 +210,10 @@ setClass(Class = "rateRegMcf",
              if (length(object@knots)) { # if there exists internal knots
                  if (min(object@knots) < min(object@Boundary.knots) ||
                      max(object@knots) > max(object@Boundary.knots)) {
-                     return(paste("Internal knots must all lie in the",
-                                  "coverage of boundary knots."))
+                     return(wrapMessages(
+                         "Internal knots must all lie in the",
+                         "coverage of boundary knots."
+                     ))
                  }
              }
              ## check on degree
@@ -275,4 +277,28 @@ setClass(Class = "simRec", contains = "numeric",
              censoring = "list",
              recurrent = "logical",
              method = "character"
+         ))
+
+
+##' An S4 Class Representing Sample MCF Difference
+##'
+##' An S4 class that represents the difference between two sample mean
+##' cumulative functions from data.  The function \code{\link{mcfDiff}}
+##' produces objects of this class.
+##'
+##' @slot MCF A data frame.
+##' @slot origin A named numeric vector.
+##' @slot variance A character vector.
+##' @slot logConfInt A logical value.
+##' @slot level A numeric value.
+##' @aliases sampleMcfDiff-class
+##' @seealso \code{\link{mcfDiff}} for details of slots.
+##' @export
+setClass(Class = "mcfDiff",
+         slots = c(
+             MCF = "data.frame",
+             origin = "numeric",
+             variance = "character",
+             logConfInt = "logical",
+             level = "numeric"
          ))
