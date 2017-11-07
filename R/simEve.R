@@ -25,9 +25,9 @@ NULL
 
 ##' Simulated Survival times or Recurrent Events
 ##'
-##' The function \code{simRec} generates simulated recurrent events or survival
+##' The function \code{simEve} generates simulated recurrent events or survival
 ##' time (the first event time) from one stochastic process. The function
-##' \code{simRecData} calls \code{simRec} internally and collects the generated
+##' \code{simEveData} calls \code{simEve} internally and collects the generated
 ##' survival data or recurrent events into a data frame.
 ##'
 ##' For each process, a time-invariant or time-varying baseline hazard rate
@@ -41,7 +41,9 @@ NULL
 ##' The thinning method (Lewis and Shedler, 1979) is applied for bounded hazard
 ##' rate function by default. The method based on inverse cumulative
 ##' distribution function (CDF) is also available for possibly unbounded but
-##' integrable rate function over the given time period.
+##' integrable rate function over the given time period. If a customized
+##' \code{interarrival} function is specifed for a general renewal process
+##' instead of a Poisson process, only the thinning method is applicable now.
 ##'
 ##' For covariates \code{z}, covariate coefficients \code{zCoef}, and baseline
 ##' hazard rate function \code{rho}, a function of time can be specified for
@@ -49,14 +51,15 @@ NULL
 ##' the time (not need to be named as "time" though). Other arguments of the
 ##' function can be specified through a named list in \code{arguments}.
 ##'
-##' @aliases simRec
+##' @aliases simEve
 ##'
 ##' @usage
-##' simRec(z = 0, zCoef = 1, rho = 1, rhoCoef = 1, origin = 0,
-##'        endTime = 3, frailty = FALSE, recurrent = TRUE,
+##' simEve(z = 0, zCoef = 1, rho = 1, rhoCoef = 1, origin = 0, endTime = 3,
+##'        frailty = FALSE, recurrent = TRUE, interarrival = "rexp",
 ##'        method = c("thinning", "inverse.cdf"),
-##'        arguments = list(x = list(), xCoef = list(),
-##'                         rho = list(), frailty = list()), ...)
+##'        arguments = list(z = list(), zCoef = list(), rho = list(),
+##'                         origin = list(), endTime = list(),
+##'                         frailty = list(), interarrival = list()), ...)
 ##'
 ##' @param z Time-invariant or time-varying covariates. The default value is
 ##'     \code{0} for no covariate effect.  This argument should be a numeric
@@ -69,22 +72,26 @@ NULL
 ##'     coefficients. The length of the numeric vector specified or returned
 ##'     from \code{z} and \code{zCoef} has to be always the same.
 ##' @param rho Baseline rate (or intensity) function for the Poisson process.
-##'     The default is \code{1} for a homogenous Poisson process of unit
-##'     intensity. This argument can be either a non-negative numeric value for
-##'     a homogenous Poisson process or a function of time for a non-homogenous
-##'     process.
+##'     The default is \code{1} for a homogenous process of unit intensity. This
+##'     argument can be either a non-negative numeric value for a homogenous
+##'     process or a function of time for a non-homogenous process.
 ##' @param rhoCoef Coefficients of baseline rate function. The default value is
 ##'     \code{1}. It can be useful when \code{rho} is a function generating
 ##'     spline bases.
-##' @param origin The time origin set to be \code{0} by default.
+##' @param origin The time origin set to be \code{0} by default. It should be
+##'     either a numeric value (less than \code{endTime}) or a function that
+##'     returns a numeric value (less than \code{endTime}).
 ##' @param endTime The end of follow-up time set to be \code{3} by default.
+##'     Similar to \code{origin}, \code{endTime} should be either a numeric
+##'     value (greater than \code{origin}) or a function that returns a numeric
+##'     value (greater than \code{origin}).
 ##' @param frailty Frailty effect. An optional logical value indicating whether
 ##'     to consider a frailty model or a function that produces the frailty
 ##'     effect.  The default value is \code{FALSE} for no frailty effect. If
 ##'     \code{TRUE}, a frailty factor from Gamma distribution will be used and
 ##'     the shape and scale parameter has to be specified through a list named
 ##'     \code{frailty} in \code{arguments}. Similar to \code{z}, \code{zCoef},
-##'     and \code{rho}, a function or its name can be specified for other
+##'     and \code{rho}, a function or a function name can be specified for other
 ##'     distribution of the frailty effect. The specified function should
 ##'     randomly return a positive numeric value. For example, the functions
 ##'     that generate random numbers following a certain distribution from
@@ -96,6 +103,21 @@ NULL
 ##' @param recurrent A logical value with default value \code{TRUE} indicating
 ##'     whether to generate recurrent event data or survival data (i.e. the
 ##'     first event only).
+##' @param interarrival A function object (or a function name) for randomly
+##'     generating (positive) interarrival time between two successive
+##'     arrivals/events.  The default value is \code{"rexp"} for generating
+##'     interarrival times following exponential distribution, which leads to a
+##'     Poisson process. If the assumption of exponential interarrival times
+##'     cannot be justified, we may consider a renewal process, (a
+##'     generalization of Poisson process), in which interarrival times between
+##'     events independently follows an identical distribution. A customized
+##'     function can be specified in this case. It must have at least one
+##'     argument named \code{rate} for the expected number of arrivals/events in
+##'     unit time and returns one positive numerical value. If the function
+##'     contains an argument named \code{n}, it is assumed that the function
+##'     returns \code{n} interarrival times in one function call to possibly
+##'     speed up the random number generation procedure.  Other arguments can be
+##'     specified through a named list inside \code{arguments}.
 ##' @param method A character string specifying the method for generating
 ##'     simulated recurrent or survival data. The default method is thinning
 ##'     method (Lewis and Shedler, 1979). Another available option is the method
@@ -103,15 +125,16 @@ NULL
 ##'     function may go to infinite, the inverse CDF method is used and a
 ##'     warning will be thrown out if the thinning method is initially
 ##'     specified.
-##' @param arguments Other arguments that can be specified through a named list
-##'     for those time-varying functions. The input arguments will be evaluated
-##'     within function \code{simRec} before feed into the function, which can
-##'     be useful for randomly setting function parameters for each process in
-##'     function \code{simRecData}.
+##' @param arguments Other arguments that can be specified through named lists
+##'     for specified functions. (A partial matching on names is not allowed to
+##'     avoid possible misspecification.) The input arguments will be evaluated
+##'     within function \code{simEve}, which can be useful for randomly setting
+##'     function parameters for each process in function \code{simEveData}. See
+##'     examples and vignettes for details.
 ##' @param ... Other arguemtns for future usage.
 ##'
-##' @return The function \code{simRec} returns a \code{simRec} S4 class object
-##'     and the function \code{simRecData} returns a \code{data.frame}.
+##' @return The function \code{simEve} returns a \code{simEve} S4 class object
+##'     and the function \code{simEveData} returns a \code{data.frame}.
 ##'
 ##' @references
 ##'
@@ -130,37 +153,36 @@ NULL
 ##'
 ##' @examples
 ##' library(reda)
-##' set.seed(1216)
 ##'
 ##' ### time-invariant covariates and coefficients
 ##' ## one process
-##' simRec(z = c(0.5, 1), zCoef = c(1, 0))
-##' simRec(z = 1, zCoef = 0.5, recurrent = FALSE)
+##' simEve(z = c(0.5, 1), zCoef = c(1, 0))
+##' simEve(z = 1, zCoef = 0.5, recurrent = FALSE)
 ##'
 ##' ## simulated data
-##' simRecData(1, z = c(0.5, 1), zCoef = c(1, 0), endTime = 2)
-##' simRecData(3, z = cbind(rnorm(3), 1), zCoef = c(1, 0))
-##' simRecData(5, z = matrix(rnorm(5)), zCoef = 0.5, recurrent = FALSE)
+##' simEveData(1, z = c(0.5, 1), zCoef = c(1, 0), endTime = 2)
+##' simEveData(3, z = cbind(rnorm(3), 1), zCoef = c(1, 0))
+##' simEveData(5, z = matrix(rnorm(5)), zCoef = 0.5, recurrent = FALSE)
 ##'
 ##' ### time-varying covariates and time-varying coefficients
-##' zFun <- function(timeVec, intercept) {
-##'    c(timeVec / 10 + intercept, as.numeric(timeVec > 1))
+##' zFun <- function(time, intercept) {
+##'    c(time / 10 + intercept, as.numeric(time > 1))
 ##' }
-##' zCoefFun <- function(timeVec, shift) {
-##'   c(sqrt(timeVec + shift), 1)
+##' zCoefFun <- function(x, shift) {
+##'   c(sqrt(x + shift), 1)
 ##' }
-##' simRec(z = zFun, zCoef = zCoefFun,
+##' simEve(z = zFun, zCoef = zCoefFun,
 ##'        arguments = list(z = list(intercept = 0.1),
 ##'                         zCoef = list(shift = 0.1)))
 ##'
 ##' ## same function of time for all processes
-##' simRecData(3, z = zFun, zCoef = zCoefFun,
+##' simEveData(3, z = zFun, zCoef = zCoefFun,
 ##'            arguments = list(z = list(intercept = 0.1),
 ##'                             zCoef = list(shift = 0.1)))
 ##'
 ##' ## same function within one process but different between processes
 ##' ## use quote function in the arguments
-##' simDat <- simRecData(3, z = zFun, zCoef = zCoefFun,
+##' simDat <- simEveData(3, z = zFun, zCoef = zCoefFun,
 ##'                      arguments = list(
 ##'                          z = list(intercept = quote(rnorm(1) / 10)),
 ##'                          zCoef = list(shift = 0.1)
@@ -170,45 +192,58 @@ NULL
 ##' unique(with(simDat, cbind(ID, intercept = round(X.1 - time / 10, 3))))
 ##'
 ##' ### non-negative time-varying baseline hazard rate function
-##' simRec(rho = function(timeVec) { sin(timeVec) + 1 })
-##' simRecData(3, origin = rnorm(3), endTime = rnorm(3, 5),
+##' simEve(rho = function(timeVec) { sin(timeVec) + 1 })
+##' simEveData(3, origin = rnorm(3), endTime = rnorm(3, 5),
 ##'            rho = function(timeVec) { sin(timeVec) + 1 })
 ##' ## specify other arguments
-##' simRec(rho = function(a, b) { cos(a + b) + 1 },
+##' simEve(rho = function(a, b) { cos(a + b) + 1 },
 ##'        arguments = list(rho = list(b = 1)))
-##' simRecData(z = cbind(rnorm(3), rbinom(3, 1, 0.5)),
+##' simEveData(z = cbind(rnorm(3), rbinom(3, 1, 0.5)),
 ##'            rho = function(a, b) { cos(a + b) + 1 },
 ##'            arguments = list(rho = list(b = 1)))
 ##'
 ##' ## quadratic I-splines with one internal knot at "time = 1"
 ##' ## (using function 'iSpline' from splines2 package)
-##' simRec(rho = "iSpline", rhoCoef = c(0.2, 0.5, 0.3, 0.4),
+##' simEve(rho = "iSpline", rhoCoef = c(0.2, 0.5, 0.3, 0.4),
 ##'        arguments = list(rho = list(degree = 2, knots = 1, intercept = TRUE,
 ##'                                    Boundary.knots = c(0, 3))))
 ##'
 ##' ### frailty effect
 ##' ## The default distribution is Gamma distribution
-##' simRec(z = c(0.5, 1), zCoef = c(1, 0), frailty = TRUE,
+##' set.seed(1216)
+##' simEve(z = c(0.5, 1), zCoef = c(1, 0), frailty = TRUE,
 ##'        arguments = list(frailty = list(shape = 2, scale = 0.5)))
 ##' ## equivalent to the following function call
-##' simRec(z = c(0.5, 1), zCoef = c(1, 0), frailty = "rgamma",
+##' set.seed(1216)
+##' simEve(z = c(0.5, 1), zCoef = c(1, 0), frailty = "rgamma",
 ##'        arguments = list(frailty = list(shape = 2, scale = 0.5)))
+##'
 ##' ## lognormal with mean zero
+##' set.seed(1216)
 ##' logNorm <- function(a) exp(rnorm(n = 1, mean = 0, sd = a))
-##' simRec(z = c(0.5, 1), zCoef = c(1, 0), frailty = logNorm,
+##' simEve(z = c(0.5, 1), zCoef = c(1, 0), frailty = logNorm,
 ##'        arguments = list(frailty = list(a = 1)))
+##' ## equivalent to the following function call
+##' set.seed(1216)
+##' simEve(z = c(0.5, 1), zCoef = c(1, 0), frailty = "rlnorm",
+##'        arguments = list(frailty = list(sdlog = 1)))
 ##'
 ##' @importFrom stats integrate optimize qexp rexp runif rgamma rpois uniroot
 ##' @export
-simRec <- function(z = 0, zCoef = 1, rho = 1, rhoCoef = 1,
+simEve <- function(z = 0, zCoef = 1, rho = 1, rhoCoef = 1,
                    origin = 0, endTime = 3,
                    frailty = FALSE, recurrent = TRUE,
+                   interarrival = "rexp",
                    method = c("thinning", "inverse.cdf"),
-                   arguments = list(x = list(),
-                                    xCoef = list(),
-                                    rho = list(),
-                                    frailty = list()),
-                   ...)
+                   arguments = list(
+                       z = list(),
+                       zCoef = list(),
+                       rho = list(),
+                       origin = list(),
+                       endTime = list(),
+                       frailty = list(),
+                       interarrival = list()
+                   ), ...)
 {
     ## record function call
     Call <- match.call()
@@ -220,34 +255,79 @@ simRec <- function(z = 0, zCoef = 1, rho = 1, rhoCoef = 1,
     if (! (zVecIdx || is.function(z) || isCharOne(z)))
         stop(wrapMessages(
             "The covariates 'z' has to be a numeric vector / matrix,",
-            "a function or its name."
+            "a function or a function name."
         ))
     ## check coefficients zCoef
     zCoefVecIdx <- isNumVector(zCoef)
     if (! (zCoefVecIdx || is.function(zCoef) || isCharOne(zCoef)))
         stop(wrapMessages(
             "The covariate coefficients 'zCoef' has to be a numeric vector,",
-            "a function or its name."
+            "a function or a function name."
         ))
     ## check baseline rate function rho
     rhoVecIdx <- isNumOne(rho)
     if (! (rhoVecIdx || is.function(rho) || isCharOne(rho)))
-        stop("'rho' has to be a numeric vector or a function")
+        stop("The baseline hazard rate function",
+             "'rho' has to be a numeric vector, a function or a function name")
     if (rhoVecIdx && rho < 0)
         stop("The baseline hazard rate function 'rho' has to be non-negative.")
-    ## check origin and endTime
-    if (! (isNumOne(origin) && isNumOne(endTime) &&
-           origin < endTime) && is.finite(endTime))
-        stop(wrapMessages(
-            "The 'origin' and 'endTime'",
-            "has to be two numerical values s.t. 'origin' < 'endTime < Inf'."
-        ))
+    ## check function for interarrival time
+    if (! (is.function(interarrival) || isCharOne(interarrival)))
+        stop("The 'interarrival' has to be a function or a function name.")
+    interarrivalFun <- if (isCharOne(interarrival)) {
+                           eval(parse(text = interarrival))
+                       } else {
+                           interarrival
+                       }
+    defaultIntArvIdx <- missing(interarrival) ||
+        identical(interarrivalFun, stats::rexp)
+    if (! defaultIntArvIdx && identical(method, "inverse.cdf")) {
+        warning("Used thinning method for the customized distribution",
+                "of interarrival times.")
+        method <- "thinning"
+    }
 
     ## get arguments
     z_args <- lapply(arguments[["z"]], eval)
     zCoef_args <- lapply(arguments[["zCoef"]], eval)
     rho_args <- lapply(arguments[["rho"]], eval)
+    origin_args <- lapply(arguments[["origin"]], eval)
+    endTime_args <- lapply(arguments[["endTime"]], eval)
     frailty_args <- lapply(arguments[["frailty"]], eval)
+    interarrival_args <- lapply(arguments[["interarrival"]], eval)
+
+    ## check origin and endTime
+    if (is.function(origin) || isCharOne(origin)) {
+        ## add "n = 1" for common distribution from stats library
+        if ("n" %in% names(as.list(args(origin)))) {
+            origin_args <- c(list(n = 1),
+                             origin_args[names(origin_args) != "n"])
+        }
+        originFun <- origin
+        origin_args <- if (! length(origin_args)) list()
+        origin <- do.call(originFun, origin_args)
+    } else {
+        originFun <- origin_args <- NULL
+    }
+    if (is.function(endTime)|| isCharOne(endTime)) {
+        ## add "n = 1" for common distribution from stats library
+        if ("n" %in% names(as.list(args(endTime)))) {
+            endTime_args <- c(list(n = 1),
+                              endTime_args[names(endTime_args) != "n"])
+        }
+        endTimeFun <- endTime
+        endTime_args <- if (! length(endTime_args)) list()
+        endTime <- do.call(endTimeFun, endTime_args)
+    } else {
+        endTimeFun <- endTime_args <- NULL
+    }
+    if (! (isNumOne(origin) && isNumOne(endTime) &&
+           origin < endTime && is.finite(endTime))) {
+        stop(wrapMessages(
+            "The 'origin' and 'endTime'",
+            "has to be two numerical values s.t. 'origin' < 'endTime < Inf'."
+        ))
+    }
 
     ## covariate: time-varying or time-invariant
     zFun <- ifelse(zVecIdx, function(zVec) z, z)
@@ -260,9 +340,8 @@ simRec <- function(z = 0, zCoef = 1, rho = 1, rhoCoef = 1,
         frailty <- if(frailty) "rgamma" else NULL
     }
     if (is.function(frailty) || isCharOne(frailty)) {
-        argsNames <- names(as.list(args(frailty)))
         ## add "n = 1" for common distribution from stats library
-        if ("n" %in% argsNames) {
+        if ("n" %in% names(as.list(args(frailty)))) {
             frailty_args <- c(list(n = 1),
                               frailty_args[names(frailty_args) != "n"])
         }
@@ -279,7 +358,7 @@ simRec <- function(z = 0, zCoef = 1, rho = 1, rhoCoef = 1,
     } else {
         stop(wrapMessages(
             "The argument 'frailty' has to be a logical value (TRUE or FALSE),",
-            "a function (or its name)."
+            "a function (or a function name)."
         ))
     }
 
@@ -314,12 +393,21 @@ simRec <- function(z = 0, zCoef = 1, rho = 1, rhoCoef = 1,
                                  maximum = TRUE)
     rho_max <- rhoMaxObj$objective
     ## if the supremum is finite, use thinning method
-    if (is.infinite(rho_max) && identical(method, "thinning")) {
-        method <- "inverse.cdf"
-        warning(wrapMessages(
-            "The rate function may go to infinite.",
-            "The Inverse CDF method was used."
-        ))
+    if (is.infinite(rho_max)) {
+        if (! defaultIntArvIdx) {
+            stop(wrapMessages(
+                "The rate function may go to infinite.",
+                "A customized function for generating interarrival times",
+                "is not applicable currently."
+            ))
+        }
+        if (identical(method, "thinning")) {
+            method <- "inverse.cdf"
+            warning(wrapMessages(
+                "The rate function may go to infinite.",
+                "The Inverse CDF method was used."
+            ))
+        }
     }
 
     ## values at end time (censoring time)
@@ -331,19 +419,32 @@ simRec <- function(z = 0, zCoef = 1, rho = 1, rhoCoef = 1,
     ## thinning method
     if (identical(method, "thinning")) {
         ## step 2: generate W_i in batch for possible better performance
-        ## estimate the number of W_i before censoring
+        ## take care of possible interarrival arguments
+        interarrivalArgs <- c(list(rate = rho_max), interarrival_args)
+        intArvArgVec <- names(as.list(args(interarrival)))
+        if (! "rate" %in% intArvArgVec)
+            stop(wrapMessages(
+                "The function for interarrival times must have",
+                "one arguments named 'rate' for the expected number of",
+                "events/arrivals in unit time."
+            ))
         if (recurrent) {
+            ## estimate the number of W_i before censoring
             batchNum <- ceiling((endTime - origin) / stats::qexp(0.10, rho_max))
+            if ("n" %in% intArvArgVec)
+                interarrivalArgs <- c(list(n = batchNum), interarrivalArgs)
             eventTime <- NULL
             lastEventTime <- origin
             while (lastEventTime < endTime) {
-                W <- stats::rexp(n = batchNum, rate = rho_max)
+                W <- do.call(interarrival, interarrivalArgs)
                 ## step 3: update evnet times
                 eventTime <- c(eventTime, lastEventTime + cumsum(W))
                 lastEventTime <- eventTime[length(eventTime)]
             }
         } else {
-            eventTime <- origin + stats::rexp(n = 1, rate = rho_max)
+            if ("n" %in% intArvArgVec)
+                interarrivalArgs <- c(list(n = 1), interarrivalArgs)
+            eventTime <- origin + do.call(interarrival, interarrivalArgs)
         }
         ## only keep event time before end time
         eventTime <- eventTime[eventTime <= endTime]
@@ -451,50 +552,62 @@ simRec <- function(z = 0, zCoef = 1, rho = 1, rhoCoef = 1,
                    }
 
     ## return
-    methods::new("simRec", xOut,
+    methods::new("simEve", xOut,
                  call = Call,
                  z = list(
                      z = zMat,
-                     zFun = zFun,
-                     zArgs = zArgs,
-                     zTimeVarying = ! zVecIdx
+                     fun = zFun,
+                     args = zArgs,
+                     timevarying = ! zVecIdx
                  ),
                  zCoef = list(
                      zCoef = zCoefMat,
-                     zCoefFun = zCoefFun,
-                     zArgs = zArgs,
-                     zCoefTimeVarying = ! zCoefVecIdx
+                     fun = zCoefFun,
+                     args = zArgs,
+                     timevarying = ! zCoefVecIdx
                  ),
                  rho = list(
                      rho = rhoMat,
-                     rhoFun = rhoFun,
-                     rhoArgs = rhoArgs,
-                     rhoTimeVarying = ! rhoVecIdx
+                     fun = rhoFun,
+                     args = rhoArgs,
+                     timevarying = ! rhoVecIdx
                  ),
                  rhoCoef = rhoCoef,
                  frailty = list(
                      frailtyEffect = frailtyEffect,
-                     frailtyFun = frailty,
-                     frailtyArgs = frailtyArgs
+                     fun = frailty,
+                     args = frailtyArgs
                  ),
-                 origin = origin,
-                 endTime = endTime,
+                 origin = list(
+                     origin = origin,
+                     fun = originFun,
+                     args = origin_args
+                 ),
+                 endTime = list(
+                     endTime = endTime,
+                     fun = endTimeFun,
+                     args = endTime_args
+                 ),
                  censoring = list(
                      z = zMat_cen,
                      zCoef = zCoefMat_cen,
                      rho = rhoMat_cen
                  ),
                  recurrent = recurrent,
+                 interarrival = list(
+                     fun = interarrival,
+                     args = interarrival_args
+                 ),
                  method = method
                  )
 
 }
 
 
-##' @rdname simRec
-##' @aliases simRecData
+##' @rdname simEve
+##' @aliases simEveData
 ##' @usage
-##' simRecData(nProcess = 1, z = 0, zCoef = 1, rho = 1, rhoCoef = 1,
+##' simEveData(nProcess = 1, z = 0, zCoef = 1, rho = 1, rhoCoef = 1,
 ##'            origin = 0, endTime = 3, frailty = FALSE, recurrent = TRUE,
 ##'            method = c("thinning", "inverse.cdf"),
 ##'            arguments = list(z = list(), zCoef = list(),
@@ -504,7 +617,7 @@ simRec <- function(z = 0, zCoef = 1, rho = 1, rhoCoef = 1,
 ##'     speicified. The default value is \code{1}.
 ##'
 ##' @export
-simRecData <- function(nProcess = 1, z = 0, zCoef = 1,
+simEveData <- function(nProcess = 1, z = 0, zCoef = 1,
                        rho = 1, rhoCoef = 1,
                        origin = 0, endTime = 3,
                        frailty = FALSE, recurrent = TRUE,
@@ -525,7 +638,7 @@ simRecData <- function(nProcess = 1, z = 0, zCoef = 1,
     if (! (is.matrix(z) || is.function(z) || isCharOne(z)))
         stop(wrapMessages(
             "The covariates 'z' has to be a numeric vector / matrix,",
-            "a function or its name."
+            "a function or a function name."
         ))
 
     ## if covariates are given as a matrix
@@ -544,41 +657,32 @@ simRecData <- function(nProcess = 1, z = 0, zCoef = 1,
         zCoef <- rep(zCoef, length.out = ncol(z))
     }
 
-    origin <- rep(origin, length.out = nProcess)
-    endTime <- rep(endTime, length.out = nProcess)
+    ## take care of origin and endTime before simEve
+    originFunIdx <- is.function(origin) || isCharOne(origin)
+    if (! originFunIdx) {
+        origin <- rep(origin, length.out = nProcess)
+    }
+    endTimeFunIdx <- is.function(endTime) || isCharOne(endTime)
+    if (! endTimeFunIdx) {
+        endTime <- rep(endTime, length.out = nProcess)
+    }
 
     ## generate simulated data for each process
-    resList <- if (isZmatIdx) {
-                   lapply(seq_len(nProcess), function(i) {
-                       res <- simRec(z = z[i, ],
-                                     zCoef = zCoef,
-                                     rho = rho,
-                                     rhoCoef = rhoCoef,
-                                     origin = origin[i],
-                                     endTime = endTime[i],
-                                     frailty = frailty,
-                                     recurrent = recurrent,
-                                     method = method,
-                                     arguments = arguments,
-                                     ...)
-                       simRec2data(ID = i, res)
-                   })
-               } else {
-                   lapply(seq_len(nProcess), function(i) {
-                       res <- simRec(z = z,
-                                     zCoef = zCoef,
-                                     rho = rho,
-                                     rhoCoef = rhoCoef,
-                                     origin = origin[i],
-                                     endTime = endTime[i],
-                                     frailty = frailty,
-                                     recurrent = recurrent,
-                                     method = method,
-                                     arguments = arguments,
-                                     ...)
-                       simRec2data(ID = i, res)
-                   })
-               }
+    resList <- lapply(seq_len(nProcess), function(i) {
+        res <- simEve(z = if (isZmatIdx) z[i, ] else z,
+                      zCoef = zCoef,
+                      rho = rho,
+                      rhoCoef = rhoCoef,
+                      origin = if (originFunIdx) origin else origin[i],
+                      endTime = if (endTimeFunIdx) endTime else endTime[i],
+                      frailty = frailty,
+                      recurrent = recurrent,
+                      method = method,
+                      arguments = arguments,
+                      ...)
+        simEve2data(ID = i, res)
+    })
+
     ## prepare for output
     out <- do.call(rbind, resList)
     if (! recurrent) {
@@ -591,20 +695,20 @@ simRecData <- function(nProcess = 1, z = 0, zCoef = 1,
 
 
 ### internal functions =========================================================
-## function convert results from simRec to data.frame
-simRec2data <- function(ID, obj) {
+## function convert results from simEve to data.frame
+simEve2data <- function(ID, obj) {
     timeVec <- obj@.Data
     ## if no event
     if (! length(timeVec))
         return(data.frame(ID = ID,
-                          time = obj@endTime,
+                          time = obj@endTime$endTime,
                           event = 0,
-                          origin = obj@origin,
+                          origin = obj@origin$origin,
                           X = obj@censoring$z))
     ## else for any event
     data.frame(ID = ID,
-               time = c(timeVec, obj@endTime),
+               time = c(timeVec, obj@endTime$endTime),
                event = c(rep(1, length(timeVec)), 0),
-               origin = obj@origin,
+               origin = obj@origin$origin,
                X = rbind(obj@z$z, obj@censoring$z))
 }
