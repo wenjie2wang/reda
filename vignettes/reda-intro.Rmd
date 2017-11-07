@@ -3,7 +3,7 @@ title: "Introduction to reda through Examples"
 author: Wenjie Wang
 date: "`r Sys.Date()`"
 bibliography:
-- ../inst/bib/reda-intro.bib
+- ../inst/bib/reda.bib
 vignette: >
   %\VignetteIndexEntry{Introduction to reda by Examples}
   %\VignetteEngine{knitr::rmarkdown}
@@ -65,8 +65,8 @@ where
 * `x1`: Continuous variable.
 * `gender`: Gender of subjects.
 
-The dataset is originally simulated by thinning method [@lewis1979]
-and further processed for a better demonstration purpose.
+The dataset is originally simulated by thinning method [@lewis1979nrlq] and
+further processed for a better demonstration purpose.
 
 
 ## Data Checking {#dataCheck}
@@ -246,7 +246,7 @@ fitted model is called `mcf`.  The related methods are dispatched by function
 ### Sample MCF (Nelson-Aalen Estimator) {#sampleMcf}
 
 The nonparametric sample MCF is also called
-Nelson-Aalen Estimator [@nelson2003]. The point estimate of MCF
+Nelson-Aalen Estimator [@nelson2003siam]. The point estimate of MCF
 at each time point does not assume any particular underlying model.
 The variance estimates
 at each time point is given by Poisson process method (by default)
@@ -254,7 +254,7 @@ or Lawless and Nadeau method [@lawless1995some].
 The approximate confidence intervals are provided as well,
 which are constructed based on the asymptotic normality
 of logarithm of MCF (by default) or MCF itself directly.
-@reliawiki also provided a simple example.
+
 
 If a formula with `Survr` as response is specified in function `mcf`, the method
 for sample MCF will be called.  The covariate specified at the right hand side
@@ -263,7 +263,7 @@ variables in the data.  The former computes the overall sample MCF.  The latter
 computes the sample MCF for each level of the combination of the factor
 variable(s) specified, respectively.
 
-The valve-seat dataset in @nelson1995confidence and the sample simulated data
+The valve-seat dataset in @nelson1995technometrics and the sample simulated data
 are used for demonstration as follows:
 
 ```{r sampleMcf}
