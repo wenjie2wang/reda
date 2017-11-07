@@ -247,7 +247,7 @@ setClass(Class = "baseRateReg",
 ##' An S4 Class for Simulated Recurrent Event or Survival Times
 ##'
 ##' An S4 class that represents simulated recurrent event or survival time from
-##' one stochastic process. The function \code{\link{simRec}} produces objects
+##' one stochastic process. The function \code{\link{simEve}} produces objects
 ##' of this class.
 ##'
 ##' @slot .Data A numerical vector of possibly length zero.
@@ -257,14 +257,14 @@ setClass(Class = "baseRateReg",
 ##' @slot rho A list.
 ##' @slot rhoCoef A numerical vector.
 ##' @slot frailty A list.
-##' @slot origin A numeric vector.
-##' @slot endTime A numeric vector.
+##' @slot origin A list.
+##' @slot endTime A list.
 ##' @slot censoring A list.
 ##' @slot recurrent A logical vector.
 ##' @slot method A character vector.
-##' @seealso \code{\link{simRec}} for details of slots.
+##' @seealso \code{\link{simEve}} for details of slots.
 ##' @export
-setClass(Class = "simRec", contains = "numeric",
+setClass(Class = "simEve", contains = "numeric",
          slots = c(
              call = "call",
              z = "list",
@@ -272,8 +272,8 @@ setClass(Class = "simRec", contains = "numeric",
              rho = "list",
              rhoCoef = "numeric",
              frailty = "list",
-             origin = "numeric",
-             endTime = "numeric",
+             origin = "list",
+             endTime = "list",
              censoring = "list",
              recurrent = "logical",
              method = "character"

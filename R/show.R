@@ -157,13 +157,13 @@ setMethod(f = "show", signature = "rateRegMcf",
 
 
 ##' @rdname show-method
-##' @aliases show,simRec-method
+##' @aliases show,simEve-method
 ##' @export
 setMethod(
     f = "show",
-    signature = "simRec",
+    signature = "simEve",
     definition = function(object) {
-        cat("'simRec' S4 class object:\n")
+        cat("'simEve' S4 class object:\n")
         print(object@.Data)
         ## invisible return
         invisible(object)
