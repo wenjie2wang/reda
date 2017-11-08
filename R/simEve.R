@@ -27,8 +27,9 @@ NULL
 ##'
 ##' The function \code{simEve} generates simulated recurrent events or survival
 ##' time (the first event time) from one stochastic process. The function
-##' \code{simEveData} calls \code{simEve} internally and collects the generated
-##' survival data or recurrent events into a data frame.
+##' \code{simEveData} provides a simple wrapper that calls \code{simEve}
+##' internally and collects the generated survival data or recurrent events into
+##' a data frame.
 ##'
 ##' For each process, a time-invariant or time-varying baseline hazard rate
 ##' (intensity) function of failure can be specified.  Covariates and their
@@ -36,7 +37,9 @@ NULL
 ##' proportional hazard model (Cox, 1972) for survival data or Andersen-Gill
 ##' model (Andersen and Gill, 1982) for recurrent events. In addition, a frailty
 ##' effect can be considered.  Conditional on predictors (or covariates) and the
-##' unobserved frailty effect, the process is a Poisson process.
+##' unobserved frailty effect, the process is a Poisson process by default. The
+##' interarrival time between two successive arrivals/events follows exponential
+##' distribution individually by default.
 ##'
 ##' The thinning method (Lewis and Shedler, 1979) is applied for bounded hazard
 ##' rate function by default. The method based on inverse cumulative
@@ -330,9 +333,9 @@ simEve <- function(z = 0, zCoef = 1, rho = 1, rhoCoef = 1,
     }
 
     ## covariate: time-varying or time-invariant
-    zFun <- ifelse(zVecIdx, function(zVec) z, z)
-    zCoefFun <- ifelse(zCoefVecIdx, function(zVec) zCoef, zCoef)
-    rhoFun <- ifelse(rhoVecIdx, function(zVec) rho, rho)
+    zFun <- if (zVecIdx) function(x) { z } else z
+    zCoefFun <- if (zCoefVecIdx) function(x) { zCoef } else zCoef
+    rhoFun <- if (rhoVecIdx) function(x) { rho } else rho
 
     ## prepare frailty effect
     if (is.logical(frailty)) {
@@ -574,7 +577,7 @@ simEve <- function(z = 0, zCoef = 1, rho = 1, rhoCoef = 1,
                  ),
                  rhoCoef = rhoCoef,
                  frailty = list(
-                     frailtyEffect = frailtyEffect,
+                     frailty = frailtyEffect,
                      fun = frailty,
                      args = frailtyArgs
                  ),
