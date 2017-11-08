@@ -112,8 +112,9 @@ The function \code{simEve} returns a \code{simEve} S4 class object
 \description{
 The function \code{simEve} generates simulated recurrent events or survival
 time (the first event time) from one stochastic process. The function
-\code{simEveData} calls \code{simEve} internally and collects the generated
-survival data or recurrent events into a data frame.
+\code{simEveData} provides a simple wrapper that calls \code{simEve}
+internally and collects the generated survival data or recurrent events into
+a data frame.
 }
 \details{
 For each process, a time-invariant or time-varying baseline hazard rate
@@ -122,7 +123,9 @@ coefficients can be specified and are incorporated based on the Cox
 proportional hazard model (Cox, 1972) for survival data or Andersen-Gill
 model (Andersen and Gill, 1982) for recurrent events. In addition, a frailty
 effect can be considered.  Conditional on predictors (or covariates) and the
-unobserved frailty effect, the process is a Poisson process.
+unobserved frailty effect, the process is a Poisson process by default. The
+interarrival time between two successive arrivals/events follows exponential
+distribution individually by default.
 
 The thinning method (Lewis and Shedler, 1979) is applied for bounded hazard
 rate function by default. The method based on inverse cumulative
