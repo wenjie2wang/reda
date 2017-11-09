@@ -37,32 +37,38 @@ NULL
 ##' proportional hazard model (Cox, 1972) for survival data or Andersen-Gill
 ##' model (Andersen and Gill, 1982) for recurrent events. In addition, a frailty
 ##' effect can be considered.  Conditional on predictors (or covariates) and the
-##' unobserved frailty effect, the process is a Poisson process by default. The
-##' interarrival time between two successive arrivals/events follows exponential
-##' distribution individually by default.
+##' unobserved frailty effect, the process is by default a Poisson process,
+##' where the interarrival times between two successive arrivals/events follow
+##' exponential distribution. A general renewal process can be specified through
+##' \code{interarrival} for other distributions of the interarrival times.
 ##'
 ##' The thinning method (Lewis and Shedler, 1979) is applied for bounded hazard
 ##' rate function by default. The method based on inverse cumulative
 ##' distribution function (CDF) is also available for possibly unbounded but
-##' integrable rate function over the given time period. If a customized
-##' \code{interarrival} function is specifed for a general renewal process
-##' instead of a Poisson process, only the thinning method is applicable now.
+##' integrable rate function over the given time period. The inverse CDF method
+##' will be used when the rate function may go to infinite and a warning will be
+##' thrown out if the thinning method is specified originally.
 ##'
-##' For covariates \code{z}, covariate coefficients \code{zCoef}, and baseline
-##' hazard rate function \code{rho}, a function of time can be specified for
-##' time-varying effect.  The (first) argument of the input function has to be
-##' the time (not need to be named as "time" though). Other arguments of the
-##' function can be specified through a named list in \code{arguments}.
+##' For the covariates \code{z}, the covariate coefficients \code{zCoef}, and
+##' the baseline hazard rate function \code{rho}, a function of time can be
+##' specified for time-varying effect.  The first argument of the input function
+##' has to be the time variable (not need to be named as "time" though). Other
+##' arguments of the function can be specified through a named list in
+##' \code{arguments}, while the first argument should not be specified.
+##'
+##' For the frailty effect \code{frailty}, the starting point \code{origin}, and
+##' the end point of the process \code{endTime}, functions that generate random
+##' numbers can be specified. An argument \code{n = 1} will be implicitly
+##' specified if the function has an argument named \code{n}, which is designed
+##' for those common functions generating random numbers from \code{stats}
+##' package.
 ##'
 ##' @aliases simEve
 ##'
 ##' @usage
 ##' simEve(z = 0, zCoef = 1, rho = 1, rhoCoef = 1, origin = 0, endTime = 3,
 ##'        frailty = FALSE, recurrent = TRUE, interarrival = "rexp",
-##'        method = c("thinning", "inverse.cdf"),
-##'        arguments = list(z = list(), zCoef = list(), rho = list(),
-##'                         origin = list(), endTime = list(),
-##'                         frailty = list(), interarrival = list()), ...)
+##'        method = c("thinning", "inverse.cdf"), arguments = list(), ...)
 ##'
 ##' @param z Time-invariant or time-varying covariates. The default value is
 ##'     \code{0} for no covariate effect.  This argument should be a numeric
@@ -82,12 +88,12 @@ NULL
 ##'     \code{1}. It can be useful when \code{rho} is a function generating
 ##'     spline bases.
 ##' @param origin The time origin set to be \code{0} by default. It should be
-##'     either a numeric value (less than \code{endTime}) or a function that
-##'     returns a numeric value (less than \code{endTime}).
+##'     either a numeric value less than \code{endTime} or a function that
+##'     returns such a numeric value.
 ##' @param endTime The end of follow-up time set to be \code{3} by default.
 ##'     Similar to \code{origin}, \code{endTime} should be either a numeric
-##'     value (greater than \code{origin}) or a function that returns a numeric
-##'     value (greater than \code{origin}).
+##'     value greater than \code{origin} or a function that returns such a
+##'     numeric value.
 ##' @param frailty Frailty effect. An optional logical value indicating whether
 ##'     to consider a frailty model or a function that produces the frailty
 ##'     effect.  The default value is \code{FALSE} for no frailty effect. If
@@ -98,11 +104,9 @@ NULL
 ##'     distribution of the frailty effect. The specified function should
 ##'     randomly return a positive numeric value. For example, the functions
 ##'     that generate random numbers following a certain distribution from
-##'     \code{stats} package can directly used. Again, all the arguments of the
+##'     \code{stats} package can directly used. All the arguments of the
 ##'     function can be specified through a list named \code{frailty} in
-##'     \code{arguments}. Note that \code{n = 1} will be implicitly specified if
-##'     the function has an argument named \code{n}, which is designed for those
-##'     common functions generating random numbers from \code{stats} package.
+##'     \code{arguments}.
 ##' @param recurrent A logical value with default value \code{TRUE} indicating
 ##'     whether to generate recurrent event data or survival data (i.e. the
 ##'     first event only).
@@ -128,12 +132,18 @@ NULL
 ##'     function may go to infinite, the inverse CDF method is used and a
 ##'     warning will be thrown out if the thinning method is initially
 ##'     specified.
-##' @param arguments Other arguments that can be specified through named lists
-##'     for specified functions. (A partial matching on names is not allowed to
-##'     avoid possible misspecification.) The input arguments will be evaluated
-##'     within function \code{simEve}, which can be useful for randomly setting
-##'     function parameters for each process in function \code{simEveData}. See
-##'     examples and vignettes for details.
+##' @param arguments A list that consists of named lists for specifying other
+##'     arguments in the corresponding functions. For example, if a function of
+##'     time named \code{foo} with two arguments, \code{x} (for time) and
+##'     \code{y} is specified for the time-varying covariates, the value of its
+##'     second argument \code{y} can be specified by letting \code{arguments =
+##'     list(z = list(y = 1)}.
+##'
+##'     A partial matching on names is not
+##'     allowed to avoid possible misspecification. The input arguments will be
+##'     evaluated within function \code{simEve}, which can be useful for
+##'     randomly setting function parameters for each process in function
+##'     \code{simEveData}. See examples and vignettes for details.
 ##' @param ... Other arguemtns for future usage.
 ##'
 ##' @return The function \code{simEve} returns a \code{simEve} S4 class object
@@ -167,6 +177,7 @@ NULL
 ##' simEveData(3, z = cbind(rnorm(3), 1), zCoef = c(1, 0))
 ##' simEveData(5, z = matrix(rnorm(5)), zCoef = 0.5, recurrent = FALSE)
 ##'
+##'
 ##' ### time-varying covariates and time-varying coefficients
 ##' zFun <- function(time, intercept) {
 ##'    c(time / 10 + intercept, as.numeric(time > 1))
@@ -194,6 +205,7 @@ NULL
 ##' ## which should be the same within each ID but different between IDs.
 ##' unique(with(simDat, cbind(ID, intercept = round(X.1 - time / 10, 3))))
 ##'
+##'
 ##' ### non-negative time-varying baseline hazard rate function
 ##' simEve(rho = function(timeVec) { sin(timeVec) + 1 })
 ##' simEveData(3, origin = rnorm(3), endTime = rnorm(3, 5),
@@ -205,48 +217,57 @@ NULL
 ##'            rho = function(a, b) { cos(a + b) + 1 },
 ##'            arguments = list(rho = list(b = 1)))
 ##'
-##' ## quadratic I-splines with one internal knot at "time = 1"
-##' ## (using function 'iSpline' from splines2 package)
-##' simEve(rho = "iSpline", rhoCoef = c(0.2, 0.5, 0.3, 0.4),
+##' ## quadratic B-splines with one internal knot at "time = 1"
+##' ## (using function 'bSpline' from splines2 package)
+##' simEve(rho = "bSpline", rhoCoef = c(0.4, 0.5, 0.3, 0.6),
 ##'        arguments = list(rho = list(degree = 2, knots = 1, intercept = TRUE,
 ##'                                    Boundary.knots = c(0, 3))))
 ##'
+##'
 ##' ### frailty effect
 ##' ## The default distribution is Gamma distribution
-##' set.seed(1216)
+##' set.seed(123)
 ##' simEve(z = c(0.5, 1), zCoef = c(1, 0), frailty = TRUE,
 ##'        arguments = list(frailty = list(shape = 2, scale = 0.5)))
 ##' ## equivalent to the following function call
-##' set.seed(1216)
+##' set.seed(123)
 ##' simEve(z = c(0.5, 1), zCoef = c(1, 0), frailty = "rgamma",
 ##'        arguments = list(frailty = list(shape = 2, scale = 0.5)))
 ##'
-##' ## lognormal with mean zero
-##' set.seed(1216)
+##' ## lognormal with mean zero (on the log scale)
+##' set.seed(123)
 ##' logNorm <- function(a) exp(rnorm(n = 1, mean = 0, sd = a))
 ##' simEve(z = c(0.5, 1), zCoef = c(1, 0), frailty = logNorm,
 ##'        arguments = list(frailty = list(a = 1)))
 ##' ## equivalent to the following function call
-##' set.seed(1216)
+##' set.seed(123)
 ##' simEve(z = c(0.5, 1), zCoef = c(1, 0), frailty = "rlnorm",
 ##'        arguments = list(frailty = list(sdlog = 1)))
 ##'
+##'
+##' ### renewal process
+##' ## interarrival times following uniform distribution
+##' rUnif <- function(n, rate, min) runif(n, min, max = 2 / rate - min)
+##' simEve(interarrival = rUnif,
+##'        arguments = list(interarrival = list(min = 0.1)))
+##'
+##' ## interarrival times following Gamma distribution with scale one
+##' set.seed(123)
+##' simEve(interarrival = function(n, rate) rgamma(n, shape = 1 / rate))
+##' ## or equivalently
+##' set.seed(123)
+##' simEve(interarrival = function(rate) rgamma(n = 1, shape = 1 / rate))
+##'
 ##' @importFrom stats integrate optimize qexp rexp runif rgamma rpois uniroot
 ##' @export
-simEve <- function(z = 0, zCoef = 1, rho = 1, rhoCoef = 1,
+simEve <- function(z = 0, zCoef = 1,
+                   rho = 1, rhoCoef = 1,
                    origin = 0, endTime = 3,
-                   frailty = FALSE, recurrent = TRUE,
+                   frailty = FALSE,
+                   recurrent = TRUE,
                    interarrival = "rexp",
                    method = c("thinning", "inverse.cdf"),
-                   arguments = list(
-                       z = list(),
-                       zCoef = list(),
-                       rho = list(),
-                       origin = list(),
-                       endTime = list(),
-                       frailty = list(),
-                       interarrival = list()
-                   ), ...)
+                   arguments = list(), ...)
 {
     ## record function call
     Call <- match.call()
@@ -271,7 +292,7 @@ simEve <- function(z = 0, zCoef = 1, rho = 1, rhoCoef = 1,
     rhoVecIdx <- isNumOne(rho)
     if (! (rhoVecIdx || is.function(rho) || isCharOne(rho)))
         stop("The baseline hazard rate function",
-             "'rho' has to be a numeric vector, a function or a function name")
+             "'rho' has to be a numeric vector, a function or a function name.")
     if (rhoVecIdx && rho < 0)
         stop("The baseline hazard rate function 'rho' has to be non-negative.")
     ## check function for interarrival time
@@ -284,28 +305,37 @@ simEve <- function(z = 0, zCoef = 1, rho = 1, rhoCoef = 1,
                        }
     defaultIntArvIdx <- missing(interarrival) ||
         identical(interarrivalFun, stats::rexp)
-    if (! defaultIntArvIdx && identical(method, "inverse.cdf")) {
-        warning("Used thinning method for the customized distribution",
-                "of interarrival times.")
-        method <- "thinning"
-    }
 
     ## get arguments
     z_args <- lapply(arguments[["z"]], eval)
     zCoef_args <- lapply(arguments[["zCoef"]], eval)
     rho_args <- lapply(arguments[["rho"]], eval)
+
     origin_args <- lapply(arguments[["origin"]], eval)
+    origin_args <- origin_args[names(origin_args) != "n"]
+
     endTime_args <- lapply(arguments[["endTime"]], eval)
+    endTime_args <- endTime_args[names(endTime_args) != "n"]
+
     frailty_args <- lapply(arguments[["frailty"]], eval)
+    frailty_args <- frailty_args[names(frailty_args) != "n"]
+
     interarrival_args <- lapply(arguments[["interarrival"]], eval)
+    interarrival_args <-
+        interarrival_args[! names(interarrival_args) %in% c("n", "rate")]
+    intArvArgs <- names(as.list(args(interarrival)))
+    if (! "rate" %in% intArvArgs)
+        stop(wrapMessages(
+            "The function for interarrival times must have",
+            "one arguments named 'rate' for the expected number of",
+            "events/arrivals in unit time."
+        ))
 
     ## check origin and endTime
     if (is.function(origin) || isCharOne(origin)) {
         ## add "n = 1" for common distribution from stats library
-        if ("n" %in% names(as.list(args(origin)))) {
-            origin_args <- c(list(n = 1),
-                             origin_args[names(origin_args) != "n"])
-        }
+        if ("n" %in% names(as.list(args(origin))))
+            origin_args <- c(list(n = 1), origin_args)
         originFun <- origin
         origin_args <- if (! length(origin_args)) list()
         origin <- do.call(originFun, origin_args)
@@ -314,10 +344,8 @@ simEve <- function(z = 0, zCoef = 1, rho = 1, rhoCoef = 1,
     }
     if (is.function(endTime)|| isCharOne(endTime)) {
         ## add "n = 1" for common distribution from stats library
-        if ("n" %in% names(as.list(args(endTime)))) {
-            endTime_args <- c(list(n = 1),
-                              endTime_args[names(endTime_args) != "n"])
-        }
+        if ("n" %in% names(as.list(args(endTime))))
+            endTime_args <- c(list(n = 1), endTime_args)
         endTimeFun <- endTime
         endTime_args <- if (! length(endTime_args)) list()
         endTime <- do.call(endTimeFun, endTime_args)
@@ -344,10 +372,8 @@ simEve <- function(z = 0, zCoef = 1, rho = 1, rhoCoef = 1,
     }
     if (is.function(frailty) || isCharOne(frailty)) {
         ## add "n = 1" for common distribution from stats library
-        if ("n" %in% names(as.list(args(frailty)))) {
-            frailty_args <- c(list(n = 1),
-                              frailty_args[names(frailty_args) != "n"])
-        }
+        if ("n" %in% names(as.list(args(frailty))))
+            frailty_args <- c(list(n = 1), frailty_args)
         frailtyEffect <- do.call(frailty, frailty_args)
         ## check frailty effect of length one numeric
         if (! isNumOne(frailtyEffect)) {
@@ -397,13 +423,6 @@ simEve <- function(z = 0, zCoef = 1, rho = 1, rhoCoef = 1,
     rho_max <- rhoMaxObj$objective
     ## if the supremum is finite, use thinning method
     if (is.infinite(rho_max)) {
-        if (! defaultIntArvIdx) {
-            stop(wrapMessages(
-                "The rate function may go to infinite.",
-                "A customized function for generating interarrival times",
-                "is not applicable currently."
-            ))
-        }
         if (identical(method, "thinning")) {
             method <- "inverse.cdf"
             warning(wrapMessages(
@@ -424,30 +443,28 @@ simEve <- function(z = 0, zCoef = 1, rho = 1, rhoCoef = 1,
         ## step 2: generate W_i in batch for possible better performance
         ## take care of possible interarrival arguments
         interarrivalArgs <- c(list(rate = rho_max), interarrival_args)
-        intArvArgVec <- names(as.list(args(interarrival)))
-        if (! "rate" %in% intArvArgVec)
-            stop(wrapMessages(
-                "The function for interarrival times must have",
-                "one arguments named 'rate' for the expected number of",
-                "events/arrivals in unit time."
-            ))
         if (recurrent) {
             ## estimate the number of W_i before censoring
-            batchNum <- ceiling((endTime - origin) / stats::qexp(0.10, rho_max))
-            if ("n" %in% intArvArgVec)
+            batchNum <- ceiling((endTime - origin) / stats::qexp(0.20, rho_max))
+            if ("n" %in% intArvArgs)
                 interarrivalArgs <- c(list(n = batchNum), interarrivalArgs)
             eventTime <- NULL
             lastEventTime <- origin
             while (lastEventTime < endTime) {
                 W <- do.call(interarrival, interarrivalArgs)
+                if (! isNumVector(W) || any(W <= 0))
+                    stop("The interarrival times must be positive!")
                 ## step 3: update evnet times
                 eventTime <- c(eventTime, lastEventTime + cumsum(W))
                 lastEventTime <- eventTime[length(eventTime)]
             }
         } else {
-            if ("n" %in% intArvArgVec)
+            if ("n" %in% intArvArgs)
                 interarrivalArgs <- c(list(n = 1), interarrivalArgs)
-            eventTime <- origin + do.call(interarrival, interarrivalArgs)
+            W <- do.call(interarrival, interarrivalArgs)
+            if (! isNumOne(W) || any(W <= 0))
+                stop("The interarrival time must be a positive nuumber!")
+            eventTime <- origin + W
         }
         ## only keep event time before end time
         eventTime <- eventTime[eventTime <= endTime]
@@ -489,12 +506,34 @@ simEve <- function(z = 0, zCoef = 1, rho = 1, rhoCoef = 1,
             stats::integrate(vecRateFun, lower = origin,
                              upper = endTime)$value,
             error = function(e) e)
+        ## error if rate function is not integrable
         if ("error" %in% class(intRate))
             stop(wrapMessages(
                 "The integral of rate function",
-                "is probably divergent"
+                "is probably divergent."
             ))
-        numEvent <- stats::rpois(n = 1, lambda = intRate)
+        ## determine number of events, numEvent
+        if (defaultIntArvIdx) {
+            numEvent <- stats::rpois(n = 1, lambda = intRate)
+        } else {
+            ## take care of possible interarrival arguments
+            interarrivalArgs <- c(list(rate = intRate), interarrival_args)
+            ## take a larger step when argument 'n' is available
+            if ("n" %in% intArvArgs)
+                interarrivalArgs <- c(list(n = 10), interarrivalArgs)
+            ## initialize for the while loop
+            numEvent <- 0L
+            lastEventTime <- origin
+            while (lastEventTime < endTime) {
+                W <- do.call(interarrival, interarrivalArgs)
+                if (any(W <= 0))
+                    stop("The interarrival times must be positive!")
+                ## step 3: update evnet times
+                eventTime <- lastEventTime + cumsum(W)
+                numEvent <- numEvent + sum(eventTime < endTime)
+                lastEventTime <- eventTime[length(eventTime)]
+            }
+        }
         if (identical(numEvent, 0)) {
             xOut <- numeric(0)
             ## only return values on end time
