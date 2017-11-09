@@ -61,7 +61,8 @@ NULL
 ##' numbers can be specified. An argument \code{n = 1} will be implicitly
 ##' specified if the function has an argument named \code{n}, which is designed
 ##' for those common functions generating random numbers from \code{stats}
-##' package.
+##' package. Similar to \code{z}, \code{zCoef}, and \code{rho}, other arguments
+##' of the function can be specified through a named list in \code{arguments}.
 ##'
 ##' @aliases simEve
 ##'
@@ -137,13 +138,11 @@ NULL
 ##'     time named \code{foo} with two arguments, \code{x} (for time) and
 ##'     \code{y} is specified for the time-varying covariates, the value of its
 ##'     second argument \code{y} can be specified by letting \code{arguments =
-##'     list(z = list(y = 1)}.
-##'
-##'     A partial matching on names is not
-##'     allowed to avoid possible misspecification. The input arguments will be
-##'     evaluated within function \code{simEve}, which can be useful for
-##'     randomly setting function parameters for each process in function
-##'     \code{simEveData}. See examples and vignettes for details.
+##'     list(z = list(y = 1)}.  A partial matching on names is not allowed to
+##'     avoid possible misspecification. The input arguments will be evaluated
+##'     within function \code{simEve}, which can be useful for randomly setting
+##'     function parameters for each process in function \code{simEveData}. See
+##'     examples and vignettes for details.
 ##' @param ... Other arguemtns for future usage.
 ##'
 ##' @return The function \code{simEve} returns a \code{simEve} S4 class object
@@ -651,23 +650,22 @@ simEve <- function(z = 0, zCoef = 1,
 ##' @usage
 ##' simEveData(nProcess = 1, z = 0, zCoef = 1, rho = 1, rhoCoef = 1,
 ##'            origin = 0, endTime = 3, frailty = FALSE, recurrent = TRUE,
-##'            method = c("thinning", "inverse.cdf"),
-##'            arguments = list(z = list(), zCoef = list(),
-##'                             rho = list(), frailty = list()), ...)
+##'            interarrival = "rexp", method = c("thinning", "inverse.cdf"),
+##'            arguments = list(), ...)
 ##'
 ##' @param nProcess Number of stochastic processes. A positive number should be
 ##'     speicified. The default value is \code{1}.
 ##'
 ##' @export
-simEveData <- function(nProcess = 1, z = 0, zCoef = 1,
+simEveData <- function(nProcess = 1,
+                       z = 0, zCoef = 1,
                        rho = 1, rhoCoef = 1,
                        origin = 0, endTime = 3,
-                       frailty = FALSE, recurrent = TRUE,
+                       frailty = FALSE,
+                       recurrent = TRUE,
+                       interarrival = "rexp",
                        method = c("thinning", "inverse.cdf"),
-                       arguments = list(z = list(),
-                                        zCoef = list(),
-                                        rho = list(),
-                                        frailty = list()),
+                       arguments = list(),
                        ...)
 {
     ## record function call
@@ -719,6 +717,7 @@ simEveData <- function(nProcess = 1, z = 0, zCoef = 1,
                       endTime = if (endTimeFunIdx) endTime else endTime[i],
                       frailty = frailty,
                       recurrent = recurrent,
+                      interarrival = interarrival,
                       method = method,
                       arguments = arguments,
                       ...)
