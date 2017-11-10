@@ -1,0 +1,60 @@
+---
+title: "Simulate Survival and Recurrent Event Data with reda"
+author: Wenjie Wang
+date: "`r Sys.Date()`"
+bibliography:
+- ../inst/bib/reda.bib
+vignette: >
+  %\VignetteIndexEntry{Simulate Survival and Recurrent Event Data with reda}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+output: rmarkdown::html_vignette
+---
+
+
+In this vignette, we briefly introduce how to simulate survival and recurrent
+event data from a stochastic process point of view with **reda** package.  The
+core function is named `simEve` for simulating survival and recurrent event
+times for one stochastic process. Another function named `simEveData` is simply
+a wrapper that calls `simEve` internally and collects event times and covariates
+of a given number of processes into a data frame format.  Examples for
+generating random samples from common survival and recurrent models are
+provided. The details of function syntax and the objects produced are available
+in the package manual and thus not covered in this vignette.
+
+
+## Hazard Rate Function
+
+We first introduce the general form of hazard rate function that was considered
+for the function `simEve`.  Let $\rho(t)$ denote the baseline hazard rate
+function of time $t$, $\mathbf{x}_i(t)$ denote the covariate vector,
+$\boldsymbol{\beta}(t)$ denote the covariate coefficients for a stochastic
+process $i$. Note that both covariates and coefficients can be time-varying.
+The @andersen1982aos model incorporates covariates and their coefficients into
+the stochastic process by specifying the intensity as a function of time $t$ and
+the covariates,
+$$
+\lambda(t \mid \mathbf{x}_i, r_i) = r_i\rho(t)
+\exp\left\{\mathbf{x}^{\top}_i(t) ~\boldsymbol{\beta}(t)\right\},
+$$
+where
+
+
+## Homogenous Poisson Process {#hpp}
+
+```{r setup}
+library(reda)
+```
+
+```{r hpp}
+simEve(z = c(0.2, 0.5), zCoef = c(1, - 0.5), rho = 0.5, endTime = 10)
+```
+
+```{r hpp.data}
+simEveData(z = c(0.2, 0.5), zCoef = c(1, - 0.5), rho = 0.5, endTime = 10)
+```
+
+
+
+
+## Reference

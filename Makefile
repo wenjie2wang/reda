@@ -7,8 +7,8 @@ citation := inst/CITATION
 yr := $(shell date +"%Y")
 dt := $(shell date +"%Y-%m-%d")
 
-rmd := vignettes/$(pkg)-intro.Rmd
-vignettes := vignettes/$(pkg)-intro.html
+rmd := $(wildcard vignettes/*.Rmd)
+vignettes := $(patsubst %.Rmd,%.html,$(rmd))
 cprt := COPYRIGHT
 
 
@@ -37,8 +37,8 @@ $(tar): $(objects)
 $(checkLog): $(tar)
 	R CMD check --as-cran $(tar)
 
-$(vignettes): $(rmd)
-	Rscript -e "rmarkdown::render('$(rmd)')"
+vignettes/%.html: vignettes/%.Rmd
+	Rscript -e "library(methods); rmarkdown::render('$?')"
 
 
 ## update copyright year in HEADER, R script and date in DESCRIPTION
