@@ -64,6 +64,12 @@ NULL
 ##' package. Similar to \code{z}, \code{zCoef}, and \code{rho}, other arguments
 ##' of the function can be specified through a named list in \code{arguments}.
 ##'
+##' For time-varying covariates, the function \code{simEveData} assumes
+##' covariates can be observed only at event times and censoring times. Thus,
+##' covariate values are returned only at these time points. If we want more
+##' observed covariate values to be recorded, we may write a simple wrapper
+##' function of \code{simEve} similar to \code{simEveData}.
+##'
 ##' @aliases simEve
 ##'
 ##' @usage
