@@ -1,3 +1,27 @@
+# CHANGES IN reda VERSION 0.4.0.9000
+
+## NEW FEATURES
+
+* Added function `simEve` and `simEveData` for simulating survival and recurrent
+  event data.
+
+* Added function `mcfDiff` for estimating difference between two sample MCFs.
+
+* Added argument `origin` to function `Survr` for modeling processes with
+  different time origins.
+
+* Added variance estimates of sample MCF by bootstrap method.
+
+## MAJOR CHANGES
+
+* Updated checking rule of argument `event` of function `Survr` for modeling
+  sample MCF of cost in addition to number of events.
+
+## BUG FIXES
+
+* Fixed possible label mismatching in `plot,sampleMcf` method.
+
+
 # CHANGES IN reda VERSION 0.3.1
 
 ## NEW FEATURES
