@@ -12,32 +12,32 @@ output: rmarkdown::html_vignette
 ---
 
 
-The package **reda** mainly provides function to fit gamma frailty model with
-either a piecewise constant or a spline as the baseline rate function
-for recurrent event data. What's more, some handy functions are designed,
-such as computing and plotting sample nonparametric mean cumulative function,
-or so-called Nelson-Aalen estimator. Most functions in this package
-are S4 methods that produce S4 class objects.
+The **R** package **reda** provides functions fitting gamma frailty model with
+the baseline rate function modeled by splines for recurrent event data,
+functions computing and plotting nonparametric sample mean cumulative function
+(MCF) or so-called Nelson-Aalen estimator, and functions generating simulated
+survival and recurrent evnet data.  Most functions in this package are S4
+methods that produce S4 class objects.
 
-In this vignette, we mainly introduce the basic usage of the functions
-provided in the package by examples. The details of function syntax
-and slots of the objects produced are available in the package manual,
-which will thus not be covered in this vignette.
 
-An outline of the remainder of the vignette is as follows:
-We first introduce the [simulated sample recurrent event data](#simuDat)
-and the [data checking](#dataCheck) rules.
-After then, the demonstration of the main function `rateReg` for
-[model fitting](#rateReg) is provided, which includes fitting model with
-(one piece) [constant](#constFit), [piecewise constant](#piecesFit),
-and [spline](#splineFit) baseline rate function.
-What follows next are the examples of functions that
-[summarize](#summaryFit) the model fitted and
-functions for [model selection](#modelSelect) based on AIC or BIC.
-Last but not the least, the demonstration of estimation and plotting methods
-for [baseline rate function](#baseRate) and mean cumulative function (MCF) are
-given, which includes [sample MCF](#sampleMcf) and [estimated MCF](#rateRegMcf)
-from the fitted model.
+In this vignette, we introduce the basic usage of the functions exploring and
+analyzing recurrent event data through examples. The details of function syntax
+and the objects produced are available in the package manual, which will thus
+not be covered in this vignette.
+
+
+An outline of the remainder of the vignette is as follows: We first introduce
+the [simulated sample recurrent event data](#simuDat) and the [data
+checking](#dataCheck) rules.  After then, the demonstration of the main function
+`rateReg` for [model fitting](#rateReg) is provided, which includes fitting
+model with (one piece) [constant](#constFit), [piecewise constant](#piecesFit),
+and [spline](#splineFit) baseline rate function.  What follows next are the
+examples of functions that [summarize](#summaryFit) the model fitted and
+functions for [model selection](#modelSelect) based on AIC or BIC.  Last but not
+the least, the demonstration of estimation and plotting methods for [baseline
+rate function](#baseRate) and mean cumulative function (MCF) are given, which
+includes [sample MCF](#sampleMcf) and [estimated MCF](#rateRegMcf) from the
+fitted model.
 
 
 ## Simulated Sample Recurrent Event Data {#simuDat}
@@ -78,7 +78,7 @@ function. Therefore, before model fitting, the observations of the covariates
 specified in the formula will be checked.  The checking rules include
 
 * Identification of each subject cannot be missing.
-* Event indicator must be coded as 0 (censored) or 1 (event).
+* Event indicator must be coded as  (censored) or 1 (event).
 * Event time and censoring time cannot be missing.
 * Each subject must have one and only one censoring time.
 * Event time cannot not be later than censoring time.
@@ -109,7 +109,7 @@ printed out by calling the object.
 
 When argument `df` or `knots` (at least one internal knot) is specified,
 the model becomes gamma frailty model with piecewise constant rate function
-or so-called HEART model [@fu2014]
+or so-called HEART model [@fu2014jbs]
 if argument degree is specified to be zero as default.
 
 We may specify `df` and leave `knots` and `degree` as default.
@@ -250,7 +250,7 @@ Nelson-Aalen Estimator [@nelson2003siam]. The point estimate of MCF
 at each time point does not assume any particular underlying model.
 The variance estimates
 at each time point is given by Poisson process method (by default)
-or Lawless and Nadeau method [@lawless1995some].
+or Lawless and Nadeau method [@lawless1995technometrics].
 The approximate confidence intervals are provided as well,
 which are constructed based on the asymptotic normality
 of logarithm of MCF (by default) or MCF itself directly.
