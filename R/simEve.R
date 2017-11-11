@@ -134,6 +134,12 @@ NULL
 ##'     returns \code{n} interarrival times in one function call to possibly
 ##'     speed up the random number generation procedure.  Other arguments can be
 ##'     specified through a named list inside \code{arguments}.
+##' @param relativeRisk Relateive risk function for incorporating the covariates
+##'     and the covariate coefficients into the intensity function. The
+##'     applicable choices include \code{exponential} (default) for regular Cox
+##'     model or Andersen-Gill model, \code{linear} for linear model (including
+##'     an intercept term), and \code{excess} for excess model. A customized
+##'     function can be specified. ##FIXME
 ##' @param method A character string specifying the method for generating
 ##'     simulated recurrent or survival data. The default method is thinning
 ##'     method (Lewis and Shedler, 1979). Another available option is the method
@@ -151,7 +157,9 @@ NULL
 ##'     within function \code{simEve}, which can be useful for randomly setting
 ##'     function parameters for each process in function \code{simEveData}. See
 ##'     examples and vignettes for details.
-##' @param ... Other arguemtns for future usage.
+##' @param ... Additional arguements passed from function \code{simEveData} to
+##'     fucntion \code{simEve}. For function \code{simEve}, \code{...} is not
+##'     used.
 ##'
 ##' @return The function \code{simEve} returns a \code{simEve} S4 class object
 ##'     and the function \code{simEveData} returns a \code{data.frame}.
@@ -180,9 +188,9 @@ NULL
 ##' simEve(z = 1, zCoef = 0.5, recurrent = FALSE)
 ##'
 ##' ## simulated data
-##' simEveData(1, z = c(0.5, 1), zCoef = c(1, 0), endTime = 2)
-##' simEveData(3, z = cbind(rnorm(3), 1), zCoef = c(1, 0))
-##' simEveData(5, z = matrix(rnorm(5)), zCoef = 0.5, recurrent = FALSE)
+##' simEveData(z = c(0.5, 1), zCoef = c(1, 0), endTime = 2)
+##' simEveData(z = cbind(rnorm(3), 1), zCoef = c(1, 0))
+##' simEveData(z = matrix(rnorm(5)), zCoef = 0.5, recurrent = FALSE)
 ##'
 ##'
 ##' ### time-varying covariates and time-varying coefficients
@@ -238,14 +246,13 @@ NULL
 ##'
 ##' ## lognormal with mean zero (on the log scale)
 ##' set.seed(123)
+##' simEve(z = c(0.5, 1), zCoef = c(1, 0), frailty = "rlnorm",
+##'        arguments = list(frailty = list(sdlog = 1)))
+##' ## or equivalently
+##' set.seed(123)
 ##' logNorm <- function(a) exp(rnorm(n = 1, mean = 0, sd = a))
 ##' simEve(z = c(0.5, 1), zCoef = c(1, 0), frailty = logNorm,
 ##'        arguments = list(frailty = list(a = 1)))
-##' ## equivalent to the following function call
-##' set.seed(123)
-##' simEve(z = c(0.5, 1), zCoef = c(1, 0), frailty = "rlnorm",
-##'        arguments = list(frailty = list(sdlog = 1)))
-##'
 ##'
 ##' ### renewal process
 ##' ## interarrival times following uniform distribution
@@ -260,6 +267,17 @@ NULL
 ##' set.seed(123)
 ##' simEve(interarrival = function(rate) rgamma(n = 1, shape = 1 / rate))
 ##'
+##' ### relative risk functioin
+##' set.seed(123)
+##' simEve(relativeRisk = "linear")
+##' ## or equivalently
+##' rriskFun <- function(z, zCoef, intercept) {
+##'     as.numeric(z %*% zCoef) + intercept
+##' }
+##' set.seed(123)
+##' simEve(relativeRisk = "rriskFun",
+##'        arguments = list(relativeRisk = list(intercept = 1)))
+##'
 ##' @importFrom stats integrate optimize qexp rexp runif rgamma rpois uniroot
 ##' @export
 simEve <- function(z = 0, zCoef = 1,
@@ -268,14 +286,14 @@ simEve <- function(z = 0, zCoef = 1,
                    frailty = 1,
                    recurrent = TRUE,
                    interarrival = "rexp",
+                   relativeRisk = c("exponential", "linear", "excess"),
                    method = c("thinning", "inverse.cdf"),
                    arguments = list(), ...)
 {
     ## record function call
     Call <- match.call()
     ## match method
-    method <- match.arg(method)
-
+    method <- match.arg(method, c("thinning", "inverse.cdf"))
     ## check covariate z
     zVecIdx <- isNumVector(z)
     if (! (zVecIdx || is.function(z) || isCharOne(z)))
@@ -290,6 +308,8 @@ simEve <- function(z = 0, zCoef = 1,
             "The covariate coefficients 'zCoef' has to be a numeric vector,",
             "a function or a function name."
         ))
+    if (zVecIdx && zCoefVecIdx && length(zCoef) < (tmp <- length(z)))
+        zCoef <- rep(zCoef, length.out = tmp)
     ## check baseline rate function rho
     rhoVecIdx <- isNumOne(rho)
     if (! (rhoVecIdx || is.function(rho) || isCharOne(rho)))
@@ -307,6 +327,32 @@ simEve <- function(z = 0, zCoef = 1,
                        }
     defaultIntArvIdx <- missing(interarrival) ||
         identical(interarrivalFun, stats::rexp)
+    ## match relative risk function
+    rriskNames <- c("exponential", "linear", "excess")
+    rriskFun <- if (is.function(relativeRisk)) {
+                    relativeRisk
+                } else if (isCharVector(relativeRisk)) {
+                    rriskInd <- pmatch(relativeRisk, rriskNames,
+                                       nomatch = - 1)[1L]
+                    if (rriskInd < 0) {
+                        ## customized function name
+                        if (! identical(length(relativeRisk), 1L))
+                            stop(wrapMessages(
+                                "The customized relative risk function name",
+                                "should be of length one."
+                            ))
+                        relativeRisk
+                    } else {
+                        relativeRisk <- rriskNames[rriskInd]
+                        ## strange function names that user may not create
+                        paste0(".rrisk_", relativeRisk, "_")
+                    }
+                } else {
+                    stop(wrapMessages(
+                        "The specified relative risk function 'relativeRisk'",
+                        "should be a function (or a function name)."
+                    ))
+                }
 
     ## get arguments
     z_args <- lapply(arguments[["z"]], eval)
@@ -329,11 +375,21 @@ simEve <- function(z = 0, zCoef = 1,
     if (! "rate" %in% intArvArgs)
         stop(wrapMessages(
             "The function for interarrival times must have",
-            "one arguments named 'rate' for the expected number of",
+            "at least one argument named 'rate' for the expected number of",
             "events/arrivals in unit time."
         ))
 
-    ## check origin and endTime
+    rrisk_args <- lapply(arguments[["relativeRisk"]], eval)
+    rrisk_args <- rrisk_args[! names(rrisk_args) %in% c("z", "zCoef")]
+    rriskFunArgs <- names(as.list(args(rriskFun)))
+    if (any(! c("z", "zCoef") %in% rriskFunArgs))
+        stop(wrapMessages(
+            "The relative risk function must have",
+            "at least one argument named 'z' for covariates and",
+            "another argument named 'zCoef' for covariate coefficients."
+        ))
+
+    ## check origin
     if (is.function(origin) || isCharOne(origin)) {
         ## add "n = 1" for common distribution from stats library
         if ("n" %in% names(as.list(args(origin))))
@@ -344,6 +400,7 @@ simEve <- function(z = 0, zCoef = 1,
     } else {
         originFun <- origin_args <- NULL
     }
+    ## check endTime similarly to origin
     if (is.function(endTime)|| isCharOne(endTime)) {
         ## add "n = 1" for common distribution from stats library
         if ("n" %in% names(as.list(args(endTime))))
@@ -354,6 +411,7 @@ simEve <- function(z = 0, zCoef = 1,
     } else {
         endTimeFun <- endTime_args <- NULL
     }
+    ## check origin and endTime
     if (! (isNumOne(origin) && isNumOne(endTime) &&
            origin < endTime && is.finite(endTime))) {
         stop(wrapMessages(
@@ -393,12 +451,15 @@ simEve <- function(z = 0, zCoef = 1,
                     } else {
                         do.call(zCoef, c(list(timeNum), zCoef_args))
                     }
-        covEffect <- as.numeric(exp(zVec %*% zCoefVec))
         rhoMat <- if (rhoVecIdx) {
                       rho
                   } else {
                       do.call(rho, c(list(timeNum), rho_args))
                   }
+        covEffect <- do.call(rriskFun,
+                             c(list(z = zVec, zCoef = zCoefVec), rrisk_args))
+        if (! isNumOne(covEffect) || covEffect <= 0)
+            stop("The relative risk function should return a positive number.")
         rhoVec <- as.numeric(rhoMat %*% rhoCoef)
         rho_t <- frailtyEffect * rhoVec * covEffect
         if (forOptimize)
@@ -642,6 +703,10 @@ simEve <- function(z = 0, zCoef = 1,
                      fun = interarrival,
                      args = interarrival_args
                  ),
+                 relativeRisk = list(
+                     fun = relativeRisk,
+                     args = rrisk_args
+                 ),
                  method = method
                  )
 
@@ -651,30 +716,24 @@ simEve <- function(z = 0, zCoef = 1,
 ##' @rdname simEve
 ##' @aliases simEveData
 ##' @usage
-##' simEveData(nProcess = 1, z = 0, zCoef = 1, rho = 1, rhoCoef = 1,
-##'            origin = 0, endTime = 3, frailty = 1, recurrent = TRUE,
-##'            interarrival = "rexp", method = c("thinning", "inverse.cdf"),
-##'            arguments = list(), ...)
+##' simEveData(nProcess, z = 0, rho = 1,
+##'            origin = 0, endTime = 3, frailty = 1, ...)
 ##'
-##' @param nProcess Number of stochastic processes. A positive number should be
-##'     speicified. The default value is \code{1}.
+##' @param nProcess Number of stochastic processes. If missing, the value will
+##'     be the number of row of the specified matrix \code{z}. Or a positive
+##'     number should be speicified.
 ##'
 ##' @export
 simEveData <- function(nProcess = 1,
-                       z = 0, zCoef = 1,
-                       rho = 1, rhoCoef = 1,
-                       origin = 0, endTime = 3,
+                       z = 0,
+                       rho = 1,
+                       origin = 0,
+                       endTime = 3,
                        frailty = 1,
-                       recurrent = TRUE,
-                       interarrival = "rexp",
-                       method = c("thinning", "inverse.cdf"),
-                       arguments = list(),
                        ...)
 {
     ## record function call
     Call <- match.call()
-    ## match method
-    method <- match.arg(method)
 
     ## check covariate z
     if (isNumVector(z)) z <- matrix(z, nrow = 1)  # convert vector z to matrix
@@ -683,7 +742,6 @@ simEveData <- function(nProcess = 1,
             "The covariates 'z' has to be a numeric vector / matrix,",
             "a function or a function name."
         ))
-
     ## if covariates are given as a matrix
     if (isZmatIdx <- is.matrix(z)) {
         if (missing(nProcess)) {
@@ -697,7 +755,6 @@ simEveData <- function(nProcess = 1,
                 })
             }
         }
-        zCoef <- rep(zCoef, length.out = ncol(z))
     }
 
     ## take care of origin, endTime, and frailty before simEve
@@ -723,26 +780,21 @@ simEveData <- function(nProcess = 1,
     ## generate simulated data for each process
     resList <- lapply(seq_len(nProcess), function(i) {
         res <- simEve(z = if (isZmatIdx) z[i, ] else z,
-                      zCoef = zCoef,
-                      rho = rho,
-                      rhoCoef = rhoCoef,
                       origin = if (originFunIdx) origin else origin[i],
                       endTime = if (endTimeFunIdx) endTime else endTime[i],
                       frailty = if (frailtyFunIdx) frailty else frailty[i],
-                      recurrent = recurrent,
-                      interarrival = interarrival,
-                      method = method,
-                      arguments = arguments,
                       ...)
         simEve2data(ID = i, res)
     })
 
     ## prepare for output
     out <- do.call(rbind, resList)
-    if (! recurrent) {
+    if (! attr(out, "recurrent")) {
         uniIdx <- duplicated(out$ID, fromLast = TRUE)
         out <- out[uniIdx, ]
     }
+    ## add original function call to attribute
+    attr(out, "call") <- Call
     ## return
     out
 }
@@ -752,17 +804,40 @@ simEveData <- function(nProcess = 1,
 ## function convert results from simEve to data.frame
 simEve2data <- function(ID, obj) {
     timeVec <- obj@.Data
-    ## if no event
-    if (! length(timeVec))
-        return(data.frame(ID = ID,
-                          time = obj@endTime$endTime,
-                          event = 0,
-                          origin = obj@origin$origin,
-                          X = obj@censoring$z))
-    ## else for any event
-    data.frame(ID = ID,
-               time = c(timeVec, obj@endTime$endTime),
-               event = c(rep(1, length(timeVec)), 0),
-               origin = obj@origin$origin,
-               X = rbind(obj@z$z, obj@censoring$z))
+    out <- if (! length(timeVec)) {
+               ## if no event
+               data.frame(
+                   ID = ID,
+                   time = obj@endTime$endTime,
+                   event = 0,
+                   origin = obj@origin$origin,
+                   X = obj@censoring$z
+               )
+           } else {
+               ## else for any event
+               data.frame(
+                   ID = ID,
+                   time = c(timeVec, obj@endTime$endTime),
+                   event = c(rep(1, length(timeVec)), 0),
+                   origin = obj@origin$origin,
+                   X = rbind(obj@z$z, obj@censoring$z)
+               )
+           }
+    attr(out, "recurrent") <- obj@recurrent
+    out
+}
+
+## exponential relative risk function
+.rrisk_exponential_ <- function(z, zCoef, ...) {
+    as.numeric(base::exp(z %*% zCoef))
+}
+
+## linear relative risk function
+.rrisk_linear_ <- function(z, zCoef, ...) {
+    1 + as.numeric(z %*% zCoef)
+}
+
+## excess relative risk function
+.rrisk_excess_ <- function(z, zCoef, ...) {
+    exp(sum(log1p(z * zCoef)))
 }

@@ -262,6 +262,7 @@ setClass(Class = "baseRateReg",
 ##' @slot censoring A list.
 ##' @slot recurrent A logical vector.
 ##' @slot interarrival A list.
+##' @slot relativeRisk A list.
 ##' @slot method A character vector.
 ##' @seealso \code{\link{simEve}} for details of slots.
 ##' @export
@@ -278,6 +279,7 @@ setClass(Class = "simEve", contains = "numeric",
              censoring = "list",
              recurrent = "logical",
              interarrival = "list",
+             relativeRisk = "list",
              method = "character"
          ))
 

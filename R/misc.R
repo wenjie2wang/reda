@@ -36,9 +36,14 @@ isNumOne <- function(x) {
     isNumVector(x) && identical(length(x), 1L)
 }
 
+## is x a character vector
+isCharVector <- function(x) {
+    is.character(x) && is.vector(x)
+}
+
 ## is x a character value
 isCharOne <- function(x) {
-    is.character(x) && is.vector(x) && identical(length(x), 1L)
+    isCharVector(x) && identical(length(x), 1L)
 }
 
 ## is x a Survr object
