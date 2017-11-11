@@ -75,6 +75,7 @@ NULL
 ##' @usage
 ##' simEve(z = 0, zCoef = 1, rho = 1, rhoCoef = 1, origin = 0, endTime = 3,
 ##'        frailty = 1, recurrent = TRUE, interarrival = "rexp",
+##'        relativeRisk = c("exponential", "linear", "excess"),
 ##'        method = c("thinning", "inverse.cdf"), arguments = list(), ...)
 ##'
 ##' @param z Time-invariant or time-varying covariates. The default value is
@@ -321,7 +322,7 @@ simEve <- function(z = 0, zCoef = 1,
     if (! (is.function(interarrival) || isCharOne(interarrival)))
         stop("The 'interarrival' has to be a function or a function name.")
     interarrivalFun <- if (isCharOne(interarrival)) {
-                           get(interarrival)
+                           eval(parse(text = interarrival))
                        } else {
                            interarrival
                        }
@@ -329,7 +330,7 @@ simEve <- function(z = 0, zCoef = 1,
         identical(interarrivalFun, stats::rexp)
     ## match relative risk function
     rriskNames <- c("exponential", "linear", "excess")
-    rriskFun <- if (is.function(relativeRisk)) {
+    rriskFun <- if (rriskFunIdx <- is.function(relativeRisk)) {
                     relativeRisk
                 } else if (isCharVector(relativeRisk)) {
                     rriskInd <- pmatch(relativeRisk, rriskNames,
@@ -371,7 +372,7 @@ simEve <- function(z = 0, zCoef = 1,
     interarrival_args <- lapply(arguments[["interarrival"]], eval)
     interarrival_args <-
         interarrival_args[! names(interarrival_args) %in% c("n", "rate")]
-    intArvArgs <- names(as.list(args(interarrival)))
+    intArvArgs <- names(as.list(args(interarrivalFun)))
     if (! "rate" %in% intArvArgs)
         stop(wrapMessages(
             "The function for interarrival times must have",
@@ -381,7 +382,9 @@ simEve <- function(z = 0, zCoef = 1,
 
     rrisk_args <- lapply(arguments[["relativeRisk"]], eval)
     rrisk_args <- rrisk_args[! names(rrisk_args) %in% c("z", "zCoef")]
-    rriskFunArgs <- names(as.list(args(rriskFun)))
+    rriskFunArgs <- names(as.list(args(
+        if (rriskFunIdx) rriskFun else eval(parse(text = rriskFun))
+    )))
     if (any(! c("z", "zCoef") %in% rriskFunArgs))
         stop(wrapMessages(
             "The relative risk function must have",
@@ -390,9 +393,12 @@ simEve <- function(z = 0, zCoef = 1,
         ))
 
     ## check origin
-    if (is.function(origin) || isCharOne(origin)) {
+    if ((originFunIdx <- is.function(origin)) || isCharOne(origin)) {
         ## add "n = 1" for common distribution from stats library
-        if ("n" %in% names(as.list(args(origin))))
+        if ("n" %in% names(as.list(args(
+                         if (originFunIdx)
+                             origin else eval(parse(text = origin))
+                     ))))
             origin_args <- c(list(n = 1), origin_args)
         originFun <- origin
         origin_args <- if (! length(origin_args)) list()
@@ -401,9 +407,12 @@ simEve <- function(z = 0, zCoef = 1,
         originFun <- origin_args <- NULL
     }
     ## check endTime similarly to origin
-    if (is.function(endTime)|| isCharOne(endTime)) {
+    if ((endTimeFunIdx <- is.function(endTime)) || isCharOne(endTime)) {
         ## add "n = 1" for common distribution from stats library
-        if ("n" %in% names(as.list(args(endTime))))
+        if ("n" %in% names(as.list(args(
+                         if (endTimeFunIdx)
+                             endTime else eval(parse(text = endTime))
+                     ))))
             endTime_args <- c(list(n = 1), endTime_args)
         endTimeFun <- endTime
         endTime_args <- if (! length(endTime_args)) list()
@@ -424,9 +433,12 @@ simEve <- function(z = 0, zCoef = 1,
     if (isNumOne(frailty)) {
         frailtyEffect <- frailty
         frailtyFun <- NULL
-    } else if (is.function(frailty) || isCharOne(frailty)) {
+    } else if ((frailtyFunIdx <- is.function(frailty)) || isCharOne(frailty)) {
         ## add "n = 1" for common distribution from stats library
-        if ("n" %in% names(as.list(args(frailty))))
+        if ("n" %in% names(as.list(args(
+                         if (frailtyFunIdx)
+                             frailty else eval(parse(text = frailty))
+                     ))))
             frailty_args <- c(list(n = 1), frailty_args)
         frailtyEffect <- do.call(frailty, frailty_args)
         frailtyFun <- frailty
