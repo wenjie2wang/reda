@@ -74,7 +74,7 @@ NULL
 ##'
 ##' @usage
 ##' simEve(z = 0, zCoef = 1, rho = 1, rhoCoef = 1, origin = 0, endTime = 3,
-##'        frailty = FALSE, recurrent = TRUE, interarrival = "rexp",
+##'        frailty = 1, recurrent = TRUE, interarrival = "rexp",
 ##'        method = c("thinning", "inverse.cdf"), arguments = list(), ...)
 ##'
 ##' @param z Time-invariant or time-varying covariates. The default value is
@@ -101,19 +101,21 @@ NULL
 ##'     Similar to \code{origin}, \code{endTime} should be either a numeric
 ##'     value greater than \code{origin} or a function that returns such a
 ##'     numeric value.
-##' @param frailty Frailty effect. An optional logical value indicating whether
-##'     to consider a frailty model or a function that produces the frailty
-##'     effect.  The default value is \code{FALSE} for no frailty effect. If
-##'     \code{TRUE}, a frailty factor from Gamma distribution will be used and
-##'     the shape and scale parameter has to be specified through a list named
-##'     \code{frailty} in \code{arguments}. Similar to \code{z}, \code{zCoef},
-##'     and \code{rho}, a function or a function name can be specified for other
-##'     distribution of the frailty effect. The specified function should
-##'     randomly return a positive numeric value. For example, the functions
-##'     that generate random numbers following a certain distribution from
-##'     \code{stats} package can directly used. All the arguments of the
-##'     function can be specified through a list named \code{frailty} in
-##'     \code{arguments}.
+##' @param frailty A positive number, a function, or a function name for frailty
+##'     effect. The default value is \code{1} for no frailty effect.  Other
+##'     positive value can be specified directly for a shared frailty effect
+##'     within a cluster.  Similar to \code{z}, \code{zCoef}, and \code{rho}, a
+##'     function or a function name can be specified for other distribution of
+##'     the frailty effect. The specified function should randomly return a
+##'     positive numeric value. The functions that generate random numbers
+##'     following a certain distribution from \code{stats} package can be
+##'     directly used. The arguments of the function can be specified through a
+##'     list named \code{frailty} in \code{arguments}. For example, if we
+##'     consider Gamma distribution with mean one as the distribution of frailty
+##'     effect, we may specify \code{frailty = "rgamma"} or \code{frailty =
+##'     rgamma}. The shape and scale parameter needs to be specified through a
+##'     list named \code{frailty} in \code{arguments}, such as \code{arguments =
+##'     list(frailty = list(shape = 2, scale = 0.5))}.
 ##' @param recurrent A logical value with default value \code{TRUE} indicating
 ##'     whether to generate recurrent event data or survival data (i.e. the
 ##'     first event only).
@@ -230,12 +232,7 @@ NULL
 ##'
 ##'
 ##' ### frailty effect
-##' ## The default distribution is Gamma distribution
-##' set.seed(123)
-##' simEve(z = c(0.5, 1), zCoef = c(1, 0), frailty = TRUE,
-##'        arguments = list(frailty = list(shape = 2, scale = 0.5)))
-##' ## equivalent to the following function call
-##' set.seed(123)
+##' ## Gamma distribution with mean one
 ##' simEve(z = c(0.5, 1), zCoef = c(1, 0), frailty = "rgamma",
 ##'        arguments = list(frailty = list(shape = 2, scale = 0.5)))
 ##'
@@ -268,7 +265,7 @@ NULL
 simEve <- function(z = 0, zCoef = 1,
                    rho = 1, rhoCoef = 1,
                    origin = 0, endTime = 3,
-                   frailty = FALSE,
+                   frailty = 1,
                    recurrent = TRUE,
                    interarrival = "rexp",
                    method = c("thinning", "inverse.cdf"),
@@ -371,30 +368,23 @@ simEve <- function(z = 0, zCoef = 1,
     rhoFun <- if (rhoVecIdx) function(x) { rho } else rho
 
     ## prepare frailty effect
-    if (is.logical(frailty)) {
-        ## default as Gamma distribution
-        frailty <- if(frailty) "rgamma" else NULL
-    }
-    if (is.function(frailty) || isCharOne(frailty)) {
+    if (isNumOne(frailty)) {
+        frailtyEffect <- frailty
+        frailtyFun <- NULL
+    } else if (is.function(frailty) || isCharOne(frailty)) {
         ## add "n = 1" for common distribution from stats library
         if ("n" %in% names(as.list(args(frailty))))
             frailty_args <- c(list(n = 1), frailty_args)
         frailtyEffect <- do.call(frailty, frailty_args)
-        ## check frailty effect of length one numeric
-        if (! isNumOne(frailtyEffect)) {
-            stop(wrapMessages(
-                "The Frailty effect (returned from function)",
-                "must be of length one."
-            ))
-        }
-    } else if (is.null(frailty)) {
-        frailtyEffect <- 1
+        frailtyFun <- frailty
     } else {
-        stop(wrapMessages(
-            "The argument 'frailty' has to be a logical value (TRUE or FALSE),",
-            "a function (or a function name)."
-        ))
+        frailtyEffect <- - 1            # leads to errors
     }
+    if (! isNumOne(frailtyEffect) || frailtyEffect <= 0)
+        stop(wrapMessages(
+            "The argument 'frailty' has to be a positive number or",
+            "a function that generates a positive number."
+        ))
 
     ## rate function
     rateFun <- function(timeNum, forOptimize = TRUE) {
@@ -592,7 +582,7 @@ simEve <- function(z = 0, zCoef = 1,
         rhoArgs <- if (length(rho_args)) rho_args else list()
     }
     ## for frailty
-    frailtyArgs <- if (is.null(frailty)) {
+    frailtyArgs <- if (is.null(frailtyFun)) {
                        NULL
                    } else {
                        if (length(frailty_args)) frailty_args else list()
@@ -622,7 +612,7 @@ simEve <- function(z = 0, zCoef = 1,
                  rhoCoef = rhoCoef,
                  frailty = list(
                      frailty = frailtyEffect,
-                     fun = frailty,
+                     fun = frailtyFun,
                      args = frailtyArgs
                  ),
                  origin = list(
@@ -667,7 +657,7 @@ simEveData <- function(nProcess = 1,
                        z = 0, zCoef = 1,
                        rho = 1, rhoCoef = 1,
                        origin = 0, endTime = 3,
-                       frailty = FALSE,
+                       frailty = 1,
                        recurrent = TRUE,
                        interarrival = "rexp",
                        method = c("thinning", "inverse.cdf"),
@@ -703,14 +693,24 @@ simEveData <- function(nProcess = 1,
         zCoef <- rep(zCoef, length.out = ncol(z))
     }
 
-    ## take care of origin and endTime before simEve
+    ## take care of origin, endTime, and frailty before simEve
     originFunIdx <- is.function(origin) || isCharOne(origin)
     if (! originFunIdx) {
+        if (! isNumVector(origin))
+            stop("The time origins, 'origin' has to be a numeric vector.")
         origin <- rep(origin, length.out = nProcess)
     }
     endTimeFunIdx <- is.function(endTime) || isCharOne(endTime)
     if (! endTimeFunIdx) {
+        if (! isNumVector(endTime))
+            stop("The ends of time, 'endTime' has to be a numeric vector.")
         endTime <- rep(endTime, length.out = nProcess)
+    }
+    frailtyFunIdx <- is.function(frailty) || isCharOne(frailty)
+    if (! frailtyFunIdx) {
+        if (! isNumVector(frailty))
+            stop("The frailty effects to be a numeric vector.")
+        frailty <- rep(frailty, length.out = nProcess)
     }
 
     ## generate simulated data for each process
@@ -721,7 +721,7 @@ simEveData <- function(nProcess = 1,
                       rhoCoef = rhoCoef,
                       origin = if (originFunIdx) origin else origin[i],
                       endTime = if (endTimeFunIdx) endTime else endTime[i],
-                      frailty = frailty,
+                      frailty = if (frailtyFunIdx) frailty else frailty[i],
                       recurrent = recurrent,
                       interarrival = interarrival,
                       method = method,
