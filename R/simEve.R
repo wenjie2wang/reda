@@ -140,7 +140,10 @@ NULL
 ##'     applicable choices include \code{exponential} (default) for regular Cox
 ##'     model or Andersen-Gill model, \code{linear} for linear model (including
 ##'     an intercept term), and \code{excess} for excess model. A customized
-##'     function can be specified. ##FIXME
+##'     function can be specified. The specified function must have at least one
+##'     argument named \code{z} for covariates and another argument named
+##'     {zCoef} for covariate coefficients.  Other arguments can be specified
+##'     through a named list inside \code{arguments}.
 ##' @param method A character string specifying the method for generating
 ##'     simulated recurrent or survival data. The default method is thinning
 ##'     method (Lewis and Shedler, 1979). Another available option is the method
@@ -276,7 +279,7 @@ NULL
 ##'     as.numeric(z %*% zCoef) + intercept
 ##' }
 ##' set.seed(123)
-##' simEve(relativeRisk = "rriskFun",
+##' simEve(relativeRisk = rriskFun,
 ##'        arguments = list(relativeRisk = list(intercept = 1)))
 ##'
 ##' @importFrom stats integrate optimize qexp rexp runif rgamma rpois uniroot
