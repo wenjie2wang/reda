@@ -6,11 +6,11 @@
 \title{Simulated Survival times or Recurrent Events}
 \usage{
 simEve(z = 0, zCoef = 1, rho = 1, rhoCoef = 1, origin = 0, endTime = 3,
-       frailty = FALSE, recurrent = TRUE, interarrival = "rexp",
+       frailty = 1, recurrent = TRUE, interarrival = "rexp",
        method = c("thinning", "inverse.cdf"), arguments = list(), ...)
 
 simEveData(nProcess = 1, z = 0, zCoef = 1, rho = 1, rhoCoef = 1,
-           origin = 0, endTime = 3, frailty = FALSE, recurrent = TRUE,
+           origin = 0, endTime = 3, frailty = 1, recurrent = TRUE,
            interarrival = "rexp", method = c("thinning", "inverse.cdf"),
            arguments = list(), ...)
 }
@@ -45,19 +45,21 @@ Similar to \code{origin}, \code{endTime} should be either a numeric
 value greater than \code{origin} or a function that returns such a
 numeric value.}
 
-\item{frailty}{Frailty effect. An optional logical value indicating whether
-to consider a frailty model or a function that produces the frailty
-effect.  The default value is \code{FALSE} for no frailty effect. If
-\code{TRUE}, a frailty factor from Gamma distribution will be used and
-the shape and scale parameter has to be specified through a list named
-\code{frailty} in \code{arguments}. Similar to \code{z}, \code{zCoef},
-and \code{rho}, a function or a function name can be specified for other
-distribution of the frailty effect. The specified function should
-randomly return a positive numeric value. For example, the functions
-that generate random numbers following a certain distribution from
-\code{stats} package can directly used. All the arguments of the
-function can be specified through a list named \code{frailty} in
-\code{arguments}.}
+\item{frailty}{A positive number, a function, or a function name for frailty
+effect. The default value is \code{1} for no frailty effect.  Other
+positive value can be specified directly for a shared frailty effect
+within a cluster.  Similar to \code{z}, \code{zCoef}, and \code{rho}, a
+function or a function name can be specified for other distribution of
+the frailty effect. The specified function should randomly return a
+positive numeric value. The functions that generate random numbers
+following a certain distribution from \code{stats} package can be
+directly used. The arguments of the function can be specified through a
+list named \code{frailty} in \code{arguments}. For example, if we
+consider Gamma distribution with mean one as the distribution of frailty
+effect, we may specify \code{frailty = "rgamma"} or \code{frailty =
+rgamma}. The shape and scale parameter needs to be specified through a
+list named \code{frailty} in \code{arguments}, such as \code{arguments =
+list(frailty = list(shape = 2, scale = 0.5))}.}
 
 \item{recurrent}{A logical value with default value \code{TRUE} indicating
 whether to generate recurrent event data or survival data (i.e. the
@@ -215,12 +217,7 @@ simEve(rho = "bSpline", rhoCoef = c(0.4, 0.5, 0.3, 0.6),
 
 
 ### frailty effect
-## The default distribution is Gamma distribution
-set.seed(123)
-simEve(z = c(0.5, 1), zCoef = c(1, 0), frailty = TRUE,
-       arguments = list(frailty = list(shape = 2, scale = 0.5)))
-## equivalent to the following function call
-set.seed(123)
+## Gamma distribution with mean one
 simEve(z = c(0.5, 1), zCoef = c(1, 0), frailty = "rgamma",
        arguments = list(frailty = list(shape = 2, scale = 0.5)))
 

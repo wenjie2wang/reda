@@ -645,7 +645,7 @@ simEve <- function(z = 0, zCoef = 1,
 ##' @aliases simEveData
 ##' @usage
 ##' simEveData(nProcess = 1, z = 0, zCoef = 1, rho = 1, rhoCoef = 1,
-##'            origin = 0, endTime = 3, frailty = FALSE, recurrent = TRUE,
+##'            origin = 0, endTime = 3, frailty = 1, recurrent = TRUE,
 ##'            interarrival = "rexp", method = c("thinning", "inverse.cdf"),
 ##'            arguments = list(), ...)
 ##'
