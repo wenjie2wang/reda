@@ -36,6 +36,8 @@ of this class.
 
 \item{\code{interarrival}}{A list.}
 
+\item{\code{relativeRisk}}{A list.}
+
 \item{\code{method}}{A character vector.}
 }}
 

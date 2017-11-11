@@ -7,12 +7,11 @@
 \usage{
 simEve(z = 0, zCoef = 1, rho = 1, rhoCoef = 1, origin = 0, endTime = 3,
        frailty = 1, recurrent = TRUE, interarrival = "rexp",
+       relativeRisk = c("exponential", "linear", "excess"),
        method = c("thinning", "inverse.cdf"), arguments = list(), ...)
 
-simEveData(nProcess = 1, z = 0, zCoef = 1, rho = 1, rhoCoef = 1,
-           origin = 0, endTime = 3, frailty = 1, recurrent = TRUE,
-           interarrival = "rexp", method = c("thinning", "inverse.cdf"),
-           arguments = list(), ...)
+simEveData(nProcess, z = 0, rho = 1,
+           origin = 0, endTime = 3, frailty = 1, ...)
 }
 \arguments{
 \item{z}{Time-invariant or time-varying covariates. The default value is
@@ -81,6 +80,13 @@ returns \code{n} interarrival times in one function call to possibly
 speed up the random number generation procedure.  Other arguments can be
 specified through a named list inside \code{arguments}.}
 
+\item{relativeRisk}{Relateive risk function for incorporating the covariates
+and the covariate coefficients into the intensity function. The
+applicable choices include \code{exponential} (default) for regular Cox
+model or Andersen-Gill model, \code{linear} for linear model (including
+an intercept term), and \code{excess} for excess model. A customized
+function can be specified. ##FIXME}
+
 \item{method}{A character string specifying the method for generating
 simulated recurrent or survival data. The default method is thinning
 method (Lewis and Shedler, 1979). Another available option is the method
@@ -100,10 +106,13 @@ within function \code{simEve}, which can be useful for randomly setting
 function parameters for each process in function \code{simEveData}. See
 examples and vignettes for details.}
 
-\item{...}{Other arguemtns for future usage.}
+\item{...}{Additional arguements passed from function \code{simEveData} to
+fucntion \code{simEve}. For function \code{simEve}, \code{...} is not
+used.}
 
-\item{nProcess}{Number of stochastic processes. A positive number should be
-speicified. The default value is \code{1}.}
+\item{nProcess}{Number of stochastic processes. If missing, the value will
+be the number of row of the specified matrix \code{z}. Or a positive
+number should be speicified.}
 }
 \value{
 The function \code{simEve} returns a \code{simEve} S4 class object
@@ -165,9 +174,9 @@ simEve(z = c(0.5, 1), zCoef = c(1, 0))
 simEve(z = 1, zCoef = 0.5, recurrent = FALSE)
 
 ## simulated data
-simEveData(1, z = c(0.5, 1), zCoef = c(1, 0), endTime = 2)
-simEveData(3, z = cbind(rnorm(3), 1), zCoef = c(1, 0))
-simEveData(5, z = matrix(rnorm(5)), zCoef = 0.5, recurrent = FALSE)
+simEveData(z = c(0.5, 1), zCoef = c(1, 0), endTime = 2)
+simEveData(z = cbind(rnorm(3), 1), zCoef = c(1, 0))
+simEveData(z = matrix(rnorm(5)), zCoef = 0.5, recurrent = FALSE)
 
 
 ### time-varying covariates and time-varying coefficients
@@ -223,14 +232,13 @@ simEve(z = c(0.5, 1), zCoef = c(1, 0), frailty = "rgamma",
 
 ## lognormal with mean zero (on the log scale)
 set.seed(123)
+simEve(z = c(0.5, 1), zCoef = c(1, 0), frailty = "rlnorm",
+       arguments = list(frailty = list(sdlog = 1)))
+## or equivalently
+set.seed(123)
 logNorm <- function(a) exp(rnorm(n = 1, mean = 0, sd = a))
 simEve(z = c(0.5, 1), zCoef = c(1, 0), frailty = logNorm,
        arguments = list(frailty = list(a = 1)))
-## equivalent to the following function call
-set.seed(123)
-simEve(z = c(0.5, 1), zCoef = c(1, 0), frailty = "rlnorm",
-       arguments = list(frailty = list(sdlog = 1)))
-
 
 ### renewal process
 ## interarrival times following uniform distribution
@@ -244,6 +252,17 @@ simEve(interarrival = function(n, rate) rgamma(n, shape = 1 / rate))
 ## or equivalently
 set.seed(123)
 simEve(interarrival = function(rate) rgamma(n = 1, shape = 1 / rate))
+
+### relative risk functioin
+set.seed(123)
+simEve(relativeRisk = "linear")
+## or equivalently
+rriskFun <- function(z, zCoef, intercept) {
+    as.numeric(z \%*\% zCoef) + intercept
+}
+set.seed(123)
+simEve(relativeRisk = "rriskFun",
+       arguments = list(relativeRisk = list(intercept = 1)))
 
 }
 \references{
