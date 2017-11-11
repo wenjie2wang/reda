@@ -301,7 +301,7 @@ simEve <- function(z = 0, zCoef = 1,
     if (! (is.function(interarrival) || isCharOne(interarrival)))
         stop("The 'interarrival' has to be a function or a function name.")
     interarrivalFun <- if (isCharOne(interarrival)) {
-                           eval(parse(text = interarrival))
+                           get(interarrival)
                        } else {
                            interarrival
                        }
@@ -362,11 +362,6 @@ simEve <- function(z = 0, zCoef = 1,
         ))
     }
 
-    ## covariate: time-varying or time-invariant
-    zFun <- if (zVecIdx) function(x) { z } else z
-    zCoefFun <- if (zCoefVecIdx) function(x) { zCoef } else zCoef
-    rhoFun <- if (rhoVecIdx) function(x) { rho } else rho
-
     ## prepare frailty effect
     if (isNumOne(frailty)) {
         frailtyEffect <- frailty
@@ -388,10 +383,22 @@ simEve <- function(z = 0, zCoef = 1,
 
     ## rate function
     rateFun <- function(timeNum, forOptimize = TRUE) {
-        zVec <- do.call(zFun, c(list(timeNum), z_args))
-        zCoefVec <- do.call(zCoefFun, c(list(timeNum), zCoef_args))
+        zVec <- if (zVecIdx) {
+                    z
+                } else {
+                    do.call(z, c(list(timeNum), z_args))
+                }
+        zCoefVec <- if (zCoefVecIdx) {
+                        zCoef
+                    } else {
+                        do.call(zCoef, c(list(timeNum), zCoef_args))
+                    }
         covEffect <- as.numeric(exp(zVec %*% zCoefVec))
-        rhoMat <- do.call(rhoFun, c(list(timeNum), rho_args))
+        rhoMat <- if (rhoVecIdx) {
+                      rho
+                  } else {
+                      do.call(rho, c(list(timeNum), rho_args))
+                  }
         rhoVec <- as.numeric(rhoMat %*% rhoCoef)
         rho_t <- frailtyEffect * rhoVec * covEffect
         if (forOptimize)
