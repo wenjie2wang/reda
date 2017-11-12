@@ -8,52 +8,155 @@ vignette: >
   %\VignetteIndexEntry{Simulate Survival and Recurrent Event Data with reda}
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
-output: rmarkdown::html_vignette
+output:
+  rmarkdown::html_vignette:
+    toc: true
 ---
 
 
 In this vignette, we briefly introduce how to simulate survival and recurrent
-event data from a stochastic process point of view with **reda** package.  The
-core function is named `simEve` for simulating survival and recurrent event
-times for one stochastic process. Another function named `simEveData` is simply
-a wrapper that calls `simEve` internally and collects event times and covariates
-of a given number of processes into a data frame format.  Examples for
-generating random samples from common survival and recurrent models are
-provided. The details of function syntax and the objects produced are available
-in the package manual and thus not covered in this vignette.
+event data from stochastic process point of view with **reda** package.  The
+core function named `simEve` provides an intuitive and flexible interface for
+simulating survival and recurrent event times from one stochastic process.
+Another function named `simEveData` is simply a wrapper that calls `simEve`
+internally and collects event times and covariates of a given number of
+processes into a data frame format.  Examples of generating random samples from
+common survival and recurrent models are provided. The details of function
+syntax and the objects produced are available in the package manual and thus not
+covered in this vignette.
 
 
-## Hazard Rate Function
+## Introduction {#intro}
 
-We first introduce the general form of hazard rate function that was considered
-for the function `simEve`.  Let $\rho(t)$ denote the baseline hazard rate
-function of time $t$, $\mathbf{x}_i(t)$ denote the covariate vector,
-$\boldsymbol{\beta}(t)$ denote the covariate coefficients for a stochastic
-process $i$. Note that both covariates and coefficients can be time-varying.
-The @andersen1982aos model incorporates covariates and their coefficients into
-the stochastic process by specifying the intensity as a function of time $t$ and
-the covariates,
-$$
-\lambda(t \mid \mathbf{x}_i, r_i) = r_i\rho(t)
-\exp\left\{\mathbf{x}^{\top}_i(t) ~\boldsymbol{\beta}(t)\right\},
-$$
-where
+### Intensity Function {#intensity}
+
+We first introduce the general form of hazard rate function considered and
+implemented in the function `simEve`.
 
 
-## Homogenous Poisson Process {#hpp}
+Consider $n$ stochastic processes with the baseline hazard rate function
+$\rho(t)$ of time $t$.  For the stochastic process $i$ ($i=1,2,\ldots,n$), let
+$\mathbf{z}_i=(z_{i1},\ldots,z_{ip})^{\top}$ denote the covariate vector of
+length $p$, and $\boldsymbol{\beta}=(\beta_1,\ldots,\beta_p)^{\top}$ denote the
+covariate coefficients.  We may incorporate the covariates and their
+coefficients into the stochastic process by specifying the intensity as a
+function of time $t$ and the covariates $\mathbf{z}_i$ as follows: $$\lambda(t
+\mid \mathbf{z}_i) = \rho(t) r(\mathbf{z}_i, \boldsymbol{\beta}),$$ where
+$r(\mathbf{z}_i, \boldsymbol{\beta})$ is the relative risk function. For the
+regular Cox model [@cox1972jrssb] or the Andersen-Gill model [@andersen1982aos],
+$r(\mathbf{z}_i, \boldsymbol{\beta})=
+\exp\{\boldsymbol{\beta}^{\top}\mathbf{z}_i\}$. Other common choices include the
+linear relative risk model: $r(\mathbf{z}_i, \boldsymbol{\beta}) = 1 +
+\boldsymbol{\beta}^{\top}\mathbf{z}_i$, and the excess relative risk model:
+$r(\mathbf{z}_i, \boldsymbol{\beta}) = \prod_{j=1}^p(1 + \beta_j z_{ij})$.
+
+
+We may extend the model by considering a random frailty effect $w_i$ to account
+for heterogeneity between different processes or processes from different
+clusters. The intensity function becomes $$\lambda(t \mid \mathbf{z}_i, w_i) =
+\rho(t) r(\mathbf{z}_i, \boldsymbol{\beta}) w_i.$$ The common choices for
+distribution of the random frailty effect include Gamma distribution of mean
+one, and lognormal distribution of mean zero in logarithm scale.
+
+
+Furthermore, both covariates and coefficients may be time-varying. So the
+general form of the intensity function is given as follows: $$\lambda(t \mid
+\mathbf{z}_i(t), w_i) = \rho(t) r(\mathbf{z}_i(t), \boldsymbol{\beta}(t)) w_i.$$
+
+
+### Sampling methods
+
+
+
+## Getting Started {#getting-started}
 
 ```{r setup}
-library(reda)
+library(reda)                    # attach reda package to the search path
+packageVersion("reda")           # check the package version
+options(digits = 3)              # set the number of significant digits to print
+set.seed(123)                    # set random number seed
 ```
 
+## Poisson Process {#poisson-process}
+
+### Homogeneous Poisson process {#hpp}
+
+A homogeneous Poisson process (HPP) has a constant hazard rate over time and the
+interarrival times between two successive arrivals/events following exponential
+distribution.  Two simple examples of simulating a homogeneous Poisson process
+using `simEve` are given as follows:
+
 ```{r hpp}
+## HPP from time 1 to 5 of intensity 1 without covariates
+simEve(rho = 1, origin = 1, endTime = 5)
+## HPP from 0 to 10 of baseline rate 0.5 with two covariates
 simEve(z = c(0.2, 0.5), zCoef = c(1, - 0.5), rho = 0.5, endTime = 10)
 ```
 
-```{r hpp.data}
+The function `simEveData` enable us to simulate multiple processes and collect
+the simulated event times into a survival or recurrent event data format.
+
+```{r hpp-data-1}
+## recurrent events from two processes with same covariates
+simEveData(2, z = c(0.2, 0.5), zCoef = c(1, - 0.5), rho = 0.01, endTime = 5)
+```
+
+In the example given above, the number of process is explicitly specified to be
+two.  However, if it is not specified, it will be the number of rows of the
+covariate matrix. See the example given below.
+
+```{r hpp-data-2}
+## recurrent events from two processes
+## with different time-invariant covariate and time origin
+simEveData(z = cbind(rnorm(2), 0.5), zCoef = c(0.2, - 0.5),
+           rho = 0.01, origin = c(1, 3), endTime = c(8, 9))
+```
+
+We can also simulate survival data by taking the first event of each process.
+Setting `recurrent = FALSE` in function `simEve` (or function `simEveData`)
+gives us the survival time(s) or the right censoring time(s).  In the example
+given below, we specified `endTime = "rnorm"` and `arguments = list(endTime =
+list(mean = 4))` for generating a random censoring times from normal
+distribution with mean 4 and unit standard deviation.
+
+```{r hpp-data-3}
+## survival data by set 'recurrent = FALSE'
+simEveData(z = cbind(rnorm(10), 1), zCoef = c(0.2, - 1), rho = 0.1,
+           origin = c(0, 1), endTime = "rnorm", recurrent = FALSE,
+           arguments = list(endTime = list(mean = 4)))
+```
+
+
+### Nonhomogeneous Poisson process {#nhpp}
+
+```{r nhpp}
+simEve(z = c(0.2, 0.5), zCoef = c(1, - 0.5), rho = 0.5, endTime = 10)
+```
+
+```{r nhpp-data}
 simEveData(z = c(0.2, 0.5), zCoef = c(1, - 0.5), rho = 0.5, endTime = 10)
 ```
 
+## Other Renewal Processes {#renewal-processes}
+
+## Beyond Time-invariant
+
+### Timevarying covariates
+
+### Timevarying covariate coefficients
+
+
+## Frailty Models {#frailty}
+
+### Frailty for individual process {#individual-frailty}
+
+### Shared frailty for clusters {#shared-frailty}
+
+
+## Examples for Common Survival Models {#common-dist}
+
+
+## Extension to Multiple Event Data {#multiple-event}
 
 
 
