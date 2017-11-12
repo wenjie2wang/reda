@@ -64,16 +64,16 @@ NULL
 ##' package. Similar to \code{z}, \code{zCoef}, and \code{rho}, other arguments
 ##' of the function can be specified through a named list in \code{arguments}.
 ##'
-##' For time-varying covariates, the function \code{simEveData} assumes
+##' For time-varying covariates, the function \code{simEventData} assumes
 ##' covariates can be observed only at event times and censoring times. Thus,
 ##' covariate values are returned only at these time points. If we want more
 ##' observed covariate values to be recorded, we may write a simple wrapper
-##' function of \code{simEve} similar to \code{simEveData}.
+##' function of \code{simEvent} similar to \code{simEventData}.
 ##'
-##' @aliases simEve
+##' @aliases simEvent
 ##'
 ##' @usage
-##' simEve(z = 0, zCoef = 1, rho = 1, rhoCoef = 1, origin = 0, endTime = 3,
+##' simEvent(z = 0, zCoef = 1, rho = 1, rhoCoef = 1, origin = 0, endTime = 3,
 ##'        frailty = 1, recurrent = TRUE, interarrival = "rexp",
 ##'        relativeRisk = c("exponential", "linear", "excess"),
 ##'        method = c("thinning", "inverse.cdf"), arguments = list(), ...)
@@ -158,15 +158,15 @@ NULL
 ##'     second argument \code{y} can be specified by letting \code{arguments =
 ##'     list(z = list(y = 1)}.  A partial matching on names is not allowed to
 ##'     avoid possible misspecification. The input arguments will be evaluated
-##'     within function \code{simEve}, which can be useful for randomly setting
-##'     function parameters for each process in function \code{simEveData}. See
+##'     within function \code{simEvent}, which can be useful for randomly setting
+##'     function parameters for each process in function \code{simEventData}. See
 ##'     examples and vignettes for details.
-##' @param ... Additional arguements passed from function \code{simEveData} to
-##'     fucntion \code{simEve}. For function \code{simEve}, \code{...} is not
+##' @param ... Additional arguements passed from function \code{simEventData} to
+##'     fucntion \code{simEvent}. For function \code{simEvent}, \code{...} is not
 ##'     used.
 ##'
-##' @return The function \code{simEve} returns a \code{simEve} S4 class object
-##'     and the function \code{simEveData} returns a \code{data.frame}.
+##' @return The function \code{simEvent} returns a \code{simEvent} S4 class object
+##'     and the function \code{simEventData} returns a \code{data.frame}.
 ##'
 ##' @references
 ##'
@@ -188,13 +188,13 @@ NULL
 ##'
 ##' ### time-invariant covariates and coefficients
 ##' ## one process
-##' simEve(z = c(0.5, 1), zCoef = c(1, 0))
-##' simEve(z = 1, zCoef = 0.5, recurrent = FALSE)
+##' simEvent(z = c(0.5, 1), zCoef = c(1, 0))
+##' simEvent(z = 1, zCoef = 0.5, recurrent = FALSE)
 ##'
 ##' ## simulated data
-##' simEveData(z = c(0.5, 1), zCoef = c(1, 0), endTime = 2)
-##' simEveData(z = cbind(rnorm(3), 1), zCoef = c(1, 0))
-##' simEveData(z = matrix(rnorm(5)), zCoef = 0.5, recurrent = FALSE)
+##' simEventData(z = c(0.5, 1), zCoef = c(1, 0), endTime = 2)
+##' simEventData(z = cbind(rnorm(3), 1), zCoef = c(1, 0))
+##' simEventData(z = matrix(rnorm(5)), zCoef = 0.5, recurrent = FALSE)
 ##'
 ##'
 ##' ### time-varying covariates and time-varying coefficients
@@ -204,18 +204,18 @@ NULL
 ##' zCoefFun <- function(x, shift) {
 ##'   c(sqrt(x + shift), 1)
 ##' }
-##' simEve(z = zFun, zCoef = zCoefFun,
+##' simEvent(z = zFun, zCoef = zCoefFun,
 ##'        arguments = list(z = list(intercept = 0.1),
 ##'                         zCoef = list(shift = 0.1)))
 ##'
 ##' ## same function of time for all processes
-##' simEveData(3, z = zFun, zCoef = zCoefFun,
+##' simEventData(3, z = zFun, zCoef = zCoefFun,
 ##'            arguments = list(z = list(intercept = 0.1),
 ##'                             zCoef = list(shift = 0.1)))
 ##'
 ##' ## same function within one process but different between processes
 ##' ## use quote function in the arguments
-##' simDat <- simEveData(3, z = zFun, zCoef = zCoefFun,
+##' simDat <- simEventData(3, z = zFun, zCoef = zCoefFun,
 ##'                      arguments = list(
 ##'                          z = list(intercept = quote(rnorm(1) / 10)),
 ##'                          zCoef = list(shift = 0.1)
@@ -226,65 +226,65 @@ NULL
 ##'
 ##'
 ##' ### non-negative time-varying baseline hazard rate function
-##' simEve(rho = function(timeVec) { sin(timeVec) + 1 })
-##' simEveData(3, origin = rnorm(3), endTime = rnorm(3, 5),
+##' simEvent(rho = function(timeVec) { sin(timeVec) + 1 })
+##' simEventData(3, origin = rnorm(3), endTime = rnorm(3, 5),
 ##'            rho = function(timeVec) { sin(timeVec) + 1 })
 ##' ## specify other arguments
-##' simEve(rho = function(a, b) { cos(a + b) + 1 },
+##' simEvent(rho = function(a, b) { cos(a + b) + 1 },
 ##'        arguments = list(rho = list(b = 1)))
-##' simEveData(z = cbind(rnorm(3), rbinom(3, 1, 0.5)),
+##' simEventData(z = cbind(rnorm(3), rbinom(3, 1, 0.5)),
 ##'            rho = function(a, b) { cos(a + b) + 1 },
 ##'            arguments = list(rho = list(b = 1)))
 ##'
 ##' ## quadratic B-splines with one internal knot at "time = 1"
 ##' ## (using function 'bSpline' from splines2 package)
-##' simEve(rho = "bSpline", rhoCoef = c(0.4, 0.5, 0.3, 0.6),
+##' simEvent(rho = "bSpline", rhoCoef = c(0.4, 0.5, 0.3, 0.6),
 ##'        arguments = list(rho = list(degree = 2, knots = 1, intercept = TRUE,
 ##'                                    Boundary.knots = c(0, 3))))
 ##'
 ##'
 ##' ### frailty effect
 ##' ## Gamma distribution with mean one
-##' simEve(z = c(0.5, 1), zCoef = c(1, 0), frailty = "rgamma",
+##' simEvent(z = c(0.5, 1), zCoef = c(1, 0), frailty = "rgamma",
 ##'        arguments = list(frailty = list(shape = 2, scale = 0.5)))
 ##'
 ##' ## lognormal with mean zero (on the log scale)
 ##' set.seed(123)
-##' simEve(z = c(0.5, 1), zCoef = c(1, 0), frailty = "rlnorm",
+##' simEvent(z = c(0.5, 1), zCoef = c(1, 0), frailty = "rlnorm",
 ##'        arguments = list(frailty = list(sdlog = 1)))
 ##' ## or equivalently
 ##' set.seed(123)
 ##' logNorm <- function(a) exp(rnorm(n = 1, mean = 0, sd = a))
-##' simEve(z = c(0.5, 1), zCoef = c(1, 0), frailty = logNorm,
+##' simEvent(z = c(0.5, 1), zCoef = c(1, 0), frailty = logNorm,
 ##'        arguments = list(frailty = list(a = 1)))
 ##'
 ##' ### renewal process
 ##' ## interarrival times following uniform distribution
 ##' rUnif <- function(n, rate, min) runif(n, min, max = 2 / rate - min)
-##' simEve(interarrival = rUnif,
+##' simEvent(interarrival = rUnif,
 ##'        arguments = list(interarrival = list(min = 0.1)))
 ##'
 ##' ## interarrival times following Gamma distribution with scale one
 ##' set.seed(123)
-##' simEve(interarrival = function(n, rate) rgamma(n, shape = 1 / rate))
+##' simEvent(interarrival = function(n, rate) rgamma(n, shape = 1 / rate))
 ##' ## or equivalently
 ##' set.seed(123)
-##' simEve(interarrival = function(rate) rgamma(n = 1, shape = 1 / rate))
+##' simEvent(interarrival = function(rate) rgamma(n = 1, shape = 1 / rate))
 ##'
 ##' ### relative risk functioin
 ##' set.seed(123)
-##' simEve(relativeRisk = "linear")
+##' simEvent(relativeRisk = "linear")
 ##' ## or equivalently
 ##' rriskFun <- function(z, zCoef, intercept) {
 ##'     as.numeric(z %*% zCoef) + intercept
 ##' }
 ##' set.seed(123)
-##' simEve(relativeRisk = rriskFun,
+##' simEvent(relativeRisk = rriskFun,
 ##'        arguments = list(relativeRisk = list(intercept = 1)))
 ##'
 ##' @importFrom stats integrate optimize qexp rexp runif rgamma rpois uniroot
 ##' @export
-simEve <- function(z = 0, zCoef = 1,
+simEvent <- function(z = 0, zCoef = 1,
                    rho = 1, rhoCoef = 1,
                    origin = 0, endTime = 3,
                    frailty = 1,
@@ -672,7 +672,7 @@ simEve <- function(z = 0, zCoef = 1,
                    }
 
     ## return
-    methods::new("simEve", xOut,
+    methods::new("simEvent", xOut,
                  call = Call,
                  z = list(
                      z = zMat,
@@ -728,10 +728,10 @@ simEve <- function(z = 0, zCoef = 1,
 }
 
 
-##' @rdname simEve
-##' @aliases simEveData
+##' @rdname simEvent
+##' @aliases simEventData
 ##' @usage
-##' simEveData(nProcess, z = 0, rho = 1,
+##' simEventData(nProcess, z = 0, rho = 1,
 ##'            origin = 0, endTime = 3, frailty = 1, ...)
 ##'
 ##' @param nProcess Number of stochastic processes. If missing, the value will
@@ -739,7 +739,7 @@ simEve <- function(z = 0, zCoef = 1,
 ##'     number should be speicified.
 ##'
 ##' @export
-simEveData <- function(nProcess = 1,
+simEventData <- function(nProcess = 1,
                        z = 0,
                        rho = 1,
                        origin = 0,
@@ -772,7 +772,7 @@ simEveData <- function(nProcess = 1,
         }
     }
 
-    ## take care of origin, endTime, and frailty before simEve
+    ## take care of origin, endTime, and frailty before simEvent
     originFunIdx <- is.function(origin) || isCharOne(origin)
     if (! originFunIdx) {
         if (! isNumVector(origin))
@@ -794,12 +794,12 @@ simEveData <- function(nProcess = 1,
 
     ## generate simulated data for each process
     resList <- lapply(seq_len(nProcess), function(i) {
-        res <- simEve(z = if (isZmatIdx) z[i, ] else z,
+        res <- simEvent(z = if (isZmatIdx) z[i, ] else z,
                       origin = if (originFunIdx) origin else origin[i],
                       endTime = if (endTimeFunIdx) endTime else endTime[i],
                       frailty = if (frailtyFunIdx) frailty else frailty[i],
                       ...)
-        simEve2data(ID = i, res)
+        simEvent2data(ID = i, res)
     })
 
     ## prepare for output
@@ -818,8 +818,8 @@ simEveData <- function(nProcess = 1,
 
 
 ### internal functions =========================================================
-## function convert results from simEve to data.frame
-simEve2data <- function(ID, obj) {
+## function convert results from simEvent to data.frame
+simEvent2data <- function(ID, obj) {
     timeVec <- obj@.Data
     out <- if (! length(timeVec)) {
                ## if no event

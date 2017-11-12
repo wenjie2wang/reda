@@ -16,9 +16,9 @@ output:
 
 In this vignette, we briefly introduce how to simulate survival and recurrent
 event data from stochastic process point of view with **reda** package.  The
-core function named `simEve` provides an intuitive and flexible interface for
+core function named `simEvent` provides an intuitive and flexible interface for
 simulating survival and recurrent event times from one stochastic process.
-Another function named `simEveData` is simply a wrapper that calls `simEve`
+Another function named `simEventData` is simply a wrapper that calls `simEvent`
 internally and collects event times and covariates of a given number of
 processes into a data frame format.  Examples of generating random samples from
 common survival and recurrent models are provided. The details of function
@@ -31,7 +31,7 @@ covered in this vignette.
 ### Intensity Function {#intensity}
 
 We first introduce the general form of hazard rate function considered and
-implemented in the function `simEve`.
+implemented in the function `simEvent`.
 
 
 Consider $n$ stochastic processes with the baseline hazard rate function
@@ -84,21 +84,21 @@ set.seed(123)                    # set random number seed
 A homogeneous Poisson process (HPP) has a constant hazard rate over time and the
 interarrival times between two successive arrivals/events following exponential
 distribution.  Two simple examples of simulating a homogeneous Poisson process
-using `simEve` are given as follows:
+using `simEvent` are given as follows:
 
 ```{r hpp}
 ## HPP from time 1 to 5 of intensity 1 without covariates
-simEve(rho = 1, origin = 1, endTime = 5)
+simEvent(rho = 1, origin = 1, endTime = 5)
 ## HPP from 0 to 10 of baseline rate 0.5 with two covariates
-simEve(z = c(0.2, 0.5), zCoef = c(1, - 0.5), rho = 0.5, endTime = 10)
+simEvent(z = c(0.2, 0.5), zCoef = c(1, - 0.5), rho = 0.5, endTime = 10)
 ```
 
-The function `simEveData` enable us to simulate multiple processes and collect
+The function `simEventData` enable us to simulate multiple processes and collect
 the simulated event times into a survival or recurrent event data format.
 
 ```{r hpp-data-1}
 ## recurrent events from two processes with same covariates
-simEveData(2, z = c(0.2, 0.5), zCoef = c(1, - 0.5), rho = 0.01, endTime = 5)
+simEventData(2, z = c(0.2, 0.5), zCoef = c(1, - 0.5), rho = 0.01, endTime = 5)
 ```
 
 In the example given above, the number of process is explicitly specified to be
@@ -108,12 +108,12 @@ covariate matrix. See the example given below.
 ```{r hpp-data-2}
 ## recurrent events from two processes
 ## with different time-invariant covariate and time origin
-simEveData(z = cbind(rnorm(2), 0.5), zCoef = c(0.2, - 0.5),
+simEventData(z = cbind(rnorm(2), 0.5), zCoef = c(0.2, - 0.5),
            rho = 0.01, origin = c(1, 3), endTime = c(8, 9))
 ```
 
 We can also simulate survival data by taking the first event of each process.
-Setting `recurrent = FALSE` in function `simEve` (or function `simEveData`)
+Setting `recurrent = FALSE` in function `simEvent` (or function `simEventData`)
 gives us the survival time(s) or the right censoring time(s).  In the example
 given below, we specified `endTime = "rnorm"` and `arguments = list(endTime =
 list(mean = 4))` for generating a random censoring times from normal
@@ -121,7 +121,7 @@ distribution with mean 4 and unit standard deviation.
 
 ```{r hpp-data-3}
 ## survival data by set 'recurrent = FALSE'
-simEveData(z = cbind(rnorm(10), 1), zCoef = c(0.2, - 1), rho = 0.1,
+simEventData(z = cbind(rnorm(10), 1), zCoef = c(0.2, - 1), rho = 0.1,
            origin = c(0, 1), endTime = "rnorm", recurrent = FALSE,
            arguments = list(endTime = list(mean = 4)))
 ```
@@ -130,11 +130,11 @@ simEveData(z = cbind(rnorm(10), 1), zCoef = c(0.2, - 1), rho = 0.1,
 ### Nonhomogeneous Poisson process {#nhpp}
 
 ```{r nhpp}
-simEve(z = c(0.2, 0.5), zCoef = c(1, - 0.5), rho = 0.5, endTime = 10)
+simEvent(z = c(0.2, 0.5), zCoef = c(1, - 0.5), rho = 0.5, endTime = 10)
 ```
 
 ```{r nhpp-data}
-simEveData(z = c(0.2, 0.5), zCoef = c(1, - 0.5), rho = 0.5, endTime = 10)
+simEventData(z = c(0.2, 0.5), zCoef = c(1, - 0.5), rho = 0.5, endTime = 10)
 ```
 
 ## Other Renewal Processes {#renewal-processes}
