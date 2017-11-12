@@ -404,7 +404,7 @@ simEve <- function(z = 0, zCoef = 1,
                      ))))
             origin_args <- c(list(n = 1), origin_args)
         originFun <- origin
-        origin_args <- if (! length(origin_args)) list()
+        if (! length(origin_args)) origin_args <- list()
         origin <- do.call(originFun, origin_args)
     } else {
         originFun <- origin_args <- NULL
@@ -418,7 +418,7 @@ simEve <- function(z = 0, zCoef = 1,
                      ))))
             endTime_args <- c(list(n = 1), endTime_args)
         endTimeFun <- endTime
-        endTime_args <- if (! length(endTime_args)) list()
+        if (! length(endTime_args)) endTime_args <- list()
         endTime <- do.call(endTimeFun, endTime_args)
     } else {
         endTimeFun <- endTime_args <- NULL
@@ -805,11 +805,13 @@ simEveData <- function(nProcess = 1,
     ## prepare for output
     out <- do.call(rbind, resList)
     if (! attr(out, "recurrent")) {
-        uniIdx <- duplicated(out$ID, fromLast = TRUE)
+        uniIdx <- ! duplicated(out$ID)
         out <- out[uniIdx, ]
     }
     ## add original function call to attribute
     attr(out, "call") <- Call
+    ## reset row names
+    row.names(out) <- NULL
     ## return
     out
 }
