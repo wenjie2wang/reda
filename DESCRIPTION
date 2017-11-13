@@ -46,7 +46,7 @@ Collate:
     'rateReg.R'
     'reda.R'
     'show.R'
-    'simEve.R'
+    'simEvent.R'
     'summary.R'
 URL: https://github.com/wenjie2wang/reda
 BugReports: https://github.com/wenjie2wang/reda/issues

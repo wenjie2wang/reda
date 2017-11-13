@@ -25,11 +25,11 @@ NULL
 
 ##' Simulated Survival times or Recurrent Events
 ##'
-##' The function \code{simEve} generates simulated recurrent events or survival
-##' time (the first event time) from one stochastic process. The function
-##' \code{simEveData} provides a simple wrapper that calls \code{simEve}
-##' internally and collects the generated survival data or recurrent events into
-##' a data frame.
+##' The function \code{simEvent} generates simulated recurrent events or
+##' survival time (the first event time) from one stochastic process. The
+##' function \code{simEventData} provides a simple wrapper that calls
+##' \code{simEvent} internally and collects the generated survival data or
+##' recurrent events into a data frame.
 ##'
 ##' For each process, a time-invariant or time-varying baseline hazard rate
 ##' (intensity) function of failure can be specified.  Covariates and their
