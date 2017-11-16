@@ -6,12 +6,12 @@
 \title{Simulated Survival times or Recurrent Events}
 \usage{
 simEvent(z = 0, zCoef = 1, rho = 1, rhoCoef = 1, origin = 0, endTime = 3,
-       frailty = 1, recurrent = TRUE, interarrival = "rexp",
-       relativeRisk = c("exponential", "linear", "excess"),
-       method = c("thinning", "inverse.cdf"), arguments = list(), ...)
+         frailty = 1, recurrent = TRUE, interarrival = "rexp",
+         relativeRisk = c("exponential", "linear", "excess"),
+         method = c("thinning", "inverse.cdf"), arguments = list(), ...)
 
 simEventData(nProcess, z = 0, rho = 1,
-           origin = 0, endTime = 3, frailty = 1, ...)
+             origin = 0, endTime = 3, frailty = 1, ...)
 }
 \arguments{
 \item{z}{Time-invariant or time-varying covariates. The default value is
@@ -105,21 +105,21 @@ time named \code{foo} with two arguments, \code{x} (for time) and
 second argument \code{y} can be specified by letting \code{arguments =
 list(z = list(y = 1)}.  A partial matching on names is not allowed to
 avoid possible misspecification. The input arguments will be evaluated
-within function \code{simEvent}, which can be useful for randomly setting
-function parameters for each process in function \code{simEventData}. See
-examples and vignettes for details.}
+within function \code{simEvent}, which can be useful for randomly
+setting function parameters for each process in function
+\code{simEventData}. See examples and vignettes for details.}
 
 \item{...}{Additional arguements passed from function \code{simEventData} to
-fucntion \code{simEvent}. For function \code{simEvent}, \code{...} is not
-used.}
+fucntion \code{simEvent}. For function \code{simEvent}, \code{...} is
+not used.}
 
 \item{nProcess}{Number of stochastic processes. If missing, the value will
 be the number of row of the specified matrix \code{z}. Or a positive
 number should be speicified.}
 }
 \value{
-The function \code{simEvent} returns a \code{simEvent} S4 class object
-    and the function \code{simEventData} returns a \code{data.frame}.
+The function \code{simEvent} returns a \code{simEvent} S4 class object and
+the function \code{simEventData} returns a \code{data.frame}.
 }
 \description{
 The function \code{simEvent} generates simulated recurrent events or

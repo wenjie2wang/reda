@@ -10,8 +10,8 @@
 mcf(object, ...)
 
 \S4method{mcf}{formula}(object, data, subset, na.action,
-  variance = c("LawlessNadeau", "Nelson", "Poisson", "bootstrap"),
-  logConfInt = TRUE, level = 0.95, control = list(), ...)
+  variance = c("LawlessNadeau", "Poisson", "bootstrap"), logConfInt = FALSE,
+  level = 0.95, control = list(), ...)
 
 \S4method{mcf}{rateReg}(object, newdata, groupName, groupLevels, level = 0.95,
   na.action, control = list(), ...)
@@ -21,9 +21,9 @@ mcf(object, ...)
 
 \item{...}{Other arguments for future usage.}
 
-\item{data}{An optional data frame, list or environment containing the
-variables in the model.  If not found in data, the variables are taken
-from \code{environment(formula)}, usually the environment from which the
+\item{data}{A data frame, list or environment containing the variables in
+the model.  If not found in data, the variables are taken from
+\code{environment(formula)}, usually the environment from which the
 function is called.}
 
 \item{subset}{An optional vector specifying a subset of observations to be
@@ -36,16 +36,16 @@ setting of \code{\link[base]{options}}.  The "factory-fresh" default is
 \code{\link[stats]{na.fail}}, \code{\link[stats]{na.exclude}}, and
 \code{\link[stats]{na.pass}}.  \code{help(na.fail)} for details.}
 
-\item{variance}{An optional character specifying the method for variance
-estimates.  The available options are \code{"LawlessNadeau"} (default)
-for Lawless and Nadeau (1995) method, \code{"Poisson"} for Poisson
-process method, and \code{"bootstrap"} for bootstrapping method.
-Partial matching on the names is allowed.}
+\item{variance}{A character specifying the method for variance estimates.
+The available options are \code{"LawlessNadeau"} (default) for Lawless
+and Nadeau (1995) method, \code{"Poisson"} for Poisson process method,
+and \code{"bootstrap"} for bootstrapping method.  Partial matching on
+the names is allowed.}
 
-\item{logConfInt}{An optional logical value. If \code{TRUE} (default), the
-confidence intervals of given level are constucted based on the
-normality of logarithm of the MCF estimates. Otherwise, the confidence
-interval are constructed based on the normality of the MCF estimates.}
+\item{logConfInt}{A logical value. If \code{FALSE} (default), the confidence
+interval are constructed based on the normality of the MCF
+estimates. Otherwise, the confidence intervals of given level are
+constucted based on the normality of logarithm of the MCF estimates.}
 
 \item{level}{An optional numeric value indicating the confidence level
 required. The default value is 0.95.}

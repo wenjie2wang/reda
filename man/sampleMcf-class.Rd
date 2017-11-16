@@ -13,13 +13,13 @@ The function \code{\link{mcf}} produces objects of this class.
 \describe{
 \item{\code{formula}}{Formula.}
 
+\item{\code{data}}{A data frame.}
+
 \item{\code{MCF}}{A data frame.}
 
 \item{\code{origin}}{A named numeric vector.}
 
 \item{\code{multiGroup}}{A logical value.}
-
-\item{\code{na.action}}{A length-one character vector.}
 
 \item{\code{variance}}{A character vector.}
 

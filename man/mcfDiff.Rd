@@ -38,6 +38,10 @@ estimates and confidence intervals are returned.
 ## See examples given for function mcf.
 }
 \references{
+Nelson, W. B. (2003). \emph{Recurrent events data analysis for product
+repairs, disease recurrences, and other applications}. Society for
+Industrial and Applied Mathematics.
+
 Doganaksoy, N., & Nelson, W. (1998). A Method to Compare Two Samples of
 Recurrence Data. \emph{Lifetime Data Analysis}, 4(1), 51--63.
 }
