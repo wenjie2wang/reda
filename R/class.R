@@ -150,25 +150,28 @@ setClass(Class = "summaryRateReg",
 ##' The function \code{\link{mcf}} produces objects of this class.
 ##'
 ##' @slot formula Formula.
+##' @slot data A data frame.
 ##' @slot MCF A data frame.
 ##' @slot origin A named numeric vector.
 ##' @slot multiGroup A logical value.
-##' @slot na.action A length-one character vector.
 ##' @slot variance A character vector.
 ##' @slot logConfInt A logical value.
 ##' @slot level A numeric value.
+##'
 ##' @aliases sampleMcf-class
 ##' @seealso \code{\link{mcf,formula-method}} for details of slots.
 ##' @export
 setClass(Class = "sampleMcf",
-         slots = c(formula = "formula",
-                   MCF = "data.frame",
-                   origin = "numeric",
-                   multiGroup = "logical",
-                   na.action = "character",
-                   variance = "character",
-                   logConfInt = "logical",
-                   level = "numeric"))
+         slots = c(
+             formula = "formula",
+             data = "data.frame",
+             MCF = "data.frame",
+             origin = "numeric",
+             multiGroup = "logical",
+             variance = "character",
+             logConfInt = "logical",
+             level = "numeric"
+         ))
 
 
 ##' An S4 Class Respresenting Estimated MCF from a Fitted Model

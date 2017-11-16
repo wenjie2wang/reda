@@ -26,21 +26,21 @@ NULL
 
 ##' @describeIn mcf Sample MCF from data.
 ##'
-##' @param data An optional data frame, list or environment containing the
-##'     variables in the model.  If not found in data, the variables are taken
-##'     from \code{environment(formula)}, usually the environment from which the
+##' @param data A data frame, list or environment containing the variables in
+##'     the model.  If not found in data, the variables are taken from
+##'     \code{environment(formula)}, usually the environment from which the
 ##'     function is called.
 ##' @param subset An optional vector specifying a subset of observations to be
 ##'     used in the fitting process.
-##' @param variance An optional character specifying the method for variance
-##'     estimates.  The available options are \code{"LawlessNadeau"} (default)
-##'     for Lawless and Nadeau (1995) method, \code{"Poisson"} for Poisson
-##'     process method, and \code{"bootstrap"} for bootstrapping method.
-##'     Partial matching on the names is allowed.
-##' @param logConfInt An optional logical value. If \code{TRUE} (default), the
-##'     confidence intervals of given level are constucted based on the
-##'     normality of logarithm of the MCF estimates. Otherwise, the confidence
-##'     interval are constructed based on the normality of the MCF estimates.
+##' @param variance A character specifying the method for variance estimates.
+##'     The available options are \code{"LawlessNadeau"} (default) for Lawless
+##'     and Nadeau (1995) method, \code{"Poisson"} for Poisson process method,
+##'     and \code{"bootstrap"} for bootstrapping method.  Partial matching on
+##'     the names is allowed.
+##' @param logConfInt A logical value. If \code{FALSE} (default), the confidence
+##'     interval are constructed based on the normality of the MCF
+##'     estimates. Otherwise, the confidence intervals of given level are
+##'     constucted based on the normality of logarithm of the MCF estimates.
 ##'
 ##' @aliases mcf,formula-method
 ##' @importFrom stats na.fail na.omit na.exclude na.pass qnorm quantile sd
@@ -48,9 +48,10 @@ NULL
 setMethod(
     f = "mcf", signature = "formula",
     definition = function(object, data, subset, na.action,
-                          variance = c("LawlessNadeau", "Nelson",
-                                       "Poisson", "bootstrap"),
-                          logConfInt = TRUE, level = 0.95,
+                          variance = c("LawlessNadeau", "Poisson",
+                                       "bootstrap"),
+                          logConfInt = FALSE,
+                          level = 0.95,
                           control = list(), ...)
     {
         ## specify the type of variance
@@ -129,13 +130,6 @@ setMethod(
         }
         colnames(dat) <- c("ID", "time", "event", "origin", covar_names)
 
-        ## output: na.action
-        na.action <- if (is.null(attr(mm, "na.action"))) {
-                         options("na.action")[[1]]
-                     } else {
-                         paste0("na.", class(attr(mm, "na.action")))
-                     }
-
         ## if no covariates specified
         if (! nBeta) {
             ## revert subject ID
@@ -144,16 +138,17 @@ setMethod(
                            variance = variance,
                            logConfInt = logConfInt,
                            level = level,
-                           control = control)
+                           control = control,
+                           groupLabel = NULL)
             ## remove all censoring rows? probably no for the plot method
             ## outDat <- base::subset(outDat, event == 1)
             rownames(outDat) <- NULL
             out <- new("sampleMcf",
                        formula = object,
+                       data = dat,
                        MCF = outDat,
                        origin = min(dat$origin),
                        multiGroup = FALSE,
-                       na.action = na.action,
                        variance = variance,
                        logConfInt = logConfInt,
                        level = level)
@@ -177,8 +172,12 @@ setMethod(
             subDat <- dat[datLevs %in% levs[i], ]
             ## ...compute origin for each level
             originVec[i] <<- min(subDat$origin)
-            oneSmcfDat <- sMcf(subDat, variance,
-                               logConfInt, level, control)
+            oneSmcfDat <- sMcf(dat = subDat,
+                               variance = variance,
+                               logConfInt = logConfInt,
+                               level = level,
+                               control = control,
+                               groupLabel = levs[i])
             do.call(data.frame, c(as.list(oneSmcfDat),
                                   as.list(xGrid[i, , drop = FALSE])))
         })
@@ -196,10 +195,10 @@ setMethod(
 
         out <- methods::new("sampleMcf",
                             formula = object,
+                            data = dat,
                             MCF = outDat,
                             origin = originVec,
                             multiGroup = TRUE,
-                            na.action = na.action,
                             variance = variance,
                             logConfInt = logConfInt,
                             level = level)
@@ -210,18 +209,26 @@ setMethod(
 
 ### internal function ==========================================================
 ## simple wrapper function for sMcf_point and addVar_sMcf
-sMcf <- function(dat, variance, logConfInt, level, control)
+sMcf <- function(dat, variance, logConfInt, level, control, groupLabel)
 {
-    sMcfDat <- sMcf_point(dat)
+    sMcfDat <- sMcf_point(dat, groupLabel = groupLabel)
     addVar_sMcf(dat, sMcfDat, variance, logConfInt, level, control)
 }
 
 ## sample MCF point estimates
-sMcf_point <- function(inpDat)
+sMcf_point <- function(inpDat, groupLabel)
 {
     ## throw out warning if no any event
-    if (all(! inpDat$event))
-        warning("No event found.")
+    if (all(! inpDat$event)) {
+        warning(wrapMessages(
+            "No event found",
+            if (is.null(groupLabel))
+                "."
+            else
+                sprintf("in the %s group.", groupLabel)
+        ))
+    }
+
     ## different origins?
     origin_idx <- length(unique(inpDat$origin)) > 1
     if (origin_idx) {
@@ -275,8 +282,7 @@ addVar_sMcf <- function(dat, sMcfDat, variance, logConfInt, level, control)
         control <- do.call(addVar_sMcf_control, control)
         sMcfBootMat <- sMcf_boot(dat, sMcfDat, B = control$B)
         se_smcf <- seBoot_normal(sMcfBootMat, upperQuan = 0.75)
-    } else
-        stop("Have not been implemented.")
+    }
 
     ## confidence interval
     if (identical(variance, "bootstrap") && control$ci.method != "normal") {
@@ -300,7 +306,6 @@ addVar_sMcf <- function(dat, sMcfDat, variance, logConfInt, level, control)
             lower <- smcf - criVal
         }
     }
-
     ## update mcf data
     sMcfDat$se <- se_smcf
     sMcfDat$lower <- lower
@@ -319,7 +324,6 @@ var_lawlessNadeau <- function(dat, sMcfDat)
     delta_tj <- sMcfDat$numRisk
     ## ... and events or costs
     m_tj <- sMcfDat$instRate
-
     ## function for each process
     var_comp <- function(subDat, tj, delta_tj, m_tj) {
         ## compute delta_i(tj) as delta_i_tj
@@ -335,7 +339,6 @@ var_lawlessNadeau <- function(dat, sMcfDat)
                                           with(subDat, tapply(event, time, sum))
                                       else
                                           subDat$event
-
         ## apply formula (2.3)--(2.5)
         res_ij <- ifelse(delta_tj > 0,
                          delta_i_tj / delta_tj * (n_i_tj - m_tj),
@@ -343,7 +346,6 @@ var_lawlessNadeau <- function(dat, sMcfDat)
         ## return
         cumsum(res_ij) ^ 2
     }
-
     ## apply var_comp to each process
     varList <- by(dat[, c("ID", "time", "event", "origin")], dat$ID,
                   var_comp, tj = tj, delta_tj = delta_tj, m_tj = m_tj,
