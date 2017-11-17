@@ -3,7 +3,6 @@
 \docType{class}
 \name{mcfDiff-class}
 \alias{mcfDiff-class}
-\alias{sampleMcfDiff-class}
 \title{An S4 Class Representing Sample MCF Difference}
 \description{
 An S4 class that represents the difference between two sample mean
@@ -13,6 +12,8 @@ produces objects of this class.
 \section{Slots}{
 
 \describe{
+\item{\code{call}}{A function call.}
+
 \item{\code{MCF}}{A data frame.}
 
 \item{\code{origin}}{A named numeric vector.}
@@ -22,6 +23,8 @@ produces objects of this class.
 \item{\code{logConfInt}}{A logical value.}
 
 \item{\code{level}}{A numeric value.}
+
+\item{\code{test}}{A \code{mcfDiff.test} class object.}
 }}
 
 \seealso{

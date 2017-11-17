@@ -287,25 +287,56 @@ setClass(Class = "simEvent", contains = "numeric",
          ))
 
 
+##' An S4 Class Representing the Two-Sample Pseudo-Score Test Results
+##'
+##' An S4 class that represents the results of the two-sample pseudo-score tests
+##' between two sample mean cumulative functions.  The function
+##' \code{\link{mcfDiff.test}} produces objects of this class.
+##'
+##' @slot .Data A numeric matrix.
+##' @slot testVariance A character vector.
+##' @aliases mcfDiff.test-class
+##' @seealso \code{\link{mcfDiff.test}} for details of slots.
+##' @export
+setClass(Class = "mcfDiff.test",
+         contains = "matrix",
+         slots = c(
+             testVariance = "character"
+         ),
+         prototype = {
+             mat <- matrix(NA, nrow = 2L, ncol = 5L)
+             row.names(mat) <- c("Constant Weight", "Linear Weight")
+             colnames(mat) <- c("Statistic", "Variance", "Chisq",
+                                "DF", "Pr(>Chisq)")
+             attr(mat, "testVariance") <- "none"
+             mat
+         }
+         )
+
+
 ##' An S4 Class Representing Sample MCF Difference
 ##'
 ##' An S4 class that represents the difference between two sample mean
 ##' cumulative functions from data.  The function \code{\link{mcfDiff}}
 ##' produces objects of this class.
 ##'
+##' @slot call A function call.
 ##' @slot MCF A data frame.
 ##' @slot origin A named numeric vector.
 ##' @slot variance A character vector.
 ##' @slot logConfInt A logical value.
 ##' @slot level A numeric value.
-##' @aliases sampleMcfDiff-class
+##' @slot test A \code{mcfDiff.test} class object.
+##' @aliases mcfDiff-class
 ##' @seealso \code{\link{mcfDiff}} for details of slots.
 ##' @export
 setClass(Class = "mcfDiff",
          slots = c(
+             call = "call",
              MCF = "data.frame",
              origin = "numeric",
              variance = "character",
              logConfInt = "logical",
-             level = "numeric"
+             level = "numeric",
+             test = "mcfDiff.test"
          ))

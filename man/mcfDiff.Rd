@@ -2,46 +2,99 @@
 % Please edit documentation in R/mcfDiff.R
 \name{mcfDiff}
 \alias{mcfDiff}
-\title{Estimate Difference Between Two MCF curves}
+\alias{mcfDiff.test}
+\title{Comparing Two Sample MCF curves}
 \usage{
-mcfDiff(mcf1, mcf2 = NULL, level = 0.95, ...)
+mcfDiff(mcf1, mcf2 = NULL, level = 0.95,
+        testVariance = c("robust", "Poisson", "none"), ...)
+
+mcfDiff.test(mcf1, mcf2 = NULL, testVariance = c("robust", "Poisson",
+  "none"))
 }
 \arguments{
 \item{mcf1}{A \code{sampleMcf} object representing the MCF for one or two
 groups.}
 
-\item{mcf2}{An optional second \code{sampleMcf} object.}
+\item{mcf2}{An optional second \code{sampleMcf} object. By default, it is
+\code{NULL}.}
 
-\item{level}{An optional numeric value indicating the confidence level
-required. The default value is 0.95.}
+\item{level}{A numeric value indicating the confidence level required. The
+default value is 0.95.}
+
+\item{testVariance}{A character string specifying the method for computing
+the variance estimate for the pseudo-score test statistic proposed by
+Cook, Lawless, and Nadeau (1996). The applicable options include
+\code{"robust"} (default) for an estimate robust to departures from
+Poisson assumptions, \code{"Poisson"} for an estimate for Poisson
+process, and \code{"none"} for not performing any test (if only the
+difference estimates are of interest).}
 
 \item{...}{Other arguments for future usage.}
 }
 \value{
 A \code{mcfDiff} object that contains the following slots:
+
 \itemize{
-    \item \code{MCF}: Estimated Mean cumulative function Difference
-        at each time point.
-    \item \code{origin}: Time origins of the two groups.
-    \item \code{variance}: The method used for variance estimates.
-    \item \code{logConfInt}: A logical value indicating whether normality
-        is assumed for \code{log(MCF)} instead of MCF itself.
-        For \code{mcfDiff} object, it is always \code{FALSE}.
-    \item \code{level}: Confidence level specified.
+
+\item \code{call}: Function call.
+
+\item \code{MCF}: Estimated Mean cumulative function Difference at each time
+point.
+
+\item \code{origin}: Time origins of the two groups.
+
+\item \code{variance}: The method used for variance estimates.
+
+\item \code{logConfInt}: A logical value indicating whether normality is
+assumed for \code{log(MCF)} instead of MCF itself.  For \code{mcfDiff}
+object, it is always \code{FALSE}.
+
+\item \code{level}: Confidence level specified.
+
+\item \code{test}: A \code{mcfDiff.test} object for the hypothesis test
+results.
+
 }
 }
 \description{
-This function estimates MCF difference between two groups. Both point
-estimates and confidence intervals are returned.
+This function estimates the sample MCF difference between two groups. Both
+the point estimates and the confidence intervals are computed (Lawless and
+Nadeau, 1995). The two-sample pseudo-score test proposed by Cook, Lawless,
+and Nadeau (1996) is also performed by default.
+}
+\details{
+The null hypothesis of the two-sample pseudo-score test is that there is no
+difference between the two sample MCF curves, while the alternative
+hypothesis suggests a difference.
+
+The test is based on a family of test statistics proposed by Lawless and
+Nadeau (1995). The argument \code{testVariance} specifies the method for
+computing the variance estimates of the test statistics under different
+model assumption. The variance estimates for a Poisson process, and the
+estimate more robust to departures from Poisson assumptions are implemented.
+
+Both constant weight and the linear weight function (with scaling) suggested
+in Cook, Lawless, and Nadeau (1996) are implemented. The constant weight is
+powerful in cases where the two MCFs are approximately proportional to each
+other. The linear weight function is \code{a(u) = t - u}, where \code{u}
+represents the time variable and \code{t} is the first time point when the
+risk set of either group becomes empty. The linear weight function puts more
+emphasis on the difference at earily times than later times and is more
+powerful for cases where the MCFs are no longer proportional to each other,
+but not crossing. Also see Cook and Lawless (2007, Section 3.7.5) for more
+details.
 }
 \examples{
 ## See examples given for function mcf.
 }
 \references{
-Nelson, W. B. (2003). \emph{Recurrent events data analysis for product
-repairs, disease recurrences, and other applications}. Society for
-Industrial and Applied Mathematics.
+Lawless, J. F., & Nadeau, C. (1995). Some Simple Robust Methods for the
+Analysis of Recurrent Events. \emph{Technometrics}, 37(2), 158--168.
 
-Doganaksoy, N., & Nelson, W. (1998). A Method to Compare Two Samples of
-Recurrence Data. \emph{Lifetime Data Analysis}, 4(1), 51--63.
+Cook, R. J., Lawless, J. F., & Nadeau, C. (1996). Robust Tests for Treatment
+Comparisons Based on Recurrent Event Responses. \emph{Biometrics}, 52(2),
+557--571.
+
+Cook, R. J., & Lawless, J. (2007). \emph{The Statistical Analysis of
+Recurrent Events}.  Springer Science \& Business Media.
 }
