@@ -126,16 +126,22 @@ NULL
 ##'      legendName = "Treatment & Gender")
 ##'
 ##' ### estimate MCF difference between two groups
-##' ## for one sample MCF object of two groups
+##' ## one sample MCF object of two groups
 ##' mcf0 <- mcf(Survr(ID, time, event) ~ group, data = simuDat)
-##' plot(mcfDiff(mcf0), col = "red")
+##' ## two-sample pseudo-score tests
+##' mcfDiff.test(mcf0)
+##' ## difference estimates over time
+##' mcf0_diff <- mcfDiff(mcf0, testVariance = "none")
+##' plot(mcf0_diff)
 ##'
 ##' ## or explicitly ask for the difference of two sample MCF
 ##' mcf1 <- mcf(Survr(ID, time, event) ~ 1, data = simuDat,
-##'             subset = gender %in% "female")
+##'             subset = group %in% "Treat")
 ##' mcf2 <- mcf(Survr(ID, time, event) ~ 1, data = simuDat,
-##'             subset = gender %in% "male")
-##' plot(mcfDiff(mcf1, mcf2, level = 0.9))
+##'             subset = group %in% "Contr")
+##' ## perform two-sample tests and estimate difference at the same time
+##' (mcf12_diff <- mcfDiff(mcf1, mcf2, level = 0.9))
+##' plot(mcf12_diff)
 ##'
 ##' ### For estimated MCF from a fitted model,
 ##' ### see examples given in function rateReg.
