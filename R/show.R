@@ -168,3 +168,36 @@ setMethod(
         ## invisible return
         invisible(object)
     })
+
+
+##' @rdname show-method
+##' @aliases show,mcfDiff-method
+##' @export
+setMethod(
+    f = "show",
+    signature = "mcfDiff",
+    definition = function(object) {
+        print(object@MCF)
+        if (! identical(object@test@testVariance, "none")) {
+            cat("\nTwo-Sample Pseudo-Score Tests:\n")
+            printCoefmat(object@test@.Data)
+            cat("\nVariance Estimator:", object@test@testVariance, "\n")
+        }
+        ## invisible return
+        invisible(object)
+    })
+
+
+##' @rdname show-method
+##' @aliases show,mcfDiff.test-method
+##' @export
+setMethod(
+    f = "show",
+    signature = "mcfDiff.test",
+    definition = function(object) {
+        cat("Two-Sample Pseudo-Score Tests:\n")
+        printCoefmat(object@.Data)
+        cat("\nVariance Estimator:", object@testVariance, "\n")
+        ## invisible return
+        invisible(object)
+    })

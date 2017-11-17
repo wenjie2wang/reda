@@ -8,6 +8,8 @@
 \alias{show,sampleMcf-method}
 \alias{show,rateRegMcf-method}
 \alias{show,simEvent-method}
+\alias{show,mcfDiff-method}
+\alias{show,mcfDiff.test-method}
 \title{Show an object.}
 \usage{
 \S4method{show}{rateReg}(object)
@@ -19,6 +21,10 @@
 \S4method{show}{rateRegMcf}(object)
 
 \S4method{show}{simEvent}(object)
+
+\S4method{show}{mcfDiff}(object)
+
+\S4method{show}{mcfDiff.test}(object)
 }
 \arguments{
 \item{object}{An object used to dispatch a method.}
