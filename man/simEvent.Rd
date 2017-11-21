@@ -10,8 +10,7 @@ simEvent(z = 0, zCoef = 1, rho = 1, rhoCoef = 1, origin = 0, endTime = 3,
          relativeRisk = c("exponential", "linear", "excess"),
          method = c("thinning", "inverse.cdf"), arguments = list(), ...)
 
-simEventData(nProcess, z = 0, rho = 1,
-             origin = 0, endTime = 3, frailty = 1, ...)
+simEventData(nProcess, z = 0, origin = 0, endTime = 3, frailty = 1, ...)
 }
 \arguments{
 \item{z}{Time-invariant or time-varying covariates. The default value is

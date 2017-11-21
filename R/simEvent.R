@@ -287,14 +287,14 @@ NULL
 ##' @importFrom stats integrate optimize qexp rexp runif rgamma rpois uniroot
 ##' @export
 simEvent <- function(z = 0, zCoef = 1,
-                   rho = 1, rhoCoef = 1,
-                   origin = 0, endTime = 3,
-                   frailty = 1,
-                   recurrent = TRUE,
-                   interarrival = "rexp",
-                   relativeRisk = c("exponential", "linear", "excess"),
-                   method = c("thinning", "inverse.cdf"),
-                   arguments = list(), ...)
+                     rho = 1, rhoCoef = 1,
+                     origin = 0, endTime = 3,
+                     frailty = 1,
+                     recurrent = TRUE,
+                     interarrival = "rexp",
+                     relativeRisk = c("exponential", "linear", "excess"),
+                     method = c("thinning", "inverse.cdf"),
+                     arguments = list(), ...)
 {
     ## record function call
     Call <- match.call()
@@ -630,7 +630,7 @@ simEvent <- function(z = 0, zCoef = 1,
             invFun <- function(prob) {
                 foo <- function(timeNum) {
                     stats::integrate(vecRateFun, lower = origin,
-                                         upper = timeNum)$value / intRate - prob
+                                     upper = timeNum)$value / intRate - prob
                 }
                 stats::uniroot(foo, interval = c(origin + .Machine$double.eps,
                                                  endTime))$root
@@ -733,8 +733,7 @@ simEvent <- function(z = 0, zCoef = 1,
 ##' @rdname simEvent
 ##' @aliases simEventData
 ##' @usage
-##' simEventData(nProcess, z = 0, rho = 1,
-##'              origin = 0, endTime = 3, frailty = 1, ...)
+##' simEventData(nProcess, z = 0, origin = 0, endTime = 3, frailty = 1, ...)
 ##'
 ##' @param nProcess Number of stochastic processes. If missing, the value will
 ##'     be the number of row of the specified matrix \code{z}. Or a positive
@@ -742,12 +741,11 @@ simEvent <- function(z = 0, zCoef = 1,
 ##'
 ##' @export
 simEventData <- function(nProcess = 1,
-                       z = 0,
-                       rho = 1,
-                       origin = 0,
-                       endTime = 3,
-                       frailty = 1,
-                       ...)
+                         z = 0,
+                         origin = 0,
+                         endTime = 3,
+                         frailty = 1,
+                         ...)
 {
     ## record function call
     Call <- match.call()
@@ -797,10 +795,10 @@ simEventData <- function(nProcess = 1,
     ## generate simulated data for each process
     resList <- lapply(seq_len(nProcess), function(i) {
         res <- simEvent(z = if (isZmatIdx) z[i, ] else z,
-                      origin = if (originFunIdx) origin else origin[i],
-                      endTime = if (endTimeFunIdx) endTime else endTime[i],
-                      frailty = if (frailtyFunIdx) frailty else frailty[i],
-                      ...)
+                        origin = if (originFunIdx) origin else origin[i],
+                        endTime = if (endTimeFunIdx) endTime else endTime[i],
+                        frailty = if (frailtyFunIdx) frailty else frailty[i],
+                        ...)
         simEvent2data(ID = i, res)
     })
 
