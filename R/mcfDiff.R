@@ -226,7 +226,7 @@ mcfDiff.test <- function(mcf1, mcf2 = NULL,
     ## constant and linear weight function
     ## and two variance estimates for the test statistic
     testVariance <- match.arg(testVariance)
-    if (identical(testVariance, "none"))
+    if (testVariance == "none")
         return(methods::new("mcfDiff.test"))
 
     ## define some constants
@@ -336,7 +336,7 @@ mcfDiff.test <- function(mcf1, mcf2 = NULL,
     jumpDiff <- dLambda1 - dLambda2
     ## re-scale to avoid numerical issues
     max_jumpDiff <- max(abs(jumpDiff))
-    if (! identical(max_jumpDiff, 0)) {
+    if (max_jumpDiff > 0) {
         re_jumpDiff <- jumpDiff / max_jumpDiff
         reFactor <- exp(log(max_jumpDiff) + log(max_w_const))
     } else {
@@ -348,7 +348,7 @@ mcfDiff.test <- function(mcf1, mcf2 = NULL,
     testU_linear <- sum(w_linear / max_w_const * re_jumpDiff) * reFactor
 
     ## variance part
-    if (identical(testVariance, "Poisson")) {
+    if (testVariance == "Poisson") {
         varComp <- ifelse(yVec1 > 0, dLambda1 / yVec1, 0) +
             ifelse(yVec2 > 0, dLambda2 / yVec2, 0)
         varU_const <- sum(w_const ^ 2 * varComp)
@@ -383,7 +383,7 @@ mcfDiff.test <- function(mcf1, mcf2 = NULL,
                              0)
             ## rescaling
             max_res_ij <- max(abs(res_ij))
-            if (! identical(max_res_ij, 0)) {
+            if (max_res_ij > 0) {
                 re_res_ij <- res_ij / max_res_ij
                 reFactor <- exp(log(max_res_ij) + log(max_w_const))
             } else {

@@ -177,7 +177,8 @@ setMethod(
     f = "show",
     signature = "mcfDiff",
     definition = function(object) {
-        print(object@MCF)
+        cat("Call: \n")
+        print(object@call)
         if (! identical(object@test@testVariance, "none")) {
             cat("\nTwo-Sample Pseudo-Score Tests:\n")
             printCoefmat(object@test@.Data)
