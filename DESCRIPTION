@@ -9,11 +9,12 @@ Authors@R: c(
     person(given = "Haoda", family = "Fu", role = "aut"),
     person(given = "Jun", family = "Yan", role = "ctb")
     )
-Description: Functions that fit gamma frailty model with spline or piecewise
-    constant baseline rate function for recurrent event data, compute and
-    plot parametric mean cumulative function (MCF) from a fitted model
-    as well as nonparametric sample MCF (Nelson-Aalen estimator) are provided.
-    Most functions are S4 methods that produce S4 class objects.
+Description: Functions for (1) simulating survival, recurrent event, and
+    multiple event data from stochastic process point of view, (2) exploring,
+    and modeling recurrent event data through the mean cumulative function (MCF)
+    or the Nelson-Aalen estimator of the cumulative hazard rate function, and
+    gamma frailty model with spline rate function, and (3) comparing two-sample
+    recurrent event responses with the pseudo-score tests.
 Imports:
     ggplot2,
     graphics,
@@ -30,7 +31,7 @@ Depends:
 License: GPL (>= 3)
 LazyData: true
 VignetteBuilder: knitr
-Collate: 
+Collate:
     'class.R'
     'Survr.R'
     'aic.R'
