@@ -393,7 +393,7 @@ rateReg <- function(formula, data, subset, df = NULL, knots = NULL, degree = 0L,
                               control = control4optim)
 
     ## estimates for beta
-    est_beta <- matrix(NA, nrow = nBeta, ncol = 5L)
+    est_beta <- matrix(NA_real_, nrow = nBeta, ncol = 5L)
     colnames(est_beta) <- c("coef", "exp(coef)", "se(coef)", "z", "Pr(>|z|)")
     rownames(est_beta) <- covar_names
 
@@ -405,13 +405,13 @@ rateReg <- function(formula, data, subset, df = NULL, knots = NULL, degree = 0L,
     est_beta[, 5L] <- 2 * stats::pnorm(- abs(est_beta[, 4L]))
 
     ## estimates for theta
-    est_theta <- matrix(NA, nrow = 1L, ncol = 2L)
+    est_theta <- matrix(NA_real_, nrow = 1L, ncol = 2L)
     colnames(est_theta) <- c("parameter", "se")
     rownames(est_theta) <- "Frailty"
     est_theta[1L, ] <- c(fit$par[nBeta + 1L], se_vec[nBeta + 1L])
 
     ## estimates for alpha
-    est_alpha <- matrix(NA, nrow = df, ncol = 2)
+    est_alpha <- matrix(NA_real_, nrow = df, ncol = 2)
     colnames(est_alpha) <- c("coef", "se(coef)")
     rownames(est_alpha) <- alphaName
     est_alpha[, 1L] <- fit$par[(tmpIdx <- (nBeta + 2L) : length_par)]
