@@ -2,24 +2,30 @@
 
 ## NEW FEATURES
 
-* Added function `simEve` and `simEveData` for simulating survival and recurrent
-  event data.
+* Added function `simEvent` and `simEventData` for simulating survival,
+  recurrent event, and multiple event data from stochastic process point of
+  view.
 
-* Added function `mcfDiff` for estimating difference between two sample MCFs.
+* Added function `mcfDiff` and `mcfDiff.test` for comparing two-sample MCFs by
+  difference estimates over time and the pseudo-score tests.
 
 * Added argument `origin` to function `Survr` for modeling processes with
   different time origins.
 
-* Added variance estimates of sample MCF by bootstrap method.
+* Added variance estimates of sample MCF from bootstrap methods.
 
 ## MAJOR CHANGES
 
 * Updated checking rule of argument `event` of function `Survr` for modeling
   sample MCF of cost in addition to number of events.
 
+* Rename class `sampleMcf` to `mcf.formula`, `rateRegMcf` to `mcf.rateReg`,
+  `baseRateReg` to `baseRate.rateReg`, `summaryRateReg` to `summary.rateReg`.
+
 ## BUG FIXES
 
-* Fixed possible label mismatching in `plot,sampleMcf` method.
+* Fixed possible label mismatching in `plot,mcf.formula` (previously
+  `plot,sampleMcf`) method.
 
 
 # CHANGES IN reda VERSION 0.3.1
