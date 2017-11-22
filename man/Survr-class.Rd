@@ -5,7 +5,7 @@
 \alias{Survr-class}
 \title{An S4 Class Representing Formula Response}
 \description{
-The class \code{Survr-class} is an S4 that represents a formula response for
+The class \code{Survr} is an S4 that represents a formula response for
 recurrent event data model.  The function \code{\link{Survr}} produces
 objects of this class.  See ``Slots'' for details.
 }
@@ -18,7 +18,10 @@ objects of this class.  See ``Slots'' for details.
 
 \item{\code{check}}{Logical value indicating whether to performance data checking.}
 
-\item{\code{ord}}{integer vector for increasingly ordering data by ID, time, and 1 -
-event.}
+\item{\code{ord}}{Integer vector for increasingly ordering data by \code{ID},
+\code{time}, and \code{1 - event}.}
 }}
 
+\seealso{
+\code{\link{Survr}}
+}

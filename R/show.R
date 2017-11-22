@@ -28,14 +28,14 @@ NULL
 ##' An S4 class generic function that displays certain object.
 ##'
 ##' \itemize{
-##'   \item For \code{\link{rateReg-class}} object,
+##'   \item For \code{rateReg} object,
 ##'       it prints out brief summary of the fitted model.
-##'   \item For \code{\link{summaryRateReg-class}} object,
+##'   \item For \code{summary.rateReg} object,
 ##'       it prints out summary of the fitted model.
-##'   \item For \code{\link{sampleMcf-class}} object,
+##'   \item For \code{mcf.sample} object,
 ##'       it prints out the function call, formula and
 ##'       the sample MCF data frame.
-##'   \item For \code{\link{rateRegMcf-class}} object,
+##'   \item For \code{mcf.rateReg} object,
 ##'       it prints formula, new data, confidence level,
 ##'       and the estimated MCF data frame.
 ##' }
@@ -90,7 +90,7 @@ setMethod(f = "show", signature = "rateReg",
 ##' @aliases show,summaryRateReg-method
 ##' @importFrom stats printCoefmat
 ##' @export
-setMethod(f = "show", signature = "summaryRateReg",
+setMethod(f = "show", signature = "summary.rateReg",
           definition = function(object) {
               if (attr(object@call, "show")) {
                   Call <- object@call
@@ -123,9 +123,9 @@ setMethod(f = "show", signature = "summaryRateReg",
 
 
 ##' @rdname show-method
-##' @aliases show,sampleMcf-method
+##' @aliases show,mcf.formula-method
 ##' @export
-setMethod(f = "show", signature = "sampleMcf",
+setMethod(f = "show", signature = "mcf.formula",
           definition = function(object) {
               cat("Formula:\n")
               print(object@formula)
@@ -137,23 +137,26 @@ setMethod(f = "show", signature = "sampleMcf",
 
 
 ##' @rdname show-method
-##' @aliases show,rateRegMcf-method
+##' @aliases show,mcf.rateReg-method
 ##' @export
-setMethod(f = "show", signature = "rateRegMcf",
-          definition = function(object) {
-              cat("Formula:\n")
-              print(object@formula)
-              cat("\nNew data:\n")
-              print(object@newdata)
-              cat("\nConfidence level:",
-                  paste(format(100 * object@level,
-                               trim = TRUE, scientific = FALSE),
-                        "%", sep = ""), "\n")
-              cat("\nMCF:\n")
-              print(object@MCF)
-              ## invisible return
-              invisible(object)
-          })
+setMethod(
+    f = "show",
+    signature = "mcf.rateReg",
+    definition = function(object) {
+        cat("Formula:\n")
+        print(object@formula)
+        cat("\nNew data:\n")
+        print(object@newdata)
+        cat("\nConfidence level:",
+            paste(format(100 * object@level,
+                         trim = TRUE, scientific = FALSE),
+                  "%", sep = ""), "\n")
+        cat("\nMCF:\n")
+        print(object@MCF)
+        ## invisible return
+        invisible(object)
+    }
+)
 
 
 ##' @rdname show-method
@@ -167,7 +170,8 @@ setMethod(
         print(object@.Data)
         ## invisible return
         invisible(object)
-    })
+    }
+)
 
 
 ##' @rdname show-method
@@ -186,7 +190,8 @@ setMethod(
         }
         ## invisible return
         invisible(object)
-    })
+    }
+)
 
 
 ##' @rdname show-method

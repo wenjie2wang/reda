@@ -143,7 +143,7 @@ setMethod(
             ## remove all censoring rows? probably no for the plot method
             ## outDat <- base::subset(outDat, event == 1)
             rownames(outDat) <- NULL
-            out <- new("sampleMcf",
+            out <- new("mcf.formula",
                        formula = object,
                        data = dat,
                        MCF = outDat,
@@ -193,7 +193,7 @@ setMethod(
         }
         rownames(outDat) <- NULL
 
-        out <- methods::new("sampleMcf",
+        out <- methods::new("mcf.formula",
                             formula = object,
                             data = dat,
                             MCF = outDat,

@@ -28,5 +28,5 @@ produces objects of this class.
 }}
 
 \seealso{
-\code{\link{mcfDiff}} for details of slots.
+\code{\link{mcfDiff}}
 }

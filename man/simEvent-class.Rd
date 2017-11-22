@@ -42,5 +42,5 @@ of this class.
 }}
 
 \seealso{
-\code{\link{simEvent}} for details of slots.
+\code{\link{simEvent}}
 }

@@ -23,7 +23,7 @@
 NULL
 
 
-##' Comparing Two Sample MCF curves
+##' Comparing Two-Sample MCFs
 ##'
 ##' This function estimates the sample MCF difference between two groups. Both
 ##' the point estimates and the confidence intervals are computed (Lawless and
@@ -31,22 +31,23 @@ NULL
 ##' and Nadeau (1996) is also performed by default.
 ##'
 ##' The null hypothesis of the two-sample pseudo-score test is that there is no
-##' difference between the two sample MCF curves, while the alternative
-##' hypothesis suggests a difference.
+##' difference between the two sample MCFs, while the alternative hypothesis
+##' suggests a difference.
 ##'
 ##' The test is based on a family of test statistics proposed by Lawless and
 ##' Nadeau (1995). The argument \code{testVariance} specifies the method for
 ##' computing the variance estimates of the test statistics under different
-##' model assumption. The variance estimates for a Poisson process, and the
-##' estimate more robust to departures from Poisson assumptions are implemented.
-##'
-##' Both constant weight and the linear weight function (with scaling) suggested
-##' in Cook, Lawless, and Nadeau (1996) are implemented. The constant weight is
-##' powerful in cases where the two MCFs are approximately proportional to each
-##' other. The linear weight function is \code{a(u) = t - u}, where \code{u}
-##' represents the time variable and \code{t} is the first time point when the
-##' risk set of either group becomes empty. The linear weight function puts more
-##' emphasis on the difference at earily times than later times and is more
+##' model assumption. See the document of argument \code{testVariance} for all
+##' applicable options.  For the variance estimates robust to departures from
+##' Poisson process assumption, both constant weight and the linear weight
+##' function (with scaling) suggested in Cook, Lawless, and Nadeau (1996) are
+##' implemented. The constant weight is powerful in cases where the two MCFs are
+##' approximately proportional to each other. The linear weight function is
+##' originally \code{a(u) = t - u}, where \code{u} represents the time variable
+##' and \code{t} is the first time point when the risk set of either group
+##' becomes empty. It is further scaled by \code{1 / t} for test statistics
+##' invariant to unit of measurement of time.  The linear weight function puts
+##' more emphasis on the difference at earily times than later times and is more
 ##' powerful for cases where the MCFs are no longer proportional to each other,
 ##' but not crossing. Also see Cook and Lawless (2007, Section 3.7.5) for more
 ##' details.
@@ -57,10 +58,9 @@ NULL
 ##' mcfDiff(mcf1, mcf2 = NULL, level = 0.95,
 ##'         testVariance = c("robust", "Poisson", "none"), ...)
 ##'
-##' @param mcf1 A \code{sampleMcf} object representing the MCF for one or two
+##' @param mcf1 A \code{mcf.formula} object representing the MCF for one or two
 ##'     groups.
-##' @param mcf2 An optional second \code{sampleMcf} object. By default, it is
-##'     \code{NULL}.
+##' @param mcf2 An optional second \code{mcf.formula} object or \code{NULL}.
 ##' @param level A numeric value indicating the confidence level required. The
 ##'     default value is 0.95.
 ##' @param testVariance A character string specifying the method for computing
@@ -73,8 +73,9 @@ NULL
 ##' @param ... Other arguments for future usage.
 ##'
 ##' @return
-##' A \code{mcfDiff} object that contains the following slots:
 ##'
+##' The function \code{mcfDiff} returns a \code{mcfDiff} object (of S4 class)
+##' that contains the following slots:
 ##' \itemize{
 ##'
 ##' \item \code{call}: Function call.
@@ -94,6 +95,18 @@ NULL
 ##'
 ##' \item \code{test}: A \code{mcfDiff.test} object for the hypothesis test
 ##' results.
+##'
+##' }
+##'
+##' The function \code{mcfDiff.test} returns a \code{mcfDiff.test} object (of S4
+##' class) that contains the following slots:
+##' \itemize{
+##'
+##' \item \code{.Data}: A numeric matrix (of two rows and five columns) for
+##' hypothesis testing results.
+##'
+##' \item \code{testVariance}: A character string (or vector of length one)
+##' indicating the method used for the variance estimates of the test statistic.
 ##'
 ##' }
 ##'
@@ -170,7 +183,7 @@ mcfDiff <- function(mcf1, mcf2 = NULL, level = 0.95,
         if (mcf1@variance != mcf2@variance)
             warning(wrapMessages(
                 "The method used for variance estimates were not consistent",
-                "between the two 'sampleMcf' objects!"
+                "between the two 'mcf.formula' objects!"
             ))
         ## first group
         mcfDat1 <- mcf1@MCF[, mcfCols]
@@ -433,31 +446,28 @@ mcfDiff.test <- function(mcf1, mcf2 = NULL,
     }
 
     ## summarize the results in a table
-    outTab <- matrix(NA, nrow = 2L, ncol = 5L)
-    row.names(outTab) <- c("Constant Weight", "Linear Weight")
-    colnames(outTab) <- c("Statistic", "Variance", "Chisq",
-                          "DF", "Pr(>Chisq)")
+    outTab <- methods::new("mcfDiff.test")
     outTab[, 1L] <- c(testU_const, testU_linear)
     outTab[, 2L] <- varU
     outTab[, 3L] <- outTab[, 1L] ^ 2 / outTab[, 2L]
     outTab[, 4L] <- 1
-    outTab[, 5L] <- stats::pchisq(outTab[, 3L], df = outTab[, 4L],
+    outTab[, 5L] <- stats::pchisq(outTab[, 3L],
+                                  df = outTab[, 4L],
                                   lower.tail = FALSE)
-
+    outTab@testVariance <- testVariance
     ## return
-    methods::new("mcfDiff.test", outTab,
-                 testVariance = testVariance)
+    outTab
 }
 
 
 ### internal functions =========================================================
 mcfDiff_check <- function(mcf1, mcf2) {
     ## quick check
-    if (! is.sampleMcf(mcf1) ||
-        (! is.sampleMcf(mcf2) && ! is.null(mcf2))) {
+    if (! is.mcf.formula(mcf1) ||
+        (! is.mcf.formula(mcf2) && ! is.null(mcf2))) {
         stop(wrapMessages(
-            "'mcf1' must be 'sampleMcf' object and",
-            "'mcf2' must be eithor 'sampleMcf' object or 'NULL'."
+            "'mcf1' must be 'mcf.formula' object, and",
+            "'mcf2' must be eithor 'mcf.formula' object or 'NULL'."
         ))
     }
 }

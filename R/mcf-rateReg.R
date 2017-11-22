@@ -148,15 +148,15 @@ setMethod(
             colnames(outDat)[5L] <- groupName
         }
         ## output
-        out <- new("rateRegMcf",
-                   call = object@call,
-                   formula = object@formula,
-                   spline = object@spline$spline,
-                   knots = knots, degree = degree,
-                   Boundary.knots = Boundary.knots,
-                   newdata = X, MCF = outDat, level = level,
-                   na.action = na.action, control = control,
-                   multiGroup = multiGroup)
+        out <- methods::new("mcf.rateReg",
+                            call = object@call,
+                            formula = object@formula,
+                            spline = object@spline$spline,
+                            knots = knots, degree = degree,
+                            Boundary.knots = Boundary.knots,
+                            newdata = X, MCF = outDat, level = level,
+                            na.action = na.action, control = control,
+                            multiGroup = multiGroup)
         ## return
         out
     })

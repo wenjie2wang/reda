@@ -8,7 +8,7 @@
 \S4method{summary}{rateReg}(object, showCall = TRUE, showKnots = TRUE, ...)
 }
 \arguments{
-\item{object}{\code{\link{rateReg-class}} object.}
+\item{object}{A \code{rateReg} object.}
 
 \item{showCall}{A logic value with dafault \code{TRUE},
 indicating whether function \code{show}
@@ -24,7 +24,7 @@ for a more concise printout.}
 \item{...}{Other arguments for future usage.}
 }
 \value{
-summaryRateReg-class object
+\code{summary.rateReg} object
 }
 \description{
 Summary of estimated coefficients of covariates, rate function bases,
@@ -32,7 +32,7 @@ and estimated rate parameter of frailty random variable, etc.
 }
 \details{
 \code{summary,rateReg-method} returns a
-\code{\link{summaryRateReg-class}} object,
+\code{summary.rateReg} object,
 whose slots include
 \itemize{
     \item \code{covarCoef}: Estimated covariate coefficients.
@@ -44,6 +44,7 @@ For the meaning of other slots, see \code{\link{rateReg}}.
 }
 \examples{
 ## See examples given in function rateReg.
+
 }
 \seealso{
 \code{\link{rateReg}} for model fitting;

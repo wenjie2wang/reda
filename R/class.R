@@ -20,28 +20,38 @@
 
 ##' An S4 Class Representing Formula Response
 ##'
-##' The class \code{Survr-class} is an S4 that represents a formula response for
+##' The class \code{Survr} is an S4 that represents a formula response for
 ##' recurrent event data model.  The function \code{\link{Survr}} produces
 ##' objects of this class.  See ``Slots'' for details.
+##'
+##' @aliases Survr-class
 ##'
 ##' @slot .Data A numeric matrix object.
 ##' @slot ID Charactrer vector for original subject identificator.
 ##' @slot check Logical value indicating whether to performance data checking.
-##' @slot ord integer vector for increasingly ordering data by ID, time, and 1 -
-##'     event.
-##' @aliases Survr-class
+##' @slot ord Integer vector for increasingly ordering data by \code{ID},
+##'     \code{time}, and \code{1 - event}.
+##'
+##' @seealso \code{\link{Survr}}
 ##' @export
-setClass("Survr", contains = "matrix",
-         slots = c(ID = "factor",
-                   check = "logical",
-                   ord = "integer"))
+setClass(
+    "Survr",
+    contains = "matrix",
+    slots = c(
+        ID = "factor",
+        check = "logical",
+        ord = "integer"
+    )
+)
 
 
 ##' An S4 Class Representing a Fitted Model
 ##'
-##' The class \code{rateReg-class} is an S4 class that represents a fitted
-##' model.  The function \code{\link{rateReg}} produces objects of this class.
-##' See ``Slots'' for details.
+##' The class \code{rateReg} is an S4 class that represents a fitted model.  The
+##' function \code{\link{rateReg}} produces objects of this class.  See
+##' ``Slots'' for details.
+##'
+##' @aliases rateReg-class
 ##'
 ##' @slot call Function call.
 ##' @slot formula Formula.
@@ -50,61 +60,67 @@ setClass("Survr", contains = "matrix",
 ##' @slot estimates A list.
 ##' @slot control A list.
 ##' @slot start A list.
-##' @slot na.action A length-one character vector.
+##' @slot na.action A character vector (of length one).
 ##' @slot xlevels A list.
 ##' @slot contrasts A list.
 ##' @slot convergCode A nonnegative integer.
 ##' @slot logL A numeric value.
 ##' @slot fisher A numeric matrix.
-##' @aliases rateReg-class
-##' @seealso \code{\link{rateReg}} for details of slots.
+##'
+##' @seealso \code{\link{rateReg}}
 ##' @export
-setClass(Class = "rateReg",
-         slots = c(call = "call",
-                   formula = "formula",
-                   nObs = "integer",
-                   spline = "list",
-                   estimates = "list",
-                   control = "list",
-                   start = "list",
-                   na.action = "character",
-                   xlevels = "list",
-                   contrasts = "list",
-                   convergCode = "integer",
-                   logL = "numeric",
-                   fisher = "matrix"),
-         validity = function(object) {
-             ## check on nObs
-             if (object@nObs <= 0)
-                 return("Number of observations must be a positive integer.")
-             ## check on knots
-             knots <- object@spline$knots
-             Boundary.knots <- object@spline$Boundary.knots
-             if (length(knots)) { # if there exists internal knots
-                 if (min(knots) < min(Boundary.knots) ||
-                     max(knots) > max(Boundary.knots))
-                     return(paste("Internal knots must all lie in the",
-                                  "coverage of boundary knots."))
-             }
-             ## check on degree
-             degree <- object@spline$degre
-             if (degree < 0)
-                 return("Degree of spline bases must be a nonnegative integer.")
-             ## check on df
-             dfVec <- do.call("c", object@spline$df)
-             dfValid <- is.integer(dfVec) && all(dfVec >= 0)
-             if (! dfValid)
-                 return("Degree of freedom must be nonnegative integers.")
-             ## else return
-             TRUE
-         })
+setClass(
+    Class = "rateReg",
+    slots = c(
+        call = "call",
+        formula = "formula",
+        nObs = "integer",
+        spline = "list",
+        estimates = "list",
+        control = "list",
+        start = "list",
+        na.action = "character",
+        xlevels = "list",
+        contrasts = "list",
+        convergCode = "integer",
+        logL = "numeric",
+        fisher = "matrix"
+    ),
+    validity = function(object) {
+        ## check on nObs
+        if (object@nObs <= 0)
+            return("Number of observations must be a positive integer.")
+        ## check on knots
+        knots <- object@spline$knots
+        Boundary.knots <- object@spline$Boundary.knots
+        if (length(knots)) { # if there exists internal knots
+            if (min(knots) < min(Boundary.knots) ||
+                max(knots) > max(Boundary.knots))
+                return(paste("Internal knots must all lie in the",
+                             "coverage of boundary knots."))
+        }
+        ## check on degree
+        degree <- object@spline$degre
+        if (degree < 0)
+            return("Degree of spline bases must be a nonnegative integer.")
+        ## check on df
+        dfVec <- do.call("c", object@spline$df)
+        dfValid <- is.integer(dfVec) && all(dfVec >= 0)
+        if (! dfValid)
+            return("Degree of freedom must be nonnegative integers.")
+        ## else return
+        TRUE
+    }
+)
 
 
 ##' An S4 Class Representing Summary of a Fitted Model
 ##'
-##' The class \code{summaryRateReg-class} is an S4 class with selective slots of
-##' \code{rateReg-class} object.  See ``Slots'' for details.  The function
+##' The class \code{summary.rateReg} is an S4 class with selective slots of
+##' \code{rateReg} object.  See ``Slots'' for details.  The function
 ##' \code{\link{summary,rateReg-method}} produces objects of this class.
+##'
+##' @aliases summary.rateReg-class
 ##'
 ##' @slot call Function call.
 ##' @slot spline A character.
@@ -115,39 +131,45 @@ setClass(Class = "rateReg",
 ##' @slot degree A nonnegative integer.
 ##' @slot baseRateCoef A numeric matrix.
 ##' @slot logL A numeric value.
-##' @aliases summaryRateReg-class
-##' @seealso \code{\link{summary,rateReg-method}} for details of slots.
+##'
+##' @seealso \code{\link{summary,rateReg-method}}
 ##' @export
-setClass(Class = "summaryRateReg",
-         slots = c(call = "call",
-                   spline = "character",
-                   knots = "numeric",
-                   Boundary.knots = "numeric",
-                   covarCoef = "matrix",
-                   frailtyPar = "matrix",
-                   degree = "integer",
-                   baseRateCoef = "matrix",
-                   logL = "numeric"),
-         validity = function(object) {
-             ## check on knots
-             if (length(object@knots)) { # if there exists internal knots
-                 if (min(object@knots) < min(object@Boundary.knots) ||
-                     max(object@knots) > max(object@Boundary.knots))
-                     return(paste("Internal knots must all lie in the",
-                                  "coverage of boundary knots."))
-             }
-             ## check on degree
-             if (object@degree < 0)
-                 return("Degree of spline bases must be a nonnegative integer.")
-             ## else return
-             TRUE
-         })
+setClass(
+    Class = "summary.rateReg",
+    slots = c(
+        call = "call",
+        spline = "character",
+        knots = "numeric",
+        Boundary.knots = "numeric",
+        covarCoef = "matrix",
+        frailtyPar = "matrix",
+        degree = "integer",
+        baseRateCoef = "matrix",
+        logL = "numeric"
+    ),
+    validity = function(object) {
+        ## check on knots
+        if (length(object@knots)) { # if there exists internal knots
+            if (min(object@knots) < min(object@Boundary.knots) ||
+                max(object@knots) > max(object@Boundary.knots))
+                return(paste("Internal knots must all lie in the",
+                             "coverage of boundary knots."))
+        }
+        ## check on degree
+        if (object@degree < 0)
+            return("Degree of spline bases must be a nonnegative integer.")
+        ## else return
+        TRUE
+    }
+)
 
 
 ##' An S4 Class Representing Sample MCF
 ##'
 ##' An S4 class that represents sample mean cumulative function (MCF) from data.
 ##' The function \code{\link{mcf}} produces objects of this class.
+##'
+##' @aliases mcf.formula-class
 ##'
 ##' @slot formula Formula.
 ##' @slot data A data frame.
@@ -158,26 +180,29 @@ setClass(Class = "summaryRateReg",
 ##' @slot logConfInt A logical value.
 ##' @slot level A numeric value.
 ##'
-##' @aliases sampleMcf-class
-##' @seealso \code{\link{mcf,formula-method}} for details of slots.
+##' @seealso \code{\link{mcf,formula-method}}.
 ##' @export
-setClass(Class = "sampleMcf",
-         slots = c(
-             formula = "formula",
-             data = "data.frame",
-             MCF = "data.frame",
-             origin = "numeric",
-             multiGroup = "logical",
-             variance = "character",
-             logConfInt = "logical",
-             level = "numeric"
-         ))
+setClass(
+    Class = "mcf.formula",
+    slots = c(
+        formula = "formula",
+        data = "data.frame",
+        MCF = "data.frame",
+        origin = "numeric",
+        multiGroup = "logical",
+        variance = "character",
+        logConfInt = "logical",
+        level = "numeric"
+    )
+)
 
 
 ##' An S4 Class Respresenting Estimated MCF from a Fitted Model
 ##'
 ##' An S4 class that represents estimated mean cumulative function (MCF) from
 ##' Models. The function \code{\link{mcf}} produces objects of this class.
+##'
+##' @aliases mcf.rateReg-class
 ##'
 ##' @slot call Function call.
 ##' @slot formula Formula.
@@ -191,43 +216,46 @@ setClass(Class = "sampleMcf",
 ##' @slot na.action A length-one character vector.
 ##' @slot control A list.
 ##' @slot multiGroup A logical value.
-##' @aliases rateRegMcf-class
-##' @seealso
-##' \code{\link{mcf,rateReg-method}} for details of slots.
+##'
+##' @seealso \code{\link{mcf,rateReg-method}}
 ##' @export
-setClass(Class = "rateRegMcf",
-         slots = c(call = "call",
-                   formula = "formula",
-                   spline = "character",
-                   knots = "numeric",
-                   degree = "integer",
-                   Boundary.knots = "numeric",
-                   newdata = "matrix",
-                   MCF = "data.frame",
-                   level = "numeric",
-                   na.action = "character",
-                   control = "list",
-                   multiGroup = "logical"),
-         validity = function(object) {
-             ## check on knots
-             if (length(object@knots)) { # if there exists internal knots
-                 if (min(object@knots) < min(object@Boundary.knots) ||
-                     max(object@knots) > max(object@Boundary.knots)) {
-                     return(wrapMessages(
-                         "Internal knots must all lie in the",
-                         "coverage of boundary knots."
-                     ))
-                 }
-             }
-             ## check on degree
-             if (object@degree < 0)
-                 return("Degree of spline bases must be a nonnegative integer.")
-             ## check on level
-             if (object@level <= 0 || object@level >= 1)
-                 return("Confidence level mush be between 0 and 1.")
-             ## else return
-             TRUE
-         })
+setClass(
+    Class = "mcf.rateReg",
+    slots = c(
+        call = "call",
+        formula = "formula",
+        spline = "character",
+        knots = "numeric",
+        degree = "integer",
+        Boundary.knots = "numeric",
+        newdata = "matrix",
+        MCF = "data.frame",
+        level = "numeric",
+        na.action = "character",
+        control = "list",
+        multiGroup = "logical"
+    ),
+    validity = function(object) {
+        ## check on knots
+        if (length(object@knots)) { # if there exists internal knots
+            if (min(object@knots) < min(object@Boundary.knots) ||
+                max(object@knots) > max(object@Boundary.knots)) {
+                return(wrapMessages(
+                    "Internal knots must all lie in the",
+                    "coverage of boundary knots."
+                ))
+            }
+        }
+        ## check on degree
+        if (object@degree < 0)
+            return("Degree of spline bases must be a nonnegative integer.")
+        ## check on level
+        if (object@level <= 0 || object@level >= 1)
+            return("Confidence level mush be between 0 and 1.")
+        ## else return
+        TRUE
+    }
+)
 
 
 ##' An S4 Class Representing Estimated Baseline Rate Function
@@ -235,16 +263,20 @@ setClass(Class = "rateRegMcf",
 ##' An S4 class that represents Estimated Baseline Rate Function from model.
 ##' The function \code{\link{baseRate}} produces objects of this class.
 ##'
+##' @aliases baseRate.rateReg-class
+##'
 ##' @slot baseRate A data frame.
 ##' @slot level A numeric value.
-##' @aliases baseRateReg-class
-##' @seealso \code{\link{baseRate,rateReg-method}} for details of slots.
+##'
+##' @seealso \code{\link{baseRate,rateReg-method}}
 ##' @export
-setClass(Class = "baseRateReg",
-         slots = c(
-             baseRate = "data.frame",
-             level = "numeric"
-         ))
+setClass(
+    Class = "baseRate.rateReg",
+    slots = c(
+        baseRate = "data.frame",
+        level = "numeric"
+    )
+)
 
 
 ##' An S4 Class for Simulated Recurrent Event or Survival Times
@@ -252,6 +284,8 @@ setClass(Class = "baseRateReg",
 ##' An S4 class that represents simulated recurrent event or survival time from
 ##' one stochastic process. The function \code{\link{simEvent}} produces objects
 ##' of this class.
+##'
+##' @aliases simEvent-class
 ##'
 ##' @slot .Data A numerical vector of possibly length zero.
 ##' @slot call A function call.
@@ -267,24 +301,28 @@ setClass(Class = "baseRateReg",
 ##' @slot interarrival A list.
 ##' @slot relativeRisk A list.
 ##' @slot method A character vector.
-##' @seealso \code{\link{simEvent}} for details of slots.
+##'
+##' @seealso \code{\link{simEvent}}
 ##' @export
-setClass(Class = "simEvent", contains = "numeric",
-         slots = c(
-             call = "call",
-             z = "list",
-             zCoef = "list",
-             rho = "list",
-             rhoCoef = "numeric",
-             frailty = "list",
-             origin = "list",
-             endTime = "list",
-             censoring = "list",
-             recurrent = "logical",
-             interarrival = "list",
-             relativeRisk = "list",
-             method = "character"
-         ))
+setClass(
+    Class = "simEvent",
+    contains = "numeric",
+    slots = c(
+        call = "call",
+        z = "list",
+        zCoef = "list",
+        rho = "list",
+        rhoCoef = "numeric",
+        frailty = "list",
+        origin = "list",
+        endTime = "list",
+        censoring = "list",
+        recurrent = "logical",
+        interarrival = "list",
+        relativeRisk = "list",
+        method = "character"
+    )
+)
 
 
 ##' An S4 Class Representing the Two-Sample Pseudo-Score Test Results
@@ -293,25 +331,28 @@ setClass(Class = "simEvent", contains = "numeric",
 ##' between two sample mean cumulative functions.  The function
 ##' \code{\link{mcfDiff.test}} produces objects of this class.
 ##'
+##' @aliases mcfDiff.test-class
+##'
 ##' @slot .Data A numeric matrix.
 ##' @slot testVariance A character vector.
-##' @aliases mcfDiff.test-class
-##' @seealso \code{\link{mcfDiff.test}} for details of slots.
+##'
+##' @seealso \code{\link{mcfDiff.test}}
 ##' @export
-setClass(Class = "mcfDiff.test",
-         contains = "matrix",
-         slots = c(
-             testVariance = "character"
-         ),
-         prototype = {
-             mat <- matrix(NA, nrow = 2L, ncol = 5L)
-             row.names(mat) <- c("Constant Weight", "Linear Weight")
-             colnames(mat) <- c("Statistic", "Variance", "Chisq",
-                                "DF", "Pr(>Chisq)")
-             attr(mat, "testVariance") <- "none"
-             mat
-         }
-         )
+setClass(
+    Class = "mcfDiff.test",
+    contains = "matrix",
+    slots = c(
+        testVariance = "character"
+    ),
+    prototype = {
+        mat <- matrix(NA, nrow = 2L, ncol = 5L)
+        row.names(mat) <- c("Constant Weight", "Linear Weight")
+        colnames(mat) <- c("Statistic", "Variance", "Chisq",
+                           "DF", "Pr(>Chisq)")
+        attr(mat, "testVariance") <- "none"
+        mat
+    }
+)
 
 
 ##' An S4 Class Representing Sample MCF Difference
@@ -320,6 +361,8 @@ setClass(Class = "mcfDiff.test",
 ##' cumulative functions from data.  The function \code{\link{mcfDiff}}
 ##' produces objects of this class.
 ##'
+##' @aliases mcfDiff-class
+##'
 ##' @slot call A function call.
 ##' @slot MCF A data frame.
 ##' @slot origin A named numeric vector.
@@ -327,16 +370,18 @@ setClass(Class = "mcfDiff.test",
 ##' @slot logConfInt A logical value.
 ##' @slot level A numeric value.
 ##' @slot test A \code{mcfDiff.test} class object.
-##' @aliases mcfDiff-class
-##' @seealso \code{\link{mcfDiff}} for details of slots.
+##'
+##' @seealso \code{\link{mcfDiff}}
 ##' @export
-setClass(Class = "mcfDiff",
-         slots = c(
-             call = "call",
-             MCF = "data.frame",
-             origin = "numeric",
-             variance = "character",
-             logConfInt = "logical",
-             level = "numeric",
-             test = "mcfDiff.test"
-         ))
+setClass(
+    Class = "mcfDiff",
+    slots = c(
+        call = "call",
+        MCF = "data.frame",
+        origin = "numeric",
+        variance = "character",
+        logConfInt = "logical",
+        level = "numeric",
+        test = "mcfDiff.test"
+    )
+)

@@ -60,7 +60,7 @@ for details.}
 \item{...}{Other arguments for future usage.}
 }
 \value{
-A \code{\link{rateReg-class}} object, whose slots include
+A \code{rateReg} object, whose slots include
 \itemize{
     \item \code{call}: Function call of \code{rateReg}.
     \item \code{formula}: Formula used in the model fitting.
@@ -101,8 +101,7 @@ baseline rate function, which is equivalent to negative binomial regression
 with the same shape and rate parameter in the gamma prior. Spline (including
 piecewise constant) baseline rate function can also be specified and applied
 to model fitting.  Both B-spline and M-spline bases are available.
-\code{rateReg} returns the fitted model through a
-\code{\link{rateReg-class}} object.
+\code{rateReg} returns the fitted model through a \code{rateReg} object.
 }
 \details{
 Function \code{\link{Survr}} in the formula response by default first checks
@@ -207,6 +206,7 @@ plot(splineMcf) +
                 data = splineMcf@MCF, alpha = 0.2) +
     xlab("Days")
 }
+
 }
 \references{
 Fu, H., Luo, J., & Qu, Y. (2016).
@@ -221,5 +221,5 @@ covariate coefficients;
 \code{\link{baseRate,rateReg-method}} for estimated coefficients of baseline
 rate function;
 \code{\link{mcf,rateReg-method}} for estimated MCF from a fitted model;
-\code{\link{plot,rateRegMcf-method}} for plotting estimated MCF.
+\code{\link{plot,mcf.rateReg-method}} for plotting estimated MCF.
 }

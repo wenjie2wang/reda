@@ -121,7 +121,7 @@ setMethod(f = "BIC", signature = "rateReg",
                   ## check on object class
                   checkRes <- sapply(inpList, is.rateReg)
                   if (any(! checkRes))
-                      stop("Objects should be all from 'rateReg-class'.")
+                      stop("Objects should be all of class 'rateReg'.")
                   nObss <- sapply(inpList, nObsFun)
                   k <- log(nObss)
                   abics <- sapply(seq_along(inpList), function(ind) {

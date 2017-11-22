@@ -64,12 +64,13 @@ formula method.  The available named elements include
         right boundary knots (for \code{rateReg-class} object).
     \item \code{B}: The number of bootstrap replicates for using
         bootstrap method for variance estimates of sample MCF estimates.
-        The default value is 1,000.
+        The default value is 200.
     \item \code{se.method}: The method used for SE estimates for
-        bootstrap. The default method is \code{"sampleSE"}, which takes
+        bootstrap. The default method is \code{"sample.se"}, which takes
         the sample SE of point estimates from bootstrap samples.
     \item \code{ci.method}: The method used for confidence interval for
-        bootstrap. The default method is the normal method.
+        bootstrap. The default method is the normal method based on
+        normality.
 }
 The option \code{length.out}, \code{from}, \code{to} will be ignored if
 \code{grid} is specified directly. Otherwise, the grid will be generated
@@ -89,8 +90,8 @@ each unique row in \code{newdata}, such as "treatment" and "control".
 The default values are capital letters starting from "A".}
 }
 \value{
-A \code{\link{sampleMcf-class}} or \code{\link{rateRegMcf-class}} object.
-Their slots include
+A \code{mcf.formula} or \code{mcf.rateReg} object.
+The slots of a \code{mcf.formula} object include
 \itemize{
     \item \code{level}: Confidence level specified.
     \item \code{MCF}: Mean cumulative function at each time point.
@@ -101,33 +102,30 @@ Their slots include
 For the meaning of other slots, see \code{\link{rateReg}}.
 }
 \description{
-An S4 class generic function that estimates mean cumulative function (MCF)
-from a fitted model or computing the sample nonparametric MCF
-(also called Nelson-Aalen estimator) from data.
+An S4 class generic function that returns mean cumulative function (MCF)
+estimates from a fitted model or computing the nonparametric MCF estimates
+(also called the Nelson-Aalen estimator) from the sample data.
 }
 \details{
-For \code{formula} object with \code{\link{Survr}} object as response,
-the covariate specified at the right hand side of the formula
-should be either 1 or any "linear" conbination of factor variable
-in the data.
-The former computes the overall sample MCF.
-The latter computes the sample MCF for each level of the combination of
-the factor variable(s) specified, respectively.
-The sample MCF is also called Nelson-Aalen nonparametric estimator
-(Nelson, 2003) and computed on each time point from sample data.
-The point estimate of sample MCF at each time point does not
-assume any particular underlying model. The variance estimates
-at each time point is given by Poisson process method (by default)
-or Lawless and Nadeau method (LawLess and Nadeau, 1995).
-The approximate confidence intervals are provided as well,
-which are constructed based on the asymptotic normality
-of logarithm of MCF (by default) or MCF itself directly.
+For \code{formula} object with \code{\link{Survr}} object as response, the
+covariate specified at the right hand side of the formula should be either
+\code{1} or any "linear" conbination of categorical variable in the data.
+The former computes the overall sample MCF.  The latter computes the sample
+MCF for each level of the combination of the categorical variable(s)
+specified, respectively.  The sample MCF is also called Nelson-Aalen
+nonparametric estimator (Nelson, 2003) and computed on each time point from
+sample data.  The point estimate of sample MCF at each time point does not
+assume any particular underlying model. The variance estimates at each time
+point is computed following the Lawless and Nadeau method (LawLess and
+Nadeau, 1995), the Poisson process method, or the bootstrap methods.  The
+approximate confidence intervals are provided as well, which are constructed
+based on the asymptotic normality of the MCF itself (by default) or the
+logarithm of MCF.
 
-For \code{\link{rateReg-class}} object,
-\code{mcf} estimates the baseline MCF and its confidence interval
-at each time grid if argument \code{newdata} is not specified.
-Otherwise, \code{mcf} estimates MCF and its confidence interval
-for the given newdata based on Delta-method.
+For \code{\link{rateReg-class}} object, \code{mcf} estimates the baseline
+MCF and its confidence interval at each time grid if argument \code{newdata}
+is not specified.  Otherwise, \code{mcf} estimates MCF and its confidence
+interval for the given newdata based on Delta-method.
 }
 \section{Methods (by class)}{
 \itemize{
@@ -180,5 +178,6 @@ Repairs, Disease Recurrences, and Other Applications} (Vol. 10). SIAM.
 }
 \seealso{
 \code{\link{rateReg}} for model fitting;
+\code{\link{mcfDiff}} for comparing two sample MCFs.
 \code{\link{plot-method}} for plotting MCF.
 }

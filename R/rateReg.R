@@ -30,10 +30,8 @@ NULL
 ##' with the same shape and rate parameter in the gamma prior. Spline (including
 ##' piecewise constant) baseline rate function can also be specified and applied
 ##' to model fitting.  Both B-spline and M-spline bases are available.
-##' \code{rateReg} returns the fitted model through a
-##' \code{\link{rateReg-class}} object.
+##' \code{rateReg} returns the fitted model through a \code{rateReg} object.
 ##'
-##' @details
 ##' Function \code{\link{Survr}} in the formula response by default first checks
 ##' the dataset and will report an error if the dataset does not fall into
 ##' recurrent event data framework.  Subject's ID will be pinpointed if its
@@ -79,10 +77,12 @@ NULL
 ##'         Set it to be \code{FALSE} to supress any possible message
 ##'         from this function.
 ##' }
+##'
 ##' @usage
 ##' rateReg(formula, data, subset, df = NULL, knots = NULL,
 ##'         degree = 0L, na.action, spline = c("bSplines", "mSplines"),
 ##'         start = list(), control = list(), contrasts = NULL, ...)
+##'
 ##' @param formula \code{Survr} object produced by function \code{\link{Survr}}.
 ##' @param data An optional data frame, list or environment containing
 ##' the variables in the model.  If not found in data, the variables are taken
@@ -121,7 +121,8 @@ NULL
 ##' See \code{contrasts.arg} of \code{\link[stats]{model.matrix.default}}
 ##' for details.
 ##' @param ... Other arguments for future usage.
-##' @return A \code{\link{rateReg-class}} object, whose slots include
+##'
+##' @return A \code{rateReg} object, whose slots include
 ##' \itemize{
 ##'     \item \code{call}: Function call of \code{rateReg}.
 ##'     \item \code{formula}: Formula used in the model fitting.
@@ -155,10 +156,13 @@ NULL
 ##'     \item \code{logL}: Log likelihood of the fitted model.
 ##'     \item \code{fisher}: Observed Fisher information matrix.
 ##' }
+##'
 ##' @references
+##'
 ##' Fu, H., Luo, J., & Qu, Y. (2016).
 ##' Hypoglycemic events analysis via recurrent time-to-event (HEART) models.
 ##' \emph{Journal Of Biopharmaceutical Statistics}, 26(2), 280--298.
+##'
 ##' @examples
 ##' library(reda)
 ##'
@@ -215,6 +219,7 @@ NULL
 ##'                 data = splineMcf@MCF, alpha = 0.2) +
 ##'     xlab("Days")
 ##' }
+##'
 ##' @seealso
 ##' \code{\link{summary,rateReg-method}} for summary of fitted model;
 ##' \code{\link{coef,rateReg-method}} for estimated covariate coefficients;
@@ -223,10 +228,13 @@ NULL
 ##' \code{\link{baseRate,rateReg-method}} for estimated coefficients of baseline
 ##' rate function;
 ##' \code{\link{mcf,rateReg-method}} for estimated MCF from a fitted model;
-##' \code{\link{plot,rateRegMcf-method}} for plotting estimated MCF.
-##' @importFrom splines2 ibs iSpline
-##' @importFrom stats na.fail na.omit na.exclude na.pass .getXlevels
-##' model.extract predict
+##' \code{\link{plot,mcf.rateReg-method}} for plotting estimated MCF.
+##'
+##' @importFrom splines2 bSpline cSpline ibs iSpline mSpline
+##'
+##' @importFrom stats .getXlevels constrOptim model.extract na.fail na.omit
+##'     na.exclude na.pass predict
+##'
 ##' @export
 rateReg <- function(formula, data, subset, df = NULL, knots = NULL, degree = 0L,
                     na.action, spline = c("bSplines", "mSplines"),
@@ -341,9 +349,11 @@ rateReg <- function(formula, data, subset, df = NULL, knots = NULL, degree = 0L,
 
     ## check whether the knots are reasonable
     if (any(colSums(bMat[dat$event == 1, , drop = FALSE]) == 0)) {
-        stop("Some spline basis does not capture any event time ",
-             "and thus is possibly redundent.",
-             "\nPlease adjust spline knots or degree.")
+        stop(wrapMessages(
+            "Some spline basis does not capture any event time",
+            "and thus is possibly redundent.",
+            "Please adjust spline knots or degree."
+        ))
     }
 
     ## prepare anything needed in LogL_rateReg but free from parameters
@@ -425,29 +435,27 @@ rateReg <- function(formula, data, subset, df = NULL, knots = NULL, degree = 0L,
     ## output: df, degree of freefom, including beta and theta
     df <- list(beta = nBeta, theta = 1L, alpha = df)
 
-    ## results to return
-    results <- methods::new("rateReg",
-                            call = Call,
-                            formula = formula,
-                            nObs = nObs,
-                            spline = list(spline = spline,
-                                          df = df,
-                                          knots = knots,
-                                          degree = degree,
-                                          Boundary.knots = Boundary.knots),
-                            estimates = list(beta = est_beta,
-                                             theta = est_theta,
-                                             alpha = est_alpha),
-                            control = control,
-                            start = start,
-                            na.action = na.action,
-                            xlevels = .getXlevels(mt, mf),
-                            contrasts = contrasts,
-                            convergCode = fit$convergence,
-                            logL = - fit$value,
-                            fisher = fit$hessian)
     ## return
-    results
+    methods::new("rateReg",
+                 call = Call,
+                 formula = formula,
+                 nObs = nObs,
+                 spline = list(spline = spline,
+                               df = df,
+                               knots = knots,
+                               degree = degree,
+                               Boundary.knots = Boundary.knots),
+                 estimates = list(beta = est_beta,
+                                  theta = est_theta,
+                                  alpha = est_alpha),
+                 control = control,
+                 start = start,
+                 na.action = na.action,
+                 xlevels = .getXlevels(mt, mf),
+                 contrasts = contrasts,
+                 convergCode = fit$convergence,
+                 logL = - fit$value,
+                 fisher = fit$hessian)
 }
 
 
@@ -551,7 +559,7 @@ rateReg_control <- function(Boundary.knots = NULL,
                             verbose = TRUE, ...)
 {
     if (! is.logical(verbose))
-        stop("'verbose' must be a logical value.")
+        stop("The option 'verbose' must be a logical value.")
     ## return
     list(control4rateReg = list(Boundary.knots = Boundary.knots,
                                 verbose = verbose),
@@ -567,8 +575,10 @@ rateReg_start <- function (beta, theta = 0.5, alpha, ..., nBeta_, nAlpha_)
     if (missing(beta)) {
         beta <- rep(0.1, nBeta_)
     } else if (length(beta) != nBeta_) {
-        stop("Number of starting values for coefficients of covariates ",
-             "does not match with the specified formula.")
+        stop(wrapMessages(
+            "Number of starting values for coefficients of covariates",
+            "does not match with the specified formula."
+        ))
     }
     if (theta <= 0)
         stop("Value of parameter for random effects must be > 0.")

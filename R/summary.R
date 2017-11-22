@@ -29,7 +29,7 @@ NULL
 ##' and estimated rate parameter of frailty random variable, etc.
 ##'
 ##' \code{summary,rateReg-method} returns a
-##' \code{\link{summaryRateReg-class}} object,
+##' \code{summary.rateReg} object,
 ##' whose slots include
 ##' \itemize{
 ##'     \item \code{covarCoef}: Estimated covariate coefficients.
@@ -39,7 +39,7 @@ NULL
 ##' }
 ##' For the meaning of other slots, see \code{\link{rateReg}}.
 ##'
-##' @param object \code{\link{rateReg-class}} object.
+##' @param object A \code{rateReg} object.
 ##' @param showCall A logic value with dafault \code{TRUE},
 ##' indicating whether function \code{show}
 ##' prints out the original call information of \code{rateReg}.
@@ -50,10 +50,14 @@ NULL
 ##' Similar to argument \code{showCall}, It may be helpful
 ##' for a more concise printout.
 ##' @param ... Other arguments for future usage.
-##' @return summaryRateReg-class object
+##'
+##' @return \code{summary.rateReg} object
+##'
 ##' @aliases summary,rateReg-method
+##'
 ##' @examples
 ##' ## See examples given in function rateReg.
+##'
 ##' @seealso
 ##' \code{\link{rateReg}} for model fitting;
 ##' \code{\link{coef,rateReg-method}} for point estimates of
@@ -75,7 +79,7 @@ setMethod(f = "summary", signature = "rateReg",
               theta <- object@estimates$theta
               alpha <- object@estimates$alpha
               ## check on object validity by 'new', validObject(results)
-              results <- new("summaryRateReg",
+              results <- new("summary.rateReg",
                              call = Call,
                              spline = object@spline$spline,
                              knots = knots,

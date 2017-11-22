@@ -3,26 +3,26 @@
 \docType{methods}
 \name{plot-method}
 \alias{plot-method}
-\alias{plot,sampleMcf,missing-method}
-\alias{plot,sampleMcf-method}
-\alias{plot,rateRegMcf,missing-method}
-\alias{plot,rateRegMcf-method}
-\alias{plot,baseRateReg,missing-method}
-\alias{plot,baseRateReg-method}
+\alias{plot,mcf.formula,missing-method}
+\alias{plot,mcf.formula-method}
+\alias{plot,mcf.rateReg,missing-method}
+\alias{plot,mcf.rateReg-method}
+\alias{plot,baseRate.rateReg,missing-method}
+\alias{plot,baseRate.rateReg-method}
 \alias{plot,mcfDiff,missing-method}
 \alias{plot,mcfDiff-method}
 \title{Plot Baseline Rate or Mean Cumulative Function (MCF)}
 \usage{
-\S4method{plot}{sampleMcf,missing}(x, y, conf.int = FALSE,
-  mark.time = FALSE, lty, col, legendName, legendLevels, addOrigin = FALSE,
+\S4method{plot}{mcf.formula,missing}(x, y, lty, col, legendName, legendLevels,
+  conf.int = FALSE, mark.time = FALSE, addOrigin = FALSE, ...)
+
+\S4method{plot}{mcf.rateReg,missing}(x, y, conf.int = FALSE, lty, col, ...)
+
+\S4method{plot}{baseRate.rateReg,missing}(x, y, conf.int = FALSE, lty, col,
   ...)
 
-\S4method{plot}{rateRegMcf,missing}(x, y, conf.int = FALSE, lty, col, ...)
-
-\S4method{plot}{baseRateReg,missing}(x, y, conf.int = FALSE, lty, col, ...)
-
-\S4method{plot}{mcfDiff,missing}(x, y, conf.int = TRUE, lty, col, legendName,
-  legendLevels, addOrigin = FALSE, ...)
+\S4method{plot}{mcfDiff,missing}(x, y, lty, col, legendName, legendLevels,
+  conf.int = TRUE, addOrigin = FALSE, ...)
 }
 \arguments{
 \item{x}{An object used to dispatch a method.}
@@ -30,14 +30,6 @@
 \item{y}{An argument that should be missing and ignored now.
 Its existence is just for satisfying the definition of generaic function
 \code{plot} in package \code{graphics} for methods' dispatching.}
-
-\item{conf.int}{A logical value indicating
-whether to plot confidence interval.
-The default value is \code{FALSE}.}
-
-\item{mark.time}{A logical value with default \code{FALSE}.
-If \code{TRUE}, each censoring time is marked by "+" on the MCF curves.
-Otherwise, the censoring time would not be marked.}
 
 \item{lty}{An optional numeric vector indicating
 line types specified to different groups:
@@ -56,6 +48,14 @@ for "male" and "female". The default value is generated from the
 each unique row in \code{newdata}, such as "treatment" and "control".
 The default values are generated from the \code{object}.}
 
+\item{conf.int}{A logical value indicating
+whether to plot confidence interval.
+The default value is \code{FALSE}.}
+
+\item{mark.time}{A logical value with default \code{FALSE}.
+If \code{TRUE}, each censoring time is marked by "+" on the MCF curves.
+Otherwise, the censoring time would not be marked.}
+
 \item{addOrigin}{A logical value indicating whether the MCF curves start
 from origin time. The default value is \code{TRUE}.}
 
@@ -72,6 +72,7 @@ further customized properly.
 }
 \examples{
 ## See examples given in function mcf and rateReg.
+
 }
 \seealso{
 \code{\link{mcf}} for estimation of MCF;

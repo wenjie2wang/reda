@@ -27,6 +27,7 @@
 ##' further customized properly.
 ##'
 ##' @name plot-method
+##'
 ##' @param x An object used to dispatch a method.
 ##' @param y An argument that should be missing and ignored now.
 ##' Its existence is just for satisfying the definition of generaic function
@@ -42,17 +43,26 @@
 ##' line colors specified to different groups.
 ##' @param ... Other arguments for further usage.
 ##' @return A \code{ggplot} object.
+##'
 ##' @examples
 ##' ## See examples given in function mcf and rateReg.
+##'
 ##' @seealso
 ##' \code{\link{mcf}} for estimation of MCF;
 ##' \code{\link{rateReg}} for model fitting.
+##'
+##' @importFrom ggplot2 aes aes_string element_text geom_line geom_step
+##'     geom_text ggplot ggtitle scale_color_manual scale_linetype_manual theme
+##'     ylab
+##'
 ##' @importFrom graphics plot
 NULL
 
 
 ##' @rdname plot-method
-##' @aliases plot,sampleMcf-method
+##'
+##' @aliases plot,mcf.formula-method
+##'
 ##' @param mark.time A logical value with default \code{FALSE}.
 ##' If \code{TRUE}, each censoring time is marked by "+" on the MCF curves.
 ##' Otherwise, the censoring time would not be marked.
@@ -65,14 +75,17 @@ NULL
 ##' The default values are generated from the \code{object}.
 ##' @param addOrigin A logical value indicating whether the MCF curves start
 ##' from origin time. The default value is \code{TRUE}.
-##' @importFrom ggplot2 ggplot geom_step aes aes_string scale_color_manual
-##' scale_linetype_manual ylab ggtitle geom_text theme element_text
+##'
 ##' @export
 setMethod(
-    f = "plot", signature = c("sampleMcf", "missing"),
-    definition = function(x, y, conf.int = FALSE, mark.time = FALSE,
-                          lty, col, legendName, legendLevels,
-                          addOrigin = FALSE, ...)
+    f = "plot", signature = c("mcf.formula", "missing"),
+    definition = function(x, y,
+                          lty, col,
+                          legendName, legendLevels,
+                          conf.int = FALSE,
+                          mark.time = FALSE,
+                          addOrigin = FALSE,
+                          ...)
     {
         ## nonsense, just to suppress Note from R CMD check --as-cran
         MCF <- instRate <- lower <- upper <- design <- time <- NULL
@@ -190,12 +203,12 @@ setMethod(
 
 
 ##' @rdname plot-method
-##' @aliases plot,rateRegMcf-method
-##' @importFrom ggplot2 ggplot geom_line aes aes_string scale_color_manual
-##' scale_linetype_manual ylab ggtitle theme element_text
+##'
+##' @aliases plot,mcf.rateReg-method
+##'
 ##' @export
 setMethod(
-    f = "plot", signature = c("rateRegMcf", "missing"),
+    f = "plot", signature = c("mcf.rateReg", "missing"),
     definition = function(x, y, conf.int = FALSE, lty, col, ...)
     {
         ## nonsense, just to suppress Note from R CMD check --as-cran
@@ -258,12 +271,12 @@ setMethod(
 
 
 ##' @rdname plot-method
-##' @aliases plot,baseRateReg-method
-##' @importFrom ggplot2 ggplot geom_line aes aes_string
-##' ylab ggtitle theme element_text
+##'
+##' @aliases plot,baseRate.rateReg-method
+##'
 ##' @export
 setMethod(
-    f = "plot", signature = c("baseRateReg", "missing"),
+    f = "plot", signature = c("baseRate.rateReg", "missing"),
     definition = function(x, y, conf.int = FALSE, lty, col, ...)
     {
         ## nonsense, just to suppress Note from R CMD check --as-cran
@@ -294,9 +307,12 @@ setMethod(
 ##' @export
 setMethod(
     f = "plot", signature = c("mcfDiff", "missing"),
-    definition = function(x, y, conf.int = TRUE,
-                          lty, col, legendName, legendLevels,
-                          addOrigin = FALSE, ...)
+    definition = function(x, y,
+                          lty, col,
+                          legendName, legendLevels,
+                          conf.int = TRUE,
+                          addOrigin = FALSE,
+                          ...)
     {
         ## nonsense, just to suppress Note from R CMD check --as-cran
         MCF <- lower <- upper <- time <- NULL

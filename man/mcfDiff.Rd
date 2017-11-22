@@ -3,7 +3,7 @@
 \name{mcfDiff}
 \alias{mcfDiff}
 \alias{mcfDiff.test}
-\title{Comparing Two Sample MCF curves}
+\title{Comparing Two-Sample MCFs}
 \usage{
 mcfDiff(mcf1, mcf2 = NULL, level = 0.95,
         testVariance = c("robust", "Poisson", "none"), ...)
@@ -12,11 +12,10 @@ mcfDiff.test(mcf1, mcf2 = NULL, testVariance = c("robust", "Poisson",
   "none"))
 }
 \arguments{
-\item{mcf1}{A \code{sampleMcf} object representing the MCF for one or two
+\item{mcf1}{A \code{mcf.formula} object representing the MCF for one or two
 groups.}
 
-\item{mcf2}{An optional second \code{sampleMcf} object. By default, it is
-\code{NULL}.}
+\item{mcf2}{An optional second \code{mcf.formula} object or \code{NULL}.}
 
 \item{level}{A numeric value indicating the confidence level required. The
 default value is 0.95.}
@@ -32,8 +31,8 @@ difference estimates are of interest).}
 \item{...}{Other arguments for future usage.}
 }
 \value{
-A \code{mcfDiff} object that contains the following slots:
-
+The function \code{mcfDiff} returns a \code{mcfDiff} object (of S4 class)
+that contains the following slots:
 \itemize{
 
 \item \code{call}: Function call.
@@ -55,6 +54,18 @@ object, it is always \code{FALSE}.
 results.
 
 }
+
+The function \code{mcfDiff.test} returns a \code{mcfDiff.test} object (of S4
+class) that contains the following slots:
+\itemize{
+
+\item \code{.Data}: A numeric matrix (of two rows and five columns) for
+hypothesis testing results.
+
+\item \code{testVariance}: A character string (or vector of length one)
+indicating the method used for the variance estimates of the test statistic.
+
+}
 }
 \description{
 This function estimates the sample MCF difference between two groups. Both
@@ -64,22 +75,23 @@ and Nadeau (1996) is also performed by default.
 }
 \details{
 The null hypothesis of the two-sample pseudo-score test is that there is no
-difference between the two sample MCF curves, while the alternative
-hypothesis suggests a difference.
+difference between the two sample MCFs, while the alternative hypothesis
+suggests a difference.
 
 The test is based on a family of test statistics proposed by Lawless and
 Nadeau (1995). The argument \code{testVariance} specifies the method for
 computing the variance estimates of the test statistics under different
-model assumption. The variance estimates for a Poisson process, and the
-estimate more robust to departures from Poisson assumptions are implemented.
-
-Both constant weight and the linear weight function (with scaling) suggested
-in Cook, Lawless, and Nadeau (1996) are implemented. The constant weight is
-powerful in cases where the two MCFs are approximately proportional to each
-other. The linear weight function is \code{a(u) = t - u}, where \code{u}
-represents the time variable and \code{t} is the first time point when the
-risk set of either group becomes empty. The linear weight function puts more
-emphasis on the difference at earily times than later times and is more
+model assumption. See the document of argument \code{testVariance} for all
+applicable options.  For the variance estimates robust to departures from
+Poisson process assumption, both constant weight and the linear weight
+function (with scaling) suggested in Cook, Lawless, and Nadeau (1996) are
+implemented. The constant weight is powerful in cases where the two MCFs are
+approximately proportional to each other. The linear weight function is
+originally \code{a(u) = t - u}, where \code{u} represents the time variable
+and \code{t} is the first time point when the risk set of either group
+becomes empty. It is further scaled by \code{1 / t} for test statistics
+invariant to unit of measurement of time.  The linear weight function puts
+more emphasis on the difference at earily times than later times and is more
 powerful for cases where the MCFs are no longer proportional to each other,
 but not crossing. Also see Cook and Lawless (2007, Section 3.7.5) for more
 details.

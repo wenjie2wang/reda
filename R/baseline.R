@@ -28,21 +28,26 @@ NULL
 ##' An S4 class generic function that returns the estimated baseline rate
 ##' function.
 ##'
+##' @aliases baseRate
+##'
 ##' @param object An object used to dispatch a method.
 ##' @param ... Other arguments for future usage.
-##' @aliases baseRate
+##'
 ##' @return A \code{baseRate} object.
+##'
 ##' @examples
 ##' ## See examples given in function rateReg.
 ##' @seealso
 ##' \code{\link{rateReg}} for model fitting;
 ##' \code{\link{summary,rateReg-method}} for summary of a fitted model;
-##' \code{\link{plot,baseRateReg-method}} for ploting method.
+##' \code{\link{plot,baseRate.rateReg-method}} for ploting method.
 ##' @export
-setGeneric(name = "baseRate",
-           def = function(object, ...) {
-               standardGeneric("baseRate")
-           })
+setGeneric(
+    name = "baseRate",
+    def = function(object, ...) {
+        standardGeneric("baseRate")
+    }
+)
 
 
 ##' @describeIn baseRate Estiamted baseline rate from a fitted model.
@@ -63,12 +68,15 @@ setGeneric(name = "baseRate",
 ##' When \code{grid} is missing, the grid will be generated
 ##' by \code{seq} (from package \pkg{base})
 ##' with arguments \code{from}, \code{to} and \code{length.out}.
+##'
 ##' @aliases baseRate,rateReg-method
+##'
 ##' @importFrom stats qnorm
-##' @importFrom splines2 bSpline mSpline
+##'
 ##' @export
 setMethod(
-    f = "baseRate", signature = "rateReg",
+    f = "baseRate",
+    signature = "rateReg",
     definition = function(object, level = 0.95, control = list(), ...) {
 
         ## baseline rate coefficients
@@ -117,7 +125,7 @@ setMethod(
         ## prepare for output
         outDat <- data.frame(time = gridTime, baseRate = estVec,
                              se = seVec, lower = lower, upper = upper)
-        out <- new("baseRateReg",
-                   baseRate = outDat,
-                   level = level)
+        methods::new("baseRate.rateReg",
+                     baseRate = outDat,
+                     level = level)
     })

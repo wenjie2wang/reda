@@ -51,9 +51,9 @@ is.Survr <- function(x) {
     inherits(x, "Survr")
 }
 
-## is x a sampleMcf object
-is.sampleMcf <- function(x) {
-    inherits(x, "sampleMcf")
+## is x a mcf.sample object
+is.mcf.formula <- function(x) {
+    inherits(x, "mcf.formula")
 }
 
 ## is x a rateReg object

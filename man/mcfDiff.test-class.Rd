@@ -18,5 +18,5 @@ between two sample mean cumulative functions.  The function
 }}
 
 \seealso{
-\code{\link{mcfDiff.test}} for details of slots.
+\code{\link{mcfDiff.test}}
 }

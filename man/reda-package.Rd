@@ -5,13 +5,27 @@
 \alias{reda-package}
 \title{Recurrent Event Data Analysis}
 \description{
-The package \pkg{reda} mainly provides function \code{\link{rateReg}}
-to fit parametric gamma frailty model with spline baseline rate function.
-Another main function \code{\link{mcf}} computes and plots
-the parametric mean cumulative function (MCF) from a fitted model
-as well as the nonparametric sample MCF (Nelson-Aelson estimator)
-for recurrent event data.
+The R package \pkg{reda} provides functions for simulating, exploring and
+modeling recurrent event data.
 }
 \details{
-See vignettes for introduction and demonstration.
+The main functions are summarized as follows:
+\itemize{
+
+\item \code{simEventData}: Simulating survival, recurrent event, or multiple
+event data from stochastic process point of view.
+
+\item \code{mcf}: Mean cumulative function (MCF) estimates from a fitted
+parametric gamma frailty model or the nonparametic MCF estimator (the
+Nelson-Aelen estimator of the cumulative hazard function) from the sample
+data.
+
+\item \code{mcfDiff}: Comparing two-sample MCFs by the pseudo-score tests
+and estimating their difference over time.
+
+\item \code{rateReg}: Fitting parametric Gamma fraitly model with spline
+baseline rate function.
+}
+
+See the package vignettes for introduction and demonstration.
 }

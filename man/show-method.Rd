@@ -4,9 +4,10 @@
 \name{show-method}
 \alias{show-method}
 \alias{show,rateReg-method}
+\alias{show,summary.rateReg-method}
 \alias{show,summaryRateReg-method}
-\alias{show,sampleMcf-method}
-\alias{show,rateRegMcf-method}
+\alias{show,mcf.formula-method}
+\alias{show,mcf.rateReg-method}
 \alias{show,simEvent-method}
 \alias{show,mcfDiff-method}
 \alias{show,mcfDiff.test-method}
@@ -14,11 +15,11 @@
 \usage{
 \S4method{show}{rateReg}(object)
 
-\S4method{show}{summaryRateReg}(object)
+\S4method{show}{summary.rateReg}(object)
 
-\S4method{show}{sampleMcf}(object)
+\S4method{show}{mcf.formula}(object)
 
-\S4method{show}{rateRegMcf}(object)
+\S4method{show}{mcf.rateReg}(object)
 
 \S4method{show}{simEvent}(object)
 
@@ -34,14 +35,14 @@ An S4 class generic function that displays certain object.
 }
 \details{
 \itemize{
-  \item For \code{\link{rateReg-class}} object,
+  \item For \code{rateReg} object,
       it prints out brief summary of the fitted model.
-  \item For \code{\link{summaryRateReg-class}} object,
+  \item For \code{summary.rateReg} object,
       it prints out summary of the fitted model.
-  \item For \code{\link{sampleMcf-class}} object,
+  \item For \code{mcf.sample} object,
       it prints out the function call, formula and
       the sample MCF data frame.
-  \item For \code{\link{rateRegMcf-class}} object,
+  \item For \code{mcf.rateReg} object,
       it prints formula, new data, confidence level,
       and the estimated MCF data frame.
 }
