@@ -25,12 +25,12 @@ NULL
 
 ##' Recurrent Events Regression Based on Counts and Rate Function
 ##'
-##' The default model is the gamma frailty model with one piece constant
-##' baseline rate function, which is equivalent to negative binomial regression
-##' with the same shape and rate parameter in the gamma prior. Spline (including
-##' piecewise constant) baseline rate function can also be specified and applied
-##' to model fitting.  Both B-spline and M-spline bases are available.
-##' \code{rateReg} returns the fitted model through a \code{rateReg} object.
+##' This function fits recurrent event data (event counts) with gamma frailty
+##' model with spline rate function. The default model is the gamma frailty
+##' model with one piece constant baseline rate function, which is equivalent to
+##' negative binomial regression with the same shape and rate parameter in the
+##' gamma prior. Spline (including piecewise constant) baseline rate function
+##' can also be specified and applied to model fitting.
 ##'
 ##' Function \code{\link{Survr}} in the formula response by default first checks
 ##' the dataset and will report an error if the dataset does not fall into
@@ -84,42 +84,40 @@ NULL
 ##'         start = list(), control = list(), contrasts = NULL, ...)
 ##'
 ##' @param formula \code{Survr} object produced by function \code{\link{Survr}}.
-##' @param data An optional data frame, list or environment containing
-##' the variables in the model.  If not found in data, the variables are taken
-##' from \code{environment(formula)}, usually the environment from which
-##' function \code{\link{rateReg}} is called.
-##' @param subset An optional vector specifying a subset of observations
-##' to be used in the fitting process.
+##' @param data An optional data frame, list or environment containing the
+##'     variables in the model.  If not found in data, the variables are taken
+##'     from \code{environment(formula)}, usually the environment from which
+##'     function \code{\link{rateReg}} is called.
+##' @param subset An optional vector specifying a subset of observations to be
+##'     used in the fitting process.
 ##' @param df An optional nonnegative integer to specify the degree of freedom
-##' of baseline rate function. If argument \code{knots} or \code{degree} are
-##' specified, \code{df} will be neglected whether it is specified or not.
+##'     of baseline rate function. If argument \code{knots} or \code{degree} are
+##'     specified, \code{df} will be neglected whether it is specified or not.
 ##' @param knots An optional numeric vector that represents all the internal
-##' knots of baseline rate function.
-##' The default is \code{NULL}, representing no any internal knots.
+##'     knots of baseline rate function.  The default is \code{NULL},
+##'     representing no any internal knots.
 ##' @param degree An optional nonnegative integer to specify the degree of
-##' spline bases.
-##' @param na.action A function that indicates what should the procedure
-##' do if the data contains \code{NA}s.  The default is set by the
-##' na.action setting of \code{\link[base]{options}}.
-##' The "factory-fresh" default is \code{\link[stats]{na.omit}}.
-##' Other possible values inlcude \code{\link[stats]{na.fail}},
-##' \code{\link[stats]{na.exclude}}, and \code{\link[stats]{na.pass}}.
-##' \code{help(na.fail)} for details.
+##'     spline bases.
+##' @param na.action A function that indicates what should the procedure do if
+##'     the data contains \code{NA}s.  The default is set by the na.action
+##'     setting of \code{\link[base]{options}}.  The "factory-fresh" default is
+##'     \code{\link[stats]{na.omit}}.  Other possible values inlcude
+##'     \code{\link[stats]{na.fail}}, \code{\link[stats]{na.exclude}}, and
+##'     \code{\link[stats]{na.pass}}.  \code{help(na.fail)} for details.
 ##' @param spline An optional character that specifies the flavor of splines.
-##' The possible option is \code{bSplines} for B-splines or
-##' \code{mSplines} for M-splines. Partial matching on the names is allowed.
-##' @param start An optional list of starting values for the parameters
-##' to be estimated in the model.  See more in Section details.
-##' @param control An optional list of parameters to control the
-##' maximization process of negative log likelihood function
-##' and adjust the baseline rate function.
-##' See more in Section details.
-##' @param contrasts An optional list, whose entries are values
-##' (numeric matrices or character strings naming functions) to be used
-##' as replacement values for the contrasts replacement function and
-##' whose names are the names of columns of data containing factors.
-##' See \code{contrasts.arg} of \code{\link[stats]{model.matrix.default}}
-##' for details.
+##'     The possible option is \code{bSplines} for B-splines or \code{mSplines}
+##'     for M-splines.
+##' @param start An optional list of starting values for the parameters to be
+##'     estimated in the model.  See more in Section details.
+##' @param control An optional list of parameters to control the maximization
+##'     process of negative log likelihood function and adjust the baseline rate
+##'     function.  See more in Section details.
+##' @param contrasts An optional list, whose entries are values (numeric
+##'     matrices or character strings naming functions) to be used as
+##'     replacement values for the contrasts replacement function and whose
+##'     names are the names of columns of data containing factors.  See
+##'     \code{contrasts.arg} of \code{\link[stats]{model.matrix.default}} for
+##'     details.
 ##' @param ... Other arguments for future usage.
 ##'
 ##' @return A \code{rateReg} object, whose slots include
@@ -172,11 +170,11 @@ NULL
 ##' ## six pieces' piecewise constant rate function
 ##' (piecesFit <- rateReg(Survr(ID, time, event) ~ group + x1,
 ##'                       data = simuDat, subset = ID %in% 1:50,
-##'                       spline = "bSplines", knots = seq(28, 140, by = 28)))
+##'                       knots = seq(28, 140, by = 28)))
 ##'
 ##' ## fit rate function with cubic spline
 ##' (splineFit <- rateReg(Survr(ID, time, event) ~ group + x1, data = simuDat,
-##'                       spline = "mSpl", knots = c(56, 84, 112), degree = 3))
+##'                       knots = c(56, 84, 112), degree = 3))
 ##'
 ##' ## more specific summary
 ##' summary(constFit)
@@ -276,8 +274,9 @@ rateReg <- function(formula, data, subset, df = NULL, knots = NULL, degree = 0L,
         stop("Response in formula must be a survival recurrent object.")
 
     ## number of covariates excluding intercept
-    if ((nBeta <- ncol(mm) - 1L) <= 0)
-        stop("Covariates must be specified in formula.")
+    nBeta <- ncol(mm) - 1L
+    ## if (nBeta == 0L)
+    ##     warning("No covariate was specified in formula.")
     ## covariates' names
     covar_names <- colnames(mm)[- 1L]
 
@@ -348,7 +347,7 @@ rateReg <- function(formula, data, subset, df = NULL, knots = NULL, degree = 0L,
     length_par <- length(ini)
 
     ## check whether the knots are reasonable
-    if (any(colSums(bMat[dat$event == 1, , drop = FALSE]) == 0)) {
+    if (any(colSums(bMat[dat$event > 0, , drop = FALSE]) == 0)) {
         stop(wrapMessages(
             "Some spline basis does not capture any event time",
             "and thus is possibly redundent.",
@@ -358,7 +357,7 @@ rateReg <- function(formula, data, subset, df = NULL, knots = NULL, degree = 0L,
 
     ## prepare anything needed in LogL_rateReg but free from parameters
     ## index for event and censoring
-    ind_event <- dat$event == 1
+    ind_event <- dat$event > 0
     ind_cens <- ! ind_event
     ## basis matrix at event times
     bMat_event <- bMat[ind_event, , drop = FALSE]
@@ -435,6 +434,10 @@ rateReg <- function(formula, data, subset, df = NULL, knots = NULL, degree = 0L,
     ## output: df, degree of freefom, including beta and theta
     df <- list(beta = nBeta, theta = 1L, alpha = df)
 
+    ## output: xlevels
+    xlevels <- .getXlevels(mt, mf)
+    if (is.null(xlevels)) xlevels <- list()
+
     ## return
     methods::new("rateReg",
                  call = Call,
@@ -451,7 +454,7 @@ rateReg <- function(formula, data, subset, df = NULL, knots = NULL, degree = 0L,
                  control = control,
                  start = start,
                  na.action = na.action,
-                 xlevels = .getXlevels(mt, mf),
+                 xlevels = xlevels,
                  contrasts = contrasts,
                  convergCode = fit$convergence,
                  logL = - fit$value,
@@ -467,7 +470,12 @@ logL_rateReg <- function(par, nBeta, nSub, xMat, ind_event, ind_cens,
     ## par = \THETA in the paper
     par_theta <- max(par[nBeta + 1L], .Machine$double.eps)
     par_alpha <- par[(nBeta + 2L) : length(par)]
-    expXBeta <- as.vector(exp(xMat %*% as.matrix(par[seq_len(nBeta)])))
+    expXBeta <-
+        if (nBeta) {
+            as.vector(exp(xMat %*% as.matrix(par[seq_len(nBeta)])))
+        } else {
+            rep(1, nrow(xMat))
+        }
 
     ## baseline rate function
     rho_0_ij <- pmax(as.vector(bMat_event %*% par_alpha), .Machine$double.eps)

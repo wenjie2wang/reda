@@ -113,13 +113,25 @@ setMethod(
         nBeta <- nrow(object@estimates$beta)
         ind <- seq_len(nBeta + 1L)
         covMat <- solve(object@fisher)[- ind, - ind, drop = FALSE]
-        seVec <- apply(bMat, 1L, function (bVec, covMat) {
-                sqrt(crossprod(bVec, covMat) %*% bVec)
+        varVec <- apply(bMat, 1L, function (bVec, covMat) {
+            crossprod(bVec, covMat) %*% bVec
         }, covMat = covMat)
+
+        seVec <- tryCatch(sqrt(varVec), warning = function(w) w)
+        if ("warning" %in% class(seVec)) {
+            warning(wrapMessages(
+                "The variance-covariance matrix is not positive definite.",
+                "Please check possible error",
+                "(or adjust spline bases and perhaps",
+                "try different set of starting values)."
+            ))
+            ## may not be apprepriate
+            seVec <- sqrt(pmax(varVec, .Machine$double.eps))
+        }
 
         ## confidence interval for the given level
         confBand <- stats::qnorm((1 + level) / 2) * seVec
-        lower <- pmax(0, estVec - confBand)
+        lower <- estVec - confBand
         upper <- estVec + confBand
 
         ## prepare for output

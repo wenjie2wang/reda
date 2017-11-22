@@ -11,51 +11,49 @@ rateReg(formula, data, subset, df = NULL, knots = NULL,
 \arguments{
 \item{formula}{\code{Survr} object produced by function \code{\link{Survr}}.}
 
-\item{data}{An optional data frame, list or environment containing
-the variables in the model.  If not found in data, the variables are taken
+\item{data}{An optional data frame, list or environment containing the
+variables in the model.  If not found in data, the variables are taken
 from \code{environment(formula)}, usually the environment from which
 function \code{\link{rateReg}} is called.}
 
-\item{subset}{An optional vector specifying a subset of observations
-to be used in the fitting process.}
+\item{subset}{An optional vector specifying a subset of observations to be
+used in the fitting process.}
 
 \item{df}{An optional nonnegative integer to specify the degree of freedom
 of baseline rate function. If argument \code{knots} or \code{degree} are
 specified, \code{df} will be neglected whether it is specified or not.}
 
 \item{knots}{An optional numeric vector that represents all the internal
-knots of baseline rate function.
-The default is \code{NULL}, representing no any internal knots.}
+knots of baseline rate function.  The default is \code{NULL},
+representing no any internal knots.}
 
 \item{degree}{An optional nonnegative integer to specify the degree of
 spline bases.}
 
-\item{na.action}{A function that indicates what should the procedure
-do if the data contains \code{NA}s.  The default is set by the
-na.action setting of \code{\link[base]{options}}.
-The "factory-fresh" default is \code{\link[stats]{na.omit}}.
-Other possible values inlcude \code{\link[stats]{na.fail}},
-\code{\link[stats]{na.exclude}}, and \code{\link[stats]{na.pass}}.
-\code{help(na.fail)} for details.}
+\item{na.action}{A function that indicates what should the procedure do if
+the data contains \code{NA}s.  The default is set by the na.action
+setting of \code{\link[base]{options}}.  The "factory-fresh" default is
+\code{\link[stats]{na.omit}}.  Other possible values inlcude
+\code{\link[stats]{na.fail}}, \code{\link[stats]{na.exclude}}, and
+\code{\link[stats]{na.pass}}.  \code{help(na.fail)} for details.}
 
 \item{spline}{An optional character that specifies the flavor of splines.
-The possible option is \code{bSplines} for B-splines or
-\code{mSplines} for M-splines. Partial matching on the names is allowed.}
+The possible option is \code{bSplines} for B-splines or \code{mSplines}
+for M-splines.}
 
-\item{start}{An optional list of starting values for the parameters
-to be estimated in the model.  See more in Section details.}
+\item{start}{An optional list of starting values for the parameters to be
+estimated in the model.  See more in Section details.}
 
-\item{control}{An optional list of parameters to control the
-maximization process of negative log likelihood function
-and adjust the baseline rate function.
-See more in Section details.}
+\item{control}{An optional list of parameters to control the maximization
+process of negative log likelihood function and adjust the baseline rate
+function.  See more in Section details.}
 
-\item{contrasts}{An optional list, whose entries are values
-(numeric matrices or character strings naming functions) to be used
-as replacement values for the contrasts replacement function and
-whose names are the names of columns of data containing factors.
-See \code{contrasts.arg} of \code{\link[stats]{model.matrix.default}}
-for details.}
+\item{contrasts}{An optional list, whose entries are values (numeric
+matrices or character strings naming functions) to be used as
+replacement values for the contrasts replacement function and whose
+names are the names of columns of data containing factors.  See
+\code{contrasts.arg} of \code{\link[stats]{model.matrix.default}} for
+details.}
 
 \item{...}{Other arguments for future usage.}
 }
@@ -96,12 +94,12 @@ A \code{rateReg} object, whose slots include
 }
 }
 \description{
-The default model is the gamma frailty model with one piece constant
-baseline rate function, which is equivalent to negative binomial regression
-with the same shape and rate parameter in the gamma prior. Spline (including
-piecewise constant) baseline rate function can also be specified and applied
-to model fitting.  Both B-spline and M-spline bases are available.
-\code{rateReg} returns the fitted model through a \code{rateReg} object.
+This function fits recurrent event data (event counts) with gamma frailty
+model with spline rate function. The default model is the gamma frailty
+model with one piece constant baseline rate function, which is equivalent to
+negative binomial regression with the same shape and rate parameter in the
+gamma prior. Spline (including piecewise constant) baseline rate function
+can also be specified and applied to model fitting.
 }
 \details{
 Function \code{\link{Survr}} in the formula response by default first checks
@@ -159,11 +157,11 @@ library(reda)
 ## six pieces' piecewise constant rate function
 (piecesFit <- rateReg(Survr(ID, time, event) ~ group + x1,
                       data = simuDat, subset = ID \%in\% 1:50,
-                      spline = "bSplines", knots = seq(28, 140, by = 28)))
+                      knots = seq(28, 140, by = 28)))
 
 ## fit rate function with cubic spline
 (splineFit <- rateReg(Survr(ID, time, event) ~ group + x1, data = simuDat,
-                      spline = "mSpl", knots = c(56, 84, 112), degree = 3))
+                      knots = c(56, 84, 112), degree = 3))
 
 ## more specific summary
 summary(constFit)

@@ -19,8 +19,14 @@
 * Updated checking rule of argument `event` of function `Survr` for modeling
   sample MCF of cost in addition to number of events.
 
-* Rename class `sampleMcf` to `mcf.formula`, `rateRegMcf` to `mcf.rateReg`,
+* Renamed class `sampleMcf` to `mcf.formula`, `rateRegMcf` to `mcf.rateReg`,
   `baseRateReg` to `baseRate.rateReg`, `summaryRateReg` to `summary.rateReg`.
+
+## MINOR CHANGES
+
+* Allowed formula `Survr(ID, time, event) ~ 1` for modeling baseline rate
+  function using gamma frailty model in function `rateReg` without specifying
+  any covariate.
 
 ## BUG FIXES
 
