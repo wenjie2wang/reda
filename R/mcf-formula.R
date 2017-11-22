@@ -43,13 +43,13 @@ NULL
 ##'     constucted based on the normality of logarithm of the MCF estimates.
 ##'
 ##' @aliases mcf,formula-method
-##' @importFrom stats na.fail na.omit na.exclude na.pass qnorm quantile sd
+##'
+##' @importFrom stats na.exclude na.fail na.omit na.pass qnorm quantile sd
 ##' @export
 setMethod(
     f = "mcf", signature = "formula",
     definition = function(object, data, subset, na.action,
-                          variance = c("LawlessNadeau", "Poisson",
-                                       "bootstrap"),
+                          variance = c("LawlessNadeau", "Poisson", "bootstrap"),
                           logConfInt = FALSE,
                           level = 0.95,
                           control = list(), ...)
@@ -57,8 +57,11 @@ setMethod(
         ## specify the type of variance
         variance <- match.arg(variance)
         ## basic check on inputs
-        if (length(logConfInt) > 1 || ! is.logical(logConfInt))
-            stop("'logConfint' has to be either 'TRUE' or 'FALSE'.")
+        if (! isLogicalOne(logConfInt))
+            stop(wrapMessages(
+                "The argument 'logConfint' has to be",
+                "either 'TRUE' or 'FALSE'."
+            ))
         if (! isNumOne(level) || level <= 0 || level >= 1)
             stop("Confidence level must be between 0 and 1.")
 
@@ -132,8 +135,6 @@ setMethod(
 
         ## if no covariates specified
         if (! nBeta) {
-            ## revert subject ID
-            dat$ID <- attr(resp, "ID")
             outDat <- sMcf(dat,
                            variance = variance,
                            logConfInt = logConfInt,
@@ -143,16 +144,19 @@ setMethod(
             ## remove all censoring rows? probably no for the plot method
             ## outDat <- base::subset(outDat, event == 1)
             rownames(outDat) <- NULL
-            out <- new("mcf.formula",
-                       formula = object,
-                       data = dat,
-                       MCF = outDat,
-                       origin = min(dat$origin),
-                       multiGroup = FALSE,
-                       variance = variance,
-                       logConfInt = logConfInt,
-                       level = level)
-            return(out)
+            ## revert subject ID
+            dat$ID <- attr(resp, "ID")
+            return(
+                new("mcf.formula",
+                    formula = object,
+                    data = dat,
+                    MCF = outDat,
+                    origin = min(dat$origin),
+                    multiGroup = FALSE,
+                    variance = variance,
+                    logConfInt = logConfInt,
+                    level = level)
+            )
         }
 
         ## else at least one covariate are specified
@@ -192,19 +196,18 @@ setMethod(
                 factor(levels(dat1[[nBeta + 1 - j]])[outDat[, outCol + 1 - j]])
         }
         rownames(outDat) <- NULL
-
-        out <- methods::new("mcf.formula",
-                            formula = object,
-                            data = dat,
-                            MCF = outDat,
-                            origin = originVec,
-                            multiGroup = TRUE,
-                            variance = variance,
-                            logConfInt = logConfInt,
-                            level = level)
         ## return
-        out
-    })
+        methods::new("mcf.formula",
+                     formula = object,
+                     data = dat,
+                     MCF = outDat,
+                     origin = originVec,
+                     multiGroup = TRUE,
+                     variance = variance,
+                     logConfInt = logConfInt,
+                     level = level)
+    }
+)
 
 
 ### internal function ==========================================================
@@ -216,7 +219,7 @@ sMcf <- function(dat, variance, logConfInt, level, control, groupLabel)
 }
 
 ## sample MCF point estimates
-sMcf_point <- function(inpDat, groupLabel)
+sMcf_point <- function(inpDat, groupLabel = NULL)
 {
     ## throw out warning if no any event
     if (all(! inpDat$event)) {
@@ -270,28 +273,36 @@ sMcf_point <- function(inpDat, groupLabel)
 ## add variance estimates for sample MCF point estimates
 addVar_sMcf <- function(dat, sMcfDat, variance, logConfInt, level, control)
 {
+    ## point estimates of mcf
+    smcf <- sMcfDat$MCF
+
     ## sample variance estimator
-    if (identical(variance, "LawlessNadeau")) {
+    if (variance == "LawlessNadeau") {
         var_smcf <- var_lawlessNadeau(dat, sMcfDat)
         se_smcf <- sqrt(var_smcf)
-    } else if (identical(variance, "Poisson")) {
+    } else if (variance == "Poisson") {
         varVec <- with(sMcfDat, ifelse(numRisk > 0, instRate / numRisk, 0))
         var_smcf <- cumsum(varVec)
         se_smcf <- sqrt(var_smcf)
-    } else if (identical(variance, "bootstrap")) {
+    } else if (variance == "bootstrap") {
         control <- do.call(addVar_sMcf_control, control)
         sMcfBootMat <- sMcf_boot(dat, sMcfDat, B = control$B)
-        se_smcf <- seBoot_normal(sMcfBootMat, upperQuan = 0.75)
+        se_smcf <- switch(
+            control$se.method,
+            "sample.se" = seBoot_sampleSE(sMcfBootMat),
+            "normality" = seBoot_normality(sMcfBootMat, upperQuan = 0.75)
+        )
     }
 
     ## confidence interval
-    if (identical(variance, "bootstrap") && control$ci.method != "normal") {
-        ciMat <- switch(control$ci.method,
-                        percentile = ciBoot_percentile(sMcfBootMat, level))
+    if (variance == "bootstrap" && control$ci.method != "normality") {
+        ciMat <- switch(
+            control$ci.method,
+            percentile = ciBoot_percentile(sMcfBootMat, level, logConfInt)
+        )
         lower <- ciMat[1L, ]
         upper <- ciMat[2L, ]
     } else {
-        smcf <- sMcfDat$MCF
         ## Confidence interval for log(MCF) or MCF
         if (logConfInt) {
             criVal <- ifelse(smcf > 0,
@@ -358,9 +369,9 @@ var_lawlessNadeau <- function(dat, sMcfDat)
 }
 
 ## function preparing control
-addVar_sMcf_control <- function(B = 1e3,
-                                se.method = c("sampleSE", "normal"),
-                                ci.method = c("normal", "percentile"))
+addVar_sMcf_control <- function(B = 2e2,
+                                se.method = c("sample.se", "normality"),
+                                ci.method = c("normality", "percentile"))
 {
     se.method <- match.arg(se.method)
     ci.method <- match.arg(ci.method)
@@ -386,15 +397,7 @@ sMcf_boot <- function(dat, sMcfDat, B)
 sMcf_boot_one <- function(dat, idTab, uID, numSub, rowIndList, grid, ...)
 {
     subInd <- sample(numSub, replace = TRUE)
-    subTab <- table(subInd)
-    ## recover subject ID with zero count in bootstrap sample
-    zeroIdx <- ! match(uID, names(subTab), nomatch = 0)
-    zeroTab <- rep(0, sum(zeroIdx))
-    names(zeroTab) <- uID[zeroIdx]
-    compTab <- c(subTab, zeroTab)
-    aID <- factor(names(compTab), levels = levels(dat$ID))
-    compTab <- compTab[order(aID)]
-    bootList <- rep(rowIndList, compTab)
+    bootList <- rowIndList[subInd]
     bootVec <- do.call(c, bootList)
     ## bootstrap sample data
     bootDat <- dat[bootVec, ]
@@ -405,19 +408,18 @@ sMcf_boot_one <- function(dat, idTab, uID, numSub, rowIndList, grid, ...)
     dupNames[tmp_m > 0] <- regmatches(rowNames, tmp_m)
     ## update subject ID in bootstrap sample
     bootDat$ID <- paste0(bootDat$ID, "_boot", dupNames)
-
+    bootDat$ID <- as.numeric(factor(bootDat$ID))
     ## apply sMcf_point to bootDat
     mcfDat <- sMcf_point(bootDat)
     stepMcf <- with(mcfDat, stepfun(time, c(0, MCF)))
-
     ## variance estimate for inst rate?
     stepMcf(grid)
 }
 
 ## estimate SE based on normality assumption
-seBoot_normal <- function(sMcfBootMat, upperQuan = 0.75)
+seBoot_normality <- function(sMcfBootMat, upperQuan = 0.75)
 {
-    if (! is.numeric(upperQuan) || upperQuan >= 1 || upperQuan <= 0.5)
+    if (! isNumOne(upperQuan) || upperQuan >= 1 || upperQuan <= 0.5)
         stop(wrapMessages(
             "The upper quantile ('upperQuan') has to be between 0.5 and 1."
         ))
@@ -427,21 +429,25 @@ seBoot_normal <- function(sMcfBootMat, upperQuan = 0.75)
 }
 
 ## estimate SE by sample SE
-seBoot_sample <- function(sMcfBootMat)
+seBoot_sampleSE <- function(sMcfBootMat)
 {
     apply(sMcfBootMat, 1L, stats::sd)
 }
 
-## estimate CI by percentile method
-ciBoot_percentile <- function(sMcfBootMat, level = 0.95)
+## estimate CI by normality assumption
+ciBoot_percentile <- function(sMcfBootMat, level, logConfInt)
 {
-    apply(sMcfBootMat, 1L, quan_fun)
+    if (logConfInt) {
+        exp(apply(log(sMcfBootMat), 1L, quan_fun))
+    } else {
+        apply(sMcfBootMat, 1L, quan_fun)
+    }
 }
 
 ## estimate CI by BCa method (accelation and bias-correction)
-ciBoot_BCa <- function(sMcfBootMat, level) {
-    ## TODO
-}
+## ciBoot_BCa <- function(sMcfBootMat, level) {
+##     ## TODO
+## }
 
 ## extract required quantiles
 quan_fun <- function(x, level = 0.95)

@@ -74,11 +74,15 @@ NULL
 ##'             bootstrap method for variance estimates of sample MCF estimates.
 ##'             The default value is 200.
 ##'         \item \code{se.method}: The method used for SE estimates for
-##'             bootstrap. The default method is \code{"sample.se"}, which takes
-##'             the sample SE of point estimates from bootstrap samples.
-##'         \item \code{ci.method}: The method used for confidence interval for
-##'             bootstrap. The default method is the normal method based on
-##'             normality.
+##'             bootstrap. The available methods include \code{"sample.se"}
+##'             (the default) and \code{"normality"}. The former takes the
+##'             sample SE of point estimates from bootstrap samples; The latter
+##'             estimates SE based on interquantile and normality assumption.
+##'         \item \code{ci.method}: The method used for confidence interval (CI)
+##'             for bootstrap. The available options include \code{"normality"}
+##'             (the default) and \code{"percentile"}. The former estimates the
+##'             CI based on SE estimates and normality assumption; The latter
+##'             takes percentiles of the bootstrap estimates.
 ##'     }
 ##'     The option \code{length.out}, \code{from}, \code{to} will be ignored if
 ##'     \code{grid} is specified directly. Otherwise, the grid will be generated
@@ -108,7 +112,7 @@ NULL
 ##'
 ##' @seealso
 ##' \code{\link{rateReg}} for model fitting;
-##' \code{\link{mcfDiff}} for comparing two sample MCFs.
+##' \code{\link{mcfDiff}} for comparing two-sample MCFs.
 ##' \code{\link{plot-method}} for plotting MCF.
 ##' @examples
 ##' library(reda)
@@ -120,7 +124,7 @@ NULL
 ##'
 ##' ## Example 2. sample simulated data
 ##' simuMcf <- mcf(Survr(ID, time, event) ~ group + gender,
-##'                data = simuDat, ID %in% 1 : 50, logConfInt = FALSE)
+##'                data = simuDat, ID %in% 1 : 50)
 ##' plot(simuMcf, conf.int = TRUE, lty = 1 : 4,
 ##'      legendName = "Treatment & Gender")
 ##'

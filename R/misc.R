@@ -33,7 +33,7 @@ isNumVector <- function(x) {
 
 ## is x a numeric value
 isNumOne <- function(x) {
-    isNumVector(x) && identical(length(x), 1L)
+    isNumVector(x) && length(x) == 1L
 }
 
 ## is x a character vector
@@ -43,7 +43,17 @@ isCharVector <- function(x) {
 
 ## is x a character value
 isCharOne <- function(x) {
-    isCharVector(x) && identical(length(x), 1L)
+    isCharVector(x) && length(x) == 1L
+}
+
+## is x a logical vector
+isLogicalVector <- function(x) {
+    is.logical(x) && is.vector(x)
+}
+
+## is x a logical value
+isLogicalOne <- function(x) {
+    isLogicalVector(x) && length(x) == 1L
 }
 
 ## is x a Survr object
