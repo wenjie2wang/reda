@@ -131,12 +131,13 @@ mcfDiff <- function(mcf1, mcf2 = NULL, level = 0.95,
 {
     ## record function call
     Call <- match.call()
+    ## match testVariance
+    testVariance <- match.arg(testVariance)
 
     ## quick checks
     mcfDiff_check(mcf1, mcf2)
     if (! isNumOne(level) || level <= 0 || level >= 1)
         stop("Confidence level must be between 0 and 1.")
-    testVariance <- match.arg(testVariance)
 
     ## simple version
     ## if mcf1 contains only one level, mcf2 cannot be null
@@ -241,6 +242,11 @@ mcfDiff.test <- function(mcf1, mcf2 = NULL,
     testVariance <- match.arg(testVariance)
     if (testVariance == "none")
         return(methods::new("mcfDiff.test"))
+    ## if no process data in mcf1
+    if (nrow(mcf1@data) == 0L) {
+        warning("No processed data is available from 'mcf1'.")
+        return(methods::new("mcfDiff.test"))
+    }
 
     ## define some constants
     mcfCols <- c("time", "numRisk", "instRate",
@@ -261,6 +267,7 @@ mcfDiff.test <- function(mcf1, mcf2 = NULL,
         uniLevs <- names(mcf1@origin)
         if (diff(mcf1@origin) != 0)
             warning("Time origins of two groups were not the same.")
+
         getLevs <- function(dat, colInd) {
             paste_ <- function(...) paste(..., sep = "_")
             sapply(seq_len(nrow(dat)), function (i, colInd) {
@@ -287,6 +294,11 @@ mcfDiff.test <- function(mcf1, mcf2 = NULL,
             stop(wrapMessages(
                 "The object 'mcf2' should contain MCF for only one group."
             ))
+        ## if no process data in mcf2
+        if (nrow(mcf2@data) == 0L) {
+            warning("No processed data is available from 'mcf2'.")
+            return(methods::new("mcfDiff.test"))
+        }
         ## first group
         eventDat1 <- mcf1@data
         mcfDat1 <- mcf1@MCF[, mcfCols]

@@ -50,36 +50,50 @@ constucted based on the normality of logarithm of the MCF estimates.}
 \item{level}{An optional numeric value indicating the confidence level
 required. The default value is 0.95.}
 
-\item{control}{An optional list to specify the time grid where the MCF is
-estimated for \code{rateReg-class} object and other options for the
-formula method.  The available named elements include
-\itemize{
-    \item \code{grid}: The time grid where MCF is estimated. A dense
-        grid is suggested for further using the plot method.
-    \item \code{length.out}: The length of grid points. The dafault
-        value is 1,000.
-    \item \code{from}: The starting point of grid. The default value is
-        the left boundary knots (for \code{rateReg-class} object).
-    \item \code{to}: The endpoint of grid. The default value is the
-        right boundary knots (for \code{rateReg-class} object).
-    \item \code{B}: The number of bootstrap replicates for using
-        bootstrap method for variance estimates of sample MCF estimates.
-        The default value is 200.
-    \item \code{se.method}: The method used for SE estimates for
-        bootstrap. The available methods include \code{"sample.se"}
-        (the default) and \code{"normality"}. The former takes the
-        sample SE of point estimates from bootstrap samples; The latter
-        estimates SE based on interquantile and normality assumption.
-    \item \code{ci.method}: The method used for confidence interval (CI)
-        for bootstrap. The available options include \code{"normality"}
-        (the default) and \code{"percentile"}. The former estimates the
-        CI based on SE estimates and normality assumption; The latter
-        takes percentiles of the bootstrap estimates.
-}
-The option \code{length.out}, \code{from}, \code{to} will be ignored if
-\code{grid} is specified directly. Otherwise, the grid will be generated
-by function \code{\link[base]{seq.int}} with specified \code{from},
-\code{to} and \code{length.out}.}
+\item{control}{An optional named list specifying other options.  For
+    \code{rateReg} object, it can be used to specify the time grid where the
+    MCF is estimated. The available elements include
+    \itemize{
+        \item \code{grid}: The time grid where MCF is estimated. A dense
+            grid is suggested for further using the plot method.
+        \item \code{length.out}: The length of grid points. The dafault
+            value is 1,000.
+        \item \code{from}: The starting point of grid. The default value is
+            the left boundary knots (for \code{rateReg} object).
+        \item \code{to}: The endpoint of grid. The default value is the
+            right boundary knots (for \code{rateReg} object).
+    }
+    The option \code{length.out}, \code{from}, \code{to} will be ignored if
+    \code{grid} is specified directly. Otherwise, the grid will be generated
+    by function \code{\link[base]{seq.int}} with specified \code{from},
+    \code{to} and \code{length.out}.
+
+    For formula method, the available named elements include
+    \itemize{
+      \item \code{B}: The number of bootstrap replicates for using
+            bootstrap method for variance estimates of sample MCF estimates.
+            The default value is 200.
+        \item \code{se.method}: The method used for SE estimates for
+            bootstrap. The available methods include \code{"sample.se"}
+            (the default) and \code{"normality"}. The former takes the
+            sample SE of point estimates from bootstrap samples; The latter
+            estimates SE based on interquantile and normality assumption.
+        \item \code{ci.method}: The method used for confidence interval (CI)
+            for bootstrap. The available options include \code{"normality"}
+            (the default) and \code{"percentile"}. The former estimates the
+            CI based on SE estimates and normality assumption; The latter
+            takes percentiles of the bootstrap estimates.
+      \item \code{keep.data}: A logical value specifying whether to keep the
+            processed data in the output object. If \code{TRUE}
+            (the default), the processed data will kept in the output and
+            available for other method to use. Otherwise, an empty data
+            frame object will be returned in the \code{data} slot.
+            \code{FALSE} should be set when the memory consumption is
+            of concern and we only need MCF estimates. For example, the
+            function \code{mcfDiff} and \code{mcfDiff.test} will not be
+            applicable for the \code{mcf.formula} object with empty
+            \code{data} slot.
+    }}
 
 \item{newdata}{An optional data frame. If specified, the data frame should
 have the same column names as the covariate names appearing in the formula
@@ -97,6 +111,8 @@ The default values are capital letters starting from "A".}
 A \code{mcf.formula} or \code{mcf.rateReg} object.
 The slots of a \code{mcf.formula} object include
 \itemize{
+    \item \code{formula}: Model Formula.
+    \item \code{data}: Processed data based on the model formula.
     \item \code{level}: Confidence level specified.
     \item \code{MCF}: Mean cumulative function at each time point.
     \item \code{multiGroup}: A logical value indicating whether MCF
@@ -126,7 +142,7 @@ approximate confidence intervals are provided as well, which are constructed
 based on the asymptotic normality of the MCF itself (by default) or the
 logarithm of MCF.
 
-For \code{\link{rateReg-class}} object, \code{mcf} estimates the baseline
+For \code{rateReg} object, \code{mcf} estimates the baseline
 MCF and its confidence interval at each time grid if argument \code{newdata}
 is not specified.  Otherwise, \code{mcf} estimates MCF and its confidence
 interval for the given newdata based on Delta-method.

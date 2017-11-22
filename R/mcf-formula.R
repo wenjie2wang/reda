@@ -133,6 +133,9 @@ setMethod(
         }
         colnames(dat) <- c("ID", "time", "event", "origin", covar_names)
 
+        ## update control list
+        control <- do.call(mcf_formula_control, control)
+
         ## if no covariates specified
         if (! nBeta) {
             outDat <- sMcf(dat,
@@ -144,8 +147,14 @@ setMethod(
             ## remove all censoring rows? probably no for the plot method
             ## outDat <- base::subset(outDat, event == 1)
             rownames(outDat) <- NULL
-            ## revert subject ID
-            dat$ID <- attr(resp, "ID")
+            ## whether to keep data in output
+            if (control$keep.data) {
+                ## revert subject ID
+                dat$ID <- attr(resp, "ID")
+            } else {
+                dat <- data.frame()
+            }
+
             return(
                 new("mcf.formula",
                     formula = object,
@@ -196,6 +205,15 @@ setMethod(
                 factor(levels(dat1[[nBeta + 1 - j]])[outDat[, outCol + 1 - j]])
         }
         rownames(outDat) <- NULL
+
+        ## whether to keep data in output
+        if (control$keep.data) {
+            ## revert subject ID
+            dat$ID <- attr(resp, "ID")
+        } else {
+            dat <- data.frame()
+        }
+
         ## return
         methods::new("mcf.formula",
                      formula = object,
@@ -285,7 +303,6 @@ addVar_sMcf <- function(dat, sMcfDat, variance, logConfInt, level, control)
         var_smcf <- cumsum(varVec)
         se_smcf <- sqrt(var_smcf)
     } else if (variance == "bootstrap") {
-        control <- do.call(addVar_sMcf_control, control)
         sMcfBootMat <- sMcf_boot(dat, sMcfDat, B = control$B)
         se_smcf <- switch(
             control$se.method,
@@ -368,15 +385,6 @@ var_lawlessNadeau <- function(dat, sMcfDat)
         sum(do.call(c, varList))
 }
 
-## function preparing control
-addVar_sMcf_control <- function(B = 2e2,
-                                se.method = c("sample.se", "normality"),
-                                ci.method = c("normality", "percentile"))
-{
-    se.method <- match.arg(se.method)
-    ci.method <- match.arg(ci.method)
-    list(B = B, se.method = se.method, ci.method = ci.method)
-}
 
 ## warpper function computing sample MCFs for bootstrap sample generated
 sMcf_boot <- function(dat, sMcfDat, B)
@@ -455,4 +463,33 @@ quan_fun <- function(x, level = 0.95)
     half_level <- level / 2 * c(- 1, 1)
     quan2 <- 0.5 + half_level
     stats::quantile(x, probs = quan2)
+}
+
+
+## function for preparing control list
+mcf_formula_control <- function(B = 2e2,
+                                se.method = c("sample.se", "normality"),
+                                ci.method = c("normality", "percentile"),
+                                keep.data = TRUE,
+                                ...)
+{
+    if (! isNumOne(B) || B <= 1)
+        stop(wrapMessages(
+            "The number of bootstarp sample, 'B' should be a numeric number."
+        ))
+    if (B < 30)
+        warning(wrapMessages(
+            "A larger number of bootstarp samples is suggested."
+        ))
+    se.method <- match.arg(se.method)
+    ci.method <- match.arg(ci.method)
+    if (! isLogicalOne(keep.data))
+        stop("The option 'keep.data' should be either 'TRUE' or 'FALSE'.")
+    ## return
+    list(
+        B = B,
+        se.method = se.method,
+        ci.method = ci.method,
+        keep.data = keep.data
+    )
 }
