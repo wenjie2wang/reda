@@ -85,7 +85,8 @@ setMethod(
         mfind <- match(mfnames, names(mcall), nomatch = 0L)
         mcall$formula <- eval(object)
         ## re-define data
-        mcall$data <- substitute(data)
+        ## mcall$data <- substitute(data)
+        mcall$data <- data
         ## match mcall
         mmcall <- match(c("formula", "data", "na.action"), names(mcall), 0L)
         mcall$na.action <- eval(substitute(alist(na.action)))[[1]]

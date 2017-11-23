@@ -114,7 +114,7 @@ mcfDiff <- function(mcf1, mcf2 = NULL, level = 0.95, ...)
 
     ## quick checks
     mcfDiff_check(mcf1, mcf2)
-    if (! isNumOne(level) || level <= 0 || level >= 1)
+    if (! isNumOne(level) || is.na(level) || level <= 0 || level >= 1)
         stop("Confidence level must be between 0 and 1.")
 
     ## simple version
@@ -132,9 +132,9 @@ mcfDiff <- function(mcf1, mcf2 = NULL, level = 0.95, ...)
         nLevel <- length(mcf1@origin)
         if (nLevel > 2)
             stop("There were more than two groups in 'mcf1'.")
+        if (! is.null(mcf2))
+            warning("Only the 'mcf1' object was used.")
         uniLevs <- names(mcf1@origin)
-        if (diff(mcf1@origin) != 0)
-            warning("Time origins of two groups were not the same.")
         paste_ <- function(...) paste(..., sep = "_")
         datLevs <- sapply(seq_len(NROW(mcf1@MCF)), function (i) {
             paste_(mcf1@MCF[i, - mcfColInd])
@@ -145,7 +145,7 @@ mcfDiff <- function(mcf1, mcf2 = NULL, level = 0.95, ...)
         ## second group
         mcfDat2 <- base::subset(mcf1@MCF, subset = datLevs %in% uniLevs[2L],
                                 select = mcfCols)
-        ## origin
+        ## origins
         originVec <- mcf1@origin
         ## variance
         variance <- mcf1@variance
@@ -161,18 +161,23 @@ mcfDiff <- function(mcf1, mcf2 = NULL, level = 0.95, ...)
             ))
         if (mcf1@variance != mcf2@variance)
             warning(wrapMessages(
-                "The method used for variance estimates were not consistent",
+                "The methods used for variance estimates were not consistent",
                 "between the two 'mcf.formula' objects!"
             ))
         ## first group
         mcfDat1 <- mcf1@MCF[, mcfCols]
         ## second group
         mcfDat2 <- mcf2@MCF[, mcfCols]
-        ## origin
+        ## origins
         originVec <- c(mcf1@origin, mcf2@origin)
         ## variance
         variance <- unique(c(mcf1@variance, mcf2@variance))
     }
+    ## warning if the earliest time origins of two groups were different
+    if (diff(originVec) != 0)
+        warning(wrapMessages(
+            "The earliest time origins of the two groups were not the same!"
+        ))
     ## first group
     mcfFun1 <- with(mcfDat1, stats::stepfun(time, c(0, MCF)))
     seFun1 <- with(mcfDat1, stats::stepfun(time, c(0, se)))
@@ -257,8 +262,6 @@ mcfDiff.test <- function(mcf1, mcf2 = NULL,
         if (nLevel > 2)
             stop("There were more than two groups in 'mcf1'.")
         uniLevs <- names(mcf1@origin)
-        if (diff(mcf1@origin) != 0)
-            warning("Time origins of two groups were not the same.")
         if (! is.null(mcf2))
             warning("Only the 'mcf1' object was used.")
 
@@ -278,6 +281,8 @@ mcfDiff.test <- function(mcf1, mcf2 = NULL,
         eventDat2 <- base::subset(mcf1@data, datLevs %in% uniLevs[2L])
         mcfDat2 <- base::subset(mcf1@MCF, mcfDatLevs %in% uniLevs[2L],
                                 select = mcfCols)
+        ## origins
+        originVec <- mcf1@origin
     } else {
         if (is.null(mcf2))
             stop(wrapMessages(
@@ -299,8 +304,14 @@ mcfDiff.test <- function(mcf1, mcf2 = NULL,
         ## second group
         eventDat2 <- mcf2@data
         mcfDat2 <- mcf2@MCF[, mcfCols]
+        ## origins
+        originVec <- c(mcf1@origin, mcf2@origin)
     }
-
+    ## warning if the earliest time origins of two groups were different
+    if (diff(originVec) != 0)
+        warning(wrapMessages(
+            "The earliest time origins of the two groups were not the same!"
+        ))
     ## internal function
     ## Y_k.(u) for k = 1, 2
     y_k <- function(eventDat, newTimes) {

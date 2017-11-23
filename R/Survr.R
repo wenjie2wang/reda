@@ -95,9 +95,9 @@ check_Survr <- function(dat, check, ...)
         stop("Time variable must be 'numeric', 'difftime' or 'Date'.")
     if (inherits(origin, "Date"))
         origin <- unclass(origin)
-    if (! is.numeric(origin))
+    if (! isNumVector(origin))
         stop("Origin variable must be 'numeric' or 'Date'.")
-    if (is.logical(event))
+    if (isLogicalVector(event))
         event <- as.numeric(event)
     ## convert non-positive event all to zero
     ## for ease of later computing sample MCF
@@ -157,6 +157,17 @@ check_Survr <- function(dat, check, ...)
             tmpID <- unique(sIDnam[idx])
             stop(wrapMessages(
                 "Event or censoring times cannot be missing.",
+                "Please check subject:",
+                paste0(paste(tmpID, collapse = ", "), ".")
+            ))
+        }
+
+        ## stop if missing value of 'origin'
+        idx <- is.na(sOrigin)
+        if (any(idx)) {
+            tmpID <- unique(sIDnam[idx])
+            stop(wrapMessages(
+                "The origin times cannot be missing.",
                 "Please check subject:",
                 paste0(paste(tmpID, collapse = ", "), ".")
             ))

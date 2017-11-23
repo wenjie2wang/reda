@@ -345,7 +345,7 @@ setClass(
         testVariance = "character"
     ),
     prototype = {
-        mat <- matrix(NA, nrow = 2L, ncol = 5L)
+        mat <- matrix(NA_real_, nrow = 2L, ncol = 5L)
         row.names(mat) <- c("Constant Weight", "Linear Weight")
         colnames(mat) <- c("Statistic", "Variance", "Chisq",
                            "DF", "Pr(>Chisq)")

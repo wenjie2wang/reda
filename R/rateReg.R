@@ -258,7 +258,8 @@ rateReg <- function(formula, data, subset, df = NULL, knots = NULL, degree = 0L,
     mmcall <- match(c("formula", "data", "na.action"), names(mcall), 0L)
     mcall <- mcall[c(1L, mmcall)]
     ## re-define data
-    mcall$data <- substitute(data)
+    ## mcall$data <- substitute(data)
+    mcall$data <- data
     ## drop unused levels in factors
     mcall$drop.unused.levels <- TRUE
     mcall[[1L]] <- quote(stats::model.frame)
