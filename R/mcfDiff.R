@@ -30,25 +30,32 @@ NULL
 ##' Nadeau, 1995). The two-sample pseudo-score test proposed by Cook, Lawless,
 ##' and Nadeau (1996) is also performed by default.
 ##'
+##' The function \code{mcfDiff} estimates the two-sample MCFs' difference and
+##' internally calls function \code{mcfDiff.test} to perform the pseudo-score
+##' tests by default. A \code{-} method is available as a simple wrapper for the
+##' function \code{mcfDiff} for comparing two-sample MCFs from two
+##' \code{mcf.formula} objects. For instance, suppose \code{mcf1} and
+##' \code{mcf2} are \code{mcf.formula} objects, each of which represents the
+##' sample MCF estimates for one group. The function call \code{mcf1 - mcf2} is
+##' equivalent to \code{mcfDiff(mcf1, mcf2)}.
+##'
 ##' The null hypothesis of the two-sample pseudo-score test is that there is no
 ##' difference between the two sample MCFs, while the alternative hypothesis
-##' suggests a difference.
-##'
-##' The test is based on a family of test statistics proposed by Lawless and
-##' Nadeau (1995). The argument \code{testVariance} specifies the method for
-##' computing the variance estimates of the test statistics under different
-##' model assumption. See the document of argument \code{testVariance} for all
-##' applicable options.  For the variance estimates robust to departures from
-##' Poisson process assumption, both constant weight and the linear weight
-##' function (with scaling) suggested in Cook, Lawless, and Nadeau (1996) are
-##' implemented. The constant weight is powerful in cases where the two MCFs are
-##' approximately proportional to each other. The linear weight function is
-##' originally \code{a(u) = t - u}, where \code{u} represents the time variable
-##' and \code{t} is the first time point when the risk set of either group
-##' becomes empty. It is further scaled by \code{1 / t} for test statistics
-##' invariant to the unit of measurement of the time variable.  The linear
-##' weight function puts more emphasis on the difference at earily times than
-##' later times and is more powerful for cases where the MCFs are no longer
+##' suggests a difference.  The test is based on a family of test statistics
+##' proposed by Lawless and Nadeau (1995). The argument \code{testVariance}
+##' specifies the method for computing the variance estimates of the test
+##' statistics under different model assumption. See the document of argument
+##' \code{testVariance} for all applicable options.  For the variance estimates
+##' robust to departures from Poisson process assumption, both constant weight
+##' and the linear weight function (with scaling) suggested in Cook, Lawless,
+##' and Nadeau (1996) are implemented. The constant weight is powerful in cases
+##' where the two MCFs are approximately proportional to each other. The linear
+##' weight function is originally \code{a(u) = t - u}, where \code{u} represents
+##' the time variable and \code{t} is the first time point when the risk set of
+##' either group becomes empty. It is further scaled by \code{1 / t} for test
+##' statistics invariant to the unit of measurement of the time variable.  The
+##' linear weight function puts more emphasis on the difference at earily times
+##' than later times and is more powerful for cases where the MCFs are no longer
 ##' proportional to each other, but not crossing. Also see Cook and Lawless
 ##' (2007, Section 3.7.5) for more details.
 ##'
@@ -212,6 +219,27 @@ mcfDiff <- function(mcf1, mcf2 = NULL, level = 0.95, ...)
 
 
 ##' @rdname mcfDiff
+##' @aliases -,mcf.formula-method
+##'
+##' @param e1 The first \code{mcf.formula} object, \code{mcf1}.
+##' @param e2 The second \code{mcf.formula} object, \code{mcf2}.
+##'
+##' @export
+setMethod(
+    f = "-",
+    signature = c("mcf.formula", "mcf.formula"),
+    definition = function(e1, e2)
+    {
+        out <- mcfDiff(e1, e2)
+        ## substitute for function call
+        out@call[[2L]] <- substitute(e1)
+        out@call[[3L]] <- substitute(e2)
+        out
+    }
+)
+
+
+##' @rdname mcfDiff
 ##' @aliases mcfDiff.test
 ##'
 ##' @usage
@@ -237,6 +265,10 @@ mcfDiff.test <- function(mcf1, mcf2 = NULL,
     ## constant and linear weight function
     ## and two variance estimates for the test statistic
     testVariance <- match.arg(testVariance)
+
+    ## quick checks
+    mcfDiff_check(mcf1, mcf2)
+
     if (testVariance == "none")
         return(methods::new("mcfDiff.test"))
     ## if no process data in mcf1

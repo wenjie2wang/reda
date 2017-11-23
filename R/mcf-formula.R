@@ -148,18 +148,13 @@ setMethod(
             ## remove all censoring rows? probably no for the plot method
             ## outDat <- base::subset(outDat, event == 1)
             rownames(outDat) <- NULL
-            ## whether to keep data in output
-            if (control$keep.data) {
-                ## revert subject ID
-                dat$ID <- attr(resp, "ID")
-            } else {
-                dat <- data.frame()
-            }
+            ## revert subject ID
+            dat$ID <- attr(resp, "ID")
 
             return(
                 new("mcf.formula",
                     formula = object,
-                    data = dat,
+                    data = if (control$keep.data) dat else data.frame(),
                     MCF = outDat,
                     origin = min(dat$origin),
                     multiGroup = FALSE,

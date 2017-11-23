@@ -207,8 +207,11 @@ NULL
 ##' mcf2 <- mcf(Survr(ID, time, event) ~ 1, data = simuDat,
 ##'             subset = group %in% "Contr")
 ##' ## perform two-sample tests and estimate difference at the same time
-##' (mcf12_diff <- mcfDiff(mcf1, mcf2, level = 0.9))
-##' plot(mcf12_diff)
+##' mcf12_diff1 <- mcfDiff(mcf1, mcf2)
+##' mcf12_diff2 <- mcf1 - mcf2   # or equivalently using the `-` method
+##' stopifnot(all.equal(mcf12_diff1, mcf12_diff2))
+##' mcf12_diff1
+##' plot(mcf12_diff1)
 ##'
 ##' ### For estimated MCF from a fitted model,
 ##' ### see examples given in function rateReg.
