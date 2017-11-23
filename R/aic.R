@@ -25,11 +25,10 @@ NULL
 
 ##' Akaike Information Criterion (AIC)
 ##'
-##' \code{AIC,rateReg-method} is an S4 class method calculating
-##' Akaike information criterion (AIC) for one or several
-##' \code{rateReg-class} objects, according to the formula
-##' - 2 * log-likelihood + 2 * nPar, where nPar represents the number
-##' of parameters in the fitted model.
+##' \code{AIC,rateReg-method} is an S4 class method calculating Akaike
+##' information criterion (AIC) for one or several \code{rateReg} objects,
+##' according to the formula - 2 * log-likelihood + 2 * nPar, where nPar
+##' represents the number of parameters in the fitted model.
 ##'
 ##' When comparing models fitted by maximum likelihood to the same data, the
 ##' smaller the AIC, the better the fit. A friendly warning will be thrown out
@@ -38,21 +37,25 @@ NULL
 ##'
 ##' @param object An object used to dispatch a method.
 ##' @param ... Optionally more fitted model objects.
-##' @param k An optional numeric value used as the penalty per parameter.
-##' The default \code{k = 2} is the classic AIC.
+##' @param k An optional numeric value used as the penalty per parameter.  The
+##'     default \code{k = 2} is the classic AIC.
+##'
 ##' @return If just one object is provided, a numeric value representing
-##' calculated AIC.
-##' If multiple objects are provided, a data frame with rows
-##' corresponding to the objects and columns \code{df} and \code{AIC},
-##' where \code{df} means degree of freedom,
-##' which is the number of parameters in the fitted model.
+##'     calculated AIC.  If multiple objects are provided, a data frame with
+##'     rows corresponding to the objects and columns \code{df} and \code{AIC},
+##'     where \code{df} means degree of freedom, which is the number of
+##'     parameters in the fitted model.
+##'
 ##' @aliases AIC,rateReg-method
+##'
 ##' @examples
 ##' ## See examples given in function rateReg.
+##'
 ##' @seealso
 ##' \code{\link{rateReg}} for model fitting;
 ##' \code{\link{summary,rateReg-method}} for summary of a fitted model;
 ##' \code{\link{BIC,rateReg-method}} for BIC.
+##'
 ##' @importFrom stats AIC
 ##' @export
 setMethod(f = "AIC", signature = "rateReg",
@@ -62,7 +65,7 @@ setMethod(f = "AIC", signature = "rateReg",
                   ## check on object class
                   checkRes <- sapply(inpList, is.rateReg)
                   if (any(! checkRes))
-                      stop("Objects should be all from 'rateReg-class'.")
+                      stop("Objects should be all of the 'rateReg' class.")
                   ## warning on different nObs
                   nObss <- sapply(inpList, nObsFun)
                   if (length(unique(nObss)) > 1)
@@ -87,7 +90,7 @@ setMethod(f = "AIC", signature = "rateReg",
 ##' \code{BIC,rateReg-method} is an S4 class method calculating
 ##' Bayesian information criterion (BIC) or so-called
 ##' Schwarz's Bayesian criterion (SBC)
-##' for one or several \code{rateReg-class} objects,
+##' for one or several \code{rateReg} objects,
 ##' according to the formula
 ##' - 2 * log-likelihood + ln(nObs) * nPar,
 ##' where nPar represents the number of parameters in the fitted model
@@ -121,7 +124,7 @@ setMethod(f = "BIC", signature = "rateReg",
                   ## check on object class
                   checkRes <- sapply(inpList, is.rateReg)
                   if (any(! checkRes))
-                      stop("Objects should be all of class 'rateReg'.")
+                      stop("Objects should be all of the 'rateReg' class.")
                   nObss <- sapply(inpList, nObsFun)
                   k <- log(nObss)
                   abics <- sapply(seq_along(inpList), function(ind) {

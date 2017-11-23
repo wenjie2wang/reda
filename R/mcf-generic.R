@@ -136,8 +136,37 @@ NULL
 ##'
 ##' ### sample MCF
 ##' ## Example 1. valve-seat data
-##' valveMcf <- mcf(Survr(ID, Days, No.) ~ 1, data = valveSeats)
-##' plot(valveMcf, conf.int = TRUE, mark.time = TRUE) + ggplot2::xlab("Days")
+##' ## the default variance estimates by Lawless and Nadeau (1995) method
+##' valveMcf0 <- mcf(Survr(ID, Days, No.) ~ 1, data = valveSeats)
+##' plot(valveMcf0, conf.int = TRUE, mark.time = TRUE) + ggplot2::xlab("Days")
+##'
+##' ## variance estimates following Poisson process model
+##' valveMcf1 <- mcf(Survr(ID, Days, No.) ~ 1,
+##'                  data = valveSeats, variance = "Poisson")
+##' ## variance estimates by bootstrap method (with 1,000 bootstrap samples)
+##' valveMcf2 <- mcf(Survr(ID, Days, No.) ~ 1,
+##'                  data = valveSeats, variance = "bootstrap",
+##'                  control = list(B = 1e3))
+##'
+##' ## comparing the variance estimates from different methods
+##' library(graphics)
+##' timeVec <- valveMcf0@MCF$time
+##' seMat <- cbind(valveMcf0@MCF$se, valveMcf1@MCF$se, valveMcf2@MCF$se)
+##' matplot(timeVec, seMat, type = "s", xlab = "Days", ylab = "SE estimates")
+##' legend("topleft", legend = c("Lawless & Nadeau", "Poisson", "Bootstrap"),
+##'        lty = 1 : 3, col = 1 : 3)
+##'
+##' ## comparing the confidence interval estimates from different methods
+##' library(ggplot2)
+##' ciDat <- rbind(cbind(valveMcf0@MCF, Method = "Lawless & Nadeau"),
+##'                cbind(valveMcf1@MCF, Method = "Poisson"),
+##'                cbind(valveMcf2@MCF, Method = "Bootstrap"))
+##' ggplot(ciDat, aes(x = time)) +
+##'     geom_step(aes(y = MCF)) +
+##'     geom_step(aes(y = lower, color = Method, linetype = Method)) +
+##'     geom_step(aes(y = upper, color = Method, linetype = Method)) +
+##'     xlab("Days")
+##'
 ##'
 ##' ## Example 2. sample simulated data
 ##' simuMcf <- mcf(Survr(ID, time, event) ~ group + gender,

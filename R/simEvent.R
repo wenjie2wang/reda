@@ -207,21 +207,21 @@ NULL
 ##'   c(sqrt(x + shift), 1)
 ##' }
 ##' simEvent(z = zFun, zCoef = zCoefFun,
-##'        arguments = list(z = list(intercept = 0.1),
-##'                         zCoef = list(shift = 0.1)))
+##'          arguments = list(z = list(intercept = 0.1),
+##'                           zCoef = list(shift = 0.1)))
 ##'
 ##' ## same function of time for all processes
 ##' simEventData(3, z = zFun, zCoef = zCoefFun,
-##'            arguments = list(z = list(intercept = 0.1),
-##'                             zCoef = list(shift = 0.1)))
+##'              arguments = list(z = list(intercept = 0.1),
+##'                               zCoef = list(shift = 0.1)))
 ##'
 ##' ## same function within one process but different between processes
 ##' ## use quote function in the arguments
 ##' simDat <- simEventData(3, z = zFun, zCoef = zCoefFun,
-##'                      arguments = list(
-##'                          z = list(intercept = quote(rnorm(1) / 10)),
-##'                          zCoef = list(shift = 0.1)
-##'                     ))
+##'                        arguments = list(
+##'                            z = list(intercept = quote(rnorm(1) / 10)),
+##'                            zCoef = list(shift = 0.1)
+##'                        ))
 ##' ## check the intercept randomly generated,
 ##' ## which should be the same within each ID but different between IDs.
 ##' unique(with(simDat, cbind(ID, intercept = round(X.1 - time / 10, 3))))
@@ -230,41 +230,42 @@ NULL
 ##' ### non-negative time-varying baseline hazard rate function
 ##' simEvent(rho = function(timeVec) { sin(timeVec) + 1 })
 ##' simEventData(3, origin = rnorm(3), endTime = rnorm(3, 5),
-##'            rho = function(timeVec) { sin(timeVec) + 1 })
+##'              rho = function(timeVec) { sin(timeVec) + 1 })
 ##' ## specify other arguments
 ##' simEvent(rho = function(a, b) { cos(a + b) + 1 },
-##'        arguments = list(rho = list(b = 1)))
+##'          arguments = list(rho = list(b = 1)))
 ##' simEventData(z = cbind(rnorm(3), rbinom(3, 1, 0.5)),
-##'            rho = function(a, b) { cos(a + b) + 1 },
-##'            arguments = list(rho = list(b = 1)))
+##'              rho = function(a, b) { cos(a + b) + 1 },
+##'              arguments = list(rho = list(b = 1)))
 ##'
 ##' ## quadratic B-splines with one internal knot at "time = 1"
 ##' ## (using function 'bSpline' from splines2 package)
 ##' simEvent(rho = "bSpline", rhoCoef = c(0.4, 0.5, 0.3, 0.6),
-##'        arguments = list(rho = list(degree = 2, knots = 1, intercept = TRUE,
-##'                                    Boundary.knots = c(0, 3))))
+##'          arguments = list(rho = list(degree = 2, knots = 1,
+##'                                      intercept = TRUE,
+##'                                      Boundary.knots = c(0, 3))))
 ##'
 ##'
 ##' ### frailty effect
 ##' ## Gamma distribution with mean one
 ##' simEvent(z = c(0.5, 1), zCoef = c(1, 0), frailty = "rgamma",
-##'        arguments = list(frailty = list(shape = 2, scale = 0.5)))
+##'          arguments = list(frailty = list(shape = 2, scale = 0.5)))
 ##'
 ##' ## lognormal with mean zero (on the log scale)
 ##' set.seed(123)
 ##' simEvent(z = c(0.5, 1), zCoef = c(1, 0), frailty = "rlnorm",
-##'        arguments = list(frailty = list(sdlog = 1)))
+##'          arguments = list(frailty = list(sdlog = 1)))
 ##' ## or equivalently
 ##' set.seed(123)
 ##' logNorm <- function(a) exp(rnorm(n = 1, mean = 0, sd = a))
 ##' simEvent(z = c(0.5, 1), zCoef = c(1, 0), frailty = logNorm,
-##'        arguments = list(frailty = list(a = 1)))
+##'          arguments = list(frailty = list(a = 1)))
 ##'
 ##' ### renewal process
 ##' ## interarrival times following uniform distribution
 ##' rUnif <- function(n, rate, min) runif(n, min, max = 2 / rate - min)
 ##' simEvent(interarrival = rUnif,
-##'        arguments = list(interarrival = list(min = 0.1)))
+##'          arguments = list(interarrival = list(min = 0.1)))
 ##'
 ##' ## interarrival times following Gamma distribution with scale one
 ##' set.seed(123)
@@ -282,7 +283,7 @@ NULL
 ##' }
 ##' set.seed(123)
 ##' simEvent(relativeRisk = rriskFun,
-##'        arguments = list(relativeRisk = list(intercept = 1)))
+##'          arguments = list(relativeRisk = list(intercept = 1)))
 ##'
 ##' @importFrom stats integrate optimize qexp rexp runif rgamma rpois uniroot
 ##' @export
@@ -736,8 +737,8 @@ simEvent <- function(z = 0, zCoef = 1,
 ##' simEventData(nProcess, z = 0, origin = 0, endTime = 3, frailty = 1, ...)
 ##'
 ##' @param nProcess Number of stochastic processes. If missing, the value will
-##'     be the number of row of the specified matrix \code{z}. Or a positive
-##'     number should be speicified.
+##'     be the number of row of the specified matrix \code{z}. Otherwise, a
+##'     positive number should be speicified.
 ##'
 ##' @export
 simEventData <- function(nProcess = 1,

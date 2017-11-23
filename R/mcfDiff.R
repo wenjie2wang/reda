@@ -55,59 +55,40 @@ NULL
 ##' @aliases mcfDiff
 ##'
 ##' @usage
-##' mcfDiff(mcf1, mcf2 = NULL, level = 0.95,
-##'         testVariance = c("robust", "Poisson", "none"), ...)
+##' mcfDiff(mcf1, mcf2 = NULL, level = 0.95, ...)
 ##'
 ##' @param mcf1 A \code{mcf.formula} object representing the MCF for one or two
 ##'     groups.
 ##' @param mcf2 An optional second \code{mcf.formula} object or \code{NULL}.
 ##' @param level A numeric value indicating the confidence level required. The
 ##'     default value is 0.95.
-##' @param testVariance A character string specifying the method for computing
-##'     the variance estimate for the pseudo-score test statistic proposed by
-##'     Cook, Lawless, and Nadeau (1996). The applicable options include
-##'     \code{"robust"} (default) for an estimate robust to departures from
-##'     Poisson assumptions, \code{"Poisson"} for an estimate for Poisson
-##'     process, and \code{"none"} for not performing any test (if only the
-##'     difference estimates are of interest).
-##' @param ... Other arguments for future usage.
+##' @param ... Other arguments passed to \code{mcfDiff.test}.
 ##'
 ##' @return
 ##'
 ##' The function \code{mcfDiff} returns a \code{mcfDiff} object (of S4 class)
 ##' that contains the following slots:
 ##' \itemize{
-##'
 ##' \item \code{call}: Function call.
-##'
 ##' \item \code{MCF}: Estimated Mean cumulative function Difference at each time
 ##' point.
-##'
 ##' \item \code{origin}: Time origins of the two groups.
-##'
 ##' \item \code{variance}: The method used for variance estimates.
-##'
 ##' \item \code{logConfInt}: A logical value indicating whether normality is
 ##' assumed for \code{log(MCF)} instead of MCF itself.  For \code{mcfDiff}
 ##' object, it is always \code{FALSE}.
-##'
 ##' \item \code{level}: Confidence level specified.
-##'
 ##' \item \code{test}: A \code{mcfDiff.test} object for the hypothesis test
 ##' results.
-##'
 ##' }
 ##'
 ##' The function \code{mcfDiff.test} returns a \code{mcfDiff.test} object (of S4
 ##' class) that contains the following slots:
 ##' \itemize{
-##'
 ##' \item \code{.Data}: A numeric matrix (of two rows and five columns) for
 ##' hypothesis testing results.
-##'
 ##' \item \code{testVariance}: A character string (or vector of length one)
 ##' indicating the method used for the variance estimates of the test statistic.
-##'
 ##' }
 ##'
 ##' @references
@@ -126,13 +107,10 @@ NULL
 ##' ## See examples given for function mcf.
 ##' @importFrom stats pchisq qnorm stepfun
 ##' @export
-mcfDiff <- function(mcf1, mcf2 = NULL, level = 0.95,
-                    testVariance = c("robust", "Poisson", "none"), ...)
+mcfDiff <- function(mcf1, mcf2 = NULL, level = 0.95, ...)
 {
     ## record function call
     Call <- match.call()
-    ## match testVariance
-    testVariance <- match.arg(testVariance)
 
     ## quick checks
     mcfDiff_check(mcf1, mcf2)
@@ -214,7 +192,7 @@ mcfDiff <- function(mcf1, mcf2 = NULL, level = 0.95,
                              lower = mcfDiffVec - criVec,
                              upper = mcfDiffVec + criVec)
     ## testing part
-    testRes <- mcfDiff.test(mcf1, mcf2, testVariance = testVariance)
+    testRes <- mcfDiff.test(mcf1, mcf2, ...)
 
     ## prepare for output
     methods::new("mcfDiff",
@@ -230,10 +208,24 @@ mcfDiff <- function(mcf1, mcf2 = NULL, level = 0.95,
 
 ##' @rdname mcfDiff
 ##' @aliases mcfDiff.test
+##'
+##' @usage
+##' mcfDiff.test(mcf1, mcf2 = NULL,
+##'              testVariance = c("robust", "Poisson", "none"), ...)
+##'
+##' @param testVariance A character string specifying the method for computing
+##'     the variance estimate for the pseudo-score test statistic proposed by
+##'     Cook, Lawless, and Nadeau (1996). The applicable options include
+##'     \code{"robust"} (default) for an estimate robust to departures from
+##'     Poisson assumptions, \code{"Poisson"} for an estimate for Poisson
+##'     process, and \code{"none"} for not performing any test (if only the
+##'     difference estimates are of interest in \code{mcfDiff}).
+##'
 ##' @importFrom stats stepfun
 ##' @export
 mcfDiff.test <- function(mcf1, mcf2 = NULL,
-                         testVariance = c("robust", "Poisson", "none"))
+                         testVariance = c("robust", "Poisson", "none"),
+                         ...)
 {
     ## reference: Cook, R. J., Lawless, J. F., & Nadeau, C. (1996)
     ## consider two types of weight functions a(u) for mcf difference

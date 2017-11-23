@@ -8,32 +8,29 @@
 \S4method{confint}{rateReg}(object, parm, level = 0.95, ...)
 }
 \arguments{
-\item{object}{rateReg-class object.}
+\item{object}{A \code{rateReg} object.}
 
-\item{parm}{A specification of which parameters are
-to be given confidence intervals,
-either a vector of numbers or a vector of names.
-If missing, all parameters are considered.}
+\item{parm}{A specification of which parameters are to be given confidence
+intervals, either a vector of numbers or a vector of names.  If missing,
+all parameters are considered.}
 
-\item{level}{An optional numeric value to specify
-the confidence level required.
-By default, the value is 0.95,
-which produces 95\% confidence intervals.}
+\item{level}{An optional numeric value to specify the confidence level
+required.  By default, the value is 0.95, which produces 95\% confidence
+intervals.}
 
 \item{...}{Other arguments for future usage.}
 }
 \value{
-A numeric matrix with rownames and colnames.
+A numeric matrix with row names and column names.
 }
 \description{
-\code{confint,rateReg-method} is a S4 class method for
-\code{\link{rateReg}} object, which returns approximate
-confidence intervals for all or specified covariates.
+\code{confint,rateReg-method} is an S4 class method for
+\code{\link{rateReg}} object, which returns approximate confidence intervals
+for all or specified covariates.
 }
 \details{
-Under regularity condition (Shao, 2003,
-Theorem 4.16 and Theorem 4.17, page 287, 290),
-the approximate confidence intervals are constructed loosely
+Under regularity condition (Shao, 2003, Theorem 4.16 and Theorem 4.17, page
+287, 290), the approximate confidence intervals are constructed loosely
 based on Fisher information matrix and estimates of coefficients.
 }
 \examples{

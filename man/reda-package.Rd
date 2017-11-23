@@ -12,19 +12,19 @@ modeling recurrent event data.
 The main functions are summarized as follows:
 \itemize{
 
-\item \code{simEventData}: Simulating survival, recurrent event, or multiple
-event data from stochastic process point of view.
+\item \code{simEventData}: Simulating survival, recurrent event, and
+multiple event data from stochastic process point of view.
 
-\item \code{mcf}: Mean cumulative function (MCF) estimates from a fitted
-parametric gamma frailty model or the nonparametic MCF estimator (the
-Nelson-Aelen estimator of the cumulative hazard function) from the sample
-data.
+\item \code{mcf}: Estimating the mean cumulative function (MCF) from a
+fitted gamma frailty model, or from a sample recurrent data by using a
+nonparametic MCF estimator (the Nelson-Aelen estimator of the cumulative
+hazard function).
 
 \item \code{mcfDiff}: Comparing two-sample MCFs by the pseudo-score tests
 and estimating their difference over time.
 
-\item \code{rateReg}: Fitting parametric Gamma fraitly model with spline
-baseline rate function.
+\item \code{rateReg}: Fitting Gamma fraitly model with spline baseline rate
+function.
 }
 
 See the package vignettes for introduction and demonstration.

@@ -42,22 +42,27 @@ NULL
 ##'         time.
 ##' }
 ##'
-##' @param ID Subject identificator.
+##' @param ID Subject identificators. It can be numeric vector, character
+##'     vector, or a factor vector.
 ##' @param time Time of reccurence event or censoring. In addition to numeric
-##'     values, \code{Date} and \code{difftime} are also supported.
-##' @param event Numeric vector indicating failure cost or event indicator
-##'     taking positive values as events, and non-positive values as censoring.
-##'     Logical vector is allowed and will be converted to numeric vector.
+##'     values, \code{Date} and \code{difftime} are supported and converted to
+##'     numeric values.
+##' @param event A numeric vector indicating failure cost or event indicator
+##'     taking positive values as costs (\code{1} as events), and non-positive
+##'     values as censoring.  Logical vector is allowed and will be converted to
+##'     numeric vector.
 ##' @param origin The time origin of each subject or process. In addition to
-##'     numeric values, \code{Date} and \code{difftime} are also supported.
-##'     Different subjects may have different origins. However, one subject must
-##'     have the same origin.
-##' @param check Logical value suggesting whether to perform data checking
+##'     numeric values, \code{Date} and \code{difftime} are also supported and
+##'     converted to numeric values.  Different subjects may have different
+##'     origins. However, one subject must have the same origin.
+##' @param check A logical value suggesting whether to perform data checking
 ##'     procedure. The default value is \code{TRUE}. \code{FALSE} should be set
 ##'     with caution and only for processed data already in recerruent event
 ##'     data framework.
 ##' @param ... Other arguments for future usage.
+##'
 ##' @aliases Survr
+##'
 ##' @seealso \code{\link{rateReg}} for model fitting.
 ##' @export
 Survr <- function(ID, time, event, origin = 0, check = TRUE, ...)

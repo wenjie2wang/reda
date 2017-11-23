@@ -27,9 +27,9 @@
 ##' @aliases Survr-class
 ##'
 ##' @slot .Data A numeric matrix object.
-##' @slot ID Charactrer vector for original subject identificator.
-##' @slot check Logical value indicating whether to performance data checking.
-##' @slot ord Integer vector for increasingly ordering data by \code{ID},
+##' @slot ID A charactrer vector for original subject identificator.
+##' @slot check A logical value indicating whether to performance data checking.
+##' @slot ord An integer vector for increasingly ordering data by \code{ID},
 ##'     \code{time}, and \code{1 - event}.
 ##'
 ##' @seealso \code{\link{Survr}}

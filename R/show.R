@@ -25,27 +25,11 @@ NULL
 
 ##' Show an object.
 ##'
-##' An S4 class generic function that displays certain object.
-##'
-##' \itemize{
-##'   \item For \code{rateReg} object,
-##'       it prints out brief summary of the fitted model.
-##'   \item For \code{summary.rateReg} object,
-##'       it prints out summary of the fitted model.
-##'   \item For \code{mcf.sample} object,
-##'       it prints out the function call, formula and
-##'       the sample MCF data frame.
-##'   \item For \code{mcf.rateReg} object,
-##'       it prints formula, new data, confidence level,
-##'       and the estimated MCF data frame.
-##' }
+##' S4 class methods that display objects produced from this package (similar to
+##' S3 class \code{print} methods).
 ##'
 ##' @param object An object used to dispatch a method.
 ##' @name show-method
-##' @seealso
-##' \code{\link{rateReg}} for model fitting;
-##' \code{\link{summary,rateReg-method}} for summary of a fitted model;
-##' \code{\link{mcf}} for estimation of MCF.
 ##' @importFrom methods show
 NULL
 

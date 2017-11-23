@@ -5,11 +5,10 @@
 \alias{mcfDiff.test}
 \title{Comparing Two-Sample MCFs}
 \usage{
-mcfDiff(mcf1, mcf2 = NULL, level = 0.95,
-        testVariance = c("robust", "Poisson", "none"), ...)
+mcfDiff(mcf1, mcf2 = NULL, level = 0.95, ...)
 
-mcfDiff.test(mcf1, mcf2 = NULL, testVariance = c("robust", "Poisson",
-  "none"))
+mcfDiff.test(mcf1, mcf2 = NULL,
+             testVariance = c("robust", "Poisson", "none"), ...)
 }
 \arguments{
 \item{mcf1}{A \code{mcf.formula} object representing the MCF for one or two
@@ -20,51 +19,40 @@ groups.}
 \item{level}{A numeric value indicating the confidence level required. The
 default value is 0.95.}
 
+\item{...}{Other arguments passed to \code{mcfDiff.test}.}
+
 \item{testVariance}{A character string specifying the method for computing
 the variance estimate for the pseudo-score test statistic proposed by
 Cook, Lawless, and Nadeau (1996). The applicable options include
 \code{"robust"} (default) for an estimate robust to departures from
 Poisson assumptions, \code{"Poisson"} for an estimate for Poisson
 process, and \code{"none"} for not performing any test (if only the
-difference estimates are of interest).}
-
-\item{...}{Other arguments for future usage.}
+difference estimates are of interest in \code{mcfDiff}).}
 }
 \value{
 The function \code{mcfDiff} returns a \code{mcfDiff} object (of S4 class)
 that contains the following slots:
 \itemize{
-
 \item \code{call}: Function call.
-
 \item \code{MCF}: Estimated Mean cumulative function Difference at each time
 point.
-
 \item \code{origin}: Time origins of the two groups.
-
 \item \code{variance}: The method used for variance estimates.
-
 \item \code{logConfInt}: A logical value indicating whether normality is
 assumed for \code{log(MCF)} instead of MCF itself.  For \code{mcfDiff}
 object, it is always \code{FALSE}.
-
 \item \code{level}: Confidence level specified.
-
 \item \code{test}: A \code{mcfDiff.test} object for the hypothesis test
 results.
-
 }
 
 The function \code{mcfDiff.test} returns a \code{mcfDiff.test} object (of S4
 class) that contains the following slots:
 \itemize{
-
 \item \code{.Data}: A numeric matrix (of two rows and five columns) for
 hypothesis testing results.
-
 \item \code{testVariance}: A character string (or vector of length one)
 indicating the method used for the variance estimates of the test statistic.
-
 }
 }
 \description{

@@ -12,23 +12,21 @@
 
 \item{...}{Optionally more fitted model objects.}
 
-\item{k}{An optional numeric value used as the penalty per parameter.
-The default \code{k = 2} is the classic AIC.}
+\item{k}{An optional numeric value used as the penalty per parameter.  The
+default \code{k = 2} is the classic AIC.}
 }
 \value{
 If just one object is provided, a numeric value representing
-calculated AIC.
-If multiple objects are provided, a data frame with rows
-corresponding to the objects and columns \code{df} and \code{AIC},
-where \code{df} means degree of freedom,
-which is the number of parameters in the fitted model.
+    calculated AIC.  If multiple objects are provided, a data frame with
+    rows corresponding to the objects and columns \code{df} and \code{AIC},
+    where \code{df} means degree of freedom, which is the number of
+    parameters in the fitted model.
 }
 \description{
-\code{AIC,rateReg-method} is an S4 class method calculating
-Akaike information criterion (AIC) for one or several
-\code{rateReg-class} objects, according to the formula
-- 2 * log-likelihood + 2 * nPar, where nPar represents the number
-of parameters in the fitted model.
+\code{AIC,rateReg-method} is an S4 class method calculating Akaike
+information criterion (AIC) for one or several \code{rateReg} objects,
+according to the formula - 2 * log-likelihood + 2 * nPar, where nPar
+represents the number of parameters in the fitted model.
 }
 \details{
 When comparing models fitted by maximum likelihood to the same data, the
@@ -38,6 +36,7 @@ if the numbers of observation were different in the model comparison.
 }
 \examples{
 ## See examples given in function rateReg.
+
 }
 \seealso{
 \code{\link{rateReg}} for model fitting;

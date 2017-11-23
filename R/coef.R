@@ -25,20 +25,23 @@ NULL
 
 ##' Estimated Coefficients of Covariates
 ##'
-##' \code{coef,rateReg-method} is a S4 class method that extracts
-##' estimated coefficients of covariates from
-##' \code{\link{rateReg-class}} object produced by
-##' function \code{\link{rateReg}}.
+##' \code{coef,rateReg-method} is an S4 class method that extracts estimated
+##' coefficients of covariates from \code{rateReg} object produced by function
+##' \code{\link{rateReg}}.
 ##'
-##' @param object \code{\link{rateReg-class}} object.
+##' @param object A \code{rateReg} object.
 ##' @param ... Other arguments for future usage.
+##'
 ##' @return A named numeric vector.
+##'
 ##' @aliases coef,rateReg-method
+##'
 ##' @seealso
 ##' \code{\link{rateReg}} for model fitting;
 ##' \code{\link{confint,rateReg-method}} for confidence intervals
 ##' for covariate coefficients;
 ##' \code{\link{summary,rateReg-method}} for summary of a fitted model.
+##'
 ##' @examples
 ##' ## See examples given in function rateReg.
 ##' @importFrom stats coef
@@ -51,35 +54,38 @@ setMethod(f = "coef", signature = "rateReg",
 
 ##' Confidence Intervals for Covariate Coefficients
 ##'
-##' \code{confint,rateReg-method} is a S4 class method for
-##' \code{\link{rateReg}} object, which returns approximate
-##' confidence intervals for all or specified covariates.
+##' \code{confint,rateReg-method} is an S4 class method for
+##' \code{\link{rateReg}} object, which returns approximate confidence intervals
+##' for all or specified covariates.
 ##'
-##' Under regularity condition (Shao, 2003,
-##' Theorem 4.16 and Theorem 4.17, page 287, 290),
-##' the approximate confidence intervals are constructed loosely
+##' Under regularity condition (Shao, 2003, Theorem 4.16 and Theorem 4.17, page
+##' 287, 290), the approximate confidence intervals are constructed loosely
 ##' based on Fisher information matrix and estimates of coefficients.
 ##'
-##' @param object rateReg-class object.
-##' @param parm A specification of which parameters are
-##' to be given confidence intervals,
-##' either a vector of numbers or a vector of names.
-##' If missing, all parameters are considered.
-##' @param level An optional numeric value to specify
-##' the confidence level required.
-##' By default, the value is 0.95,
-##' which produces 95\% confidence intervals.
+##' @param object A \code{rateReg} object.
+##' @param parm A specification of which parameters are to be given confidence
+##'     intervals, either a vector of numbers or a vector of names.  If missing,
+##'     all parameters are considered.
+##' @param level An optional numeric value to specify the confidence level
+##'     required.  By default, the value is 0.95, which produces 95\% confidence
+##'     intervals.
 ##' @param ... Other arguments for future usage.
-##' @return A numeric matrix with rownames and colnames.
+##'
+##' @return A numeric matrix with row names and column names.
+##'
 ##' @aliases confint,rateReg-method
+##'
 ##' @seealso
 ##' \code{\link{rateReg}} for model fitting;
 ##' \code{\link{coef,rateReg-method}} for point estimates
 ##' of covariate coefficients;
 ##' \code{\link{summary,rateReg-method}} for summary of a fitted model.
+##'
 ##' @references
+##'
 ##' Shao, J. (2003), \emph{Mathematical statistics},
 ##' Springer texts in statistics, New York: Springer, 2nd Edition.
+##'
 ##' @examples
 ##' ## See examples given in function rateReg.
 ##' @importFrom stats confint qnorm

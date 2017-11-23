@@ -8,7 +8,7 @@
 \S4method{coef}{rateReg}(object, ...)
 }
 \arguments{
-\item{object}{\code{\link{rateReg-class}} object.}
+\item{object}{A \code{rateReg} object.}
 
 \item{...}{Other arguments for future usage.}
 }
@@ -16,10 +16,9 @@
 A named numeric vector.
 }
 \description{
-\code{coef,rateReg-method} is a S4 class method that extracts
-estimated coefficients of covariates from
-\code{\link{rateReg-class}} object produced by
-function \code{\link{rateReg}}.
+\code{coef,rateReg-method} is an S4 class method that extracts estimated
+coefficients of covariates from \code{rateReg} object produced by function
+\code{\link{rateReg}}.
 }
 \examples{
 ## See examples given in function rateReg.

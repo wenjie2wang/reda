@@ -25,7 +25,7 @@ NULL
 
 ##' Recurrent Events Regression Based on Counts and Rate Function
 ##'
-##' This function fits recurrent event data (event counts) with gamma frailty
+##' This function fits recurrent event data (event counts) by gamma frailty
 ##' model with spline rate function. The default model is the gamma frailty
 ##' model with one piece constant baseline rate function, which is equivalent to
 ##' negative binomial regression with the same shape and rate parameter in the
@@ -209,14 +209,12 @@ NULL
 ##' plot(splineMcf, conf.int = TRUE, lty = c(1, 5))
 ##'
 ##' ## example of further customization by ggplot2
-##' \dontrun{
 ##' library(ggplot2)
 ##' plot(splineMcf) +
 ##'     geom_ribbon(aes(x = time, ymin = lower,
 ##'                     ymax = upper, fill = Group),
 ##'                 data = splineMcf@MCF, alpha = 0.2) +
 ##'     xlab("Days")
-##' }
 ##'
 ##' @seealso
 ##' \code{\link{summary,rateReg-method}} for summary of fitted model;

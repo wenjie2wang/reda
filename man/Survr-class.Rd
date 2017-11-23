@@ -14,11 +14,11 @@ objects of this class.  See ``Slots'' for details.
 \describe{
 \item{\code{.Data}}{A numeric matrix object.}
 
-\item{\code{ID}}{Charactrer vector for original subject identificator.}
+\item{\code{ID}}{A charactrer vector for original subject identificator.}
 
-\item{\code{check}}{Logical value indicating whether to performance data checking.}
+\item{\code{check}}{A logical value indicating whether to performance data checking.}
 
-\item{\code{ord}}{Integer vector for increasingly ordering data by \code{ID},
+\item{\code{ord}}{An integer vector for increasingly ordering data by \code{ID},
 \code{time}, and \code{1 - event}.}
 }}
 
