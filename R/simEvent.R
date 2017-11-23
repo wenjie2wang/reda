@@ -29,18 +29,22 @@ NULL
 ##' survival time (the first event time) from one stochastic process. The
 ##' function \code{simEventData} provides a simple wrapper that calls
 ##' \code{simEvent} internally and collects the generated survival data or
-##' recurrent events into a data frame.
+##' recurrent events into a data frame. More demonstration and introduction is
+##' available in one of the package vignettes in addition to the function
+##' documentation.
 ##'
 ##' For each process, a time-invariant or time-varying baseline hazard rate
 ##' (intensity) function of failure can be specified.  Covariates and their
-##' coefficients can be specified and are incorporated based on the Cox
-##' proportional hazard model (Cox, 1972) for survival data or Andersen-Gill
-##' model (Andersen and Gill, 1982) for recurrent events. In addition, a frailty
-##' effect can be considered.  Conditional on predictors (or covariates) and the
-##' unobserved frailty effect, the process is by default a Poisson process,
-##' where the interarrival times between two successive arrivals/events follow
-##' exponential distribution. A general renewal process can be specified through
-##' \code{interarrival} for other distributions of the interarrival times.
+##' coefficients can be specified and are incorporated by default based on the
+##' Cox proportional hazard model (Cox, 1972) for survival data or Andersen-Gill
+##' model (Andersen and Gill, 1982) for recurrent events. Other relative risk
+##' function can be specified through the argument \code{relativeRisk}. In
+##' addition, a frailty effect can be considered.  Conditional on predictors (or
+##' covariates) and the unobserved frailty effect, the process is by default a
+##' Poisson process, where the interarrival times between two successive
+##' arrivals/events follow exponential distribution. A general renewal process
+##' can be specified through \code{interarrival} for other distributions of the
+##' interarrival times.
 ##'
 ##' The thinning method (Lewis and Shedler, 1979) is applied for bounded hazard
 ##' rate function by default. The method based on inverse cumulative
@@ -68,7 +72,7 @@ NULL
 ##' covariates can be observed only at event times and censoring times. Thus,
 ##' covariate values are returned only at these time points. If we want more
 ##' observed covariate values to be recorded, we may write a simple wrapper
-##' function of \code{simEvent} similar to \code{simEventData}.
+##' function for \code{simEvent} similar to \code{simEventData}.
 ##'
 ##' @aliases simEvent
 ##'
@@ -118,8 +122,7 @@ NULL
 ##'     list named \code{frailty} in \code{arguments}, such as \code{arguments =
 ##'     list(frailty = list(shape = 2, scale = 0.5))}.
 ##' @param recurrent A logical value with default value \code{TRUE} indicating
-##'     whether to generate recurrent event data or survival data (i.e. the
-##'     first event only).
+##'     whether to generate recurrent event data or survival data.
 ##' @param interarrival A function object (or a function name) for randomly
 ##'     generating (positive) interarrival time between two successive
 ##'     arrivals/events.  The default value is \code{"rexp"} for generating
@@ -137,13 +140,13 @@ NULL
 ##'     specified through a named list inside \code{arguments}.
 ##' @param relativeRisk Relateive risk function for incorporating the covariates
 ##'     and the covariate coefficients into the intensity function. The
-##'     applicable choices include \code{exponential} (default) for regular Cox
-##'     model or Andersen-Gill model, \code{linear} for linear model (including
-##'     an intercept term), and \code{excess} for excess model. A customized
-##'     function can be specified. The specified function must have at least one
-##'     argument named \code{z} for covariates and another argument named
-##'     {zCoef} for covariate coefficients.  Other arguments can be specified
-##'     through a named list inside \code{arguments}.
+##'     applicable choices include \code{exponential} (the default) for regular
+##'     Cox model or Andersen-Gill model, \code{linear} for linear model
+##'     (including an intercept term), and \code{excess} for excess model. A
+##'     customized function can be specified. The specified function must have
+##'     at least one argument named \code{z} for covariates and another argument
+##'     named {zCoef} for covariate coefficients.  Other arguments can be
+##'     specified through a named list inside \code{arguments}.
 ##' @param method A character string specifying the method for generating
 ##'     simulated recurrent or survival data. The default method is thinning
 ##'     method (Lewis and Shedler, 1979). Another available option is the method
@@ -154,8 +157,8 @@ NULL
 ##' @param arguments A list that consists of named lists for specifying other
 ##'     arguments in the corresponding functions. For example, if a function of
 ##'     time named \code{foo} with two arguments, \code{x} (for time) and
-##'     \code{y} is specified for the time-varying covariates, the value of its
-##'     second argument \code{y} can be specified by letting \code{arguments =
+##'     \code{y}, is specified for the time-varying covariates, the value of its
+##'     second argument, \code{y}, can be specified by \code{arguments =
 ##'     list(z = list(y = 1)}.  A partial matching on names is not allowed to
 ##'     avoid possible misspecification. The input arguments will be evaluated
 ##'     within function \code{simEvent}, which can be useful for randomly

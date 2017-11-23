@@ -5,9 +5,9 @@
 \alias{simEvent-class}
 \title{An S4 Class for Simulated Recurrent Event or Survival Times}
 \description{
-An S4 class that represents simulated recurrent event or survival time from
-one stochastic process. The function \code{\link{simEvent}} produces objects
-of this class.
+An S4 class that represents the simulated recurrent event or survival time
+from one stochastic process. The function \code{\link{simEvent}} produces
+objects of this class.
 }
 \section{Slots}{
 

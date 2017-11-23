@@ -16,8 +16,8 @@ The main functions are summarized as follows:
 multiple event data from stochastic process point of view.
 
 \item \code{mcf}: Estimating the mean cumulative function (MCF) from a
-fitted gamma frailty model, or from a sample recurrent data by using a
-nonparametic MCF estimator (the Nelson-Aelen estimator of the cumulative
+fitted gamma frailty model, or from a sample recurrent event data by using
+the nonparametic MCF estimator (the Nelson-Aelen estimator of the cumulative
 hazard function).
 
 \item \code{mcfDiff}: Comparing two-sample MCFs by the pseudo-score tests
@@ -27,5 +27,5 @@ and estimating their difference over time.
 function.
 }
 
-See the package vignettes for introduction and demonstration.
+See the package vignettes for more introduction and demonstration.
 }

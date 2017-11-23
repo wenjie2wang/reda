@@ -29,8 +29,8 @@ NULL
 ##' model with spline rate function. The default model is the gamma frailty
 ##' model with one piece constant baseline rate function, which is equivalent to
 ##' negative binomial regression with the same shape and rate parameter in the
-##' gamma prior. Spline (including piecewise constant) baseline rate function
-##' can also be specified and applied to model fitting.
+##' gamma prior. Spline (including piecewise constant) baseline hazard rate
+##' function can be specified for the model fitting.
 ##'
 ##' Function \code{\link{Survr}} in the formula response by default first checks
 ##' the dataset and will report an error if the dataset does not fall into
@@ -66,8 +66,8 @@ NULL
 ##' that allows users to control the process of minimization of
 ##' negative log likelihood function passed to \code{constrOptim}
 ##' and specify the boundary knots of baseline rate function.
-##' The available options additional to those that can be passed to
-##' \code{control} in \code{constrOptim} include
+##' The available options additional to those that can be passed from
+##' \code{control} to \code{constrOptim} include
 ##' \itemize{
 ##'     \item \code{Boundary.knots}: A length-two numeric vector to specify
 ##'         the boundary knots for baseline rate funtion. By default,

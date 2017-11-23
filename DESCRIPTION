@@ -10,9 +10,9 @@ Authors@R: c(
     person(given = "Jun", family = "Yan", role = "ctb")
     )
 Description: Functions for (1) simulating survival, recurrent event, and
-    multiple event data from stochastic process point of view, (2) exploring,
+    multiple event data from stochastic process point of view, (2) exploring
     and modeling recurrent event data through the mean cumulative function (MCF)
-    or so-called the Nelson-Aalen estimator of the cumulative hazard rate
+    or also called the Nelson-Aalen estimator of the cumulative hazard rate
     function, and gamma frailty model with spline rate function, and (3)
     comparing two-sample recurrent event responses with the pseudo-score tests.
 Imports:

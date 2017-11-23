@@ -78,11 +78,11 @@ approximately proportional to each other. The linear weight function is
 originally \code{a(u) = t - u}, where \code{u} represents the time variable
 and \code{t} is the first time point when the risk set of either group
 becomes empty. It is further scaled by \code{1 / t} for test statistics
-invariant to unit of measurement of time.  The linear weight function puts
-more emphasis on the difference at earily times than later times and is more
-powerful for cases where the MCFs are no longer proportional to each other,
-but not crossing. Also see Cook and Lawless (2007, Section 3.7.5) for more
-details.
+invariant to the unit of measurement of the time variable.  The linear
+weight function puts more emphasis on the difference at earily times than
+later times and is more powerful for cases where the MCFs are no longer
+proportional to each other, but not crossing. Also see Cook and Lawless
+(2007, Section 3.7.5) for more details.
 }
 \examples{
 ## See examples given for function mcf.
@@ -96,5 +96,5 @@ Comparisons Based on Recurrent Event Responses. \emph{Biometrics}, 52(2),
 557--571.
 
 Cook, R. J., & Lawless, J. (2007). \emph{The Statistical Analysis of
-Recurrent Events}.  Springer Science \& Business Media.
+Recurrent Events}.  Springer Science & Business Media.
 }

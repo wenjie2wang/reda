@@ -5,7 +5,7 @@
 \alias{baseRate.rateReg-class}
 \title{An S4 Class Representing Estimated Baseline Rate Function}
 \description{
-An S4 class that represents Estimated Baseline Rate Function from model.
+An S4 class that represents the estimated baseline rate function from model.
 The function \code{\link{baseRate}} produces objects of this class.
 }
 \section{Slots}{

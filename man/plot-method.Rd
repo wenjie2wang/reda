@@ -27,17 +27,16 @@
 \arguments{
 \item{x}{An object used to dispatch a method.}
 
-\item{y}{An argument that should be missing and ignored now.
-Its existence is just for satisfying the definition of generaic function
-\code{plot} in package \code{graphics} for methods' dispatching.}
+\item{y}{An argument that should be missing and ignored now.  Its existence
+is just for satisfying the definition of generaic function \code{plot}
+in package \code{graphics} for methods' dispatching.}
 
-\item{lty}{An optional numeric vector indicating
-line types specified to different groups:
-0 = blank, 1 = solid, 2 = dashed, 3 = dotted,
-4 = dotdash, 5 = longdash, 6 = twodash.}
+\item{lty}{An optional numeric vector indicating line types specified to
+different groups: 0 = blank, 1 = solid, 2 = dashed, 3 = dotted, 4 =
+dotdash, 5 = longdash, 6 = twodash.}
 
-\item{col}{An optional character vector indicating
-line colors specified to different groups.}
+\item{col}{An optional character vector indicating line colors specified to
+different groups.}
 
 \item{legendName}{An optional length-one charactor vector to specify the
 name for grouping each unique row in \code{newdata}, such as "gender"
@@ -48,16 +47,15 @@ for "male" and "female". The default value is generated from the
 each unique row in \code{newdata}, such as "treatment" and "control".
 The default values are generated from the \code{object}.}
 
-\item{conf.int}{A logical value indicating
-whether to plot confidence interval.
-The default value is \code{FALSE}.}
+\item{conf.int}{A logical value indicating whether to plot confidence
+interval.  The default value is \code{FALSE}.}
 
-\item{mark.time}{A logical value with default \code{FALSE}.
-If \code{TRUE}, each censoring time is marked by "+" on the MCF curves.
+\item{mark.time}{A logical value with default value \code{FALSE}.  If
+\code{TRUE}, each censoring time is marked by "+" on the MCF curves.
 Otherwise, the censoring time would not be marked.}
 
 \item{addOrigin}{A logical value indicating whether the MCF curves start
-from origin time. The default value is \code{TRUE}.}
+from origin time. The default value is \code{FALSE}.}
 
 \item{...}{Other arguments for further usage.}
 }
@@ -65,10 +63,10 @@ from origin time. The default value is \code{TRUE}.}
 A \code{ggplot} object.
 }
 \description{
-S4 class methods plotting sample MCF from data, estimated MCF, or
-esttimated baseline rate function from a fitted model by using
-\code{ggplot2} plotting system.  The plots generated are thus able to be
-further customized properly.
+S4 class methods plotting sample MCF from data, estimated MCF, or estimated
+baseline hazard rate function from a fitted model by using \code{ggplot2}
+plotting system.  The plots generated are thus able to be further customized
+properly.
 }
 \examples{
 ## See examples given in function mcf and rateReg.

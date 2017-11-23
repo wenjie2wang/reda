@@ -37,13 +37,13 @@ setting of \code{\link[base]{options}}.  The "factory-fresh" default is
 \code{\link[stats]{na.pass}}.  \code{help(na.fail)} for details.}
 
 \item{variance}{A character specifying the method for variance estimates.
-The available options are \code{"LawlessNadeau"} (default) for Lawless
-and Nadeau (1995) method, \code{"Poisson"} for Poisson process method,
-and \code{"bootstrap"} for bootstrapping method.  Partial matching on
-the names is allowed.}
+The available options are \code{"LawlessNadeau"} (the default) for
+Lawless and Nadeau (1995) method, \code{"Poisson"} for Poisson process
+method, and \code{"bootstrap"} for bootstrap method.  Partial matching
+on the names is allowed.}
 
-\item{logConfInt}{A logical value. If \code{FALSE} (default), the confidence
-interval are constructed based on the normality of the MCF
+\item{logConfInt}{A logical value. If \code{FALSE} (the default), the
+confidence interval are constructed based on the normality of the MCF
 estimates. Otherwise, the confidence intervals of given level are
 constucted based on the normality of logarithm of the MCF estimates.}
 
@@ -52,7 +52,7 @@ required. The default value is 0.95.}
 
 \item{control}{An optional named list specifying other options.  For
     \code{rateReg} object, it can be used to specify the time grid where the
-    MCF is estimated. The available elements include
+    MCF is estimated. The available named elements are given as follows:
     \itemize{
         \item \code{grid}: The time grid where MCF is estimated. A dense
             grid is suggested for further using the plot method.
@@ -68,7 +68,7 @@ required. The default value is 0.95.}
     by function \code{\link[base]{seq.int}} with specified \code{from},
     \code{to} and \code{length.out}.
 
-    For formula method, the available named elements include
+    For formula method, the available named elements are given as follows:
     \itemize{
       \item \code{B}: The number of bootstrap replicates for using
             bootstrap method for variance estimates of sample MCF estimates.
@@ -85,45 +85,64 @@ required. The default value is 0.95.}
             takes percentiles of the bootstrap estimates.
       \item \code{keep.data}: A logical value specifying whether to keep the
             processed data in the output object. If \code{TRUE}
-            (the default), the processed data will kept in the output and
-            available for other method to use. Otherwise, an empty data
+            (the default), the processed data will be kept in the output and
+            available for later usage. Otherwise, an empty data
             frame object will be returned in the \code{data} slot.
-            \code{FALSE} should be set when the memory consumption is
+            \code{FALSE} may be set when the memory consumption is
             of concern and we only need MCF estimates. For example, the
             function \code{mcfDiff} and \code{mcfDiff.test} will not be
-            applicable for the \code{mcf.formula} object with empty
+            applicable for the \code{mcf.formula} object with an empty
             \code{data} slot.
     }}
 
 \item{newdata}{An optional data frame. If specified, the data frame should
-have the same column names as the covariate names appearing in the formula
-of original fitting.}
+have the same column names as the covariate names appearing in the
+formula of original fitting.}
 
-\item{groupName}{An optional length-one charactor vector to specify the
-name for grouping each unique row in \code{newdata}, such as "gender"
-for "male" and "female". The default value is "group".}
+\item{groupName}{An optional length-one charactor vector to specify the name
+for grouping each unique row in \code{newdata}, such as "gender" for
+"male" and "female". The default value is "Group".}
 
 \item{groupLevels}{An optional charactor vector to specify the levels for
 each unique row in \code{newdata}, such as "treatment" and "control".
-The default values are capital letters starting from "A".}
+The default values are \code{"Level"} followed by a numeric sequence
+with length of number of levels.}
 }
 \value{
 A \code{mcf.formula} or \code{mcf.rateReg} object.
-The slots of a \code{mcf.formula} object include
+
+A brief description of the slots of a \code{mcf.formula} object is given as
+follows:
 \itemize{
     \item \code{formula}: Model Formula.
-    \item \code{data}: Processed data based on the model formula.
-    \item \code{level}: Confidence level specified.
-    \item \code{MCF}: Mean cumulative function at each time point.
+    \item \code{data}: Processed data based on the model formula or an
+        empty data frame if \code{keep.data} is set to be \code{FALSE}.
+    \item \code{MCF}: A data frame containing estimates for sample MCF.
+    \item \code{origin}: Time origins.
     \item \code{multiGroup}: A logical value indicating whether MCF
-        is estimated for different specified group.
-    \item \code{newdata}: Given dataset used to estimate MCF.
+        is estimated for different groups respectively.
+    \item \code{logConfInt}: A logical value indicating whether the
+        variance estimates are based on the normality of logarithm of
+        the MCF estimates.
+    \item \code{level}: Confidence level specified.
 }
-For the meaning of other slots, see \code{\link{rateReg}}.
+
+Most slots of a \code{mcf.rateReg} object are inherited from the input
+\code{rateReg} object. A brief description of other slots is given as
+follows:
+\itemize{
+    \item \code{newdata}: Given dataset used to estimate MCF.
+    \item \code{MCF}: A data frame containing MCF estimates.
+    \item \code{level}: Confidence level specified.
+    \item \code{na.action}: The way handling missing values.
+    \item \code{control}: The control list.
+    \item \code{multiGroup}: A logical value indicating whether MCF
+        is estimated for different groups respectively.
+}
 }
 \description{
-An S4 class generic function that returns mean cumulative function (MCF)
-estimates from a fitted model or computing the nonparametric MCF estimates
+An S4 class generic function that returns the mean cumulative function (MCF)
+estimates from a fitted model or returns the nonparametric MCF estimates
 (also called the Nelson-Aalen estimator) from the sample data.
 }
 \details{

@@ -33,12 +33,12 @@ NULL
 ##' @param subset An optional vector specifying a subset of observations to be
 ##'     used in the fitting process.
 ##' @param variance A character specifying the method for variance estimates.
-##'     The available options are \code{"LawlessNadeau"} (default) for Lawless
-##'     and Nadeau (1995) method, \code{"Poisson"} for Poisson process method,
-##'     and \code{"bootstrap"} for bootstrapping method.  Partial matching on
-##'     the names is allowed.
-##' @param logConfInt A logical value. If \code{FALSE} (default), the confidence
-##'     interval are constructed based on the normality of the MCF
+##'     The available options are \code{"LawlessNadeau"} (the default) for
+##'     Lawless and Nadeau (1995) method, \code{"Poisson"} for Poisson process
+##'     method, and \code{"bootstrap"} for bootstrap method.  Partial matching
+##'     on the names is allowed.
+##' @param logConfInt A logical value. If \code{FALSE} (the default), the
+##'     confidence interval are constructed based on the normality of the MCF
 ##'     estimates. Otherwise, the confidence intervals of given level are
 ##'     constucted based on the normality of logarithm of the MCF estimates.
 ##'
@@ -170,9 +170,9 @@ setMethod(
 
         ## else at least one covariate are specified
         ## get the levels for each covaraite in form of grid
-        xGrid <- unique(dat1)
-        levs <- apply(xGrid, 1, paste, collapse = "_")
-        datLevs <- apply(dat1, 1, paste, collapse = "_")
+        xGrid <- unique(dat1[do.call(order, as.list(dat1)), , drop = FALSE])
+        levs <- apply(xGrid, 1L, paste, collapse = ":")
+        datLevs <- apply(dat1, 1L, paste, collapse = ":")
         ## number of levels
         num_levels <- NROW(xGrid)
         if (num_levels == 1L)
@@ -197,13 +197,6 @@ setMethod(
         outDat <- do.call(rbind, outList)
         ## name origin vector
         names(originVec) <- levs
-
-        ## factorize covariates
-        outCol <- ncol(outDat)
-        for (j in seq_len(nBeta)) {
-            outDat[, outCol + 1 - j] <-
-                factor(levels(dat1[[nBeta + 1 - j]])[outDat[, outCol + 1 - j]])
-        }
         rownames(outDat) <- NULL
 
         ## whether to keep data in output

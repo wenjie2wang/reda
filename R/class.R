@@ -260,7 +260,7 @@ setClass(
 
 ##' An S4 Class Representing Estimated Baseline Rate Function
 ##'
-##' An S4 class that represents Estimated Baseline Rate Function from model.
+##' An S4 class that represents the estimated baseline rate function from model.
 ##' The function \code{\link{baseRate}} produces objects of this class.
 ##'
 ##' @aliases baseRate.rateReg-class
@@ -281,9 +281,9 @@ setClass(
 
 ##' An S4 Class for Simulated Recurrent Event or Survival Times
 ##'
-##' An S4 class that represents simulated recurrent event or survival time from
-##' one stochastic process. The function \code{\link{simEvent}} produces objects
-##' of this class.
+##' An S4 class that represents the simulated recurrent event or survival time
+##' from one stochastic process. The function \code{\link{simEvent}} produces
+##' objects of this class.
 ##'
 ##' @aliases simEvent-class
 ##'

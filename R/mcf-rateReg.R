@@ -27,23 +27,26 @@ NULL
 ##' @describeIn mcf Estimated MCF from a fitted model.
 ##'
 ##' @param newdata An optional data frame. If specified, the data frame should
-##' have the same column names as the covariate names appearing in the formula
-##' of original fitting.
-##' @param groupName An optional length-one charactor vector to specify the
-##' name for grouping each unique row in \code{newdata}, such as "gender"
-##' for "male" and "female". The default value is "group".
+##'     have the same column names as the covariate names appearing in the
+##'     formula of original fitting.
+##' @param groupName An optional length-one charactor vector to specify the name
+##'     for grouping each unique row in \code{newdata}, such as "gender" for
+##'     "male" and "female". The default value is "Group".
 ##' @param groupLevels An optional charactor vector to specify the levels for
-##' each unique row in \code{newdata}, such as "treatment" and "control".
-##' The default values are capital letters starting from "A".
+##'     each unique row in \code{newdata}, such as "treatment" and "control".
+##'     The default values are \code{"Level"} followed by a numeric sequence
+##'     with length of number of levels.
+##'
 ##' @aliases mcf,rateReg-method
+##'
 ##' @importFrom stats na.fail na.omit na.exclude na.pass
 ##' @importFrom splines2 ibs iSpline
 ##' @export
 setMethod(
     f = "mcf", signature = "rateReg",
     definition = function(object, newdata, groupName, groupLevels,
-                          level = 0.95, na.action, control = list(), ...) {
-
+                          level = 0.95, na.action, control = list(), ...)
+    {
         ## extract model fitting information from object
         beta <- object@estimates$beta[, "coef"]
         alpha <- object@estimates$alpha[, "coef"]
@@ -109,18 +112,21 @@ setMethod(
             ## remove intercept and deplicated rows
             X <- unique(base::subset(X, select = - `(Intercept)`))
             if (ncol(X) != nBeta)
-                stop(paste("The number of input covariates does not",
-                           "match with 'rateReg' object."))
+                stop(wrapMessages(
+                    "The number of input covariates does not",
+                    "match with 'rateReg' object."
+                ))
         }
 
         ## mcf for possible multigroups
         ndesign <- nrow(X)
+        designSeq <- seq_len(ndesign)
         multiGroup <- ndesign > 1
 
         coveff <- as.numeric(exp(X %*% beta))
-        outDat <- matrix(NA, ncol = 4, nrow = ndesign * n_xx)
+        outDat <- matrix(NA_real_, ncol = 4, nrow = ndesign * n_xx)
 
-        for (i in seq(ndesign)) {
+        for (i in designSeq) {
             ## Delta-method
             gradMat <- gradDelta(Xi = X[i, ], iMat, estMcf, coveffi = coveff[i])
             varTime <- apply(gradMat, 1, function (gradVec, covMat) {
@@ -130,7 +136,7 @@ setMethod(
             mcf_i <- estMcf * coveff[i]
             lower <- pmax(0, mcf_i - confBand)
             upper <- mcf_i + confBand
-            ind <- seq(from = n_xx * (i - 1) + 1, to = n_xx * i, by = 1)
+            ind <- seq.int(from = n_xx * (i - 1) + 1, to = n_xx * i, by = 1)
             outDat[ind, 1L] <- gridTime
             outDat[ind, 2L] <- mcf_i
             outDat[ind, 3L] <- lower
@@ -140,25 +146,27 @@ setMethod(
         colnames(outDat) <- c("time", "MCF", "lower", "upper")
         if (multiGroup) {
             if (missing(groupLevels))
-                groupLevels <- LETTERS[seq(ndesign)]
+                groupLevels <- paste("Level", designSeq)
             if (missing(groupName))
-                groupName <- "group"
-            tempcol <- factor(rep(groupLevels[seq(ndesign)], each = n_xx))
+                groupName <- "Group"
+            tempcol <- factor(rep(groupLevels[designSeq], each = n_xx))
             outDat <- cbind(outDat, tempcol)
             colnames(outDat)[5L] <- groupName
         }
-        ## output
-        out <- methods::new("mcf.rateReg",
-                            call = object@call,
-                            formula = object@formula,
-                            spline = object@spline$spline,
-                            knots = knots, degree = degree,
-                            Boundary.knots = Boundary.knots,
-                            newdata = X, MCF = outDat, level = level,
-                            na.action = na.action, control = control,
-                            multiGroup = multiGroup)
         ## return
-        out
+        methods::new("mcf.rateReg",
+                     call = object@call,
+                     formula = object@formula,
+                     spline = object@spline$spline,
+                     knots = knots,
+                     degree = degree,
+                     Boundary.knots = Boundary.knots,
+                     newdata = X,
+                     MCF = outDat,
+                     level = level,
+                     na.action = na.action,
+                     control = control,
+                     multiGroup = multiGroup)
     })
 
 

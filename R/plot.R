@@ -20,28 +20,26 @@
 
 ##' Plot Baseline Rate or Mean Cumulative Function (MCF)
 ##'
-##'
-##' S4 class methods plotting sample MCF from data, estimated MCF, or
-##' esttimated baseline rate function from a fitted model by using
-##' \code{ggplot2} plotting system.  The plots generated are thus able to be
-##' further customized properly.
+##' S4 class methods plotting sample MCF from data, estimated MCF, or estimated
+##' baseline hazard rate function from a fitted model by using \code{ggplot2}
+##' plotting system.  The plots generated are thus able to be further customized
+##' properly.
 ##'
 ##' @name plot-method
 ##'
 ##' @param x An object used to dispatch a method.
-##' @param y An argument that should be missing and ignored now.
-##' Its existence is just for satisfying the definition of generaic function
-##' \code{plot} in package \code{graphics} for methods' dispatching.
-##' @param conf.int A logical value indicating
-##' whether to plot confidence interval.
-##' The default value is \code{FALSE}.
-##' @param lty An optional numeric vector indicating
-##' line types specified to different groups:
-##' 0 = blank, 1 = solid, 2 = dashed, 3 = dotted,
-##' 4 = dotdash, 5 = longdash, 6 = twodash.
-##' @param col An optional character vector indicating
-##' line colors specified to different groups.
+##' @param y An argument that should be missing and ignored now.  Its existence
+##'     is just for satisfying the definition of generaic function \code{plot}
+##'     in package \code{graphics} for methods' dispatching.
+##' @param conf.int A logical value indicating whether to plot confidence
+##'     interval.  The default value is \code{FALSE}.
+##' @param lty An optional numeric vector indicating line types specified to
+##'     different groups: 0 = blank, 1 = solid, 2 = dashed, 3 = dotted, 4 =
+##'     dotdash, 5 = longdash, 6 = twodash.
+##' @param col An optional character vector indicating line colors specified to
+##'     different groups.
 ##' @param ... Other arguments for further usage.
+##'
 ##' @return A \code{ggplot} object.
 ##'
 ##' @examples
@@ -63,18 +61,18 @@ NULL
 ##'
 ##' @aliases plot,mcf.formula-method
 ##'
-##' @param mark.time A logical value with default \code{FALSE}.
-##' If \code{TRUE}, each censoring time is marked by "+" on the MCF curves.
-##' Otherwise, the censoring time would not be marked.
 ##' @param legendName An optional length-one charactor vector to specify the
-##' name for grouping each unique row in \code{newdata}, such as "gender"
-##' for "male" and "female". The default value is generated from the
-##' \code{object}.
+##'     name for grouping each unique row in \code{newdata}, such as "gender"
+##'     for "male" and "female". The default value is generated from the
+##'     \code{object}.
 ##' @param legendLevels An optional charactor vector to specify the levels for
-##' each unique row in \code{newdata}, such as "treatment" and "control".
-##' The default values are generated from the \code{object}.
+##'     each unique row in \code{newdata}, such as "treatment" and "control".
+##'     The default values are generated from the \code{object}.
+##' @param mark.time A logical value with default value \code{FALSE}.  If
+##'     \code{TRUE}, each censoring time is marked by "+" on the MCF curves.
+##'     Otherwise, the censoring time would not be marked.
 ##' @param addOrigin A logical value indicating whether the MCF curves start
-##' from origin time. The default value is \code{TRUE}.
+##'     from origin time. The default value is \code{FALSE}.
 ##'
 ##' @export
 setMethod(
@@ -130,8 +128,10 @@ setMethod(
             numColMcf <- 7L
             desDat <- MCFdat[, - seq_len(numColMcf), drop = FALSE]
             groupName <- paste(colnames(desDat), collapse = "&")
+            ## keep order for factor variables
+            desDat <- desDat[do.call(order, as.list(desDat)), , drop = FALSE]
             desVec <- do.call(paste, c(as.list(desDat), sep = "&"))
-            desLevs <- sort(unique(desVec))
+            desLevs <- unique(desVec)
             MCFdat$design <- factor(desVec, levels = desLevs)
             nDesign <- length(desLevs)
             desInd <- seq_len(nDesign)
