@@ -135,15 +135,6 @@ setMethod(
             MCFdat$design <- factor(desVec, levels = desLevs)
             nDesign <- length(desLevs)
             desInd <- seq_len(nDesign)
-            if (addOrigin) {
-                ## add starting point at origin time for each group
-                originDat <- MCFdat[rep(1L, nDesign),]
-                originDat[, 2 : numColMcf] <- 0
-                originDat[, "time"] <- x@origin
-                originDat[, "design"] <- desLevs
-                originDat[, "instRate"] <- NA
-                MCFdat <- rbind(originDat, MCFdat)
-            }
             ## set possibly customized group name and levels
             legendName <- if (missing(legendName)) {
                               groupName
@@ -156,10 +147,20 @@ setMethod(
                         "The length of 'legendLevels' must ",
                         "match the number of designs."
                     ), call. = FALSE)
-                desLevs <- levels(MCFdat$design) <-
-                    as.character(legendLevels)
+                desLevs <- as.character(legendLevels)
+                MCFdat$design <- factor(desVec,
+                                        levels = levels(MCFdat$design),
+                                        labels = desLevs)
             }
-
+            if (addOrigin) {
+                ## add starting point at origin time for each group
+                originDat <- MCFdat[rep(1L, nDesign),]
+                originDat[, 2 : numColMcf] <- 0
+                originDat[, "time"] <- x@origin
+                originDat[, "design"] <- desLevs
+                originDat[, "instRate"] <- NA
+                MCFdat <- rbind(originDat, MCFdat)
+            }
             ## about lty
             ## 0 = blank, 1 = solid, 2 = dashed, 3 = dotted,
             ## 4 = dotdash, 5 = longdash, 6 = twodash

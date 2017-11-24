@@ -93,6 +93,9 @@ required. The default value is 0.95.}
             function \code{mcfDiff} and \code{mcfDiff.test} will not be
             applicable for the \code{mcf.formula} object with an empty
             \code{data} slot.
+      \item \code{verbose}: A logical value. The default value is
+            \code{TRUE}. If \code{FALSE}, possible data checking messages
+             (not including warnings or errors) will be suppressed.
     }}
 
 \item{newdata}{An optional data frame. If specified, the data frame should

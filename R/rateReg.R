@@ -291,11 +291,11 @@ rateReg <- function(formula, data, subset, df = NULL, knots = NULL, degree = 0L,
         ## check data for possible error caused by removal of missing values
         if (control4rateReg$verbose)
             message("Observations with missing value in covariates ",
-                    "are removed.\nChecking the new dataset again.\n",
+                    "are removed.\nChecking the new dataset again...\n",
                     appendLF = FALSE)
         check_Survr(resp, check = TRUE)
         if (control4rateReg$verbose)
-            message("Done.")
+            message("Done!")
     }
 
     ## sorted data by ID, time, and event

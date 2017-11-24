@@ -116,6 +116,10 @@ test_that("Quick tests for normal usages", {
     ## test baseRate
     br_constFit <- baseRate(constFit)
     expect_equivalent(class(br_constFit), "baseRate.rateReg")
+    expect_equivalent(class(baseRate(splineFit)), "baseRate.rateReg")
+    tmpFit <- splineFit
+    tmpFit@spline$spline <- "iSplines"
+    expect_error(baseRate(tmpFit), "Unknown splines type.", fixed = TRUE)
     ## test plot,baseRate.rateReg-method
     expect_equivalent(class(plot(br_constFit, conf.int = TRUE)),
                       c("gg", "ggplot"))
@@ -148,5 +152,6 @@ test_that("Quick tests for normal usages", {
     expect_equivalent(class(
         plot(mcf_splineFit, conf.int = TRUE, lty = 1:4, col = 1:4)
     ), c("gg", "ggplot"))
+    expect_equivalent(class(plot(mcf_splineFit)), c("gg", "ggplot"))
 
 })

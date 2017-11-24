@@ -57,12 +57,12 @@ setMethod(
         ## specify the type of variance
         variance <- match.arg(variance)
         ## basic check on inputs
-        if (! isLogicalOne(logConfInt))
+        if (! isLogicalOne(logConfInt, error_na = TRUE))
             stop(wrapMessages(
                 "The argument 'logConfint' has to be",
                 "either 'TRUE' or 'FALSE'."
             ))
-        if (! isNumOne(level) || level <= 0 || level >= 1)
+        if (! isNumOne(level, error_na = TRUE) || level <= 0 || level >= 1)
             stop("Confidence level must be between 0 and 1.")
 
         ## get the data and take care of the possible subset
@@ -111,12 +111,22 @@ setMethod(
         if (length(ord) & any(ord != 1))
             stop("Interaction term is not supported for this function.")
 
+        ## update control list
+        control <- do.call(mcf_formula_control, control)
+
         ## for possible missing values in covaraites
         if (length(na.action <- attr(mf, "na.action"))) {
             ## update if there is missing value removed
             attr(resp, "ord") <- order(resp[, "ID"], resp[, "time"])
             attr(resp, "ID") <- attr(resp, "ID")[- na.action]
+            ## check data for possible error caused by removal of missing values
+            if (control$verbose)
+                message("Observations with missing value in covariates ",
+                        "are removed.\nChecking the new dataset again...\n",
+                        appendLF = FALSE)
             check_Survr(resp, check = TRUE)
+            if (control$verbose)
+                message("Done!")
         }
 
         ## number of covariates
@@ -133,9 +143,6 @@ setMethod(
             covar_names <- NULL
         }
         colnames(dat) <- c("ID", "time", "event", "origin", covar_names)
-
-        ## update control list
-        control <- do.call(mcf_formula_control, control)
 
         ## if no covariates specified
         if (! nBeta) {
@@ -416,7 +423,8 @@ sMcf_boot_one <- function(dat, idTab, uID, numSub, rowIndList, grid, ...)
 ## estimate SE based on normality assumption
 seBoot_normality <- function(sMcfBootMat, upperQuan = 0.75)
 {
-    if (! isNumOne(upperQuan) || upperQuan >= 1 || upperQuan <= 0.5)
+    if (! isNumOne(upperQuan, error_na = TRUE) ||
+        upperQuan >= 1 || upperQuan <= 0.5)
         stop(wrapMessages(
             "The upper quantile ('upperQuan') has to be between 0.5 and 1."
         ), call. = FALSE)
@@ -460,9 +468,10 @@ mcf_formula_control <- function(B = 2e2,
                                 se.method = c("sample.se", "normality"),
                                 ci.method = c("normality", "percentile"),
                                 keep.data = TRUE,
+                                verbose = TRUE,
                                 ...)
 {
-    if (! isNumOne(B) || B <= 1)
+    if (! isNumOne(B, error_na = TRUE) || B <= 1)
         stop(wrapMessages(
             "The number of bootstarp sample, 'B' should be a numeric number."
         ), call. = FALSE)
@@ -472,7 +481,7 @@ mcf_formula_control <- function(B = 2e2,
         ), call. = FALSE)
     se.method <- match.arg(se.method)
     ci.method <- match.arg(ci.method)
-    if (! isLogicalOne(keep.data))
+    if (! isLogicalOne(keep.data, error_na = TRUE))
         stop("The option 'keep.data' should be either 'TRUE' or 'FALSE'.",
              call. = FALSE)
     ## return
@@ -480,6 +489,7 @@ mcf_formula_control <- function(B = 2e2,
         B = B,
         se.method = se.method,
         ci.method = ci.method,
-        keep.data = keep.data
+        keep.data = keep.data,
+        verbose = verbose
     )
 }

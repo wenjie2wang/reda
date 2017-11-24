@@ -36,6 +36,8 @@ test_that("call reda::simEvent", {
                  "frailty", fixed = TRUE)
     expect_error(simEvent(frailty = NA_real_),
                  "frailty", fixed = TRUE)
+
+
 })
 
 test_that("call reda::simEventData", {
