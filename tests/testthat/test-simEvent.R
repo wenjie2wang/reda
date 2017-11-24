@@ -42,11 +42,11 @@ test_that("call reda::simEvent", {
         simEvent(interarrival = stats::rexp,
              relativeRisk = function(z, zCoef) exp(as.numeric(z %*% zCoef)))
     ), "simEvent")
-    my_rriskFun <- function(z, zCoef) exp(as.numeric(z %*% zCoef))
-    expect_equivalent(class(
-        simEvent(interarrival = stats::rexp,
-                 relativeRisk = "my_rriskFun")
-    ), "simEvent")
+    expect_equivalent({
+        my_rriskFun <- function(z, zCoef) exp(as.numeric(z %*% zCoef));
+        class(simEvent(interarrival = stats::rexp,
+                       relativeRisk = my_rriskFun))
+    }, "simEvent")
     expect_error(simEvent(relativeRisk = 1), "relative risk", fixed = TRUE)
     expect_equivalent(class(
         simEvent(z = function(tVec) as.numeric(tVec > 1),

@@ -304,6 +304,7 @@ simEvent <- function(z = 0, zCoef = 1,
     Call <- match.call()
     ## match method
     method <- match.arg(method, c("thinning", "inverse.cdf"))
+
     ## check covariate z
     zVecIdx <- isNumVector(z, error_na = TRUE)
     if (! (zVecIdx || is.function(z) || isCharOne(z, error_na = TRUE)))
@@ -368,7 +369,9 @@ simEvent <- function(z = 0, zCoef = 1,
                     } else {
                         relativeRisk <- rriskNames[rriskInd]
                         ## strange function names that user may not create
-                        paste0(".rrisk_", relativeRisk, "_")
+                        eval(parse(
+                            text = paste0(".rrisk_", relativeRisk, "_")
+                        ))
                     }
                 } else {
                     stop(wrapMessages(
@@ -404,9 +407,7 @@ simEvent <- function(z = 0, zCoef = 1,
 
     rrisk_args <- lapply(arguments[["relativeRisk"]], eval)
     rrisk_args <- rrisk_args[! names(rrisk_args) %in% c("z", "zCoef")]
-    rriskFunArgs <- names(as.list(args(
-        if (rriskFunIdx) rriskFun else eval(parse(text = rriskFun))
-    )))
+    rriskFunArgs <- names(as.list(args(rriskFun)))
     if (any(! c("z", "zCoef") %in% rriskFunArgs))
         stop(wrapMessages(
             "The relative risk function must have",
