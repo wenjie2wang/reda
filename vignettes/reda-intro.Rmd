@@ -100,7 +100,7 @@ shape and rate parameter in the gamma prior.
 (constFit <- rateReg(Survr(ID, time, event) ~ group + x1, data = simuDat))
 ```
 
-The function `rateReg` returns `rateReg-class` object, which can be
+The function `rateReg` returns `rateReg` object, which can be
 printed out by calling the object.
 (Internally, `show` method for `rateReg` object is called.)
 
@@ -175,7 +175,7 @@ plus one if intercept is included in spline bases.
 
 A brief summary of the fitted model is given by `show` method
 as shown in the previous examples. Further, `summary` method for
-`rateReg-class` object provides a more specific summary
+`rateReg` object provides a more specific summary
 of the model fitted. For instance, the summary of the models fitted
 in section of model fitting can be called as follows:
 
@@ -226,7 +226,7 @@ BIC(constFit, piecesFit, splineFit)
 
 ## Baseline Rate Function {#baseRate}
 
-Function `baseRate` produces `baseRateReg-class` object representing the
+Function `baseRate` produces `baseRate.rateReg` object representing the
 estimated baseline rate function for a fitter model. An associated `plot`
 method is available. For example, the baseline rate function and its
 confidence band estimated by cubic splines can be plotted as follows:
@@ -296,10 +296,15 @@ The type and color of the line can be specified through
 `lty` and `col`, respectively.
 
 
+## Comparing Two Sample MCF
+
+[@cook1996biometrics] [@lawless1995technometrics]
+
+
 ### Estimated MCF from the fitted Model {#rateRegMcf}
 
-If `rateReg-class` object is supplied to function `mcf`,
-the method for `rateReg-class` is called, which returns
+If `rateReg` object is supplied to function `mcf`,
+the method for `rateReg` is called, which returns
 the estimated baseline MCF from the fitted model
 if `newdata` is not specified in the function.
 

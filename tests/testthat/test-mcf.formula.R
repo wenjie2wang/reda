@@ -16,12 +16,12 @@ test_that("test mcf,formula method", {
     ## test bootstrap variance
     expect_equivalent(class(
         mcf(Survr(ID, Days, No.) ~ group_, valveSeats,
-            variance = "bootstrap",
+            variance = "bootstrap", logConfInt = TRUE,
             control = list(B = 30, se.method = "normality"))
     ), "mcf.formula")
     expect_equivalent(class(
         mcf(Survr(ID, Days, No.) ~ group_, valveSeats,
-            variance = "bootstrap", logConfInt = TRUE,
+            variance = "bootstrap",
             control = list(B = 30, se.method = "normality",
                            ci.method = "percentile"))
     ), "mcf.formula")

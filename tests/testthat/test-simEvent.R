@@ -37,6 +37,46 @@ test_that("call reda::simEvent", {
     expect_error(simEvent(frailty = NA_real_),
                  "frailty", fixed = TRUE)
 
+    ## quick examples to increase test coverage
+    expect_equivalent(class(
+        simEvent(interarrival = stats::rexp,
+             relativeRisk = function(z, zCoef) exp(as.numeric(z %*% zCoef)))
+    ), "simEvent")
+    my_rriskFun <- function(z, zCoef) exp(as.numeric(z %*% zCoef))
+    expect_equivalent(class(
+        simEvent(interarrival = stats::rexp,
+                 relativeRisk = "my_rriskFun")
+    ), "simEvent")
+    expect_error(simEvent(relativeRisk = 1), "relative risk", fixed = TRUE)
+    expect_equivalent(class(
+        simEvent(z = function(tVec) as.numeric(tVec > 1),
+                 zCoef = function(tVec) - sin(tVec) / 10,
+                 rho = 0.5,
+                 origin = rnorm,
+                 end = function(n, m = 5) rnorm(n, m, sd = 0.1),
+                 frailty = rlnorm)
+    ), "simEvent")
+    expect_equivalent(class(
+        simEvent(relativeRisk = "linear")
+    ), "simEvent")
+    expect_equivalent(class(
+        simEvent(relativeRisk = "excess")
+    ), "simEvent")
+
+    ## use inverse CDF method instead of thinning method
+    expect_equivalent(class(
+        simEvent(method = "inverse.cdf")
+    ), "simEvent")
+    expect_equivalent(class(
+        simEvent(method = "inverse.cdf",
+                 interarrival = function(n, rate) runif(n, max = 2 / rate))
+    ), "simEvent")
+    expect_equivalent(class(
+        simEvent(method = "inverse.cdf", endTime = 0.1,
+                 interarrival = function(n, rate)
+                     runif(n, min = 0.1, max = 2 / rate - 0.1))
+    ), "simEvent")
+
 
 })
 
@@ -69,4 +109,9 @@ test_that("call reda::simEventData", {
                  "frailty", fixed = TRUE)
     expect_error(simEventData(frailty = NA_real_),
                  "frailty", fixed = TRUE)
+
+    ## survival data instead of recurrent event data
+    expect_output(str(
+        simEventData(recurrent = FALSE)
+    ), "'data.frame':\t1 obs. of  5 variables:")
 })
