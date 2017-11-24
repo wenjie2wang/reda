@@ -91,7 +91,7 @@ setMethod(
         ## about newdata
         tt <- stats::terms(object@formula)
         Terms <- stats::delete.response(tt)
-        if (missing("na.action"))
+        if (missing(na.action) || is.null(na.action))
             na.action <- options("na.action")[[1L]]
 
         if (missing(newdata)) {
@@ -102,11 +102,7 @@ setMethod(
             mf <- stats::model.frame(Terms, newdata,
                                      na.action = na.action,
                                      xlev = object@xlevels)
-            if (is.null(attr(mf, "na.action"))) {
-                na.action <- options("na.action")[[1L]]
-            } else {
-                na.action <- paste0("na.", class(attr(mf, "na.action")))
-            }
+            na.action <- paste0("na.", class(attr(mf, "na.action")))
             X <- stats::model.matrix(Terms, mf, contrasts.arg =
                                                     object@contrasts$constracts)
             ## remove intercept and deplicated rows

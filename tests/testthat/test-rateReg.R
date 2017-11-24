@@ -119,14 +119,23 @@ test_that("Quick tests for normal usages", {
     ## test plot,baseRate.rateReg-method
     expect_equivalent(class(plot(br_constFit, conf.int = TRUE)),
                       c("gg", "ggplot"))
+    ## trigger warnings
+    set.seed(123)
+    sinDat <- simEventData(200, rho = function(tVec) 1 - sin(tVec))
+    sinFit <- rateReg(Survr(ID, time, event) ~ 1, sinDat,
+                      knots = c(1, 2), degree = 3)
+    expect_error(baseRate(sinFit), "variance-covariance", fixed = TRUE)
 
     ## test mcf,rateReg-method
     mcf_constFit <- mcf(constFit)
+    mcf_piecesFit <- mcf(piecesFit, newdata = rbind(NA, testDat[1, ]),
+                         na.action = NULL)
     mcf_splineFit <- mcf(splineFit,
                          newdata = rbind(NA, testDat[1:10, ]),
                          na.action = "na.exclude",
                          control = list(grid = seq.int(0, 168, by = 1)))
     expect_equivalent(class(mcf_constFit), "mcf.rateReg")
+    expect_equivalent(class(mcf_piecesFit), "mcf.rateReg")
     expect_equivalent(class(mcf_splineFit), "mcf.rateReg")
     expect_error(mcf(splineFit, control = list(grid = factor(1:2))),
                  "grid", fixed = TRUE)

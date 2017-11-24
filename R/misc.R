@@ -26,34 +26,93 @@ wrapMessages <- function(..., strwrap.args = list()) {
     paste(wrap_x, collapse = "\n")
 }
 
+## warning if x contains NA (or NaN)
+na_warning <- function(x, sub_env = c("current", "parent", "grandparent"),
+                       num_grandparent = 2L, ...)
+{
+    sub_env <- switch(
+        match.arg(sub_env),
+        "current" = environment(),
+        "parent" = parent.frame(),
+        "grandparent" = parent.frame(num_grandparent)
+    )
+    objName = deparse(substitute(x, sub_env))
+    if (any(is.na(x)))
+        warning(wrapMessages(
+            sprintf("Found `NA` values in `%s`.", objName)
+        ), call. = FALSE)
+    invisible(x)
+}
+
+## stop if x contains NA (or NaN)
+na_stop <- function(x, sub_env = c("current", "parent", "grandparent"),
+                       num_grandparent = 2L, ...)
+{
+    sub_env <- switch(
+        match.arg(sub_env),
+        "current" = environment(),
+        "parent" = parent.frame(),
+        "grandparent" = parent.frame(num_grandparent)
+    )
+    objName = deparse(substitute(x, sub_env))
+    if (any(is.na(x)))
+        stop(wrapMessages(
+            sprintf("Found `NA` values in `%s`.", objName)
+        ), call. = FALSE)
+    invisible(x)
+}
+
 ## is x a numeric vector
-isNumVector <- function(x) {
-    is.numeric(x) && is.vector(x)
+isNumVector <- function(x, warn_na = TRUE, error_na = ! warn_na,
+                        sub_env = "parent", ...)
+{
+    out <- is.numeric(x) && is.vector(x)
+    if (out) {
+        if (error_na) na_stop(x, sub_env = sub_env, ...)
+        if (warn_na) na_warning(x, sub_env = sub_env, ...)
+    }
+    out
 }
 
 ## is x a numeric value
-isNumOne <- function(x) {
-    isNumVector(x) && length(x) == 1L
+isNumOne <- function(x, sub_env = "grandparent", ...)
+{
+    isNumVector(x, sub_env = sub_env, ...) && length(x) == 1L
 }
 
 ## is x a character vector
-isCharVector <- function(x) {
-    is.character(x) && is.vector(x)
+isCharVector <- function(x, warn_na = TRUE, error_na = ! warn_na,
+                         sub_env = "parent", ...)
+{
+    out <- is.character(x) && is.vector(x)
+    if (out) {
+        if (error_na) na_stop(x, sub_env = sub_env, ...)
+        if (warn_na) na_warning(x, sub_env = sub_env, ...)
+    }
+    out
 }
 
 ## is x a character value
-isCharOne <- function(x) {
-    isCharVector(x) && length(x) == 1L
+isCharOne <- function(x, sub_env = "grandparent", ...)
+{
+    isCharVector(x, sub_env = sub_env, ...) && length(x) == 1L
 }
 
 ## is x a logical vector
-isLogicalVector <- function(x) {
-    is.logical(x) && is.vector(x)
+isLogicalVector <- function(x, warn_na = TRUE, error_na = ! warn_na,
+                            sub_env = "parent", ...)
+{
+    out <- is.logical(x) && is.vector(x)
+    if (out) {
+        if (error_na) na_stop(x, sub_env = sub_env, ...)
+        if (warn_na) na_warning(x, sub_env = sub_env, ...)
+    }
+    out
 }
 
 ## is x a logical value
-isLogicalOne <- function(x) {
-    isLogicalVector(x) && length(x) == 1L
+isLogicalOne <- function(x, sub_env = "grandparent", ...) {
+    isLogicalVector(x, sub_env = sub_env, ...) && length(x) == 1L
 }
 
 ## is x a Survr object

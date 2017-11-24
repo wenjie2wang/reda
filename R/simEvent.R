@@ -305,16 +305,16 @@ simEvent <- function(z = 0, zCoef = 1,
     ## match method
     method <- match.arg(method, c("thinning", "inverse.cdf"))
     ## check covariate z
-    zVecIdx <- isNumVector(z)
-    if (! (zVecIdx || is.function(z) || isCharOne(z)) || any(is.na(z)))
+    zVecIdx <- isNumVector(z, error_na = TRUE)
+    if (! (zVecIdx || is.function(z) || isCharOne(z, error_na = TRUE)))
         stop(wrapMessages(
             "The covariates 'z' has to be a numeric vector / matrix,",
             "a function or a function name."
         ), call. = FALSE)
     ## check coefficients zCoef
-    zCoefVecIdx <- isNumVector(zCoef)
-    if (! (zCoefVecIdx || is.function(zCoef) || isCharOne(zCoef)) ||
-        any(is.na(zCoef)))
+    zCoefVecIdx <- isNumVector(zCoef, error_na = TRUE)
+    if (! (zCoefVecIdx || is.function(zCoef) ||
+           isCharOne(zCoef, error_na = TRUE)))
         stop(wrapMessages(
             "The covariate coefficients 'zCoef' has to be a numeric vector,",
             "a function or a function name."
@@ -322,8 +322,8 @@ simEvent <- function(z = 0, zCoef = 1,
     if (zVecIdx && zCoefVecIdx && length(zCoef) < (tmp <- length(z)))
         zCoef <- rep(zCoef, length.out = tmp)
     ## check baseline rate function rho
-    rhoVecIdx <- isNumOne(rho)
-    if (! (rhoVecIdx || is.function(rho) || isCharOne(rho)) || any(is.na(rho)))
+    rhoVecIdx <- isNumOne(rho, error_na = TRUE)
+    if (! (rhoVecIdx || is.function(rho) || isCharOne(rho, error_na = TRUE)))
         stop(wrapMessages(
             "The baseline hazard rate function",
             "'rho' has to be a numeric vector, a function or a function name."
@@ -332,18 +332,18 @@ simEvent <- function(z = 0, zCoef = 1,
         stop("The baseline hazard rate function 'rho' has to be non-negative.",
              call. = FALSE)
     ## check the baseline rate function coefficients, rhoCoef
-    if (! isNumVector(rhoCoef) || any(is.na(rhoCoef)))
+    if (! isNumVector(rhoCoef, error_na = TRUE))
         stop(wrapMessages(
             "The 'rhoCoef' has to be a numeric vector",
             "(without no missing value)."
         ))
     n_rhoCoef <- length(rhoCoef)
     ## check function for interarrival time
-    if (! (is.function(interarrival) || isCharOne(interarrival)) ||
-        any(is.na(interarrival)))
+    if (! (is.function(interarrival) ||
+           isCharOne(interarrival, error_na = TRUE)))
         stop("The 'interarrival' has to be a function or a function name.",
              call. = FALSE)
-    interarrivalFun <- if (isCharOne(interarrival)) {
+    interarrivalFun <- if (isCharOne(interarrival, error_na = TRUE)) {
                            eval(parse(text = interarrival))
                        } else {
                            interarrival
@@ -354,12 +354,12 @@ simEvent <- function(z = 0, zCoef = 1,
     rriskNames <- c("exponential", "linear", "excess")
     rriskFun <- if (rriskFunIdx <- is.function(relativeRisk)) {
                     relativeRisk
-                } else if (isCharVector(relativeRisk)) {
+                } else if (isCharVector(relativeRisk, error_na = TRUE)) {
                     rriskInd <- pmatch(relativeRisk, rriskNames,
                                        nomatch = - 1)[1L]
                     if (rriskInd < 0) {
                         ## customized function name
-                        if (! identical(length(relativeRisk), 1L))
+                        if (length(relativeRisk) != 1L)
                             stop(wrapMessages(
                                 "The customized relative risk function name",
                                 "should be of length one."
@@ -415,7 +415,8 @@ simEvent <- function(z = 0, zCoef = 1,
         ), call. = FALSE)
 
     ## check origin
-    if ((originFunIdx <- is.function(origin)) || isCharOne(origin)) {
+    if ((originFunIdx <- is.function(origin)) ||
+        isCharOne(origin, error_na = TRUE)) {
         ## add "n = 1" for common distribution from stats library
         if ("n" %in% names(as.list(args(
                          if (originFunIdx)
@@ -429,7 +430,8 @@ simEvent <- function(z = 0, zCoef = 1,
         originFun <- origin_args <- NULL
     }
     ## check endTime similarly to origin
-    if ((endTimeFunIdx <- is.function(endTime)) || isCharOne(endTime)) {
+    if ((endTimeFunIdx <- is.function(endTime)) ||
+        isCharOne(endTime, error_na = TRUE)) {
         ## add "n = 1" for common distribution from stats library
         if ("n" %in% names(as.list(args(
                          if (endTimeFunIdx)
@@ -443,9 +445,9 @@ simEvent <- function(z = 0, zCoef = 1,
         endTimeFun <- endTime_args <- NULL
     }
     ## check origin and endTime
-    if (! (isNumOne(origin) && isNumOne(endTime) &&
-           origin < endTime && is.finite(endTime)) ||
-        any(is.na(origin)) || any(is.na(endTime))) {
+    if (! (isNumOne(origin, error_na = TRUE) &&
+           isNumOne(endTime, error_na = TRUE) &&
+           origin < endTime && is.finite(endTime))) {
         stop(wrapMessages(
             "The 'origin' and 'endTime'",
             "has to be two numerical values s.t. 'origin' < 'endTime < Inf'."
@@ -453,10 +455,11 @@ simEvent <- function(z = 0, zCoef = 1,
     }
 
     ## prepare frailty effect
-    if (isNumOne(frailty)) {
+    if (isNumOne(frailty, error_na = TRUE)) {
         frailtyEffect <- frailty
         frailtyFun <- NULL
-    } else if ((frailtyFunIdx <- is.function(frailty)) || isCharOne(frailty)) {
+    } else if ((frailtyFunIdx <- is.function(frailty)) ||
+               isCharOne(frailty, error_na = TRUE)) {
         ## add "n = 1" for common distribution from stats library
         if ("n" %in% names(as.list(args(
                          if (frailtyFunIdx)
@@ -468,8 +471,7 @@ simEvent <- function(z = 0, zCoef = 1,
     } else {
         frailtyEffect <- - 1            # leads to errors
     }
-    if (! isNumOne(frailtyEffect) || frailtyEffect <= 0 ||
-        any(is.na(frailtyEffect)))
+    if (! isNumOne(frailtyEffect, error_na = TRUE) || frailtyEffect <= 0)
         stop(wrapMessages(
             "The argument 'frailty' has to be a positive number or",
             "a function that generates a positive number."
@@ -497,7 +499,7 @@ simEvent <- function(z = 0, zCoef = 1,
                  "and its cofficients, 'rhoCoef', does not match.")
         covEffect <- do.call(rriskFun,
                              c(list(z = zVec, zCoef = zCoefVec), rrisk_args))
-        if (! isNumOne(covEffect) || covEffect <= 0)
+        if (! isNumOne(covEffect, error_na = TRUE) || covEffect <= 0)
             stop("The relative risk function should return a positive number.",
                  call. = FALSE)
         rhoVec <- as.numeric(rhoMat %*% rhoCoef)
@@ -526,7 +528,7 @@ simEvent <- function(z = 0, zCoef = 1,
     rho_max <- rhoMaxObj$objective
     ## if the supremum is finite, use thinning method
     if (is.infinite(rho_max)) {
-        if (identical(method, "thinning")) {
+        if (method == "thinning") {
             method <- "inverse.cdf"
             warning(wrapMessages(
                 "The rate function may go to infinite.",
@@ -555,7 +557,7 @@ simEvent <- function(z = 0, zCoef = 1,
             lastEventTime <- origin
             while (lastEventTime < endTime) {
                 W <- do.call(interarrival, interarrivalArgs)
-                if (! isNumVector(W) || any(W <= 0))
+                if (! isNumVector(W, error_na = TRUE) || any(W <= 0))
                     stop("The interarrival times must be positive!",
                          call. = FALSE)
                 ## step 3: update evnet times
@@ -566,7 +568,7 @@ simEvent <- function(z = 0, zCoef = 1,
             if ("n" %in% intArvArgs)
                 interarrivalArgs <- c(list(n = 1), interarrivalArgs)
             W <- do.call(interarrival, interarrivalArgs)
-            if (! isNumOne(W) || any(W <= 0))
+            if (! isNumOne(W, error_na = TRUE) || any(W <= 0))
                 stop("The interarrival time must be a positive nuumber!",
                      call. = FALSE)
             eventTime <- origin + W
@@ -777,8 +779,9 @@ simEventData <- function(nProcess = 1,
     Call <- match.call()
 
     ## check covariate z
-    if (isNumVector(z)) z <- matrix(z, nrow = 1)  # convert vector z to matrix
-    if (! (is.matrix(z) || is.function(z) || isCharOne(z)) || any(is.na(z)))
+    ## convert vector z to matrix
+    if (isNumVector(z, error_na = TRUE)) z <- matrix(z, nrow = 1)
+    if (! (is.matrix(z) || is.function(z) || isCharOne(z, error_na = TRUE)))
         stop(wrapMessages(
             "The covariates 'z' has to be a numeric vector / matrix,",
             "a function or a function name."
@@ -799,21 +802,21 @@ simEventData <- function(nProcess = 1,
     }
 
     ## take care of origin, endTime, and frailty before simEvent
-    originFunIdx <- is.function(origin) || isCharOne(origin)
+    originFunIdx <- is.function(origin) || isCharOne(origin, error_na = TRUE)
     if (! originFunIdx) {
-        if (! isNumVector(origin) || any(is.na(origin)))
+        if (! isNumVector(origin, error_na = TRUE))
             stop("The time origins, 'origin' has to be a numeric vector.")
         origin <- rep(origin, length.out = nProcess)
     }
-    endTimeFunIdx <- is.function(endTime) || isCharOne(endTime)
+    endTimeFunIdx <- is.function(endTime) || isCharOne(endTime, error_na = TRUE)
     if (! endTimeFunIdx) {
-        if (! isNumVector(endTime) || any(is.na(endTime)))
+        if (! isNumVector(endTime, error_na = TRUE))
             stop("The ends of time, 'endTime' has to be a numeric vector.")
         endTime <- rep(endTime, length.out = nProcess)
     }
-    frailtyFunIdx <- is.function(frailty) || isCharOne(frailty)
+    frailtyFunIdx <- is.function(frailty) || isCharOne(frailty, error_na = TRUE)
     if (! frailtyFunIdx) {
-        if (! isNumVector(frailty) || any(is.na(frailty)))
+        if (! isNumVector(frailty, error_na = TRUE))
             stop("The frailty effects to be a numeric vector.")
         frailty <- rep(frailty, length.out = nProcess)
     }

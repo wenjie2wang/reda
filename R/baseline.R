@@ -119,14 +119,12 @@ setMethod(
 
         seVec <- tryCatch(sqrt(varVec), warning = function(w) w)
         if ("warning" %in% class(seVec)) {
-            warning(wrapMessages(
+            stop(wrapMessages(
                 "The variance-covariance matrix is not positive definite.",
                 "Please check possible error",
                 "(or adjust spline bases and perhaps",
                 "try different set of starting values)."
             ))
-            ## may not be apprepriate
-            seVec <- sqrt(pmax(varVec, .Machine$double.eps))
         }
 
         ## confidence interval for the given level
