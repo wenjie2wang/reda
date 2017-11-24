@@ -103,4 +103,13 @@ test_that("call reda::mcfDiff.test", {
         mcfDiff.test(mcf(Survr(ID, Days, No., orig) ~ group, valveSeats)),
         "The earliest time origins", fixed = TRUE)
 
+    ## try alternative option testVariance = "Poisson"
+    expect_equivalent(class(mcfDiff.test(mcf1, mcf2, testVariance = "Pois")),
+                      "mcfDiff.test")
+
+    ## try extreme cases
+    tmp <- mcf(Survr(ID, Days, No.) ~ 1, valveSeats, ID == 251)
+    tmpTest <- mcfDiff.test(tmp, tmp)
+    expect_equal(tmpTest@.Data[, 1L], tmpTest@.Data[, 2L])
+
 })

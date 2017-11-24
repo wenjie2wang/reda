@@ -233,10 +233,10 @@ sMcf_point <- function(inpDat, groupLabel = NULL)
         warning(wrapMessages(
             "No event found",
             if (is.null(groupLabel))
-                "."
+                "overall."
             else
                 sprintf("in the %s group.", groupLabel)
-        ))
+        ), call. = FALSE)
     }
 
     ## different origins?
@@ -419,7 +419,7 @@ seBoot_normality <- function(sMcfBootMat, upperQuan = 0.75)
     if (! isNumOne(upperQuan) || upperQuan >= 1 || upperQuan <= 0.5)
         stop(wrapMessages(
             "The upper quantile ('upperQuan') has to be between 0.5 and 1."
-        ))
+        ), call. = FALSE)
     quanDiff <- qnorm(upperQuan) - qnorm(1 - upperQuan)
     tmp <- apply(sMcfBootMat, 1L, quan_fun, level = 2 * upperQuan - 1)
     (tmp[2L, ] - tmp[1L, ]) / quanDiff
@@ -465,15 +465,16 @@ mcf_formula_control <- function(B = 2e2,
     if (! isNumOne(B) || B <= 1)
         stop(wrapMessages(
             "The number of bootstarp sample, 'B' should be a numeric number."
-        ))
+        ), call. = FALSE)
     if (B < 30)
         warning(wrapMessages(
             "A larger number of bootstarp samples is suggested."
-        ))
+        ), call. = FALSE)
     se.method <- match.arg(se.method)
     ci.method <- match.arg(ci.method)
     if (! isLogicalOne(keep.data))
-        stop("The option 'keep.data' should be either 'TRUE' or 'FALSE'.")
+        stop("The option 'keep.data' should be either 'TRUE' or 'FALSE'.",
+             call. = FALSE)
     ## return
     list(
         B = B,

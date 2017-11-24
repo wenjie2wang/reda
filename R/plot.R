@@ -152,8 +152,10 @@ setMethod(
                           }
             if (! missing(legendLevels)) {
                 if (length(legendLevels) != nDesign)
-                    stop("The length of 'legendLevels' must ",
-                         "match the number of designs.")
+                    stop(wrapMessages(
+                        "The length of 'legendLevels' must ",
+                        "match the number of designs."
+                    ), call. = FALSE)
                 desLevs <- levels(MCFdat$design) <-
                     as.character(legendLevels)
             }

@@ -270,7 +270,7 @@ rateReg <- function(formula, data, subset, df = NULL, knots = NULL, degree = 0L,
     ## check response constructed from Survr
     resp <- stats::model.extract(mf, "response")
     if (! is.Survr(resp))
-        stop("Response in formula must be a survival recurrent object.")
+        stop("Response in the formula must be an 'Survr' object.")
 
     ## number of covariates excluding intercept
     nBeta <- ncol(mm) - 1L
@@ -565,8 +565,8 @@ logL_rateReg_grad <- function(par, nBeta, nSub, xMat, ind_event, ind_cens,
 rateReg_control <- function(Boundary.knots = NULL,
                             verbose = TRUE, ...)
 {
-    if (! is.logical(verbose))
-        stop("The option 'verbose' must be a logical value.")
+    if (! isLogicalOne(verbose))
+        stop("The option 'verbose' must be a logical value.", call. = FALSE)
     ## return
     list(control4rateReg = list(Boundary.knots = Boundary.knots,
                                 verbose = verbose),
@@ -583,12 +583,13 @@ rateReg_start <- function (beta, theta = 0.5, alpha, ..., nBeta_, nAlpha_)
         beta <- rep(0.1, nBeta_)
     } else if (length(beta) != nBeta_) {
         stop(wrapMessages(
-            "Number of starting values for coefficients of covariates",
+            "The Number of starting values for covariate coefficients",
             "does not match with the specified formula."
-        ))
+        ), call. = FALSE)
     }
-    if (theta <= 0)
-        stop("Value of parameter for random effects must be > 0.")
+    if (! isNumOne(theta) || theta <= 0)
+        stop("The parameter for gamma frailty must be a positive number.",
+             call. = FALSE)
     if (missing(alpha))
         alpha <- rep(0.05, nAlpha_)
     ## return

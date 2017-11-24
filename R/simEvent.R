@@ -310,26 +310,30 @@ simEvent <- function(z = 0, zCoef = 1,
         stop(wrapMessages(
             "The covariates 'z' has to be a numeric vector / matrix,",
             "a function or a function name."
-        ))
+        ), call. = FALSE)
     ## check coefficients zCoef
     zCoefVecIdx <- isNumVector(zCoef)
     if (! (zCoefVecIdx || is.function(zCoef) || isCharOne(zCoef)))
         stop(wrapMessages(
             "The covariate coefficients 'zCoef' has to be a numeric vector,",
             "a function or a function name."
-        ))
+        ), call. = FALSE)
     if (zVecIdx && zCoefVecIdx && length(zCoef) < (tmp <- length(z)))
         zCoef <- rep(zCoef, length.out = tmp)
     ## check baseline rate function rho
     rhoVecIdx <- isNumOne(rho)
     if (! (rhoVecIdx || is.function(rho) || isCharOne(rho)))
-        stop("The baseline hazard rate function",
-             "'rho' has to be a numeric vector, a function or a function name.")
+        stop(wrapMessages(
+            "The baseline hazard rate function",
+            "'rho' has to be a numeric vector, a function or a function name."
+        ), call. = FALSE)
     if (rhoVecIdx && rho < 0)
-        stop("The baseline hazard rate function 'rho' has to be non-negative.")
+        stop("The baseline hazard rate function 'rho' has to be non-negative.",
+             call. = FALSE)
     ## check function for interarrival time
     if (! (is.function(interarrival) || isCharOne(interarrival)))
-        stop("The 'interarrival' has to be a function or a function name.")
+        stop("The 'interarrival' has to be a function or a function name.",
+             call. = FALSE)
     interarrivalFun <- if (isCharOne(interarrival)) {
                            eval(parse(text = interarrival))
                        } else {
@@ -350,7 +354,7 @@ simEvent <- function(z = 0, zCoef = 1,
                             stop(wrapMessages(
                                 "The customized relative risk function name",
                                 "should be of length one."
-                            ))
+                            ), call. = FALSE)
                         relativeRisk
                     } else {
                         relativeRisk <- rriskNames[rriskInd]
@@ -361,7 +365,7 @@ simEvent <- function(z = 0, zCoef = 1,
                     stop(wrapMessages(
                         "The specified relative risk function 'relativeRisk'",
                         "should be a function (or a function name)."
-                    ))
+                    ), call. = FALSE)
                 }
 
     ## get arguments
@@ -387,7 +391,7 @@ simEvent <- function(z = 0, zCoef = 1,
             "The function for interarrival times must have",
             "at least one argument named 'rate' for the expected number of",
             "events/arrivals in unit time."
-        ))
+        ), call. = FALSE)
 
     rrisk_args <- lapply(arguments[["relativeRisk"]], eval)
     rrisk_args <- rrisk_args[! names(rrisk_args) %in% c("z", "zCoef")]
@@ -399,7 +403,7 @@ simEvent <- function(z = 0, zCoef = 1,
             "The relative risk function must have",
             "at least one argument named 'z' for covariates and",
             "another argument named 'zCoef' for covariate coefficients."
-        ))
+        ), call. = FALSE)
 
     ## check origin
     if ((originFunIdx <- is.function(origin)) || isCharOne(origin)) {
@@ -435,7 +439,7 @@ simEvent <- function(z = 0, zCoef = 1,
         stop(wrapMessages(
             "The 'origin' and 'endTime'",
             "has to be two numerical values s.t. 'origin' < 'endTime < Inf'."
-        ))
+        ), call. = FALSE)
     }
 
     ## prepare frailty effect
@@ -458,7 +462,7 @@ simEvent <- function(z = 0, zCoef = 1,
         stop(wrapMessages(
             "The argument 'frailty' has to be a positive number or",
             "a function that generates a positive number."
-        ))
+        ), call. = FALSE)
 
     ## rate function
     rateFun <- function(timeNum, forOptimize = TRUE) {
@@ -480,7 +484,8 @@ simEvent <- function(z = 0, zCoef = 1,
         covEffect <- do.call(rriskFun,
                              c(list(z = zVec, zCoef = zCoefVec), rrisk_args))
         if (! isNumOne(covEffect) || covEffect <= 0)
-            stop("The relative risk function should return a positive number.")
+            stop("The relative risk function should return a positive number.",
+                 call. = FALSE)
         rhoVec <- as.numeric(rhoMat %*% rhoCoef)
         rho_t <- frailtyEffect * rhoVec * covEffect
         if (forOptimize)
@@ -499,7 +504,7 @@ simEvent <- function(z = 0, zCoef = 1,
         stop(wrapMessages(
             "The rate function has to be non-negative",
             "from 'origin' to 'endTime'."
-        ))
+        ), call. = FALSE)
 
     ## step 1: calculate the supremum value of rate function
     rhoMaxObj <- stats::optimize(rateFun, interval = c(origin, endTime),
@@ -512,7 +517,7 @@ simEvent <- function(z = 0, zCoef = 1,
             warning(wrapMessages(
                 "The rate function may go to infinite.",
                 "The Inverse CDF method was used."
-            ))
+            ), call. = FALSE)
         }
     }
 
@@ -523,7 +528,7 @@ simEvent <- function(z = 0, zCoef = 1,
     rhoMat_cen <- cenList$rhoMat
 
     ## thinning method
-    if (identical(method, "thinning")) {
+    if (method == "thinning") {
         ## step 2: generate W_i in batch for possible better performance
         ## take care of possible interarrival arguments
         interarrivalArgs <- c(list(rate = rho_max), interarrival_args)
@@ -537,7 +542,8 @@ simEvent <- function(z = 0, zCoef = 1,
             while (lastEventTime < endTime) {
                 W <- do.call(interarrival, interarrivalArgs)
                 if (! isNumVector(W) || any(W <= 0))
-                    stop("The interarrival times must be positive!")
+                    stop("The interarrival times must be positive!",
+                         call. = FALSE)
                 ## step 3: update evnet times
                 eventTime <- c(eventTime, lastEventTime + cumsum(W))
                 lastEventTime <- eventTime[length(eventTime)]
@@ -547,7 +553,8 @@ simEvent <- function(z = 0, zCoef = 1,
                 interarrivalArgs <- c(list(n = 1), interarrivalArgs)
             W <- do.call(interarrival, interarrivalArgs)
             if (! isNumOne(W) || any(W <= 0))
-                stop("The interarrival time must be a positive nuumber!")
+                stop("The interarrival time must be a positive nuumber!",
+                     call. = FALSE)
             eventTime <- origin + W
         }
         ## only keep event time before end time
@@ -595,7 +602,7 @@ simEvent <- function(z = 0, zCoef = 1,
             stop(wrapMessages(
                 "The integral of rate function",
                 "is probably divergent."
-            ))
+            ), call. = FALSE)
         ## determine number of events, numEvent
         if (defaultIntArvIdx) {
             numEvent <- stats::rpois(n = 1, lambda = intRate)
@@ -611,7 +618,8 @@ simEvent <- function(z = 0, zCoef = 1,
             while (lastEventTime < endTime) {
                 W <- do.call(interarrival, interarrivalArgs)
                 if (any(W <= 0))
-                    stop("The interarrival times must be positive!")
+                    stop("The interarrival times must be positive!",
+                         call. = FALSE)
                 ## step 3: update evnet times
                 eventTime <- lastEventTime + cumsum(W)
                 numEvent <- numEvent + sum(eventTime < endTime)

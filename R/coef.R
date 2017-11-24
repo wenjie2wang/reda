@@ -107,7 +107,7 @@ setMethod(f = "confint", signature = "rateReg",
               } else if (is.character(parm)) {
                   parm <- match(parm, pnames, nomatch = NULL)
               } else {
-                  stop("invalid argument param")
+                  stop("invalid argument param", call. = FALSE)
               }
               a <- (1 + c(- 1, 1) * level) / 2
               fac <- stats::qnorm(a)

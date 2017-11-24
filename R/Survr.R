@@ -88,15 +88,16 @@ check_Survr <- function(dat, check, ...)
     origin <- dat[, "origin"]
 
     if (any(is.na(ID)))
-        stop("'ID' cannot contain missing values.")
+        stop("'ID' cannot contain missing values.", call. = FALSE)
     if (inherits(time, "difftime") || inherits(time, "Date"))
         time <- unclass(time)
     if (! is.numeric(time))
-        stop("Time variable must be 'numeric', 'difftime' or 'Date'.")
+        stop("Time variable must be 'numeric', 'difftime' or 'Date'.",
+             call. = FALSE)
     if (inherits(origin, "Date"))
         origin <- unclass(origin)
     if (! isNumVector(origin))
-        stop("Origin variable must be 'numeric' or 'Date'.")
+        stop("Origin variable must be 'numeric' or 'Date'.", call. = FALSE)
     if (isLogicalVector(event))
         event <- as.numeric(event)
     ## convert non-positive event all to zero
@@ -137,7 +138,7 @@ check_Survr <- function(dat, check, ...)
                 "not earlier than any event time.",
                 "Please check subject:",
                 paste0(paste(sIDnam[idx], collapse = ", "), ".")
-            ))
+            ), call. = FALSE)
         }
 
         ## issue 2: more than one censoring time
@@ -148,7 +149,7 @@ check_Survr <- function(dat, check, ...)
                 "Every subject must have only one censored time.",
                 "Please check subject:",
                 paste0(paste(cenID[idx], collapse = ", "), ".")
-            ))
+            ), call. = FALSE)
         }
 
         ## stop if missing value of 'time'
@@ -159,7 +160,7 @@ check_Survr <- function(dat, check, ...)
                 "Event or censoring times cannot be missing.",
                 "Please check subject:",
                 paste0(paste(tmpID, collapse = ", "), ".")
-            ))
+            ), call. = FALSE)
         }
 
         ## stop if missing value of 'origin'
@@ -170,7 +171,7 @@ check_Survr <- function(dat, check, ...)
                 "The origin times cannot be missing.",
                 "Please check subject:",
                 paste0(paste(tmpID, collapse = ", "), ".")
-            ))
+            ), call. = FALSE)
         }
 
         ## 'time' has to be later than the 'origin'
@@ -181,7 +182,7 @@ check_Survr <- function(dat, check, ...)
                 "Event times cannot be earlier than the origin time.",
                 "Please check subject:",
                 paste0(paste(tmpID, collapse = ", "), ".")
-            ))
+            ), call. = FALSE)
         }
 
         ## For one subject, the 'origin' has to be the same
@@ -195,7 +196,7 @@ check_Survr <- function(dat, check, ...)
                 "The origin variable has to be the same for one subject.",
                 "Please check subject:",
                 paste0(paste(tmpID, collapse = ", "), ".")
-            ))
+            ), call. = FALSE)
         }
     }
     ## return

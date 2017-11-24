@@ -69,9 +69,11 @@ setMethod(f = "AIC", signature = "rateReg",
                   ## warning on different nObs
                   nObss <- sapply(inpList, nObsFun)
                   if (length(unique(nObss)) > 1)
-                      warning(paste("Models are not all fitted to the same",
-                                    "number of observations.",
-                                    "Consider BIC instead?"))
+                      warning(wrapMessages(
+                          "Models are not all fitted to the same",
+                          "number of observations.",
+                          "Consider BIC instead?"
+                      ))
                   abics <- sapply(inpList, abic, penal = k)
                   dfs <- sapply(inpList, sumDf)
                   val <- data.frame(df = dfs, AIC = abics)

@@ -122,7 +122,7 @@ mcfDiff <- function(mcf1, mcf2 = NULL, level = 0.95, ...)
     ## quick checks
     mcfDiff_check(mcf1, mcf2)
     if (! isNumOne(level) || is.na(level) || level <= 0 || level >= 1)
-        stop("Confidence level must be between 0 and 1.")
+        stop("Confidence level must be between 0 and 1.", call. = FALSE)
 
     ## simple version
     ## if mcf1 contains only one level, mcf2 cannot be null
@@ -138,9 +138,9 @@ mcfDiff <- function(mcf1, mcf2 = NULL, level = 0.95, ...)
     if (mcf1@multiGroup) {
         nLevel <- length(mcf1@origin)
         if (nLevel > 2)
-            stop("There were more than two groups in 'mcf1'.")
+            stop("There were more than two groups in 'mcf1'.", call. = FALSE)
         if (! is.null(mcf2))
-            warning("Only the 'mcf1' object was used.")
+            warning("Only the 'mcf1' object was used.", call. = FALSE)
         uniLevs <- names(mcf1@origin)
         paste_ <- function(...) paste(..., sep = "_")
         datLevs <- sapply(seq_len(NROW(mcf1@MCF)), function (i) {
@@ -161,16 +161,16 @@ mcfDiff <- function(mcf1, mcf2 = NULL, level = 0.95, ...)
             stop(wrapMessages(
                 "The object 'mcf2' cannot be missing",
                 "if the object 'mcf1' only contains MCF for one group."
-            ))
+            ), call. = FALSE)
         if (mcf2@multiGroup)
             stop(wrapMessages(
                 "The object 'mcf2' should contain MCF for only one group."
-            ))
+            ), call. = FALSE)
         if (mcf1@variance != mcf2@variance)
             warning(wrapMessages(
                 "The methods used for variance estimates were not consistent",
                 "between the two 'mcf.formula' objects!"
-            ))
+            ), call. = FALSE)
         ## first group
         mcfDat1 <- mcf1@MCF[, mcfCols]
         ## second group
@@ -184,7 +184,7 @@ mcfDiff <- function(mcf1, mcf2 = NULL, level = 0.95, ...)
     if (diff(originVec) != 0)
         warning(wrapMessages(
             "The earliest time origins of the two groups were not the same!"
-        ))
+        ), call. = FALSE)
     ## first group
     mcfFun1 <- with(mcfDat1, stats::stepfun(time, c(0, MCF)))
     seFun1 <- with(mcfDat1, stats::stepfun(time, c(0, se)))
@@ -273,7 +273,7 @@ mcfDiff.test <- function(mcf1, mcf2 = NULL,
         return(methods::new("mcfDiff.test"))
     ## if no process data in mcf1
     if (nrow(mcf1@data) == 0L) {
-        warning("No processed data is available from 'mcf1'.")
+        warning("No processed data is available from 'mcf1'.", call. = FALSE)
         return(methods::new("mcfDiff.test"))
     }
 
@@ -292,10 +292,10 @@ mcfDiff.test <- function(mcf1, mcf2 = NULL,
     if (mcf1@multiGroup) {
         nLevel <- length(mcf1@origin)
         if (nLevel > 2)
-            stop("There were more than two groups in 'mcf1'.")
+            stop("There were more than two groups in 'mcf1'.", call. = FALSE)
         uniLevs <- names(mcf1@origin)
         if (! is.null(mcf2))
-            warning("Only the 'mcf1' object was used.")
+            warning("Only the 'mcf1' object was used.", call. = FALSE)
 
         getLevs <- function(dat, colInd) {
             paste_ <- function(...) paste(..., sep = "_")
@@ -320,14 +320,15 @@ mcfDiff.test <- function(mcf1, mcf2 = NULL,
             stop(wrapMessages(
                 "The object 'mcf2' cannot be missing",
                 "if the object 'mcf1' only contains MCF for one group."
-            ))
+            ), call. = FALSE)
         if (mcf2@multiGroup)
             stop(wrapMessages(
                 "The object 'mcf2' should contain MCF for only one group."
-            ))
+            ), call. = FALSE)
         ## if no process data in mcf2
         if (nrow(mcf2@data) == 0L) {
-            warning("No processed data is available from 'mcf2'.")
+            warning("No processed data is available from 'mcf2'.",
+                    call. = FALSE)
             return(methods::new("mcfDiff.test"))
         }
         ## first group
@@ -343,7 +344,7 @@ mcfDiff.test <- function(mcf1, mcf2 = NULL,
     if (diff(originVec) != 0)
         warning(wrapMessages(
             "The earliest time origins of the two groups were not the same!"
-        ))
+        ), call. = FALSE)
     ## internal function
     ## Y_k.(u) for k = 1, 2
     y_k <- function(eventDat, newTimes) {
@@ -455,7 +456,7 @@ mcfDiff.test <- function(mcf1, mcf2 = NULL,
             res_const <- (w_const / max_w_const) * re_res_ij
             res_linear <- (w_linear / max_w_const) * re_res_ij
             ## return
-            c(const = (sum(res_const) * reFactor)^ 2 ,
+            c(const = (sum(res_const) * reFactor) ^ 2 ,
               linear = (sum(res_linear) * reFactor) ^ 2)
         }
         ## apply var_comp to each process
@@ -483,13 +484,13 @@ mcfDiff.test <- function(mcf1, mcf2 = NULL,
             if (nrow(mcfDat1) > 1) {
                 colSums(do.call(rbind, varList1))
             } else {
-                sum(do.call(c, varList1))
+                do.call(c, varList1)
             }
         varU_2 <-
             if (nrow(mcfDat2) > 1) {
                 colSums(do.call(rbind, varList2))
             } else {
-                sum(do.call(c, varList2))
+                do.call(c, varList2)
             }
         varU <- varU_1 + varU_2
     }
@@ -517,6 +518,6 @@ mcfDiff_check <- function(mcf1, mcf2) {
         stop(wrapMessages(
             "'mcf1' must be 'mcf.formula' object, and",
             "'mcf2' must be eithor 'mcf.formula' object or 'NULL'."
-        ))
+        ), call. = FALSE)
     }
 }
