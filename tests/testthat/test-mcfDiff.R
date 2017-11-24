@@ -1,6 +1,6 @@
-context("Testing exception handling of mcfDiff and mcfDiff.test")
+context("Testing mcfDiff and mcfDiff.test")
 
-test_that("call reda::mcfDiff", {
+test_that("Testing reda::mcfDiff", {
     data(valveSeats)
     valveSeats$group <- cut(valveSeats$ID, c(250, 400, 450))
     valveSeats$group3 <- cut(valveSeats$ID, c(250, 380, 410, 450))
@@ -51,10 +51,15 @@ test_that("call reda::mcfDiff", {
     ## mcfDiff(mcf1, mcf2) should be equivalent to mcf1 - mcf2
     expect_equal(mcf1 - mcf2, mcfDiff(mcf1, mcf2))
 
+    ## test plot,mcfDiff-method
+    expect_equal(class(
+        plot(mcfDiff(mcf0, testVariance = "none"), addOrigin = TRUE)
+    ), c("gg", "ggplot"))
+
 })
 
 
-test_that("call reda::mcfDiff.test", {
+test_that("Testing reda::mcfDiff.test", {
     data(valveSeats)
     valveSeats$group <- cut(valveSeats$ID, c(250, 400, 450))
     valveSeats$group3 <- cut(valveSeats$ID, c(250, 380, 410, 450))

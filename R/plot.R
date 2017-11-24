@@ -325,7 +325,7 @@ setMethod(
             ## add starting point at origin time
             originDat <- MCFdat[1L, ]
             originDat[1L, ] <- 0
-            originDat[, "time"] <- x@origin
+            originDat[, "time"] <- min(x@origin)
             MCFdat <- rbind(originDat, MCFdat)
         }
         ## set default line type and color

@@ -86,7 +86,8 @@ test_that("Quick tests for normal usages", {
     piecesFit <- rateReg(Survr(ID, time, event) ~ x1 + group + gender,
                          testDat, knots = seq.int(28, 140, 28))
     splineFit <- rateReg(Survr(ID, time, event) ~ x1 + group + gender,
-                         testDat, knots = c(60, 90, 120), degree = 3)
+                         testDat, knots = c(60, 90, 120), degree = 3,
+                         spline = "mSplines")
     ## test summary
     expect_equivalent(class(summary(constFit)), "summary.rateReg")
 
@@ -95,10 +96,12 @@ test_that("Quick tests for normal usages", {
     ## test confint
     expect_output(str(confint(constFit)),
                   "num [1:3, 1:2]", fixed = TRUE)
-    expect_output(str(confint(constFit, parm = 1:2)),
+    expect_output(str(confint(piecesFit, parm = 1:2)),
                   "num [1:2, 1:2]", fixed = TRUE)
-    expect_output(str(confint(constFit, parm = "x1")),
+    expect_output(str(confint(splineFit, parm = "x1")),
                   "num [1, 1:2]", fixed = TRUE)
+    expect_error(confint(splineFit, factor(1)),
+                 "parm", fixed = TRUE)
 
     ## test AIC and BIC
     expect_output(str(AIC(constFit)), "num", fixed = TRUE)
@@ -113,19 +116,28 @@ test_that("Quick tests for normal usages", {
     ## test baseRate
     br_constFit <- baseRate(constFit)
     expect_equivalent(class(br_constFit), "baseRate.rateReg")
-
     ## test plot,baseRate.rateReg-method
     expect_equivalent(class(plot(br_constFit, conf.int = TRUE)),
                       c("gg", "ggplot"))
 
     ## test mcf,rateReg-method
     mcf_constFit <- mcf(constFit)
-    mcf_splineFit <- mcf(splineFit, newdata = testDat[1:10, ])
+    mcf_splineFit <- mcf(splineFit,
+                         newdata = rbind(NA, testDat[1:10, ]),
+                         na.action = "na.exclude",
+                         control = list(grid = seq.int(0, 168, by = 1)))
     expect_equivalent(class(mcf_constFit), "mcf.rateReg")
     expect_equivalent(class(mcf_splineFit), "mcf.rateReg")
-
+    expect_error(mcf(splineFit, control = list(grid = factor(1:2))),
+                 "grid", fixed = TRUE)
+    expect_error(mcf(splineFit, control = list(grid = seq.int(0, 200))),
+                 "boundary", fixed = TRUE)
     ## test plot,mcf.rateReg-method
-    expect_equivalent(class(plot(mcf_constFit)), c("gg", "ggplot"))
-    expect_equivalent(class(plot(mcf_splineFit)), c("gg", "ggplot"))
+    expect_equivalent(class(
+        plot(mcf_constFit, conf.int = TRUE, lty = 2, col = "red")
+    ), c("gg", "ggplot"))
+    expect_equivalent(class(
+        plot(mcf_splineFit, conf.int = TRUE, lty = 1:4, col = 1:4)
+    ), c("gg", "ggplot"))
 
 })

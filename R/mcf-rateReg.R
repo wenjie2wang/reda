@@ -188,9 +188,10 @@ rateReg_mcf_control <- function(grid, length.out = 1e3, from, to, ...,
     from <- if (missing(from)) Boundary.knots_[1L]
     to  <- if (missing(to)) Boundary.knots_[2L]
     if (! missing(grid)) {
-        if (! is.numeric(grid) || is.unsorted(grid))
-            stop("'grid' specified must be an increasing numeric vector.",
+        if (! isNumVector(grid))
+            stop("The 'grid' specified must be numeric vector.",
                  call. = FALSE)
+        grid <- sort(as.numeric(na.omit(grid)))
         length.out <- length(grid)
         from <- min(grid)
         to <- max(grid)
@@ -198,8 +199,10 @@ rateReg_mcf_control <- function(grid, length.out = 1e3, from, to, ...,
         grid <- seq.int(from = from, to = to, length.out = length.out)
     }
     if (min(grid) < Boundary.knots_[1] || max(grid) > Boundary.knots_[2])
-        stop("'grid' must be within the coverage of boundary knots.",
-             call. = FALSE)
+        stop(wrapMessages(
+            "The 'grid' specified must be within",
+            "the coverage of the boundary knots."
+        ), call. = FALSE)
 
     ## return
     list(grid = grid, length.out = length.out, from = from, to = to)
