@@ -157,7 +157,7 @@ library(reda)
 ## six pieces' piecewise constant rate function
 (piecesFit <- rateReg(Survr(ID, time, event) ~ group + x1,
                       data = simuDat, subset = ID \%in\% 1:50,
-                      knots = seq(28, 140, by = 28)))
+                      knots = seq.int(28, 140, by = 28)))
 
 ## fit rate function with cubic spline
 (splineFit <- rateReg(Survr(ID, time, event) ~ group + x1, data = simuDat,
@@ -202,7 +202,6 @@ plot(splineMcf) +
                     ymax = upper, fill = Group),
                 data = splineMcf@MCF, alpha = 0.2) +
     xlab("Days")
-
 }
 \references{
 Fu, H., Luo, J., & Qu, Y. (2016).

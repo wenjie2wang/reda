@@ -186,7 +186,7 @@ check_Survr <- function(dat, check, ...)
         }
 
         ## For one subject, the 'origin' has to be the same
-        tmp <- tapply(sOrigin, sIDnam, function(a) {
+        tmp <- tapply(sOrigin, factor(sIDnam), function(a) {
             length(unique(a))
         })
         idx <- tmp > 1
