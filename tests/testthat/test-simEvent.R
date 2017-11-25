@@ -47,6 +47,9 @@ test_that("call reda::simEvent", {
         class(simEvent(interarrival = stats::rexp,
                        relativeRisk = my_rriskFun))
     }, "simEvent")
+    expect_error(simEvent(interarrival = stats::rexp,
+                          relativeRisk = "rexp"),
+                 "relative risk function", fixed = TRUE)
     expect_error(simEvent(relativeRisk = 1), "relative risk", fixed = TRUE)
     expect_error(simEvent(relativeRisk = c("foo", "bar")),
                  "relative risk", fixed = TRUE)
