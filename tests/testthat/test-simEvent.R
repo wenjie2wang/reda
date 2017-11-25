@@ -48,6 +48,8 @@ test_that("call reda::simEvent", {
                        relativeRisk = my_rriskFun))
     }, "simEvent")
     expect_error(simEvent(relativeRisk = 1), "relative risk", fixed = TRUE)
+    expect_error(simEvent(relativeRisk = c("foo", "bar")),
+                 "relative risk", fixed = TRUE)
     expect_equivalent(class(
         simEvent(z = function(tVec) as.numeric(tVec > 1),
                  zCoef = function(tVec) - sin(tVec) / 10,
@@ -76,7 +78,9 @@ test_that("call reda::simEvent", {
                  interarrival = function(n, rate)
                      runif(n, min = 0.1, max = 2 / rate - 0.1))
     ), "simEvent")
-
+    expect_warning(simEvent(rho = function(tVec) 1 / sqrt(tVec),
+                            origin = 0, endTime = 1),
+                   "infinite", fixed = TRUE)
 
 })
 

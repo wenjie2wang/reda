@@ -524,11 +524,16 @@ simEvent <- function(z = 0, zCoef = 1,
         ), call. = FALSE)
 
     ## step 1: calculate the supremum value of rate function
-    rhoMaxObj <- stats::optimize(rateFun, interval = c(origin, endTime),
-                                 maximum = TRUE)
-    rho_max <- rhoMaxObj$objective
+    rhoMaxObj <- tryCatch(
+        stats::optim((origin + end) / 2, rateFun,
+                     lower = origin, upper = endTime,
+                     method = "L-BFGS-B",
+                     control = list(fnscale = - 1)),
+        error = function(e) e
+    )
+
     ## if the supremum is finite, use thinning method
-    if (is.infinite(rho_max)) {
+    if ("error" %in% class(rhoMaxObj)) {
         if (method == "thinning") {
             method <- "inverse.cdf"
             warning(wrapMessages(
@@ -536,6 +541,8 @@ simEvent <- function(z = 0, zCoef = 1,
                 "The Inverse CDF method was used."
             ), call. = FALSE)
         }
+    } else {
+        rho_max <- rhoMaxObj$value
     }
 
     ## values at end time (censoring time)
@@ -643,7 +650,7 @@ simEvent <- function(z = 0, zCoef = 1,
                 lastEventTime <- eventTime[length(eventTime)]
             }
         }
-        if (identical(numEvent, 0)) {
+        if (numEvent == 0L) {
             xOut <- numeric(0)
             ## only return values on end time
             zMat <- zMat_cen
