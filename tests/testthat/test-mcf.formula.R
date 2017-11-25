@@ -45,4 +45,6 @@ test_that("test mcf,formula method", {
         plot(test_mcf, lty = 1:2, col = 1:2)
     ), c("gg", "ggplot"))
 
+    ## show method
+    expect_output(show(mcf0), "MCF")
 })

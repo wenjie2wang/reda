@@ -82,6 +82,10 @@ test_that("call reda::simEvent", {
                             origin = 0, endTime = 1),
                    "infinite", fixed = TRUE)
 
+    ## show method
+    expect_output(show(simEvent(endTime = 1)),
+                  "'simEvent' S4 class object:")
+
 })
 
 test_that("call reda::simEventData", {

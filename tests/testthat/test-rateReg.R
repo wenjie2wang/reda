@@ -154,4 +154,10 @@ test_that("Quick tests for normal usages", {
     ), c("gg", "ggplot"))
     expect_equivalent(class(plot(mcf_splineFit)), c("gg", "ggplot"))
 
+    ## show methods
+    expect_output(show(piecesFit), "Call:")
+    expect_output(show(splineFit), "Call:")
+    expect_output(show(summary(piecesFit)), "Call:")
+    expect_output(show(mcf(constFit)), "MCF")
+
 })

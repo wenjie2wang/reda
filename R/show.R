@@ -167,7 +167,7 @@ setMethod(
     definition = function(object) {
         cat("Call: \n")
         print(object@call)
-        if (! identical(object@test@testVariance, "none")) {
+        if (object@test@testVariance != "none") {
             cat("\nTwo-Sample Pseudo-Score Tests:\n")
             printCoefmat(object@test@.Data)
             cat("\nVariance Estimator:", object@test@testVariance, "\n")

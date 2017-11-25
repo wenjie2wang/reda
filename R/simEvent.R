@@ -525,7 +525,7 @@ simEvent <- function(z = 0, zCoef = 1,
 
     ## step 1: calculate the supremum value of rate function
     rhoMaxObj <- tryCatch(
-        stats::optim((origin + end) / 2, rateFun,
+        stats::optim((origin + endTime) / 2, rateFun,
                      lower = origin, upper = endTime,
                      method = "L-BFGS-B",
                      control = list(fnscale = - 1)),

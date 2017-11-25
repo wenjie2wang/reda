@@ -49,12 +49,16 @@ test_that("Testing reda::mcfDiff", {
         "The earliest time origins", fixed = TRUE)
 
     ## mcfDiff(mcf1, mcf2) should be equivalent to mcf1 - mcf2
-    expect_equal(mcf1 - mcf2, mcfDiff(mcf1, mcf2))
+    diff12 <- mcfDiff(mcf1, mcf2)
+    expect_equal(mcf1 - mcf2, diff12)
 
     ## test plot,mcfDiff-method
     expect_equal(class(
         plot(mcfDiff(mcf0, testVariance = "none"), addOrigin = TRUE)
     ), c("gg", "ggplot"))
+
+    ## show method
+    expect_output(show(diff12), "Pseudo-Score Tests")
 
 })
 
@@ -116,5 +120,8 @@ test_that("Testing reda::mcfDiff.test", {
     tmp <- mcf(Survr(ID, Days, No.) ~ 1, valveSeats, ID == 251)
     tmpTest <- mcfDiff.test(tmp, tmp)
     expect_equal(tmpTest@.Data[, 1L], tmpTest@.Data[, 2L])
+
+    ## show method
+    expect_output(show(tmpTest), "Pseudo-Score Tests")
 
 })
