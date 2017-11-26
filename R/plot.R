@@ -342,7 +342,7 @@ setMethod(
                 geom_step(mapping = aes(x = time, y = upper),
                           linetype = "3313", color = col)
         }
-        p <- p + ylab("MCF Difference")
+        p <- p + ylab("MCF difference")
         p
     })
 

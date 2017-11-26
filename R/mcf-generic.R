@@ -159,7 +159,8 @@ NULL
 ##' ## Example 1. valve-seat data
 ##' ## the default variance estimates by Lawless and Nadeau (1995) method
 ##' valveMcf0 <- mcf(Survr(ID, Days, No.) ~ 1, data = valveSeats)
-##' plot(valveMcf0, conf.int = TRUE, mark.time = TRUE) + ggplot2::xlab("Days")
+##' plot(valveMcf0, conf.int = TRUE, mark.time = TRUE, addOrigin = TRUE) +
+##'     ggplot2::xlab("Days") + ggplot2::theme_bw()
 ##'
 ##' ## variance estimates following Poisson process model
 ##' valveMcf1 <- mcf(Survr(ID, Days, No.) ~ 1,
@@ -170,26 +171,23 @@ NULL
 ##'                  control = list(B = 1e3))
 ##'
 ##' ## comparing the variance estimates from different methods
-##' library(graphics)
-##' timeVec <- valveMcf0@MCF$time
-##' seMat <- cbind(valveMcf0@MCF$se, valveMcf1@MCF$se, valveMcf2@MCF$se)
-##' matplot(timeVec, seMat, type = "s", xlab = "Days", ylab = "SE estimates")
-##' legend("topleft", legend = c("Lawless & Nadeau", "Poisson", "Bootstrap"),
-##'        lty = 1 : 3, col = 1 : 3)
-##'
-##' ## comparing the confidence interval estimates from different methods
 ##' library(ggplot2)
 ##' ciDat <- rbind(cbind(valveMcf0@MCF, Method = "Lawless & Nadeau"),
 ##'                cbind(valveMcf1@MCF, Method = "Poisson"),
 ##'                cbind(valveMcf2@MCF, Method = "Bootstrap"))
+##' ggplot(ciDat, aes(x = time, y = se)) +
+##'     geom_step(aes(color = Method, linetype = Method)) +
+##'     xlab("Days") + ylab("SE estimates") + theme_bw()
+##'
+##' ## comparing the confidence interval estimates from different methods
 ##' ggplot(ciDat, aes(x = time)) +
 ##'     geom_step(aes(y = MCF)) +
 ##'     geom_step(aes(y = lower, color = Method, linetype = Method)) +
 ##'     geom_step(aes(y = upper, color = Method, linetype = Method)) +
-##'     xlab("Days")
+##'     xlab("Days") + ylab("Confidence intervals") + theme_bw()
 ##'
 ##'
-##' ## Example 2. sample simulated data
+##' ## Example 2. the simulated data
 ##' simuMcf <- mcf(Survr(ID, time, event) ~ group + gender,
 ##'                data = simuDat, ID %in% 1 : 50)
 ##' plot(simuMcf, conf.int = TRUE, lty = 1 : 4,
