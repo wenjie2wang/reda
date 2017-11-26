@@ -2,15 +2,14 @@
 title: "Simulate Survival and Recurrent Event Data with reda"
 author: Wenjie Wang
 date: "`r Sys.Date()`"
-bibliography:
-- ../inst/bib/reda.bib
-vignette: >
-  %\VignetteIndexEntry{Simulate Survival and Recurrent Event Data with reda}
-  %\VignetteEngine{knitr::rmarkdown}
-  \usepackage[utf8]{inputenc}
 output:
   rmarkdown::html_vignette:
     toc: true
+bibliography: ../inst/bib/reda.bib
+vignette: >
+  %\VignetteIndexEntry{Simulate Survival and Recurrent Event Data with reda}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
 

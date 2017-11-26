@@ -14,15 +14,15 @@
 \title{Plot Baseline Rate or Mean Cumulative Function (MCF)}
 \usage{
 \S4method{plot}{mcf.formula,missing}(x, y, lty, col, legendName, legendLevels,
-    conf.int = FALSE, mark.time = FALSE, addOrigin = FALSE, ...)
+     conf.int = FALSE, mark.time = FALSE, addOrigin = FALSE, ...)
 
 \S4method{plot}{mcf.rateReg,missing}(x, y, conf.int = FALSE, lty, col, ...)
 
 \S4method{plot}{baseRate.rateReg,missing}(x, y, conf.int = FALSE, lty, col,
-    ...)
+     ...)
 
 \S4method{plot}{mcfDiff,missing}(x, y, lty, col, legendName, legendLevels,
-    conf.int = TRUE, addOrigin = FALSE, ...)
+     conf.int = TRUE, addOrigin = FALSE, ...)
 }
 \arguments{
 \item{x}{An object used to dispatch a method.}

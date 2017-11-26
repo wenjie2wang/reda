@@ -2,15 +2,15 @@
 title: "Introduction to reda through Examples"
 author: Wenjie Wang
 date: "`r Sys.Date()`"
+output:
+  rmarkdown::html_vignette:
+    toc: true
 bibliography:
 - ../inst/bib/reda.bib
 vignette: >
   %\VignetteIndexEntry{Introduction to reda through Examples}
   %\VignetteEngine{knitr::rmarkdown}
-  \usepackage[utf8]{inputenc}
-output:
-  rmarkdown::html_vignette:
-    toc: true
+  %\VignetteEncoding{UTF-8}
 ---
 
 

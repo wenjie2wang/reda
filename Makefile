@@ -25,6 +25,9 @@ install: $(tar)
 .PHONY: preview
 preview: $(vignettes)
 
+.PHONY: pkgdown
+pkgdown:
+	Rscript -e "library(methods); pkgdown::build_site();" --vanilla
 
 $(tar): $(objects)
 	@if [ "$$(uname)" == "Darwin" ];\

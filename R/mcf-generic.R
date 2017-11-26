@@ -204,9 +204,9 @@ NULL
 ##'
 ##' ## or explicitly ask for the difference of two sample MCF
 ##' mcf1 <- mcf(Survr(ID, time, event) ~ 1, data = simuDat,
-##'             subset = group %in% "Treat")
-##' mcf2 <- mcf(Survr(ID, time, event) ~ 1, data = simuDat,
 ##'             subset = group %in% "Contr")
+##' mcf2 <- mcf(Survr(ID, time, event) ~ 1, data = simuDat,
+##'             subset = group %in% "Treat")
 ##' ## perform two-sample tests and estimate difference at the same time
 ##' mcf12_diff1 <- mcfDiff(mcf1, mcf2)
 ##' mcf12_diff2 <- mcf1 - mcf2   # or equivalently using the `-` method
