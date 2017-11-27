@@ -27,7 +27,11 @@ preview: $(vignettes)
 
 .PHONY: pkgdown
 pkgdown:
-	Rscript -e "library(methods); pkgdown::build_site();" --vanilla
+	@if [ ! -h "docs/inst/bib" ];\
+	then mkdir -p docs/inst/ && cd $$_; ln -s ../../inst/bib .;\
+	echo "created symbolic link for bib file(s)";\
+	fi;
+	Rscript -e "library(methods); pkgdown::build_site();"
 
 $(tar): $(objects)
 	@if [ "$$(uname)" == "Darwin" ];\

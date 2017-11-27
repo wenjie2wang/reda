@@ -1,6 +1,6 @@
-# CHANGES IN reda VERSION 0.4.0.9000
+# reda 0.4.0.9000
 
-## NEW FEATURES
+## New features
 
 * Added function `simEvent` and `simEventData` for simulating survival,
   recurrent event, and multiple event data from stochastic process point of
@@ -14,7 +14,7 @@
 
 * Added variance estimates of sample MCF from bootstrap methods.
 
-## MAJOR CHANGES
+## Major changes
 
 * Updated checking rule of argument `event` of function `Survr` for modeling
   sample MCF of cost in addition to number of events.
@@ -22,38 +22,38 @@
 * Renamed class `sampleMcf` to `mcf.formula`, `rateRegMcf` to `mcf.rateReg`,
   `baseRateReg` to `baseRate.rateReg`, `summaryRateReg` to `summary.rateReg`.
 
-## MINOR CHANGES
+## Minor changes
 
 * Allowed formula `Survr(ID, time, event) ~ 1` for modeling baseline rate
   function using gamma frailty model in function `rateReg` without specifying
   any covariate.
 
-## BUG FIXES
+## Bug fixes
 
 * Fixed possible label mismatching in `plot,mcf.formula` (previously
   `plot,sampleMcf`) method.
 
 
-# CHANGES IN reda VERSION 0.3.1
+# reda 0.3.1
 
-## NEW FEATURES
+## New features
 
 * Added estimated baseline rate function and its confidence band, and
   corresponding plot method.
 
-## MAJOR CHANGES
+## Major changes
 
 * Updated function `baseRate` for estimated baseline rate function instead of
   the estimated coefficients of spline bases.
 
-## BUG FIXES
+## Bug fixes
 
 * Fixed function `confint` by specifying the correct standard error column.
 
 
-# CHANGES IN reda VERSION 0.3.0
+# reda 0.3.0
 
-## NEW FEATURES
+## New features
 
 * Added M-spline for modeling baseline rate to function `rateReg`.
 
@@ -73,7 +73,7 @@
 
 * Added sample valve-seat dataset from Nelson (1995) for demonstration.
 
-## MAJOR CHANGES
+## Major changes
 
 * Borrowed the power from R package **splines2** for piece-wise constant and
   splines based baseline rate function, and thus boosted the performance of
@@ -88,7 +88,7 @@
 * Added variable "gender" in sample simulated dataset, `simuDat` for a better
   demonstration of sample MCF function.
 
-## MINOR CHANGES
+## Minor changes
 
 * Renamed all slot named `boundaryKnots` to `Boundary.knots` for consistency
   with spline functions.
@@ -98,15 +98,15 @@
 * Added sample citation entry for **reda**.
 
 
-# CHANGES IN reda VERSION 0.2.1
+# reda 0.2.1
 
-## NEW FEATURES
+## New features
 
 * Implementation of spline baseline rate function.
 
 * Added function `AIC` and `BIC`.
 
-## MAJOR CHANGES
+## Major changes
 
 * Renamed main function name from `heart` to `rateReg` and added new argument.
 
@@ -114,7 +114,7 @@
 
 * Replaced sample simulated dataset for demonstration.
 
-## BUG FIXES
+## Bug fixes
 
 * Updated S4 method `plotMcf,sampleMcf`: Replaced `show_guide` with
   `show.legend` in function `geom_text` to incorporate updates in package
@@ -123,9 +123,9 @@
 * Minor updates that clear checking note from CRAN.
 
 
-# CHANGES IN reda VERSION 0.1.0
+# reda 0.1.0
 
-## NEW FEATURES
+## New features
 
 * First version of reda mainly providing function to fit gamma frailty model
   with piece-wise constant baseline rate function for recurrent event data.
