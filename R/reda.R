@@ -43,7 +43,7 @@
 ##'
 ##' See the package vignettes for more introduction and demonstration.
 ##'
-##' @importFrom methods setClass setGeneric setMethod new validObject
+##' @importFrom methods is new setClass setGeneric setMethod validObject
 ##' @docType package
 ##' @name reda-package
 NULL

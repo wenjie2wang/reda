@@ -202,9 +202,11 @@ check_Survr <- function(dat, check, ...)
     ## return
     mat <- as.matrix(cbind(ID = ID, time = time,
                            event = event, origin = origin))
-    out <- methods::new("Survr", mat,
-                        ID = IDnam,
-                        check = check,
-                        ord = ord)
-    invisible(out)
+    invisible(
+        methods::new("Survr",
+                     .Data = mat,
+                     ID = IDnam,
+                     check = check,
+                     ord = ord)
+    )
 }

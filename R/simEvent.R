@@ -227,7 +227,7 @@ NULL
 ##'                        ))
 ##' ## check the intercept randomly generated,
 ##' ## which should be the same within each ID but different between IDs.
-##' unique(with(simDat, cbind(ID, intercept = round(X.1 - time / 10, 3))))
+##' unique(with(simDat, cbind(ID, intercept = X.1 - time / 10)))
 ##'
 ##'
 ##' ### non-negative time-varying baseline hazard rate function
@@ -419,10 +419,7 @@ simEvent <- function(z = 0, zCoef = 1,
     if ((originFunIdx <- is.function(origin)) ||
         isCharOne(origin, error_na = TRUE)) {
         ## add "n = 1" for common distribution from stats library
-        if ("n" %in% names(as.list(args(
-                         if (originFunIdx)
-                             origin else eval(parse(text = origin))
-                     ))))
+        if ("n" %in% names(as.list(args(origin))))
             origin_args <- c(list(n = 1), origin_args)
         originFun <- origin
         if (! length(origin_args)) origin_args <- list()
@@ -434,10 +431,7 @@ simEvent <- function(z = 0, zCoef = 1,
     if ((endTimeFunIdx <- is.function(endTime)) ||
         isCharOne(endTime, error_na = TRUE)) {
         ## add "n = 1" for common distribution from stats library
-        if ("n" %in% names(as.list(args(
-                         if (endTimeFunIdx)
-                             endTime else eval(parse(text = endTime))
-                     ))))
+        if ("n" %in% names(as.list(args(endTime))))
             endTime_args <- c(list(n = 1), endTime_args)
         endTimeFun <- endTime
         if (! length(endTime_args)) endTime_args <- list()
@@ -462,10 +456,7 @@ simEvent <- function(z = 0, zCoef = 1,
     } else if ((frailtyFunIdx <- is.function(frailty)) ||
                isCharOne(frailty, error_na = TRUE)) {
         ## add "n = 1" for common distribution from stats library
-        if ("n" %in% names(as.list(args(
-                         if (frailtyFunIdx)
-                             frailty else eval(parse(text = frailty))
-                     ))))
+        if ("n" %in% names(as.list(args(frailty))))
             frailty_args <- c(list(n = 1), frailty_args)
         frailtyEffect <- do.call(frailty, frailty_args)
         frailtyFun <- frailty
@@ -710,7 +701,8 @@ simEvent <- function(z = 0, zCoef = 1,
                    }
 
     ## return
-    methods::new("simEvent", xOut,
+    methods::new("simEvent",
+                 .Data = xOut,
                  call = Call,
                  z = list(
                      z = zMat,

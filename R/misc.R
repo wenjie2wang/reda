@@ -117,15 +117,15 @@ isLogicalOne <- function(x, sub_env = "grandparent", ...) {
 
 ## is x a Survr object
 is.Survr <- function(x) {
-    inherits(x, "Survr")
+    is(x, "Survr")
 }
 
 ## is x a mcf.sample object
 is.mcf.formula <- function(x) {
-    inherits(x, "mcf.formula")
+    is(x, "mcf.formula")
 }
 
 ## is x a rateReg object
 is.rateReg <- function(x) {
-    inherits(x, "rateReg")
+    is(x, "rateReg")
 }

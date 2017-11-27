@@ -209,7 +209,7 @@ simDat <- simEventData(3, z = zFun, zCoef = zCoefFun,
                        ))
 ## check the intercept randomly generated,
 ## which should be the same within each ID but different between IDs.
-unique(with(simDat, cbind(ID, intercept = round(X.1 - time / 10, 3))))
+unique(with(simDat, cbind(ID, intercept = X.1 - time / 10)))
 
 
 ### non-negative time-varying baseline hazard rate function
