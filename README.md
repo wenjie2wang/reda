@@ -4,11 +4,9 @@ The R pacakge **reda** provides functions for
 
 - simulating survival, recurrent event, and multiple event data from stochastic
   process point of view;
-
 - exploring and modeling recurrent event data through the mean cumulative
   function (MCF) or also called the Nelson-Aalen estimator of the cumulative
   hazard rate function, and gamma frailty model with spline rate function;
-
 - comparing two-sample recurrent event responses with the pseudo-score tests.
 
 
