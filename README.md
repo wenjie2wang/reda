@@ -1,10 +1,15 @@
 # reda
 
-The R package **reda** provides functions that fit gamma frailty model with
-spline baseline rate function for recurrent event data, compute and plot
-parametric mean cumulative function (MCF) from a fitted model as well as
-nonparametric sample MCF (Nelson-Aalen estimator) are provided.  Most functions
-are S4 methods that produce S4 class objects.
+The R pacakge **reda** provides functions for
+
+- simulating survival, recurrent event, and multiple event data from stochastic
+  process point of view;
+
+- exploring and modeling recurrent event data through the mean cumulative
+  function (MCF) or also called the Nelson-Aalen estimator of the cumulative
+  hazard rate function, and gamma frailty model with spline rate function;
+
+- comparing two-sample recurrent event responses with the pseudo-score tests.
 
 
 ## Installation of CRAN Version
@@ -57,7 +62,7 @@ WITHOUT ANY WARRANTY without even the implied warranty of MERCHANTABILITY or
 FITNESS FOR A PARTICULAR PURPOSE.
 
 
-[r-pkg-badge]: http://www.r-pkg.org/badges/version/reda
+[r-pkg-badge]: https://www.r-pkg.org/badges/version/reda
 [cranlog-badge]: https://cranlogs.r-pkg.org/badges/splines2
 [cran-url]: https://CRAN.R-project.org/package=reda
 [travis]: https://travis-ci.org/wenjie2wang/reda
@@ -66,7 +71,7 @@ FITNESS FOR A PARTICULAR PURPOSE.
 [github-url]: https://github.com/wenjie2wang/reda
 [vignette]: https://wenjie-stat.me/reda/
 [pdf-manual]: https://wenjie-stat.me/reda/reda.pdf
-[gpl-url]: http://www.gnu.org/licenses/
+[gpl-url]: https://www.gnu.org/licenses/
 [codecov]: https://codecov.io/gh/wenjie2wang/reda
 [codecov-master]: https://codecov.io/gh/wenjie2wang/reda/branch/master/graph/badge.svg
 [codecov-dev]: https://codecov.io/gh/wenjie2wang/reda/branch/dev/graph/badge.svg
