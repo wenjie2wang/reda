@@ -47,11 +47,11 @@ NULL
 ##' interarrival times.
 ##'
 ##' The thinning method (Lewis and Shedler, 1979) is applied for bounded hazard
-##' rate function by default. The method based on inverse cumulative
-##' distribution function (CDF) is also available for possibly unbounded but
-##' integrable rate function over the given time period. The inverse CDF method
-##' will be used when the rate function may go to infinite and a warning will be
-##' thrown out if the thinning method is specified originally.
+##' rate function by default. The inversion method (Cinlar, 1975) is also
+##' available for possibly unbounded but integrable rate function over the given
+##' time period. The inversion method will be used when the rate function may go
+##' to infinite and a warning will be thrown out if the thinning method is
+##' specified originally.
 ##'
 ##' For the covariates \code{z}, the covariate coefficients \code{zCoef}, and
 ##' the baseline hazard rate function \code{rho}, a function of time can be
@@ -80,7 +80,7 @@ NULL
 ##' simEvent(z = 0, zCoef = 1, rho = 1, rhoCoef = 1, origin = 0, endTime = 3,
 ##'          frailty = 1, recurrent = TRUE, interarrival = "rexp",
 ##'          relativeRisk = c("exponential", "linear", "excess"),
-##'          method = c("thinning", "inverse.cdf"), arguments = list(), ...)
+##'          method = c("thinning", "inversion"), arguments = list(), ...)
 ##'
 ##' @param z Time-invariant or time-varying covariates. The default value is
 ##'     \code{0} for no covariate effect.  This argument should be a numeric
@@ -149,20 +149,19 @@ NULL
 ##'     specified through a named list inside \code{arguments}.
 ##' @param method A character string specifying the method for generating
 ##'     simulated recurrent or survival data. The default method is thinning
-##'     method (Lewis and Shedler, 1979). Another available option is the method
-##'     based on inverse cumulative distribution function (CDF). When the rate
-##'     function may go to infinite, the inverse CDF method is used and a
-##'     warning will be thrown out if the thinning method is initially
-##'     specified.
+##'     method (Lewis and Shedler, 1979). Another available option is the
+##'     inversion method (Cinlar, 1975). When the rate function may go to
+##'     infinite, the inversion method is used and a warning will be thrown out
+##'     if the thinning method is initially specified.
 ##' @param arguments A list that consists of named lists for specifying other
 ##'     arguments in the corresponding functions. For example, if a function of
 ##'     time named \code{foo} with two arguments, \code{x} (for time) and
 ##'     \code{y}, is specified for the time-varying covariates, the value of its
-##'     second argument, \code{y}, can be specified by \code{arguments =
-##'     list(z = list(y = 1)}.  A partial matching on names is not allowed to
-##'     avoid possible misspecification. The input arguments will be evaluated
-##'     within function \code{simEvent}, which can be useful for randomly
-##'     setting function parameters for each process in function
+##'     second argument, \code{y}, can be specified by \code{arguments = list(z
+##'     = list(y = 1)}.  A partial matching on names is not allowed to avoid
+##'     possible misspecification. The input arguments will be evaluated within
+##'     function \code{simEvent}, which can be useful for randomly setting
+##'     function parameters for each process in function
 ##'     \code{simEventData}. See examples and vignettes for details.
 ##' @param ... Additional arguements passed from function \code{simEventData} to
 ##'     fucntion \code{simEvent}. For function \code{simEvent}, \code{...} is
@@ -179,6 +178,9 @@ NULL
 ##' processes: A large sample study. \emph{The annals of statistics}, 10(4),
 ##' 1100--1120.
 ##'
+##' Cinlar, Erhan (1975). \emph{Introduction to stochastic processes}. Englewood
+##' Cliffs, NJ: Printice-Hall.
+##'
 ##' Cox, D. R. (1972). Regression models and life-tables.
 ##' \emph{Journal of the Royal Statistical Society. Series B
 ##' (Methodological)}, 34(2), 187--220.
@@ -190,7 +192,7 @@ NULL
 ##'
 ##' @examples
 ##' library(reda)
-##'
+##' set.seed(1216)
 ##' ### time-invariant covariates and coefficients
 ##' ## one process
 ##' simEvent(z = c(0.5, 1), zCoef = c(1, 0))
@@ -227,7 +229,7 @@ NULL
 ##'                        ))
 ##' ## check the intercept randomly generated,
 ##' ## which should be the same within each ID but different between IDs.
-##' unique(with(simDat, cbind(ID, intercept = X.1 - time / 10)))
+##' unique(with(simDat, cbind(ID, intercept = round(X.1 - time / 10, 6))))
 ##'
 ##'
 ##' ### non-negative time-varying baseline hazard rate function
@@ -235,11 +237,12 @@ NULL
 ##' simEventData(3, origin = rnorm(3), endTime = rnorm(3, 5),
 ##'              rho = function(timeVec) { sin(timeVec) + 1 })
 ##' ## specify other arguments
-##' simEvent(rho = function(a, b) { cos(a + b) + 1 },
-##'          arguments = list(rho = list(b = 1)))
-##' simEventData(z = cbind(rnorm(3), rbinom(3, 1, 0.5)),
-##'              rho = function(a, b) { cos(a + b) + 1 },
-##'              arguments = list(rho = list(b = 1)))
+##' simEvent(z = c(rnorm(1), rbinom(1, 1, 0.5)) / 10,
+##'          rho = function(a, b) { sin(a + b) + 1 },
+##'          arguments = list(rho = list(b = 0.5)))
+##' simEventData(z = cbind(rnorm(3), rbinom(3, 1, 0.5)) / 10,
+##'              rho = function(a, b) { sin(a + b) + 1 },
+##'              arguments = list(rho = list(b = 0.5)))
 ##'
 ##' ## quadratic B-splines with one internal knot at "time = 1"
 ##' ## (using function 'bSpline' from splines2 package)
@@ -266,9 +269,9 @@ NULL
 ##'
 ##' ### renewal process
 ##' ## interarrival times following uniform distribution
-##' rUnif <- function(n, rate, min) runif(n, min, max = 2 / rate - min)
+##' rUnif <- function(n, rate, min) runif(n, min, max = 2 / rate)
 ##' simEvent(interarrival = rUnif,
-##'          arguments = list(interarrival = list(min = 0.1)))
+##'          arguments = list(interarrival = list(min = 0)))
 ##'
 ##' ## interarrival times following Gamma distribution with scale one
 ##' set.seed(123)
@@ -297,13 +300,13 @@ simEvent <- function(z = 0, zCoef = 1,
                      recurrent = TRUE,
                      interarrival = "rexp",
                      relativeRisk = c("exponential", "linear", "excess"),
-                     method = c("thinning", "inverse.cdf"),
+                     method = c("thinning", "inversion"),
                      arguments = list(), ...)
 {
     ## record function call
     Call <- match.call()
     ## match method
-    method <- match.arg(method, c("thinning", "inverse.cdf"))
+    method <- match.arg(method, c("thinning", "inversion"))
 
     ## check covariate z
     zVecIdx <- isNumVector(z, error_na = TRUE)
@@ -526,10 +529,10 @@ simEvent <- function(z = 0, zCoef = 1,
     ## if the supremum is finite, use thinning method
     if ("error" %in% class(rhoMaxObj)) {
         if (method == "thinning") {
-            method <- "inverse.cdf"
+            method <- "inversion"
             warning(wrapMessages(
                 "The rate function may go to infinite.",
-                "The Inverse CDF method was used."
+                "The Inversion method was used."
             ), call. = FALSE)
         }
     } else {
@@ -606,7 +609,7 @@ simEvent <- function(z = 0, zCoef = 1,
         }
 
     } else {
-        ## (naive) method based on inverse CDF
+        ## the inversion method
         vecRateFun <- Vectorize(rateFun)
         intRate <- tryCatch(
             stats::integrate(vecRateFun, lower = origin,
@@ -653,7 +656,7 @@ simEvent <- function(z = 0, zCoef = 1,
                 U <- U[1L]
             ## density function may go to infinite
             ## hard to apply rejection sampling
-            ## use inverse CDF method numerically / the hard way
+            ## use inversion method numerically / the hard way
             invFun <- function(prob) {
                 foo <- function(timeNum) {
                     stats::integrate(vecRateFun, lower = origin,

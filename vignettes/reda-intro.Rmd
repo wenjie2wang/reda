@@ -75,7 +75,7 @@ The subject's ID will be pinpointed (in most cases) if its observation violates
 any given checking rule.
 
 
-## Sample Mean Cumulative Function (MCF) {#mcf.formula}
+## Sample Mean Cumulative Function (MCF) {#mcf-formula}
 
 The nonparametric sample MCF is also called Nelson-Aalen Estimator
 [@nelson2003siam]. The point estimate of MCF at each time point does not assume
@@ -290,7 +290,7 @@ base, plus one if intercept is included in spline bases.
                       spline = "bSp", degree = 3L, knots = c(56, 112)))
 ```
 
-## Summary of Model Fits {#summary.rateReg}
+## Summary of Model Fits {#summary-rateReg}
 
 A brief summary of the fitted model is given by `show` method as shown in the
 previous examples. Further, `summary` method for `rateReg` object provides a
@@ -348,7 +348,7 @@ baseRateObj <- baseRate(splineFit)
 plot(baseRateObj, conf.int = TRUE)
 ```
 
-## Estimated MCF from the Fitted Model {#mcf.rateReg}
+## Estimated MCF from the Fitted Model {#mcf-rateReg}
 
 If `rateReg` object is supplied to function `mcf`, the method for `rateReg` is
 called, which returns the estimated baseline MCF from the fitted model if

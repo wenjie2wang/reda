@@ -67,7 +67,7 @@ general form of the intensity function is given as follows: $$\lambda\bigl(t
 
 ### Sampling methods
 
-
+The thinning method [@lewis1979nrlq]
 
 ## Getting started {#getting-started}
 

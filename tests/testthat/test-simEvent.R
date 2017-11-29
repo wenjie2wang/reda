@@ -68,16 +68,16 @@ test_that("call reda::simEvent", {
         simEvent(relativeRisk = "excess")
     ), "simEvent")
 
-    ## use inverse CDF method instead of thinning method
+    ## use the inversion method instead of thinning method
     expect_equivalent(class(
-        simEvent(method = "inverse.cdf")
+        simEvent(method = "inversion")
     ), "simEvent")
     expect_equivalent(class(
-        simEvent(method = "inverse.cdf",
+        simEvent(method = "inversion",
                  interarrival = function(n, rate) runif(n, max = 2 / rate))
     ), "simEvent")
     expect_equivalent(class(
-        simEvent(method = "inverse.cdf", endTime = 0.1,
+        simEvent(method = "inversion", endTime = 0.1,
                  interarrival = function(n, rate)
                      runif(n, min = 0.1, max = 2 / rate - 0.1))
     ), "simEvent")

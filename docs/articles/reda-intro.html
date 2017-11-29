@@ -78,7 +78,7 @@
       <h1>Introduction to reda through Examples</h1>
                         <h4 class="author">Wenjie Wang</h4>
             
-            <h4 class="date">2017-11-26</h4>
+            <h4 class="date">2017-11-29</h4>
           </div>
 
     
@@ -129,7 +129,7 @@
 <li>Subjects may have different time origins. But one subject must has only one time origin.</li>
 </ul>
 <p>The subject’s ID will be pinpointed (in most cases) if its observation violates any given checking rule.</p>
-</section><section id="mcf.formula" class="level2"><h2>Sample Mean Cumulative Function (MCF)</h2>
+</section><section id="mcf-formula" class="level2"><h2>Sample Mean Cumulative Function (MCF)</h2>
 <p>The nonparametric sample MCF is also called Nelson-Aalen Estimator <span class="citation" data-cites="nelson2003siam">(Nelson 2003)</span>. The point estimate of MCF at each time point does not assume any particular underlying model. The variance estimates at each time point is computed by the Lawless and Nadeau method <span class="citation" data-cites="lawless1995technometrics">(Lawless and Nadeau 1995)</span>, Poisson process method or based on the well-known bootstrap method <span class="citation" data-cites="efron1979aos">(Efron 1979)</span> with subjects as resampling units. The approximate confidence intervals are provided as well, which are constructed based on the asymptotic normality of the MCF estimates itself (the default) or logarithm of the MCF estimates.</p>
 <p>The function <code>mcf</code> is a generic function for the MCF estimates from a sample data or a fitted gamma frailty model (as demonstrated later). If a formula with <code>Survr</code> as response is specified in function <code>mcf</code>, the formula method for estimating the sample MCF will be called. The covariate specified at the right hand side of the formula should be either <code>1</code> or any “linear” combination of factor variables in the data. The former computes the overall sample MCF. The latter computes the sample MCF for each level of the combination of the factor variable(s) specified, respectively.</p>
 <p>The valve-seat dataset in <span class="citation" data-cites="nelson1995technometrics">Nelson (1995)</span> and the simulated sample data are used for demonstration as follows:</p>
@@ -326,7 +326,7 @@
 ## Coefficients of spline bases:
 ##  B-spline1  B-spline2  B-spline3  B-spline4  B-spline5  B-spline6 
 ## 0.01809635 0.04107572 0.01770835 0.02399031 0.06318482 0.03172925</code></pre>
-</section></section><section id="summary.rateReg" class="level2"><h2>Summary of Model Fits</h2>
+</section></section><section id="summary-rateReg" class="level2"><h2>Summary of Model Fits</h2>
 <p>A brief summary of the fitted model is given by <code>show</code> method as shown in the previous examples. Further, <code>summary</code> method for <code>rateReg</code> object provides a more specific summary of the model fitted. For instance, the summary of the models fitted in section of model fitting can be called as follows:</p>
 <pre class="sourceCode r" id="cb26"><code class="sourceCode r"><a class="sourceLine" id="cb26-1" data-line-number="1"><span class="kw">summary</span>(constFit)</a></code></pre>
 <pre><code>## Call: 
@@ -435,7 +435,7 @@
 <pre class="sourceCode r" id="cb40"><code class="sourceCode r"><a class="sourceLine" id="cb40-1" data-line-number="1">baseRateObj &lt;-<span class="st"> </span><span class="kw"><a href="../reference/baseRate.html">baseRate</a></span>(splineFit)</a>
 <a class="sourceLine" id="cb40-2" data-line-number="2"><span class="kw">plot</span>(baseRateObj, <span class="dt">conf.int =</span> <span class="ot">TRUE</span>)</a></code></pre>
 <p><img src="reda-intro_files/figure-html/baseRate-1.png" width="672"></p>
-</section><section id="mcf.rateReg" class="level2"><h2>Estimated MCF from the Fitted Model</h2>
+</section><section id="mcf-rateReg" class="level2"><h2>Estimated MCF from the Fitted Model</h2>
 <p>If <code>rateReg</code> object is supplied to function <code>mcf</code>, the method for <code>rateReg</code> is called, which returns the estimated baseline MCF from the fitted model if <code>newdata</code> is not specified in the function. The example estimating and plotting the baseline MCF from the fitted model with piecewise constant rate function is shown as follows:</p>
 <pre class="sourceCode r" id="cb41"><code class="sourceCode r"><a class="sourceLine" id="cb41-1" data-line-number="1">piecesMcf &lt;-<span class="st"> </span><span class="kw"><a href="../reference/mcf.html">mcf</a></span>(piecesFit)</a>
 <a class="sourceLine" id="cb41-2" data-line-number="2"><span class="kw">plot</span>(piecesMcf, <span class="dt">conf.int =</span> <span class="ot">TRUE</span>, <span class="dt">col =</span> <span class="st">"blueviolet"</span>) <span class="op">+</span><span class="st"> </span><span class="kw"><a href="http://www.rdocumentation.org/packages/ggplot2/topics/labs">xlab</a></span>(<span class="st">"Days"</span>)</a></code></pre>

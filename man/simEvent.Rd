@@ -8,7 +8,7 @@
 simEvent(z = 0, zCoef = 1, rho = 1, rhoCoef = 1, origin = 0, endTime = 3,
          frailty = 1, recurrent = TRUE, interarrival = "rexp",
          relativeRisk = c("exponential", "linear", "excess"),
-         method = c("thinning", "inverse.cdf"), arguments = list(), ...)
+         method = c("thinning", "inversion"), arguments = list(), ...)
 
 simEventData(nProcess, z = 0, origin = 0, endTime = 3, frailty = 1, ...)
 }
@@ -90,21 +90,20 @@ specified through a named list inside \code{arguments}.}
 
 \item{method}{A character string specifying the method for generating
 simulated recurrent or survival data. The default method is thinning
-method (Lewis and Shedler, 1979). Another available option is the method
-based on inverse cumulative distribution function (CDF). When the rate
-function may go to infinite, the inverse CDF method is used and a
-warning will be thrown out if the thinning method is initially
-specified.}
+method (Lewis and Shedler, 1979). Another available option is the
+inversion method (Cinlar, 1975). When the rate function may go to
+infinite, the inversion method is used and a warning will be thrown out
+if the thinning method is initially specified.}
 
 \item{arguments}{A list that consists of named lists for specifying other
 arguments in the corresponding functions. For example, if a function of
 time named \code{foo} with two arguments, \code{x} (for time) and
 \code{y}, is specified for the time-varying covariates, the value of its
-second argument, \code{y}, can be specified by \code{arguments =
-list(z = list(y = 1)}.  A partial matching on names is not allowed to
-avoid possible misspecification. The input arguments will be evaluated
-within function \code{simEvent}, which can be useful for randomly
-setting function parameters for each process in function
+second argument, \code{y}, can be specified by \code{arguments = list(z
+= list(y = 1)}.  A partial matching on names is not allowed to avoid
+possible misspecification. The input arguments will be evaluated within
+function \code{simEvent}, which can be useful for randomly setting
+function parameters for each process in function
 \code{simEventData}. See examples and vignettes for details.}
 
 \item{...}{Additional arguements passed from function \code{simEventData} to
@@ -143,11 +142,11 @@ can be specified through \code{interarrival} for other distributions of the
 interarrival times.
 
 The thinning method (Lewis and Shedler, 1979) is applied for bounded hazard
-rate function by default. The method based on inverse cumulative
-distribution function (CDF) is also available for possibly unbounded but
-integrable rate function over the given time period. The inverse CDF method
-will be used when the rate function may go to infinite and a warning will be
-thrown out if the thinning method is specified originally.
+rate function by default. The inversion method (Cinlar, 1975) is also
+available for possibly unbounded but integrable rate function over the given
+time period. The inversion method will be used when the rate function may go
+to infinite and a warning will be thrown out if the thinning method is
+specified originally.
 
 For the covariates \code{z}, the covariate coefficients \code{zCoef}, and
 the baseline hazard rate function \code{rho}, a function of time can be
@@ -172,7 +171,7 @@ function for \code{simEvent} similar to \code{simEventData}.
 }
 \examples{
 library(reda)
-
+set.seed(1216)
 ### time-invariant covariates and coefficients
 ## one process
 simEvent(z = c(0.5, 1), zCoef = c(1, 0))
@@ -209,7 +208,7 @@ simDat <- simEventData(3, z = zFun, zCoef = zCoefFun,
                        ))
 ## check the intercept randomly generated,
 ## which should be the same within each ID but different between IDs.
-unique(with(simDat, cbind(ID, intercept = X.1 - time / 10)))
+unique(with(simDat, cbind(ID, intercept = round(X.1 - time / 10, 6))))
 
 
 ### non-negative time-varying baseline hazard rate function
@@ -217,11 +216,12 @@ simEvent(rho = function(timeVec) { sin(timeVec) + 1 })
 simEventData(3, origin = rnorm(3), endTime = rnorm(3, 5),
              rho = function(timeVec) { sin(timeVec) + 1 })
 ## specify other arguments
-simEvent(rho = function(a, b) { cos(a + b) + 1 },
-         arguments = list(rho = list(b = 1)))
-simEventData(z = cbind(rnorm(3), rbinom(3, 1, 0.5)),
-             rho = function(a, b) { cos(a + b) + 1 },
-             arguments = list(rho = list(b = 1)))
+simEvent(z = c(rnorm(1), rbinom(1, 1, 0.5)) / 10,
+         rho = function(a, b) { sin(a + b) + 1 },
+         arguments = list(rho = list(b = 0.5)))
+simEventData(z = cbind(rnorm(3), rbinom(3, 1, 0.5)) / 10,
+             rho = function(a, b) { sin(a + b) + 1 },
+             arguments = list(rho = list(b = 0.5)))
 
 ## quadratic B-splines with one internal knot at "time = 1"
 ## (using function 'bSpline' from splines2 package)
@@ -248,9 +248,9 @@ simEvent(z = c(0.5, 1), zCoef = c(1, 0), frailty = logNorm,
 
 ### renewal process
 ## interarrival times following uniform distribution
-rUnif <- function(n, rate, min) runif(n, min, max = 2 / rate - min)
+rUnif <- function(n, rate, min) runif(n, min, max = 2 / rate)
 simEvent(interarrival = rUnif,
-         arguments = list(interarrival = list(min = 0.1)))
+         arguments = list(interarrival = list(min = 0)))
 
 ## interarrival times following Gamma distribution with scale one
 set.seed(123)
@@ -275,6 +275,9 @@ simEvent(relativeRisk = rriskFun,
 Andersen, P. K., & Gill, R. D. (1982). Cox's regression model for counting
 processes: A large sample study. \emph{The annals of statistics}, 10(4),
 1100--1120.
+
+Cinlar, Erhan (1975). \emph{Introduction to stochastic processes}. Englewood
+Cliffs, NJ: Printice-Hall.
 
 Cox, D. R. (1972). Regression models and life-tables.
 \emph{Journal of the Royal Statistical Society. Series B
