@@ -155,11 +155,11 @@ covariate specified at the right hand side of the formula should be either
 The former computes the overall sample MCF.  The latter computes the sample
 MCF for each level of the combination of the categorical variable(s)
 specified, respectively.  The sample MCF is also called Nelson-Aalen
-nonparametric estimator (Nelson, 2003) and computed on each time point from
+nonparametric estimator (Nelson 2003) and computed on each time point from
 sample data.  The point estimate of sample MCF at each time point does not
 assume any particular underlying model. The variance estimates at each time
 point is computed following the Lawless and Nadeau method (LawLess and
-Nadeau, 1995), the Poisson process method, or the bootstrap methods.  The
+Nadeau 1995), the Poisson process method, or the bootstrap methods.  The
 approximate confidence intervals are provided as well, which are constructed
 based on the asymptotic normality of the MCF itself (by default) or the
 logarithm of MCF.
@@ -192,7 +192,7 @@ valveMcf1 <- mcf(Survr(ID, Days, No.) ~ 1,
 ## variance estimates by bootstrap method (with 1,000 bootstrap samples)
 valveMcf2 <- mcf(Survr(ID, Days, No.) ~ 1,
                  data = valveSeats, variance = "bootstrap",
-                 control = list(B = 1e3))
+                 control = list(B = 2e2))
 
 ## comparing the variance estimates from different methods
 library(ggplot2)

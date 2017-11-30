@@ -29,7 +29,7 @@ A numeric matrix with row names and column names.
 for all or specified covariates.
 }
 \details{
-Under regularity condition (Shao, 2003, Theorem 4.16 and Theorem 4.17, page
+Under regularity condition (Shao 2003, Theorem 4.16 and Theorem 4.17, page
 287, 290), the approximate confidence intervals are constructed loosely
 based on Fisher information matrix and estimates of coefficients.
 }

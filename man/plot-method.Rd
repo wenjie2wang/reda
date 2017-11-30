@@ -18,8 +18,7 @@
 
 \S4method{plot}{mcf.rateReg,missing}(x, y, conf.int = FALSE, lty, col, ...)
 
-\S4method{plot}{baseRate.rateReg,missing}(x, y, conf.int = FALSE, lty, col,
-     ...)
+\S4method{plot}{baseRate.rateReg,missing}(x, y, conf.int = FALSE, lty, col, ...)
 
 \S4method{plot}{mcfDiff,missing}(x, y, lty, col, legendName, legendLevels,
      conf.int = TRUE, addOrigin = FALSE, ...)

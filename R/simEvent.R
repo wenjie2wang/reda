@@ -36,8 +36,8 @@ NULL
 ##' For each process, a time-invariant or time-varying baseline hazard rate
 ##' (intensity) function of failure can be specified.  Covariates and their
 ##' coefficients can be specified and are incorporated by default based on the
-##' Cox proportional hazard model (Cox, 1972) for survival data or Andersen-Gill
-##' model (Andersen and Gill, 1982) for recurrent events. Other relative risk
+##' Cox proportional hazard model (Cox 1972) for survival data or Andersen-Gill
+##' model (Andersen and Gill 1982) for recurrent events. Other relative risk
 ##' function can be specified through the argument \code{relativeRisk}. In
 ##' addition, a frailty effect can be considered.  Conditional on predictors (or
 ##' covariates) and the unobserved frailty effect, the process is by default a
@@ -46,8 +46,8 @@ NULL
 ##' can be specified through \code{interarrival} for other distributions of the
 ##' interarrival times.
 ##'
-##' The thinning method (Lewis and Shedler, 1979) is applied for bounded hazard
-##' rate function by default. The inversion method (Cinlar, 1975) is also
+##' The thinning method (Lewis and Shedler 1979) is applied for bounded hazard
+##' rate function by default. The inversion method (Cinlar 1975) is also
 ##' available for possibly unbounded but integrable rate function over the given
 ##' time period. The inversion method will be used when the rate function may go
 ##' to infinite and a warning will be thrown out if the thinning method is
@@ -149,8 +149,8 @@ NULL
 ##'     specified through a named list inside \code{arguments}.
 ##' @param method A character string specifying the method for generating
 ##'     simulated recurrent or survival data. The default method is thinning
-##'     method (Lewis and Shedler, 1979). Another available option is the
-##'     inversion method (Cinlar, 1975). When the rate function may go to
+##'     method (Lewis and Shedler 1979). Another available option is the
+##'     inversion method (Cinlar 1975). When the rate function may go to
 ##'     infinite, the inversion method is used and a warning will be thrown out
 ##'     if the thinning method is initially specified.
 ##' @param arguments A list that consists of named lists for specifying other

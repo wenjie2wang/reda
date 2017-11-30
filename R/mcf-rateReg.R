@@ -181,8 +181,8 @@ rateReg_mcf_control <- function(grid, length.out = 1e3, from, to, ...,
                                 Boundary.knots_)
 {
     ## controls for function MCF with signiture rateReg
-    from <- if (missing(from)) Boundary.knots_[1L]
-    to  <- if (missing(to)) Boundary.knots_[2L]
+    from <- if (missing(from)) Boundary.knots_[1L] else from
+    to  <- if (missing(to)) Boundary.knots_[2L] else to
     if (! missing(grid)) {
         if (! isNumVector(grid))
             stop("The 'grid' specified must be numeric vector.",

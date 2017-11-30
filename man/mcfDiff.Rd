@@ -67,7 +67,7 @@ indicating the method used for the variance estimates of the test statistic.
 \description{
 This function estimates the sample MCF difference between two groups. Both
 the point estimates and the confidence intervals are computed (Lawless and
-Nadeau, 1995). The two-sample pseudo-score test proposed by Cook, Lawless,
+Nadeau 1995). The two-sample pseudo-score test proposed by Cook, Lawless,
 and Nadeau (1996) is also performed by default.
 }
 \details{

@@ -276,11 +276,11 @@ covariate specified at the right hand side of the formula should be either
 The former computes the overall sample MCF.  The latter computes the sample
 MCF for each level of the combination of the categorical variable(s)
 specified, respectively.  The sample MCF is also called Nelson-Aalen
-nonparametric estimator (Nelson, 2003) and computed on each time point from
+nonparametric estimator (Nelson 2003) and computed on each time point from
 sample data.  The point estimate of sample MCF at each time point does not
 assume any particular underlying model. The variance estimates at each time
 point is computed following the Lawless and Nadeau method (LawLess and
-Nadeau, 1995), the Poisson process method, or the bootstrap methods.  The
+Nadeau 1995), the Poisson process method, or the bootstrap methods.  The
 approximate confidence intervals are provided as well, which are constructed
 based on the asymptotic normality of the MCF itself (by default) or the
 logarithm of MCF.</p>
@@ -325,7 +325,7 @@ Repairs, Disease Recurrences, and Other Applications</em> (Vol. 10). SIAM.</p>
 <span class='co'>## variance estimates by bootstrap method (with 1,000 bootstrap samples)</span>
 <span class='no'>valveMcf2</span> <span class='kw'>&lt;-</span> <span class='fu'>mcf</span>(<span class='fu'><a href='Survr.html'>Survr</a></span>(<span class='no'>ID</span>, <span class='no'>Days</span>, <span class='no'>No.</span>) ~ <span class='fl'>1</span>,
                  <span class='kw'>data</span> <span class='kw'>=</span> <span class='no'>valveSeats</span>, <span class='kw'>variance</span> <span class='kw'>=</span> <span class='st'>"bootstrap"</span>,
-                 <span class='kw'>control</span> <span class='kw'>=</span> <span class='fu'>list</span>(<span class='kw'>B</span> <span class='kw'>=</span> <span class='fl'>1e3</span>))
+                 <span class='kw'>control</span> <span class='kw'>=</span> <span class='fu'>list</span>(<span class='kw'>B</span> <span class='kw'>=</span> <span class='fl'>2e2</span>))
 
 <span class='co'>## comparing the variance estimates from different methods</span>
 <span class='fu'>library</span>(<span class='no'>ggplot2</span>)
