@@ -62,6 +62,22 @@ na_stop <- function(x, sub_env = c("current", "parent", "grandparent"),
     invisible(x)
 }
 
+## is x a numeric matrix (optionally of nRow rows and nCol columns)
+isNumMatrix <- function(x, nRow = NULL, nCol = NULL,
+                        warn_na = TRUE, error_na = ! warn_na,
+                        sub_env = "parent", ...)
+{
+    out <- is.numeric(x) && is.matrix(x)
+    if (out) {
+        nDim <- dim(x)
+        if (! is.null(nRow)) out <- out && nDim[1L] == nRow
+        if (! is.null(nCol)) out <- out && nDim[2L] == nCol
+        if (error_na) na_stop(x, sub_env = sub_env, ...)
+        if (warn_na) na_warning(x, sub_env = sub_env, ...)
+    }
+    out
+}
+
 ## is x a numeric vector
 isNumVector <- function(x, warn_na = TRUE, error_na = ! warn_na,
                         sub_env = "parent", ...)

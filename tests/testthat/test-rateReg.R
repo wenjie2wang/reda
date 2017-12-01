@@ -94,24 +94,16 @@ test_that("Quick tests for normal usages", {
     ## skip testing coef since it has been covered in previous tests
 
     ## test confint
-    expect_output(str(confint(constFit)),
-                  "num [1:3, 1:2]", fixed = TRUE)
-    expect_output(str(confint(piecesFit, parm = 1:2)),
-                  "num [1:2, 1:2]", fixed = TRUE)
-    expect_output(str(confint(splineFit, parm = "x1")),
-                  "num [1, 1:2]", fixed = TRUE)
-    expect_error(confint(splineFit, factor(1)),
-                 "parm", fixed = TRUE)
+    expect_equal(isNumMatrix(confint(constFit), 3L, 2L), TRUE)
+    expect_equal(isNumMatrix(confint(piecesFit, parm = 1:2), 2L, 2L), TRUE)
+    expect_equal(isNumMatrix(confint(splineFit, parm = "x1"), 1L, 2L), TRUE)
+    expect_error(confint(splineFit, factor(1)), "parm", fixed = TRUE)
 
     ## test AIC and BIC
-    expect_output(str(AIC(constFit)), "num", fixed = TRUE)
-    expect_output(str(BIC(constFit)), "num", fixed = TRUE)
-    expect_output(str(AIC(constFit, piecesFit, splineFit)),
-                  "'data.frame':\t3 obs. of  2 variables:",
-                  fixed = TRUE)
-    expect_output(str(BIC(constFit, piecesFit, splineFit)),
-                  "'data.frame':\t3 obs. of  2 variables:",
-                  fixed = TRUE)
+    expect_equal(isNumOne(AIC(constFit)), TRUE)
+    expect_equal(isNumOne(BIC(constFit)), TRUE)
+    expect_equal(dim(AIC(constFit, piecesFit, splineFit)), c(3L, 2L))
+    expect_equal(dim(BIC(constFit, piecesFit, splineFit)), c(3L, 2L))
 
     ## test baseRate
     br_constFit <- baseRate(constFit)

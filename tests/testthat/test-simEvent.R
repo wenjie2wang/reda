@@ -122,7 +122,6 @@ test_that("call reda::simEventData", {
                  "frailty", fixed = TRUE)
 
     ## survival data instead of recurrent event data
-    expect_output(str(
-        simEventData(recurrent = FALSE)
-    ), "'data.frame':\t1 obs. of  5 variables:")
+    expect_equal(dim(simEventData(recurrent = FALSE)), c(1L, 5L))
+
 })
