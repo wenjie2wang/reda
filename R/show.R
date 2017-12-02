@@ -47,8 +47,10 @@ setMethod(f = "show", signature = "rateReg",
               names(alpha) <- row.names(object@estimates$alpha)
               cat("Call: \n")
               print(object@call)
-              cat("\nCoefficients of covariates: \n")
-              print(beta)
+              if (length(beta) > 0) {
+                  cat("\nCoefficients of covariates: \n")
+                  print(beta)
+              }
               cat("\nFrailty parameter: ", theta, "\n")
               knots <- object@spline$knots
               Boundary.knots <- object@spline$Boundary.knots
@@ -81,10 +83,11 @@ setMethod(f = "show", signature = "summary.rateReg",
                   attr(Call, "show") <- NULL
                   cat("Call: \n")
                   print(Call)
-                  cat("\n")
               }
-              cat("Coefficients of covariates: \n")
-              printCoefmat(object@covarCoef)
+              if (nrow(object@covarCoef) > 0) {
+                  cat("\nCoefficients of covariates: \n")
+                  printCoefmat(object@covarCoef)
+              }
               cat("\nParameter of frailty: \n")
               print(object@frailtyPar)
               ## on knots
