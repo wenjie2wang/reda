@@ -559,8 +559,8 @@ simEvent <- function(z = 0, zCoef = 1,
             lastEventTime <- origin
             while (lastEventTime < endTime) {
                 W <- do.call(interarrival, interarrivalArgs)
-                if (! isNumVector(W, error_na = TRUE) || any(W <= 0))
-                    stop("The interarrival times must be positive!",
+                if (! isNumVector(W, error_na = TRUE) || any(W < 0))
+                    stop("The interarrival times must be nonnegative!",
                          call. = FALSE)
                 ## step 3: update evnet times
                 eventTime <- c(eventTime, lastEventTime + cumsum(W))
@@ -570,8 +570,8 @@ simEvent <- function(z = 0, zCoef = 1,
             if ("n" %in% intArvArgs)
                 interarrivalArgs <- c(list(n = 1), interarrivalArgs)
             W <- do.call(interarrival, interarrivalArgs)
-            if (! isNumOne(W, error_na = TRUE) || any(W <= 0))
-                stop("The interarrival time must be a positive nuumber!",
+            if (! isNumOne(W, error_na = TRUE) || any(W < 0))
+                stop("The interarrival times must be nonnegative!",
                      call. = FALSE)
             eventTime <- origin + W
         }
@@ -635,8 +635,8 @@ simEvent <- function(z = 0, zCoef = 1,
             lastEventTime <- origin
             while (lastEventTime < endTime) {
                 W <- do.call(interarrival, interarrivalArgs)
-                if (any(W <= 0))
-                    stop("The interarrival times must be positive!",
+                if (any(W < 0))
+                    stop("The interarrival times must be nonnegative!",
                          call. = FALSE)
                 ## step 3: update evnet times
                 eventTime <- lastEventTime + cumsum(W)
