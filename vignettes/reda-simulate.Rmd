@@ -18,11 +18,11 @@ event data from stochastic process point of view with **reda** package.  The
 core function named `simEvent` provides an intuitive and flexible interface for
 simulating survival and recurrent event times from one stochastic process.
 Another function named `simEventData` is simply a wrapper that calls `simEvent`
-internally and collects event times and covariates of a given number of
-processes into a data frame format.  Examples of generating random samples from
-common survival and recurrent models are provided. The details of function
-syntax and the objects produced are available in the package manual and thus not
-covered in this vignette.
+internally and collects the event times and the covariates of a given number of
+processes into a data frame.  Examples of generating random samples from common
+survival and recurrent models are provided. The details of function syntax and
+the objects produced are available in the package manual and thus not covered in
+this vignette.
 
 
 ## Introduction {#intro}
@@ -67,7 +67,14 @@ general form of the intensity function is given as follows: $$\lambda\bigl(t
 
 ### Sampling methods
 
-The thinning method [@lewis1979nrlq]
+The thinning method [@lewis1979nrlq] and the inversion method
+[@cinlar1975printice] are implemented for sampling event times. It can be shown
+that both methods achieve the given hazard rate. For function `simEvent`, the
+thinning method is the default method when the hazard rate function is bounded
+within follow-ups. Otherwise, the inversion method will be used. We may specify
+the sampling method via the argument `method` in function `simEvent` and
+`simEventData`.
+
 
 ## Getting started {#getting-started}
 
@@ -82,16 +89,16 @@ set.seed(123)                    # set random number seed
 
 ### Homogeneous Poisson process {#hpp}
 
-A homogeneous Poisson process (HPP) has a constant hazard rate over time and the
-interarrival times between two successive arrivals/events following exponential
-distribution.  Two simple examples of simulating a homogeneous Poisson process
-using `simEvent` are given as follows:
+A homogeneous/stationary Poisson process (HPP) has a constant hazard rate over
+time with the interarrival times (between two successive arrivals/events)
+following exponential distribution.  Two simple examples of simulating a
+homogeneous Poisson process using `simEvent` are given as follows:
 
 ```{r hpp}
 ## HPP from time 1 to 5 of intensity 1 without covariates
 simEvent(rho = 1, origin = 1, endTime = 5)
-## HPP from 0 to 10 of baseline rate 0.5 with two covariates
-simEvent(z = c(0.2, 0.5), zCoef = c(1, - 0.5), rho = 0.5, endTime = 10)
+## HPP from 0 to 10 of baseline hazard rate 0.5 with two covariates
+simEvent(z = c(0.2, 0.5), zCoef = c(0.5, - 0.1), rho = 0.5, endTime = 10)
 ```
 
 The function `simEventData` enable us to simulate multiple processes and collect
@@ -99,7 +106,7 @@ the simulated event times into a survival or recurrent event data format.
 
 ```{r hpp-data-1}
 ## recurrent events from two processes with same covariates
-simEventData(2, z = c(0.2, 0.5), zCoef = c(1, - 0.5), rho = 0.01, endTime = 5)
+simEventData(2, z = c(0.2, 0.5), zCoef = c(1, - 0.5), rho = 0.5, endTime = 5)
 ```
 
 In the example given above, the number of process is explicitly specified to be
@@ -108,62 +115,179 @@ covariate matrix. See the example given below.
 
 ```{r hpp-data-2}
 ## recurrent events from two processes
-## with different time-invariant covariate and time origin
-simEventData(z = cbind(rnorm(2), 0.5), zCoef = c(0.2, - 0.5),
-             rho = 0.01, origin = c(1, 3), endTime = c(8, 9))
+## with different time-invariant covariates and time origins
+simEventData(z = cbind(rnorm(2), 0.5), zCoef = c(1, - 0.5),
+             rho = 0.2, origin = c(1, 0), endTime = c(10, 9))
 ```
 
 We can also simulate survival data by taking the first event of each process.
 Setting `recurrent = FALSE` in function `simEvent` (or function `simEventData`)
 gives us the survival time(s) or the right censoring time(s).  In the example
 given below, we specified `endTime = "rnorm"` and `arguments = list(endTime =
-list(mean = 4))` for generating a random censoring times from normal
-distribution with mean 4 and unit standard deviation.
+list(mean = 10))` for generating a random censoring times from normal
+distribution with mean ten and unit standard deviation. Also note that the
+specified `origin` is recycled for these ten processes.
 
 ```{r hpp-data-3}
 ## survival data by set 'recurrent = FALSE'
-simEventData(z = cbind(rnorm(10), 1), zCoef = c(0.2, - 1), rho = 0.1,
+simEventData(z = cbind(rnorm(10), 1), zCoef = c(0.2, - 0.5), rho = 0.1,
              origin = c(0, 1), endTime = "rnorm", recurrent = FALSE,
-             arguments = list(endTime = list(mean = 4)))
+             arguments = list(endTime = list(mean = 10)))
 ```
-
 
 ### Nonhomogeneous Poisson process {#nhpp}
 
+In contrast to HPP, a nonhomogeneous Poisson process (NHPP) has a time-varying
+hazard rate function. In that case, we may specify the baseline hazard rate
+function `rho` to be a function object whose first argument represents the time
+variable. A quick example is given below, where the baseline hazard rate
+function $\rho(t) = \sin(t) + 1$.
+
 ```{r nhpp}
 rhoFun <- function(x, b = 1) (sin(x) + 1) * b
-simEvent(rho = rhoFun, endTime = 5)
-simEvent(z = rnorm(3), zCoef = rep(0.1, 3), rho = "rhoFun", endTime = 5)
+simEvent(rho = rhoFun)
 ```
+
+As demonstrated in the last example for HPP, other possible arguments of the
+function objects can be specified via the `arguments`. For example, that
+`arguments = list(rho = list(b = 0.5))` specifies the baseline hazard rate
+function to be $\rho(t) = 0.5(\sin(t) + 1)$.
 
 ```{r nhpp-data}
-simEventData(z = cbind(rnorm(2), 0.1), zCoef = rep(0.1, 2),
-             rho = "rhoFun", origin = "rnorm", endTime = "rnorm",
-             arguments = list(rho = list(b = 0.5),
-                              origin = list(mean = 1, sd = 0.1),
-                              endTime = list(mean = 5, sd = 0.5)))
+simEventData(z = cbind(rexp(2), c(0, 1)), zCoef = c(0.1, - 0.5),
+             rho = rhoFun, arguments = list(rho = list(b = 0.5)))
 ```
 
-## Other renewal processes {#renewal-processes}
+## Renewal processes {#renewal-processes}
 
-## Beyond time-invariant
+In the Poisson process, the interarrival times between two successive arrivals
+(or events) follow exponential distribution independently. We may generalize the
+distribution of interarrival times and consider more general renewal processes.
 
-### Timevarying covariates
+In function `simEvent` (and `simEventData`), we may specify the distribution of
+the interarrival times via the argument `interarrival`, which takes the function
+name `"rexp"` (from the **stats** package) for generating interarrival times
+following exponential distribution by default. In general, the argument
+`interarrival` takes a function with at least one argument named `rate` for
+generating random (nonnegative) interarrival times from a certain distribution
+at the given arrival rate. A quick example of generating the interarrival times
+following Gamma distribution of scale one is given as follows:
 
-### Timevarying covariate coefficients
+```{r rgamma-wi-n}
+set.seed(123)
+simEvent(interarrival = function(n, rate) rgamma(n, shape = 1 / rate))
+```
+
+If the specified function has an argument named `n`, the function `simEvent`
+will assume that the function can generate `n` number of random interarrival
+times at one time and take advantage of the vectorization for a potentially
+better performance. However, it is optional. The example given below produces an
+equivalent result.
+
+```{r rgamma-wo-n}
+set.seed(123)
+simEvent(interarrival = function(rate) rgamma(n = 1, shape = 1 / rate))
+```
+
+## Beyond time-invariance
+
+### Time-variant covariates
+
+In pratice, some covariates such as patients' age, automobile's mileage may vary
+over time.  The argument `z` in the function `simEvent` and `simEventData` may
+take a function of time that returns a vector of covariates for generating event
+times with the time-varying covariates. Let's consider an example of generating
+recurrent event times with three covariates, where two of which are
+time-variant.
+
+```{r time-varying-covariates-1}
+set.seed(123)
+zFun1 <- function(time) c(time / 10 + 1, as.numeric(time > 1), 0.5)
+simEventData(z = zFun1, zCoef = c(0.1, 0.5, - 0.5))
+```
+
+In the example given above, the covariate vector is $\mathbf{z}(t)=(0.1t+1,
+\boldsymbol{1}(t > 1), 0.5)^{\top}$. If the covariate function has more
+arguments, we may specify them by a named list in `arguments`. The example given
+below produces the equivalent results.
+
+```{r time-varying-covariates-2}
+set.seed(123)
+zFun2 <- function(x, a, b) c(x / 10 + a, as.numeric(x > b), 0.5)
+simEventData(z = zFun2, zCoef = c(0.1, 0.5, - 0.5),
+             arguments = list(z = list(a = 1, b = 1)))
+```
+
+Notice that in the examples given above, if we generate event times for more
+than one process, the time-varying covariate function will remain the same for
+different processes, which may not be the case in pratice.  A more realistic
+situation is that the time-variant covariate functions are different among
+different processes but coming from a common function family. Let's consider the
+Stanford heart transplant data [@crowley1977jasa] as an example (the `heart`
+data available in the **survival** package). The covariate `transplant`
+indicating whether the patient has already received a heart transplant before
+time `t` is time-dependent and can be represented by a indicator function
+family, $\boldsymbol{1}(t > b)$, where $b$ is a known parameter that may differ
+among patients. For a perticular patient $i$, $b = b_i$ is a known constant.  In
+that case, we specify the function parameters inside the `quote` function as
+follows:
+
+```{r time-varying-covariates-3}
+zFun3 <- function(time, a, b) c(time / 10 + a, as.numeric(time > b))
+(simDat <- simEventData(nProcess = 3, z = zFun3, zCoef = c(- 0.1, 0.5),
+                        arguments = list(z = list(a = quote(rpois(1, 10) / 10),
+                                                  b = quote(runif(1, 1, 3))))))
+```
+
+In the example given above, the covariate `X.2` is simulated from the indicator
+function famliy, $\boldsymbol{1}(t > b)$, where parameter $b$ follows uniform
+distribution between 1 and 3. Internally, the parameters specified in
+`arguments` were evaluated for each process. We may check the values of the
+parameter `a` from the generated covariate `X.1` for different processes as
+follows:
+
+```{r check-a}
+## check the values of parameter `a` for different processes
+with(simDat, unique(cbind(ID, a = X.1 - time / 10)))
+```
+
+
+### Time-variant covariate coefficients
+
+The assumption of time-invariance on the covariate coefficients can be hard to
+justify in practice. We may simulate event times with time-varying covariate
+coefficients by specifying the argument `zCoef` to be a function of time that
+returns a vector of coefficients at the input time point. How we may specify the
+argument `zCoef` for time-varying coefficients is very similar to the way we may
+specify the argument `z` for time-varying covariates introduced in last section.
+For example, we may generate event times with both covariates and their
+coefficients being time-variant as follows:
+
+```{r time-varying-coef-1}
+zCoefFun <- function(time, shift) c(sqrt(time / 10), sin(time + shift), 0.1)
+simEventData(z = zFun1, zCoef = zCoefFun,
+             arguments = list(zCoef = list(shift = 1)))
+```
+
+As demonstrated in the example given above, we may similarly specify the other
+arguments of the time-varying coefficient function via a named list in
+`arguments`.
 
 
 ## Frailty models {#frailty}
 
 ### Frailty for individual process {#individual-frailty}
 
+
 ### Shared frailty for clusters {#shared-frailty}
+
 
 
 ## Examples for common survival models {#common-dist}
 
 
-## Extension to multiple event data {#multiple-event}
+
+## Extension to multiple event data {#multiple-event-data}
 
 
 
