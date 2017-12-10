@@ -139,7 +139,7 @@ covariates) and the unobserved frailty effect, the process is by default a
 Poisson process, where the interarrival times between two successive
 arrivals/events follow exponential distribution. A general renewal process
 can be specified through \code{interarrival} for other distributions of the
-interarrival times.
+interarrival times in addition to the exponential distribution.
 
 The thinning method (Lewis and Shedler 1979) is applied for bounded hazard
 rate function by default. The inversion method (Cinlar 1975) is also

@@ -44,7 +44,7 @@ NULL
 ##' Poisson process, where the interarrival times between two successive
 ##' arrivals/events follow exponential distribution. A general renewal process
 ##' can be specified through \code{interarrival} for other distributions of the
-##' interarrival times.
+##' interarrival times in addition to the exponential distribution.
 ##'
 ##' The thinning method (Lewis and Shedler 1979) is applied for bounded hazard
 ##' rate function by default. The inversion method (Cinlar 1975) is also
@@ -550,30 +550,20 @@ simEvent <- function(z = 0, zCoef = 1,
         ## step 2: generate W_i in batch for possible better performance
         ## take care of possible interarrival arguments
         interarrivalArgs <- c(list(rate = rho_max), interarrival_args)
-        if (recurrent) {
-            ## estimate the number of W_i before censoring
-            batchNum <- ceiling((endTime - origin) / stats::qexp(0.20, rho_max))
-            if ("n" %in% intArvArgs)
-                interarrivalArgs <- c(list(n = batchNum), interarrivalArgs)
-            eventTime <- NULL
-            lastEventTime <- origin
-            while (lastEventTime < endTime) {
-                W <- do.call(interarrival, interarrivalArgs)
-                if (! isNumVector(W, error_na = TRUE) || any(W < 0))
-                    stop("The interarrival times must be nonnegative!",
-                         call. = FALSE)
-                ## step 3: update evnet times
-                eventTime <- c(eventTime, lastEventTime + cumsum(W))
-                lastEventTime <- eventTime[length(eventTime)]
-            }
-        } else {
-            if ("n" %in% intArvArgs)
-                interarrivalArgs <- c(list(n = 1), interarrivalArgs)
+        ## estimate the number of W_i before censoring
+        batchNum <- ceiling((endTime - origin) / stats::qexp(0.20, rho_max))
+        if ("n" %in% intArvArgs)
+            interarrivalArgs <- c(list(n = batchNum), interarrivalArgs)
+        eventTime <- NULL
+        lastEventTime <- origin
+        while (lastEventTime < endTime) {
             W <- do.call(interarrival, interarrivalArgs)
-            if (! isNumOne(W, error_na = TRUE) || any(W < 0))
+            if (! isNumVector(W, error_na = TRUE) || any(W < 0))
                 stop("The interarrival times must be nonnegative!",
                      call. = FALSE)
-            eventTime <- origin + W
+            ## step 3: update evnet times
+            eventTime <- c(eventTime, lastEventTime + cumsum(W))
+            lastEventTime <- eventTime[length(eventTime)]
         }
         ## only keep event time before end time
         eventTime <- eventTime[eventTime <= endTime]
@@ -586,7 +576,8 @@ simEvent <- function(z = 0, zCoef = 1,
             resList <- lapply(eventTime, rateFun, forOptimize = FALSE)
             rho_t <- sapply(resList, function(a) a$rho_t)
             U <- runif(n = len_eventTime)
-            ind <- U <= rho_t / rho_max
+            ind <- which(U <= rho_t / rho_max)
+            if (! recurrent && any(ind)) ind <- ind[1L]
             xOut <- eventTime[ind]
         }
 
@@ -853,7 +844,16 @@ simEventData <- function(nProcess = 1,
 ## function convert results from simEvent to data.frame
 simEvent2data <- function(ID, obj) {
     timeVec <- obj@.Data
-    out <- if (! length(timeVec)) {
+    out <- if (length(timeVec) > 0) {
+               ## if any event
+               data.frame(
+                   ID = ID,
+                   time = c(timeVec, obj@endTime$endTime),
+                   event = c(rep(1, length(timeVec)), 0),
+                   origin = obj@origin$origin,
+                   X = rbind(obj@z$z, obj@censoring$z)
+               )
+           } else {
                ## if no event
                data.frame(
                    ID = ID,
@@ -861,15 +861,6 @@ simEvent2data <- function(ID, obj) {
                    event = 0,
                    origin = obj@origin$origin,
                    X = obj@censoring$z
-               )
-           } else {
-               ## else for any event
-               data.frame(
-                   ID = ID,
-                   time = c(timeVec, obj@endTime$endTime),
-                   event = c(rep(1, length(timeVec)), 0),
-                   origin = obj@origin$origin,
-                   X = rbind(obj@z$z, obj@censoring$z)
                )
            }
     attr(out, "recurrent") <- obj@recurrent
