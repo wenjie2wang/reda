@@ -425,7 +425,7 @@ simEvent <- function(z = 0, zCoef = 1,
         if ("n" %in% names(as.list(args(origin))))
             origin_args <- c(list(n = 1), origin_args)
         originFun <- origin
-        if (! length(origin_args)) origin_args <- list()
+        if (length(origin_args) == 0L) origin_args <- list()
         origin <- do.call(originFun, origin_args)
     } else {
         originFun <- origin_args <- NULL
@@ -437,7 +437,7 @@ simEvent <- function(z = 0, zCoef = 1,
         if ("n" %in% names(as.list(args(endTime))))
             endTime_args <- c(list(n = 1), endTime_args)
         endTimeFun <- endTime
-        if (! length(endTime_args)) endTime_args <- list()
+        if (length(endTime_args) == 0L) endTime_args <- list()
         endTime <- do.call(endTimeFun, endTime_args)
     } else {
         endTimeFun <- endTime_args <- NULL
@@ -447,8 +447,8 @@ simEvent <- function(z = 0, zCoef = 1,
            isNumOne(endTime, error_na = TRUE) &&
            origin < endTime && is.finite(endTime))) {
         stop(wrapMessages(
-            "The 'origin' and 'endTime'",
-            "has to be two numerical values s.t. 'origin' < 'endTime < Inf'."
+            "The `origin` and `endTime`",
+            "has to be two numerical values s.t. `origin` < `endTime` < `Inf`."
         ), call. = FALSE)
     }
 
@@ -550,39 +550,75 @@ simEvent <- function(z = 0, zCoef = 1,
         ## step 2: generate W_i in batch for possible better performance
         ## take care of possible interarrival arguments
         interarrivalArgs <- c(list(rate = rho_max), interarrival_args)
-        ## estimate the number of W_i before censoring
-        batchNum <- ceiling((endTime - origin) / stats::qexp(0.20, rho_max))
-        if ("n" %in% intArvArgs)
-            interarrivalArgs <- c(list(n = batchNum), interarrivalArgs)
         eventTime <- NULL
         lastEventTime <- origin
-        while (lastEventTime < endTime) {
-            W <- do.call(interarrival, interarrivalArgs)
-            if (! isNumVector(W, error_na = TRUE) || any(W < 0))
-                stop("The interarrival times must be nonnegative!",
-                     call. = FALSE)
-            ## step 3: update evnet times
-            eventTime <- c(eventTime, lastEventTime + cumsum(W))
-            lastEventTime <- eventTime[length(eventTime)]
-        }
-        ## only keep event time before end time
-        eventTime <- eventTime[eventTime <= endTime]
-        len_eventTime <- length(eventTime)
-        if (! len_eventTime) {
-            ## no any event
-            xOut <- numeric(0)
+        ## if we want all the recurrent event times
+        if (recurrent) {
+            ## estimate the number of W_i before censoring
+            batchNum <- ceiling((endTime - origin) / stats::qexp(0.20, rho_max))
+            if ("n" %in% intArvArgs)
+                interarrivalArgs <- c(list(n = batchNum), interarrivalArgs)
+            while (lastEventTime < endTime) {
+                W <- do.call(interarrival, interarrivalArgs)
+                if (! isNumVector(W, error_na = TRUE) || any(W < 0))
+                    stop("The interarrival times must be nonnegative!",
+                         call. = FALSE)
+                ## step 3: update evnet times
+                eventTime <- c(eventTime, lastEventTime + cumsum(W))
+                lastEventTime <- eventTime[length(eventTime)]
+            }
+            ## only keep event time before end time
+            eventTime <- eventTime[eventTime <= endTime]
+            len_eventTime <- length(eventTime)
+            if (len_eventTime == 0L) {
+                ## no any event
+                xOut <- numeric(0)
+            } else {
+                ## step 4: thinning
+                resList <- lapply(eventTime, rateFun, forOptimize = FALSE)
+                rho_t <- sapply(resList, function(a) a$rho_t)
+                U <- runif(n = len_eventTime)
+                ind <- U <= rho_t / rho_max
+                xOut <- eventTime[ind]
+            }
         } else {
-            ## step 4: thinning
-            resList <- lapply(eventTime, rateFun, forOptimize = FALSE)
-            rho_t <- sapply(resList, function(a) a$rho_t)
-            U <- runif(n = len_eventTime)
-            ind <- which(U <= rho_t / rho_max)
-            if (! recurrent && any(ind)) ind <- ind[1L]
-            xOut <- eventTime[ind]
+            ## if only the first event is of interest
+            ## we may break the loop once we get the first event
+            batchNum <- 5
+            if ("n" %in% intArvArgs)
+                interarrivalArgs <- c(list(n = batchNum), interarrivalArgs)
+            while (lastEventTime < endTime) {
+                xOut <- numeric(0)
+                W <- do.call(interarrival, interarrivalArgs)
+                if (! isNumVector(W, error_na = TRUE) || any(W < 0))
+                    stop("The interarrival times must be nonnegative!",
+                         call. = FALSE)
+                ## step 3: update evnet times
+                eventTime <- c(eventTime, lastEventTime + cumsum(W))
+                lastEventTime <- eventTime[length(eventTime)]
+                ## only keep event time before end time
+                eventTime <- eventTime[eventTime <= endTime]
+                len_eventTime <- length(eventTime)
+                if (len_eventTime == 0L) {
+                    ## no any event
+                    break;
+                } else {
+                    ## step 4: thinning
+                    resList <- lapply(eventTime, rateFun, forOptimize = FALSE)
+                    rho_t <- sapply(resList, function(a) a$rho_t)
+                    U <- runif(n = len_eventTime)
+                    ind <- U <= rho_t / rho_max
+                    if (any(ind)) {
+                        ind <- which(ind)[1L]
+                        xOut <- eventTime[ind]
+                        break;
+                    }
+                }
+            }
         }
 
         ## update zMat, zCoefMat, and rhoMat
-        if (length(xOut)) {
+        if (length(xOut) > 0L) {
             zMat <- do.call(rbind, lapply(resList[ind], function(a) {
                 a$zVec
             }))
@@ -671,27 +707,27 @@ simEvent <- function(z = 0, zCoef = 1,
         zFun <- zArgs <- NULL
     } else {
         zFun <- z
-        zArgs <- if (length(z_args)) z_args else list()
+        zArgs <- if (length(z_args) > 0L) z_args else list()
     }
     ## for covariate coefficients
     if (zCoefVecIdx) {
         zCoefFun <- zArgs <- NULL
     } else {
         zCoefFun <- zCoef
-        zArgs <- if (length(zCoef_args)) zCoef_args else list()
+        zArgs <- if (length(zCoef_args) > 0L) zCoef_args else list()
     }
     ## for baseline rate function
     if (rhoVecIdx) {
         rhoFun <- rhoArgs <- NULL
     } else {
         rhoFun <- rho
-        rhoArgs <- if (length(rho_args)) rho_args else list()
+        rhoArgs <- if (length(rho_args) > 0L) rho_args else list()
     }
     ## for frailty
     frailtyArgs <- if (is.null(frailtyFun)) {
                        NULL
                    } else {
-                       if (length(frailty_args)) frailty_args else list()
+                       if (length(frailty_args) > 0) frailty_args else list()
                    }
 
     ## return
@@ -799,19 +835,19 @@ simEventData <- function(nProcess = 1,
     originFunIdx <- is.function(origin) || isCharOne(origin, error_na = TRUE)
     if (! originFunIdx) {
         if (! isNumVector(origin, error_na = TRUE))
-            stop("The time origins, 'origin' has to be a numeric vector.")
+            stop("The time origins, `origin` has to be a numeric vector.")
         origin <- rep(origin, length.out = nProcess)
     }
     endTimeFunIdx <- is.function(endTime) || isCharOne(endTime, error_na = TRUE)
     if (! endTimeFunIdx) {
         if (! isNumVector(endTime, error_na = TRUE))
-            stop("The ends of time, 'endTime' has to be a numeric vector.")
+            stop("The ends of time, `endTime` has to be a numeric vector.")
         endTime <- rep(endTime, length.out = nProcess)
     }
     frailtyFunIdx <- is.function(frailty) || isCharOne(frailty, error_na = TRUE)
     if (! frailtyFunIdx) {
         if (! isNumVector(frailty, error_na = TRUE))
-            stop("The frailty effects to be a numeric vector.")
+            stop("The frailty effects has to be a numeric vector.")
         frailty <- rep(frailty, length.out = nProcess)
     }
 
@@ -844,7 +880,7 @@ simEventData <- function(nProcess = 1,
 ## function convert results from simEvent to data.frame
 simEvent2data <- function(ID, obj) {
     timeVec <- obj@.Data
-    out <- if (length(timeVec) > 0) {
+    out <- if (length(timeVec) > 0L) {
                ## if any event
                data.frame(
                    ID = ID,
