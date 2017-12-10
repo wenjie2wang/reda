@@ -3,8 +3,12 @@ title: "Simulate Survival and Recurrent Event Data with reda"
 author: Wenjie Wang
 date: "`r Sys.Date()`"
 output:
-  rmarkdown::html_vignette:
+  rmarkdown::html_document:
     toc: true
+    toc_depth: 2
+    toc_float:
+      collapsed: false
+      smooth_scroll: false
 bibliography: ../inst/bib/reda.bib
 vignette: >
   %\VignetteIndexEntry{Simulate Survival and Recurrent Event Data with reda}
@@ -14,7 +18,7 @@ vignette: >
 
 
 In this vignette, we briefly introduce how to simulate survival and recurrent
-event data from stochastic process point of view with **reda** package.  The
+event data from stochastic process point of view with the **reda** package.  The
 core function named `simEvent` provides an intuitive and flexible interface for
 simulating survival and recurrent event times from one stochastic process.
 Another function named `simEventData` is simply a wrapper that calls `simEvent`
@@ -25,9 +29,9 @@ the objects produced are available in the package manual and thus not covered in
 this vignette.
 
 
-## Introduction {#intro}
+# Introduction {#intro}
 
-### Intensity function {#intensity}
+## Intensity function {#intensity}
 
 We first introduce the general form of hazard rate function considered and
 implemented in the function `simEvent`.
@@ -65,7 +69,7 @@ general form of the intensity function is given as follows: $$\lambda\bigl(t
 \boldsymbol{\beta}(t)\bigr)\,w_i.$$
 
 
-### Sampling methods
+## Sampling methods
 
 The thinning method [@lewis1979nrlq] and the inversion method
 [@cinlar1975printice] are implemented for sampling event times. It can be shown
@@ -76,7 +80,7 @@ the sampling method via the argument `method` in function `simEvent` and
 `simEventData`.
 
 
-## Getting started {#getting-started}
+# Getting started {#getting-started}
 
 ```{r setup}
 library(reda)                    # attach reda package to the search path
@@ -85,9 +89,9 @@ options(digits = 3)              # set the number of significant digits to print
 set.seed(123)                    # set random number seed
 ```
 
-## Poisson process {#poisson-process}
+# Poisson process {#poisson-process}
 
-### Homogeneous Poisson process {#hpp}
+## Homogeneous Poisson process {#hpp}
 
 A homogeneous/stationary Poisson process (HPP) has a constant hazard rate over
 time with the interarrival times (between two successive arrivals/events)
@@ -135,7 +139,7 @@ simEventData(z = cbind(rnorm(10), 1), zCoef = c(0.2, - 0.5), rho = 0.1,
              arguments = list(endTime = list(mean = 10)))
 ```
 
-### Nonhomogeneous Poisson process {#nhpp}
+## Nonhomogeneous Poisson process {#nhpp}
 
 In contrast to HPP, a nonhomogeneous Poisson process (NHPP) has a time-varying
 hazard rate function. In that case, we may specify the baseline hazard rate
@@ -158,11 +162,12 @@ simEventData(z = cbind(rexp(2), c(0, 1)), zCoef = c(0.1, - 0.5),
              rho = rhoFun, arguments = list(rho = list(b = 0.5)))
 ```
 
-## Renewal processes {#renewal-processes}
+# Renewal processes {#renewal-processes}
 
 In the Poisson process, the interarrival times between two successive arrivals
 (or events) follow exponential distribution independently. We may generalize the
 distribution of interarrival times and consider more general renewal processes.
+
 
 In function `simEvent` (and `simEventData`), we may specify the distribution of
 the interarrival times via the argument `interarrival`, which takes the function
@@ -189,9 +194,9 @@ set.seed(123)
 simEvent(interarrival = function(rate) rgamma(n = 1, shape = 1 / rate))
 ```
 
-## Beyond time-invariance
+# Beyond time-invariance
 
-### Time-variant covariates
+## Time-variant covariates
 
 In pratice, some covariates such as patients' age, automobile's mileage may vary
 over time.  The argument `z` in the function `simEvent` and `simEventData` may
@@ -252,7 +257,7 @@ with(simDat, unique(cbind(ID, a = X.1 - time / 10)))
 ```
 
 
-### Time-variant covariate coefficients
+## Time-variant covariate coefficients
 
 The assumption of time-invariance on the covariate coefficients can be hard to
 justify in practice. We may simulate event times with time-varying covariate
@@ -274,21 +279,139 @@ arguments of the time-varying coefficient function via a named list in
 `arguments`.
 
 
-## Frailty models {#frailty}
+# Frailty models {#frailty}
 
-### Frailty for individual process {#individual-frailty}
+## Frailty for individual processes {#individual-frailty}
+
+Let's consider frailty factors for individual processes first, where each
+process $i$ has its own frailty effect $w_i$. A popular choice of the frailty
+distribution is the one-parameter gamma distribution of mean one, which often
+leads to an explicit marginal likelihood in a relatively simple expression.
+Similar to the argument `z`, `zCoef`, and `rho`, the argument `frailty` may take
+a fucntion as input for simulating the frailty effect.  For example, we may
+simulate the recurrent event times for one process with frailty factor following
+gamma(2, 0.5) via `frailty = "rgamma"` and `arguments = list(frailty =
+list(shape = 2, scale = 0.5))` as follows:
+
+```{r frailty-gamma}
+set.seed(123)
+simEventData(z = zFun1, zCoef = c(0.1, 0.5, - 0.5), frailty = "rgamma",
+             arguments = list(frailty = list(shape = 2, scale = 0.5)))
+```
+
+The named list `list(shape = 2, scale = 0.5)` was passed to the function
+`rgamma` (from the **stats** package).  The random number seed was reset so that
+we might compare the results with the first example of time-variant
+covariates. Note that it is users' job to make sure the specified distribution
+of the frailty factor has mean one (or makes sense in a certain way). The
+function `simEvent` and `simEventData` only check the sign of the simulated
+frailty effect. An error will be thrown out if the generated frailty effect is
+not positive.
 
 
-### Shared frailty for clusters {#shared-frailty}
+To demonstrate how to specify other distribution of the frailty factor, we
+simulate the recurrent event times for one process by three slightly different
+but equivalent approaches in the following examples, where the frailty effect
+follows log-normal distribution of mean one.
+
+```{r frailty-lognormal-1}
+set.seed(123)
+## use function `rlnorm` from the stats package
+simEvent(z = zFun1, zCoef = c(0.1, 0.5, - 0.5), frailty = "rlnorm",
+         arguments = list(frailty = list(sdlog = 1)))
+```
+
+```{r frailty-lognormal-2}
+set.seed(123)
+## use a customized function with argument `n` and `sdlog`
+logNorm1 <- function(n, sdlog) exp(rnorm(n = n, mean = 0, sd = sdlog))
+simEvent(z = zFun1, zCoef = c(0.1, 0.5, - 0.5), frailty = logNorm1,
+         arguments = list(frailty = list(sdlog = 1)))
+```
+
+```{r frailty-lognormal-3}
+set.seed(123)
+## use a customized function with argument `sdlog` only
+logNorm2 <- function(sdlog) exp(rnorm(n = 1, mean = 0, sd = sdlog))
+simEvent(z = zFun1, zCoef = c(0.1, 0.5, - 0.5), frailty = logNorm2,
+         arguments = list(frailty = list(sdlog = 1)))
+```
+
+If the function specified for `frailty` has an argument named `n`, that `n = 1`
+will be specified internally by the function `simEvent`, which is designed for
+using the functions generating random numbers, such as `rgamma` and `rlnorm`
+from the **stats** package.
+
+
+## Shared frailty for clusters {#shared-frailty}
+
+When different processes come from several clusters, we may consider a same
+frailty effect shared among processes within a cluster.  The case we considered
+in last section where frailty factors are different among individual processes
+is a special case when the cluster size is one.
+
+
+In the function `simEvent` (`simEventData`), the argument `frailty` may take a
+numeric number (vector) as input for specific shared frailty effect for
+clusters. For instance, we may simulate the recurrent event times for four
+processes coming from two clusters with shared gamma frailty within cluster,
+where the first two processes come from one cluster while the remaining two come
+from another cluster.
+
+```{r shared-frailty-1}
+## shared gamma frailty for processes from two clusters
+frailtyEffect <- rgamma(2, shape = 2, scale = 0.5)
+simEventData(nProcess = 4, frailty = rep(frailtyEffect, each = 2))
+```
+
+If the length of the specified frailty vector is less than the number of
+processes, the vector will be recycled internally.  In the example given below,
+the process 1 and process 3 shared a same frailty effect
+(`frailtyEffect[1L]`). Similarly, the process 2 and process 4 shared a same
+frailty effect (`frailtyEffect[2L]`).
+
+```{r shared-frailty-2}
+set.seed(123)
+simEventData(nProcess = 4, frailty = frailtyEffect)
+```
+
+
+# Common survival models
+
+In this section, we present examples for generating event times with
+time-invariant covariates for several common survival models.
+
+## Weibull model
+
+The Weibull model is one of the most widely used parametric survival models.
+Assume the event times of the process $i$, $i\in\{1,\ldots,n\}$, follow Weibull
+model with hazard function $h_i(t) = \lambda_i p t^{p-1}$, where $p>0$ is the
+shape parameter, and $\lambda_i$ can be reparameterized with regression
+coefficients.
+
+
+The common reparameterization is $\lambda_i = \exp(\beta_0 +
+\boldsymbol{\beta}^{\top}\mathbf{z}_i)$, which results in Weibull proportional
+hazard model. Let $\lambda_0 = \exp(\beta_0)$ and we may rewrite the hazard
+function $h_i(t) = \rho(t) \exp(\boldsymbol{\beta}^{\top}\mathbf{z}_i)$, where
+$\rho(t) = \lambda_0 p t^{p-1}$ is the baseline hazard function.
+
+```{r weibull-ph}
+weibull_ph <- function(x, lambda, p) lambda * p * x ^ (p - 1)
+simEventData(z = cbind(rnorm(2), rbinom(2, 1, 0.5)),
+             zCoef = c(0.5, 0.2), rho = weibull_ph,
+             arguments = list(rho = list(lambda = 0.1, p = 2)),
+             recurrent = FALSE, end = 5)
+```
 
 
 
-## Examples for common survival models {#common-dist}
+## Log-normal model
+
+## Log-logistic model
+
+# Multiple event data
 
 
 
-## Extension to multiple event data {#multiple-event-data}
-
-
-
-## Reference
+# Reference

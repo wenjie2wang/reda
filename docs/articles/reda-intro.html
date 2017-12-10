@@ -78,14 +78,15 @@
       <h1>Introduction to reda through Examples</h1>
                         <h4 class="author">Wenjie Wang</h4>
             
-            <h4 class="date">2017-12-08</h4>
+            <h4 class="date">2017-12-09</h4>
           </div>
 
     
     
 <div class="contents">
 <p>In this vignette, we introduce how to explore recurrent event data by nonparametric sample mean function (also called Nelson-Aalen estimator) and modeling the event counts of interest by gamma frailty model with the <strong>R</strong> package <strong>reda</strong> through examples. Most functions in the package are S4 methods that produce S4 class objects. The details of function syntax and the produced objects are available in the package manual, which will thus not be covered in this vignette.</p>
-<section id="simuDat" class="level2"><h2>Simulated Sample Recurrent Event Data</h2>
+<section id="introduction" class="level1"><h1>Introduction</h1>
+<section id="simuDat" class="level2"><h2>Simulated recurrent event data</h2>
 <pre class="sourceCode r" id="cb1"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="kw">library</span>(reda)</a></code></pre>
 <p>First of all, the sample recurrent event data we are going to use in the following examples is called <code>simuDat</code>, which contains totally 500 observations of 6 variables.</p>
 <pre class="sourceCode r" id="cb2"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" data-line-number="1"><span class="kw">head</span>(simuDat)</a></code></pre>
@@ -120,7 +121,7 @@
 <code>gender</code>: Gender of subjects.</li>
 </ul>
 <p>The dataset was simulated by thinning method <span class="citation" data-cites="lewis1979nrlq">(Lewis and Shedler 1979)</span> and further processed for a better demonstration purpose. (Note that <strong>reda</strong> also provides functions for simulating survival data, recurrent event data, or multiple state data. See another package vignette for details.)</p>
-</section><section id="dataCheck" class="level2"><h2>Data Checking</h2>
+</section><section id="data-checking" class="level2"><h2>Data checking</h2>
 <p>The subjects’ ID, event or censoring times, event indicators or costs, and time origins of the follow-up is specified through the corresponding arguments, <code>ID</code>, <code>time</code>, <code>event</code>, and <code>origin</code> in function <code>Survr</code>, where the argument <code>event</code> takes negative values as censoring, and positive values as costs or event indicators. The function <code>Survr</code> serves as the formula response and contains a considerate data checking procedure for recurrent event data modeled by methods based on counts and rate function. The observations of the covariates specified in the formula will be checked first, where the checking rules include</p>
 <ul>
 <li>Subjects’ ID, event times or censoring times cannot be missing;</li>
@@ -129,8 +130,8 @@
 <li>Subjects may have different time origins. But one subject must has only one time origin.</li>
 </ul>
 <p>The subject’s ID will be pinpointed (in most cases) if its observation violates any given checking rule.</p>
-</section><section id="mcf-formula" class="level2"><h2>Sample Mean Cumulative Function (MCF)</h2>
-<p>The nonparametric sample MCF is also called Nelson-Aalen Estimator <span class="citation" data-cites="nelson2003siam">(Nelson 2003)</span>. The point estimate of MCF at each time point does not assume any particular underlying model. The variance estimates at each time point is computed by the Lawless and Nadeau method <span class="citation" data-cites="lawless1995technometrics">(Lawless and Nadeau 1995)</span>, Poisson process method or based on the well-known bootstrap method <span class="citation" data-cites="efron1979aos">(Efron 1979)</span> with subjects as resampling units. The approximate confidence intervals are provided as well, which are constructed based on the asymptotic normality of the MCF estimates itself (the default) or logarithm of the MCF estimates.</p>
+</section></section><section id="mcf-formula" class="level1"><h1>Sample mean cumulative function</h1>
+<p>The nonparametric sample mean cumulative function (MCF) is also called Nelson-Aalen Estimator <span class="citation" data-cites="nelson2003siam">(Nelson 2003)</span>. The point estimate of MCF at each time point does not assume any particular underlying model. The variance estimates at each time point is computed by the Lawless and Nadeau method <span class="citation" data-cites="lawless1995technometrics">(Lawless and Nadeau 1995)</span>, Poisson process method or based on the well-known bootstrap method <span class="citation" data-cites="efron1979aos">(Efron 1979)</span> with subjects as resampling units. The approximate confidence intervals are provided as well, which are constructed based on the asymptotic normality of the MCF estimates itself (the default) or logarithm of the MCF estimates.</p>
 <p>The function <code>mcf</code> is a generic function for the MCF estimates from a sample data or a fitted gamma frailty model (as demonstrated later). If a formula with <code>Survr</code> as response is specified in function <code>mcf</code>, the formula method for estimating the sample MCF will be called. The covariate specified at the right hand side of the formula should be either <code>1</code> or any “linear” combination of factor variables in the data. The former computes the overall sample MCF. The latter computes the sample MCF for each level of the combination of the factor variable(s) specified, respectively.</p>
 <p>The valve-seat dataset in <span class="citation" data-cites="nelson1995technometrics">Nelson (1995)</span> and the simulated sample data are used for demonstration as follows:</p>
 <pre class="sourceCode r" id="cb6"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" data-line-number="1">## Example 1. valve-seat data</a>
@@ -174,7 +175,7 @@
 <a class="sourceLine" id="cb10-6" data-line-number="6"><span class="st">    </span><span class="kw"><a href="http://www.rdocumentation.org/packages/ggplot2/topics/labs">xlab</a></span>(<span class="st">"Days"</span>) <span class="op">+</span><span class="st"> </span><span class="kw"><a href="http://www.rdocumentation.org/packages/ggplot2/topics/labs">ylab</a></span>(<span class="st">"Confidence intervals"</span>) <span class="op">+</span><span class="st"> </span><span class="kw"><a href="http://www.rdocumentation.org/packages/ggplot2/topics/ggtheme">theme_bw</a></span>()</a></code></pre>
 <p><img src="reda-intro_files/figure-html/plot:mcfCI-1.png" width="672"></p>
 <p>From the comparison, we may find that the SE estimates and the confidence intervals from the Lawless and Nadaeu method and the bootstrap method have good agreement, while the Poisson process method gives slightly smaller SE estimates and a narrower confidence band. In practice, the Lawless and Nadeau method is suggested if it is hard to justify the Poisson process assumption.</p>
-</section><section id="mcfDiff" class="level2"><h2>Comparing Two-Sample MCFs</h2>
+<section id="mcfDiff" class="level2"><h2>Comparing Two-Sample MCFs</h2>
 <p>The function <code>mcfDiff.test</code> is an implementation of the pseudo-score tests for comparing two-sample MCFs proposed by <span class="citation" data-cites="cook1996biometrics">Cook, Lawless, and Nadeau (1996)</span>, while the function <code>mcfDiff</code> gives the difference estimates and wraps the pseudo-score testing results from <code>mcfDiff.test</code> (by default).</p>
 <p>Suppose we are interested in comparing the two-sample MCFs between the treatment and control group in the simulated data. We may simply feed the <code>mcf.formula</code> object returned from the function <code>mcf</code> to function <code>mcfDiff</code> as follows:</p>
 <pre class="sourceCode r" id="cb11"><code class="sourceCode r"><a class="sourceLine" id="cb11-1" data-line-number="1">## one sample MCF object of two groups</a>
@@ -210,8 +211,8 @@
 <p>Similarly, a <code>plot</code> method based on <strong>ggplot2</strong> is available for visual comparison.</p>
 <pre class="sourceCode r" id="cb15"><code class="sourceCode r"><a class="sourceLine" id="cb15-1" data-line-number="1"><span class="kw">plot</span>(mcf_diff0)</a></code></pre>
 <p><img src="reda-intro_files/figure-html/plot:mcfDiff-1.png" width="672"></p>
-</section><section id="rateReg" class="level2"><h2>Fitting Gamma Frailty Model</h2>
-<section id="constFit" class="level3"><h3>Model with constant rate function</h3>
+</section></section><section id="rateReg" class="level1"><h1>Fitting gamma frailty model</h1>
+<section id="constFit" class="level2"><h2>Model with constant rate function</h2>
 <p>The default model when argument <code>df</code>, <code>knots</code>, and <code>degree</code> are not specified is gamma frailty model with (one piece) constant rate function, which is equivalent to negative binomial regression with the same shape and rate parameter in the gamma prior.</p>
 <pre class="sourceCode r" id="cb16"><code class="sourceCode r"><a class="sourceLine" id="cb16-1" data-line-number="1">(constFit &lt;-<span class="st"> </span><span class="kw"><a href="../reference/rateReg.html">rateReg</a></span>(<span class="kw"><a href="../reference/Survr.html">Survr</a></span>(ID, time, event) <span class="op">~</span><span class="st"> </span>group <span class="op">+</span><span class="st"> </span>x1, <span class="dt">data =</span> simuDat))</a></code></pre>
 <pre><code>## Call: 
@@ -230,7 +231,7 @@
 ##  B-spline1 
 ## 0.03041865</code></pre>
 <p>The function <code>rateReg</code> returns <code>rateReg</code> object, which can be printed out by calling the object. (Internally, <code>show</code> method for <code>rateReg</code> object is called.)</p>
-</section><section id="piecesFit" class="level3"><h3>Model with piecewise constant rate function</h3>
+</section><section id="piecesFit" class="level2"><h2>Model with piecewise constant rate function</h2>
 <p>When argument <code>df</code> or <code>knots</code> (at least one internal knot) is specified, the model becomes gamma frailty model with piecewise constant rate function or so-called HEART model <span class="citation" data-cites="fu2014jbs">(Fu, Luo, and Qu 2016)</span> if argument degree is specified to be zero as default.</p>
 <p>We may specify <code>df</code> and leave <code>knots</code> and <code>degree</code> as default. Then piecewise constant rate function will be applied and the number of pieces will equal <code>df</code>. The internal knots will be automatically specified at suitable quantiles of the covariate representing event and censoring time.</p>
 <p>For example, two pieces’ constant rate function can be simply specified by setting <code>df = 2</code>. The internal knot will be the median time of all the event and censoring time. Also, we can fit the models on the first 50 subjects by specifying argument <code>subset</code>.</p>
@@ -279,7 +280,7 @@
 ## Coefficients of pieces:
 ##  B-spline1  B-spline2  B-spline3  B-spline4  B-spline5  B-spline6 
 ## 0.02578590 0.03051400 0.02063051 0.03059808 0.03774148 0.04792728</code></pre>
-</section><section id="splineFit" class="level3"><h3>Model with spline rate function</h3>
+</section><section id="splineFit" class="level2"><h2>Model with spline rate function</h2>
 <p>When argument <code>degree</code> is specified to be a positive integer, the baseline rate function is fitted by splines. The type or flavor of the splines can be specified by argument <code>spline</code>. The available option for <code>spline</code> are <code>bSplines</code> for B-splines and <code>mSplines</code> for M-splines. (See <strong>R</strong> package <strong>spline2</strong> for details about the spline functions used internally.) A partial matching on names is allowed.</p>
 <p>For example, one may want to fit the baseline rate function by a cubic spline with two internal knots. Then we may explicitly specify <code>degree = 3</code> and <code>knots</code> to be a length-two numeric vector. Or we may simply specify <code>degree = 3</code> and <code>df = 6</code> Then the internal knots will be automatically specified at suitable quantiles of the covariate representing event and censoring time. Generally speaking, the degree of freedom of spline (or the number of spline bases) equals the summation of the number of internal knots and the degree of each spline base, plus one if intercept is included in spline bases.</p>
 <pre class="sourceCode r" id="cb22"><code class="sourceCode r"><a class="sourceLine" id="cb22-1" data-line-number="1">## internal knots are set as 33% and 67% quantiles of time variable</a>
@@ -326,7 +327,7 @@
 ## Coefficients of spline bases:
 ##  B-spline1  B-spline2  B-spline3  B-spline4  B-spline5  B-spline6 
 ## 0.01809635 0.04107572 0.01770835 0.02399031 0.06318482 0.03172925</code></pre>
-</section></section><section id="summary-rateReg" class="level2"><h2>Summary of Model Fits</h2>
+</section><section id="summary-rateReg" class="level2"><h2>Summary of model fits</h2>
 <p>A brief summary of the fitted model is given by <code>show</code> method as shown in the previous examples. Further, <code>summary</code> method for <code>rateReg</code> object provides a more specific summary of the model fitted. For instance, the summary of the models fitted in section of model fitting can be called as follows:</p>
 <pre class="sourceCode r" id="cb26"><code class="sourceCode r"><a class="sourceLine" id="cb26-1" data-line-number="1"><span class="kw">summary</span>(constFit)</a></code></pre>
 <pre><code>## Call: 
@@ -354,7 +355,8 @@
 ## 
 ## Loglikelihood:  -1676.422</code></pre>
 <pre class="sourceCode r" id="cb28"><code class="sourceCode r"><a class="sourceLine" id="cb28-1" data-line-number="1"><span class="kw">summary</span>(piecesFit, <span class="dt">showCall =</span> <span class="ot">FALSE</span>)</a></code></pre>
-<pre><code>## Coefficients of covariates: 
+<pre><code>## 
+## Coefficients of covariates: 
 ##                coef exp(coef) se(coef)       z Pr(&gt;|z|)  
 ## groupTreat -0.63820   0.52824  0.28515 -2.2381  0.02521 *
 ## x1          0.30626   1.35834  0.16699  1.8341  0.06665 .
@@ -384,7 +386,8 @@
 ## 
 ## Loglikelihood:  -1663.792</code></pre>
 <pre class="sourceCode r" id="cb30"><code class="sourceCode r"><a class="sourceLine" id="cb30-1" data-line-number="1"><span class="kw">summary</span>(splineFit, <span class="dt">showCall =</span> <span class="ot">FALSE</span>, <span class="dt">showKnots =</span> <span class="ot">FALSE</span>)</a></code></pre>
-<pre><code>## Coefficients of covariates: 
+<pre><code>## 
+## Coefficients of covariates: 
 ##                coef exp(coef) se(coef)       z Pr(&gt;|z|)  
 ## groupTreat -0.63528   0.52979  0.28530 -2.2267  0.02597 *
 ## x1          0.30614   1.35817  0.16650  1.8386  0.06597 .
@@ -418,7 +421,7 @@
 <pre><code>##                   2.5%      97.5%
 ## groupTreat -1.19445835 -0.0761041
 ## x1         -0.02020186  0.6324757</code></pre>
-</section><section id="modelSelect" class="level2"><h2>Model Selection</h2>
+</section><section id="model-selection" class="level2"><h2>Model selection</h2>
 <p>Two handy functions are provided for model selection. We may compare and select the models with different baseline rate function based on Akaike Information Criterion (AIC) by function <code>AIC</code> or Bayesian Information Criterion (BIC) by function <code>BIC</code>. A friendly warning will be thrown out if the numbers of observation were different in the model comparison by AIC.</p>
 <pre class="sourceCode r" id="cb36"><code class="sourceCode r"><a class="sourceLine" id="cb36-1" data-line-number="1"><span class="kw">AIC</span>(constFit, piecesFit, splineFit)</a></code></pre>
 <pre><code>##           df      AIC
@@ -430,12 +433,12 @@
 ## constFit   4 3377.702
 ## piecesFit  9 3383.516
 ## splineFit  9 3382.501</code></pre>
-</section><section id="baseRate" class="level2"><h2>Baseline Rate Function</h2>
+</section><section id="baseRate" class="level2"><h2>Baseline rate function</h2>
 <p>Function <code>baseRate</code> produces <code>baseRate.rateReg</code> object representing the estimated baseline rate function for a fitter model. An associated <code>plot</code> method is available. For example, the baseline rate function and its confidence band estimated by cubic splines can be plotted as follows:</p>
 <pre class="sourceCode r" id="cb40"><code class="sourceCode r"><a class="sourceLine" id="cb40-1" data-line-number="1">baseRateObj &lt;-<span class="st"> </span><span class="kw"><a href="../reference/baseRate.html">baseRate</a></span>(splineFit)</a>
 <a class="sourceLine" id="cb40-2" data-line-number="2"><span class="kw">plot</span>(baseRateObj, <span class="dt">conf.int =</span> <span class="ot">TRUE</span>)</a></code></pre>
 <p><img src="reda-intro_files/figure-html/baseRate-1.png" width="672"></p>
-</section><section id="mcf-rateReg" class="level2"><h2>Estimated MCF from the Fitted Model</h2>
+</section><section id="mcf-rateReg" class="level2"><h2>Estimated MCF from the fitted model</h2>
 <p>If <code>rateReg</code> object is supplied to function <code>mcf</code>, the method for <code>rateReg</code> is called, which returns the estimated baseline MCF from the fitted model if <code>newdata</code> is not specified in the function. The example estimating and plotting the baseline MCF from the fitted model with piecewise constant rate function is shown as follows:</p>
 <pre class="sourceCode r" id="cb41"><code class="sourceCode r"><a class="sourceLine" id="cb41-1" data-line-number="1">piecesMcf &lt;-<span class="st"> </span><span class="kw"><a href="../reference/mcf.html">mcf</a></span>(piecesFit)</a>
 <a class="sourceLine" id="cb41-2" data-line-number="2"><span class="kw">plot</span>(piecesMcf, <span class="dt">conf.int =</span> <span class="ot">TRUE</span>, <span class="dt">col =</span> <span class="st">"blueviolet"</span>) <span class="op">+</span><span class="st"> </span><span class="kw"><a href="http://www.rdocumentation.org/packages/ggplot2/topics/labs">xlab</a></span>(<span class="st">"Days"</span>)</a></code></pre>
@@ -455,7 +458,7 @@
 <a class="sourceLine" id="cb43-3" data-line-number="3">                <span class="kw"><a href="http://www.rdocumentation.org/packages/ggplot2/topics/aes">aes</a></span>(<span class="dt">x =</span> time, <span class="dt">ymin =</span> lower, <span class="dt">ymax =</span> upper, <span class="dt">fill =</span> Group)) <span class="op">+</span></a>
 <a class="sourceLine" id="cb43-4" data-line-number="4"><span class="st">    </span><span class="kw"><a href="http://www.rdocumentation.org/packages/ggplot2/topics/labs">ggtitle</a></span>(<span class="st">"Control vs. Treatment"</span>) <span class="op">+</span><span class="st"> </span><span class="kw"><a href="http://www.rdocumentation.org/packages/ggplot2/topics/labs">xlab</a></span>(<span class="st">"Days"</span>)</a></code></pre>
 <p><img src="reda-intro_files/figure-html/plot:ribbon-1.png" width="672"></p>
-</section><section id="reference" class="level2 unnumbered"><h2>Reference</h2>
+</section></section><section id="reference" class="level1 unnumbered"><h1>Reference</h1>
 <div id="refs" class="references">
 <div id="ref-cook1996biometrics">
 <p>Cook, Richard J, Jerald F Lawless, and Claude Nadeau. 1996. “Robust Tests for Treatment Comparisons Based on Recurrent Event Responses.” <em>Biometrics</em> 52 (2). Wiley, International Biometric Society:557–71.</p>
@@ -488,15 +491,28 @@
       <h2 class="hasAnchor">
 <a href="#tocnav" class="anchor"></a>Contents</h2>
       <ul class="nav nav-pills nav-stacked">
-<li><a href="#simuDat">Simulated Sample Recurrent Event Data</a></li>
-      <li><a href="#dataCheck">Data Checking</a></li>
-      <li><a href="#mcf-formula">Sample Mean Cumulative Function (MCF)</a></li>
-      <li><a href="#mcfDiff">Comparing Two-Sample MCFs</a></li>
-      <li><a href="#rateReg">Fitting Gamma Frailty Model</a></li>
-      <li><a href="#summary-rateReg">Summary of Model Fits</a></li>
-      <li><a href="#modelSelect">Model Selection</a></li>
-      <li><a href="#baseRate">Baseline Rate Function</a></li>
-      <li><a href="#mcf-rateReg">Estimated MCF from the Fitted Model</a></li>
+<li>
+<a href="#introduction">Introduction</a><ul class="nav nav-pills nav-stacked">
+<li><a href="#simuDat">Simulated recurrent event data</a></li>
+      <li><a href="#data-checking">Data checking</a></li>
+      </ul>
+</li>
+      <li>
+<a href="#mcf-formula">Sample mean cumulative function</a><ul class="nav nav-pills nav-stacked">
+<li><a href="#mcfDiff">Comparing Two-Sample MCFs</a></li>
+      </ul>
+</li>
+      <li>
+<a href="#rateReg">Fitting gamma frailty model</a><ul class="nav nav-pills nav-stacked">
+<li><a href="#constFit">Model with constant rate function</a></li>
+      <li><a href="#piecesFit">Model with piecewise constant rate function</a></li>
+      <li><a href="#splineFit">Model with spline rate function</a></li>
+      <li><a href="#summary-rateReg">Summary of model fits</a></li>
+      <li><a href="#model-selection">Model selection</a></li>
+      <li><a href="#baseRate">Baseline rate function</a></li>
+      <li><a href="#mcf-rateReg">Estimated MCF from the fitted model</a></li>
+      </ul>
+</li>
       <li><a href="#reference">Reference</a></li>
       </ul>
 </div>

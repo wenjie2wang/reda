@@ -3,8 +3,12 @@ title: "Introduction to reda through Examples"
 author: Wenjie Wang
 date: "`r Sys.Date()`"
 output:
-  rmarkdown::html_vignette:
+  rmarkdown::html_document:
     toc: true
+    toc_depth: 2
+    toc_float:
+      collapsed: false
+      smooth_scroll: false
 bibliography:
 - ../inst/bib/reda.bib
 vignette: >
@@ -23,7 +27,9 @@ objects are available in the package manual, which will thus not be covered in
 this vignette.
 
 
-## Simulated Sample Recurrent Event Data {#simuDat}
+# Introduction
+
+## Simulated recurrent event data {#simuDat}
 
 ```{r setup, echo = 1}
 library(reda)
@@ -54,7 +60,7 @@ functions for simulating survival data, recurrent event data, or multiple state
 data. See another package vignette for details.)
 
 
-## Data Checking {#dataCheck}
+## Data checking
 
 The subjects' ID, event or censoring times, event indicators or costs, and time
 origins of the follow-up is specified through the corresponding arguments, `ID`,
@@ -75,16 +81,17 @@ The subject's ID will be pinpointed (in most cases) if its observation violates
 any given checking rule.
 
 
-## Sample Mean Cumulative Function (MCF) {#mcf-formula}
+# Sample mean cumulative function {#mcf-formula}
 
-The nonparametric sample MCF is also called Nelson-Aalen Estimator
-[@nelson2003siam]. The point estimate of MCF at each time point does not assume
-any particular underlying model.  The variance estimates at each time point is
-computed by the Lawless and Nadeau method [@lawless1995technometrics], Poisson
-process method or based on the well-known bootstrap method [@efron1979aos] with
-subjects as resampling units.  The approximate confidence intervals are provided
-as well, which are constructed based on the asymptotic normality of the MCF
-estimates itself (the default) or logarithm of the MCF estimates.
+The nonparametric sample mean cumulative function (MCF) is also called
+Nelson-Aalen Estimator [@nelson2003siam]. The point estimate of MCF at each time
+point does not assume any particular underlying model.  The variance estimates
+at each time point is computed by the Lawless and Nadeau method
+[@lawless1995technometrics], Poisson process method or based on the well-known
+bootstrap method [@efron1979aos] with subjects as resampling units.  The
+approximate confidence intervals are provided as well, which are constructed
+based on the asymptotic normality of the MCF estimates itself (the default) or
+logarithm of the MCF estimates.
 
 The function `mcf` is a generic function for the MCF estimates from a sample
 data or a fitted gamma frailty model (as demonstrated later). If a formula with
@@ -209,9 +216,9 @@ comparison.
 plot(mcf_diff0)
 ```
 
-## Fitting Gamma Frailty Model {#rateReg}
+# Fitting gamma frailty model {#rateReg}
 
-### Model with constant rate function {#constFit}
+## Model with constant rate function {#constFit}
 
 The default model when argument `df`, `knots`, and `degree` are not specified is
 gamma frailty model with (one piece) constant rate function, which is equivalent
@@ -226,7 +233,7 @@ The function `rateReg` returns `rateReg` object, which can be printed out by
 calling the object.  (Internally, `show` method for `rateReg` object is called.)
 
 
-### Model with piecewise constant rate function {#piecesFit}
+## Model with piecewise constant rate function {#piecesFit}
 
 When argument `df` or `knots` (at least one internal knot) is specified, the
 model becomes gamma frailty model with piecewise constant rate function or
@@ -263,7 +270,7 @@ function is given as follows:
 ```
 
 
-### Model with spline rate function {#splineFit}
+## Model with spline rate function {#splineFit}
 
 When argument `degree` is specified to be a positive integer, the baseline rate
 function is fitted by splines.  The type or flavor of the splines can be
@@ -290,7 +297,7 @@ base, plus one if intercept is included in spline bases.
                       spline = "bSp", degree = 3L, knots = c(56, 112)))
 ```
 
-## Summary of Model Fits {#summary-rateReg}
+## Summary of model fits {#summary-rateReg}
 
 A brief summary of the fitted model is given by `show` method as shown in the
 previous examples. Further, `summary` method for `rateReg` object provides a
@@ -323,7 +330,7 @@ coef(splineFit)
 confint(splineFit, level = 0.95)
 ```
 
-## Model Selection {#modelSelect}
+## Model selection
 
 Two handy functions are provided for model selection.  We may compare and select
 the models with different baseline rate function based on Akaike Information
@@ -336,7 +343,7 @@ AIC(constFit, piecesFit, splineFit)
 BIC(constFit, piecesFit, splineFit)
 ```
 
-## Baseline Rate Function {#baseRate}
+## Baseline rate function {#baseRate}
 
 Function `baseRate` produces `baseRate.rateReg` object representing the
 estimated baseline rate function for a fitter model. An associated `plot` method
@@ -348,7 +355,7 @@ baseRateObj <- baseRate(splineFit)
 plot(baseRateObj, conf.int = TRUE)
 ```
 
-## Estimated MCF from the Fitted Model {#mcf-rateReg}
+## Estimated MCF from the fitted model {#mcf-rateReg}
 
 If `rateReg` object is supplied to function `mcf`, the method for `rateReg` is
 called, which returns the estimated baseline MCF from the fitted model if
@@ -395,4 +402,4 @@ plot(estmcf) +
 ```
 
 
-## Reference
+# Reference

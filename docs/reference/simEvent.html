@@ -270,7 +270,7 @@ covariates) and the unobserved frailty effect, the process is by default a
 Poisson process, where the interarrival times between two successive
 arrivals/events follow exponential distribution. A general renewal process
 can be specified through <code>interarrival</code> for other distributions of the
-interarrival times.</p>
+interarrival times in addition to the exponential distribution.</p>
 <p>The thinning method (Lewis and Shedler 1979) is applied for bounded hazard
 rate function by default. The inversion method (Cinlar 1975) is also
 available for possibly unbounded but integrable rate function over the given
@@ -322,29 +322,26 @@ Nonhomogeneous Poisson Processes by Thinning.
 #&gt; [1] 0.8014346</div><div class='input'>
 <span class='co'>## simulated data</span>
 <span class='fu'>simEventData</span>(<span class='kw'>z</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='fl'>0.5</span>, <span class='fl'>1</span>), <span class='kw'>zCoef</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='fl'>1</span>, <span class='fl'>0</span>), <span class='kw'>endTime</span> <span class='kw'>=</span> <span class='fl'>2</span>)</div><div class='output co'>#&gt;   ID      time event origin X.1 X.2
-#&gt; 1  1 0.1620842     1      0 0.5   1
-#&gt; 2  1 1.4660882     1      0 0.5   1
-#&gt; 3  1 1.7877972     1      0 0.5   1
-#&gt; 4  1 2.0000000     0      0 0.5   1</div><div class='input'><span class='fu'>simEventData</span>(<span class='kw'>z</span> <span class='kw'>=</span> <span class='fu'>cbind</span>(<span class='fu'>rnorm</span>(<span class='fl'>3</span>), <span class='fl'>1</span>), <span class='kw'>zCoef</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='fl'>1</span>, <span class='fl'>0</span>))</div><div class='output co'>#&gt;    ID      time event origin        X.1 X.2
-#&gt; 1   1 0.4925143     1      0  0.1511114   1
-#&gt; 2   1 0.5474415     1      0  0.1511114   1
-#&gt; 3   1 1.2012500     1      0  0.1511114   1
-#&gt; 4   1 1.7841190     1      0  0.1511114   1
-#&gt; 5   1 1.9183081     1      0  0.1511114   1
-#&gt; 6   1 2.5469267     1      0  0.1511114   1
-#&gt; 7   1 2.8620661     1      0  0.1511114   1
-#&gt; 8   1 3.0000000     0      0  0.1511114   1
-#&gt; 9   2 3.0000000     0      0 -1.8336277   1
-#&gt; 10  3 0.1626415     1      0  0.3496083   1
-#&gt; 11  3 0.2468813     1      0  0.3496083   1
-#&gt; 12  3 2.7072989     1      0  0.3496083   1
-#&gt; 13  3 2.8527760     1      0  0.3496083   1
-#&gt; 14  3 3.0000000     0      0  0.3496083   1</div><div class='input'><span class='fu'>simEventData</span>(<span class='kw'>z</span> <span class='kw'>=</span> <span class='fu'>matrix</span>(<span class='fu'>rnorm</span>(<span class='fl'>5</span>)), <span class='kw'>zCoef</span> <span class='kw'>=</span> <span class='fl'>0.5</span>, <span class='kw'>recurrent</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)</div><div class='output co'>#&gt;   ID      time event origin          X
-#&gt; 1  1 3.0000000     0      0 -0.6023541
-#&gt; 2  2 2.1964486     1      0 -1.8328961
-#&gt; 3  3 1.4072837     1      0 -0.8293930
-#&gt; 4  4 0.4933656     1      0  0.6710846
-#&gt; 5  5 0.1291744     1      0  0.4054334</div><div class='input'>
+#&gt; 1  1 0.4434726     1      0 0.5   1
+#&gt; 2  1 0.6657945     1      0 0.5   1
+#&gt; 3  1 1.6259731     1      0 0.5   1
+#&gt; 4  1 1.9593185     1      0 0.5   1
+#&gt; 5  1 2.0000000     0      0 0.5   1</div><div class='input'><span class='fu'>simEventData</span>(<span class='kw'>z</span> <span class='kw'>=</span> <span class='fu'>cbind</span>(<span class='fu'>rnorm</span>(<span class='fl'>3</span>), <span class='fl'>1</span>), <span class='kw'>zCoef</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='fl'>1</span>, <span class='fl'>0</span>))</div><div class='output co'>#&gt;    ID     time event origin        X.1 X.2
+#&gt; 1   1 2.161940     1      0  0.2933024   1
+#&gt; 2   1 2.315844     1      0  0.2933024   1
+#&gt; 3   1 2.596519     1      0  0.2933024   1
+#&gt; 4   1 2.696461     1      0  0.2933024   1
+#&gt; 5   1 2.756750     1      0  0.2933024   1
+#&gt; 6   1 2.964056     1      0  0.2933024   1
+#&gt; 7   1 2.966638     1      0  0.2933024   1
+#&gt; 8   1 3.000000     0      0  0.2933024   1
+#&gt; 9   2 3.000000     0      0 -0.9447436   1
+#&gt; 10  3 3.000000     0      0 -1.8884363   1</div><div class='input'><span class='fu'>simEventData</span>(<span class='kw'>z</span> <span class='kw'>=</span> <span class='fu'>matrix</span>(<span class='fu'>rnorm</span>(<span class='fl'>5</span>)), <span class='kw'>zCoef</span> <span class='kw'>=</span> <span class='fl'>0.5</span>, <span class='kw'>recurrent</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)</div><div class='output co'>#&gt;   ID      time event origin          X
+#&gt; 1  1 0.4599939     1      0 -0.1078107
+#&gt; 2  2 0.3688647     1      0 -0.4095080
+#&gt; 3  3 0.2108663     1      0  1.0153685
+#&gt; 4  4 0.2189612     1      0  0.1995956
+#&gt; 5  5 0.1183466     1      0  1.2622150</div><div class='input'>
 
 <span class='co'>### time-varying covariates and time-varying coefficients</span>
 <span class='no'>zFun</span> <span class='kw'>&lt;-</span> <span class='kw'>function</span>(<span class='no'>time</span>, <span class='no'>intercept</span>) {
@@ -356,41 +353,45 @@ Nonhomogeneous Poisson Processes by Thinning.
 <span class='fu'>simEvent</span>(<span class='kw'>z</span> <span class='kw'>=</span> <span class='no'>zFun</span>, <span class='kw'>zCoef</span> <span class='kw'>=</span> <span class='no'>zCoefFun</span>,
          <span class='kw'>arguments</span> <span class='kw'>=</span> <span class='fu'>list</span>(<span class='kw'>z</span> <span class='kw'>=</span> <span class='fu'>list</span>(<span class='kw'>intercept</span> <span class='kw'>=</span> <span class='fl'>0.1</span>),
                           <span class='kw'>zCoef</span> <span class='kw'>=</span> <span class='fu'>list</span>(<span class='kw'>shift</span> <span class='kw'>=</span> <span class='fl'>0.1</span>)))</div><div class='output co'>#&gt; 'simEvent' S4 class object:
-#&gt; [1] 1.071516 1.581951 2.150244 2.203627 2.296307 2.407877 2.517379 2.981943</div><div class='input'>
+#&gt; [1] 0.6926195 0.7392229 1.6370528 1.6515622 2.1162867 2.6651607 2.8889570</div><div class='input'>
 <span class='co'>## same function of time for all processes</span>
 <span class='fu'>simEventData</span>(<span class='fl'>3</span>, <span class='kw'>z</span> <span class='kw'>=</span> <span class='no'>zFun</span>, <span class='kw'>zCoef</span> <span class='kw'>=</span> <span class='no'>zCoefFun</span>,
              <span class='kw'>arguments</span> <span class='kw'>=</span> <span class='fu'>list</span>(<span class='kw'>z</span> <span class='kw'>=</span> <span class='fu'>list</span>(<span class='kw'>intercept</span> <span class='kw'>=</span> <span class='fl'>0.1</span>),
                               <span class='kw'>zCoef</span> <span class='kw'>=</span> <span class='fu'>list</span>(<span class='kw'>shift</span> <span class='kw'>=</span> <span class='fl'>0.1</span>)))</div><div class='output co'>#&gt;    ID      time event origin       X.1 X.2
-#&gt; 1   1 1.0238986     1      0 0.2023899   1
-#&gt; 2   1 1.1251223     1      0 0.2125122   1
-#&gt; 3   1 1.1561524     1      0 0.2156152   1
-#&gt; 4   1 1.3055758     1      0 0.2305576   1
-#&gt; 5   1 1.3696642     1      0 0.2369664   1
-#&gt; 6   1 1.4126251     1      0 0.2412625   1
-#&gt; 7   1 1.5770107     1      0 0.2577011   1
-#&gt; 8   1 1.7034583     1      0 0.2703458   1
-#&gt; 9   1 2.2138677     1      0 0.3213868   1
-#&gt; 10  1 2.2738137     1      0 0.3273814   1
-#&gt; 11  1 2.3513847     1      0 0.3351385   1
-#&gt; 12  1 2.3960778     1      0 0.3396078   1
-#&gt; 13  1 2.4426812     1      0 0.3442681   1
-#&gt; 14  1 2.7369649     1      0 0.3736965   1
-#&gt; 15  1 2.9194133     1      0 0.3919413   1
-#&gt; 16  1 3.0000000     0      0 0.4000000   1
-#&gt; 17  2 0.5836254     1      0 0.1583625   0
-#&gt; 18  2 0.9960166     1      0 0.1996017   0
-#&gt; 19  2 1.5793886     1      0 0.2579389   1
-#&gt; 20  2 1.9561447     1      0 0.2956145   1
-#&gt; 21  2 2.8248571     1      0 0.3824857   1
-#&gt; 22  2 3.0000000     0      0 0.4000000   1
-#&gt; 23  3 0.1295274     1      0 0.1129527   0
-#&gt; 24  3 0.2307286     1      0 0.1230729   0
-#&gt; 25  3 1.2196190     1      0 0.2219619   1
-#&gt; 26  3 1.2745962     1      0 0.2274596   1
-#&gt; 27  3 2.0790369     1      0 0.3079037   1
-#&gt; 28  3 2.4713796     1      0 0.3471380   1
-#&gt; 29  3 2.7842145     1      0 0.3784215   1
-#&gt; 30  3 3.0000000     0      0 0.4000000   1</div><div class='input'>
+#&gt; 1   1 0.1193134     1      0 0.1119313   0
+#&gt; 2   1 1.2208131     1      0 0.2220813   1
+#&gt; 3   1 1.2377382     1      0 0.2237738   1
+#&gt; 4   1 1.5106242     1      0 0.2510624   1
+#&gt; 5   1 1.7287193     1      0 0.2728719   1
+#&gt; 6   1 1.8392978     1      0 0.2839298   1
+#&gt; 7   1 2.0841383     1      0 0.3084138   1
+#&gt; 8   1 2.0992419     1      0 0.3099242   1
+#&gt; 9   1 2.4153359     1      0 0.3415336   1
+#&gt; 10  1 2.5416214     1      0 0.3541621   1
+#&gt; 11  1 2.5644360     1      0 0.3564436   1
+#&gt; 12  1 2.6192824     1      0 0.3619282   1
+#&gt; 13  1 3.0000000     0      0 0.4000000   1
+#&gt; 14  2 0.2072049     1      0 0.1207205   0
+#&gt; 15  2 0.2254554     1      0 0.1225455   0
+#&gt; 16  2 1.1188426     1      0 0.2118843   1
+#&gt; 17  2 1.6384926     1      0 0.2638493   1
+#&gt; 18  2 2.1174241     1      0 0.3117424   1
+#&gt; 19  2 2.3288516     1      0 0.3328852   1
+#&gt; 20  2 2.4272923     1      0 0.3427292   1
+#&gt; 21  2 3.0000000     0      0 0.4000000   1
+#&gt; 22  3 0.6787709     1      0 0.1678771   0
+#&gt; 23  3 0.9907712     1      0 0.1990771   0
+#&gt; 24  3 1.2634713     1      0 0.2263471   1
+#&gt; 25  3 1.2702813     1      0 0.2270281   1
+#&gt; 26  3 1.6589157     1      0 0.2658916   1
+#&gt; 27  3 1.8325636     1      0 0.2832564   1
+#&gt; 28  3 1.9934176     1      0 0.2993418   1
+#&gt; 29  3 2.0431505     1      0 0.3043151   1
+#&gt; 30  3 2.3552880     1      0 0.3355288   1
+#&gt; 31  3 2.7190952     1      0 0.3719095   1
+#&gt; 32  3 2.8061158     1      0 0.3806116   1
+#&gt; 33  3 2.9183567     1      0 0.3918357   1
+#&gt; 34  3 3.0000000     0      0 0.4000000   1</div><div class='input'>
 <span class='co'>## same function within one process but different between processes</span>
 <span class='co'>## use quote function in the arguments</span>
 <span class='no'>simDat</span> <span class='kw'>&lt;-</span> <span class='fu'>simEventData</span>(<span class='fl'>3</span>, <span class='kw'>z</span> <span class='kw'>=</span> <span class='no'>zFun</span>, <span class='kw'>zCoef</span> <span class='kw'>=</span> <span class='no'>zCoefFun</span>,
@@ -401,65 +402,63 @@ Nonhomogeneous Poisson Processes by Thinning.
 <span class='co'>## check the intercept randomly generated,</span>
 <span class='co'>## which should be the same within each ID but different between IDs.</span>
 <span class='fu'>unique</span>(<span class='fu'>with</span>(<span class='no'>simDat</span>, <span class='fu'>cbind</span>(<span class='no'>ID</span>, <span class='kw'>intercept</span> <span class='kw'>=</span> <span class='fu'>round</span>(<span class='no'>X.1</span> - <span class='no'>time</span> / <span class='fl'>10</span>, <span class='fl'>6</span>))))</div><div class='output co'>#&gt;      ID intercept
-#&gt; [1,]  1 -0.019402
-#&gt; [2,]  2  0.088856
-#&gt; [3,]  3  0.008036</div><div class='input'>
+#&gt; [1,]  1 -0.085512
+#&gt; [2,]  2 -0.093820
+#&gt; [3,]  3  0.002006</div><div class='input'>
 
 <span class='co'>### non-negative time-varying baseline hazard rate function</span>
 <span class='fu'>simEvent</span>(<span class='kw'>rho</span> <span class='kw'>=</span> <span class='kw'>function</span>(<span class='no'>timeVec</span>) { <span class='fu'>sin</span>(<span class='no'>timeVec</span>) + <span class='fl'>1</span> })</div><div class='output co'>#&gt; 'simEvent' S4 class object:
-#&gt; [1] 0.09058326 1.00181279 1.63764560 1.88570719 1.90766142 2.16706712 2.29943445
-#&gt; [8] 2.91002076</div><div class='input'><span class='fu'>simEventData</span>(<span class='fl'>3</span>, <span class='kw'>origin</span> <span class='kw'>=</span> <span class='fu'>rnorm</span>(<span class='fl'>3</span>), <span class='kw'>endTime</span> <span class='kw'>=</span> <span class='fu'>rnorm</span>(<span class='fl'>3</span>, <span class='fl'>5</span>),
-             <span class='kw'>rho</span> <span class='kw'>=</span> <span class='kw'>function</span>(<span class='no'>timeVec</span>) { <span class='fu'>sin</span>(<span class='no'>timeVec</span>) + <span class='fl'>1</span> })</div><div class='output co'>#&gt;    ID       time event      origin X
-#&gt; 1   1  1.1961072     1  0.01050105 0
-#&gt; 2   1  1.2097490     1  0.01050105 0
-#&gt; 3   1  6.4350165     0  0.01050105 0
-#&gt; 4   2  0.5891453     1  0.47269328 0
-#&gt; 5   2  2.1094595     1  0.47269328 0
-#&gt; 6   2  2.6633511     1  0.47269328 0
-#&gt; 7   2  6.1863240     0  0.47269328 0
-#&gt; 8   3 -0.6445883     1 -0.89029126 0
-#&gt; 9   3  1.2365461     1 -0.89029126 0
-#&gt; 10  3  2.1218254     1 -0.89029126 0
-#&gt; 11  3  2.3414102     1 -0.89029126 0
-#&gt; 12  3  3.3795152     1 -0.89029126 0
-#&gt; 13  3  3.8127962     1 -0.89029126 0
-#&gt; 14  3  4.0179426     1 -0.89029126 0
-#&gt; 15  3  6.0637495     0 -0.89029126 0</div><div class='input'><span class='co'>## specify other arguments</span>
+#&gt; [1] 0.4032913 0.4101679 0.6015466 0.8590161 2.1554234</div><div class='input'><span class='fu'>simEventData</span>(<span class='fl'>3</span>, <span class='kw'>origin</span> <span class='kw'>=</span> <span class='fu'>rnorm</span>(<span class='fl'>3</span>), <span class='kw'>endTime</span> <span class='kw'>=</span> <span class='fu'>rnorm</span>(<span class='fl'>3</span>, <span class='fl'>5</span>),
+             <span class='kw'>rho</span> <span class='kw'>=</span> <span class='kw'>function</span>(<span class='no'>timeVec</span>) { <span class='fu'>sin</span>(<span class='no'>timeVec</span>) + <span class='fl'>1</span> })</div><div class='output co'>#&gt;    ID      time event     origin X
+#&gt; 1   1 5.7423342     0  1.7970307 0
+#&gt; 2   2 0.7627300     1  0.6152073 0
+#&gt; 3   2 1.1717282     1  0.6152073 0
+#&gt; 4   2 1.6760887     1  0.6152073 0
+#&gt; 5   2 1.7812352     1  0.6152073 0
+#&gt; 6   2 1.9128730     1  0.6152073 0
+#&gt; 7   2 2.2963128     1  0.6152073 0
+#&gt; 8   2 2.7501663     1  0.6152073 0
+#&gt; 9   2 3.2979457     1  0.6152073 0
+#&gt; 10  2 5.2832923     0  0.6152073 0
+#&gt; 11  3 0.9212155     1 -1.1678297 0
+#&gt; 12  3 1.5428525     1 -1.1678297 0
+#&gt; 13  3 2.2188415     1 -1.1678297 0
+#&gt; 14  3 2.2795259     1 -1.1678297 0
+#&gt; 15  3 4.9139846     0 -1.1678297 0</div><div class='input'><span class='co'>## specify other arguments</span>
 <span class='fu'>simEvent</span>(<span class='kw'>z</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='fu'>rnorm</span>(<span class='fl'>1</span>), <span class='fu'>rbinom</span>(<span class='fl'>1</span>, <span class='fl'>1</span>, <span class='fl'>0.5</span>)) / <span class='fl'>10</span>,
          <span class='kw'>rho</span> <span class='kw'>=</span> <span class='kw'>function</span>(<span class='no'>a</span>, <span class='no'>b</span>) { <span class='fu'>sin</span>(<span class='no'>a</span> + <span class='no'>b</span>) + <span class='fl'>1</span> },
          <span class='kw'>arguments</span> <span class='kw'>=</span> <span class='fu'>list</span>(<span class='kw'>rho</span> <span class='kw'>=</span> <span class='fu'>list</span>(<span class='kw'>b</span> <span class='kw'>=</span> <span class='fl'>0.5</span>)))</div><div class='output co'>#&gt; 'simEvent' S4 class object:
-#&gt; [1] 0.05381681 0.65269982 0.83154229 1.12446537 1.89850179 2.28218059 2.53008683
-#&gt; [8] 2.56928429</div><div class='input'><span class='fu'>simEventData</span>(<span class='kw'>z</span> <span class='kw'>=</span> <span class='fu'>cbind</span>(<span class='fu'>rnorm</span>(<span class='fl'>3</span>), <span class='fu'>rbinom</span>(<span class='fl'>3</span>, <span class='fl'>1</span>, <span class='fl'>0.5</span>)) / <span class='fl'>10</span>,
+#&gt; [1] 0.8363246 2.1728723 2.1905579</div><div class='input'><span class='fu'>simEventData</span>(<span class='kw'>z</span> <span class='kw'>=</span> <span class='fu'>cbind</span>(<span class='fu'>rnorm</span>(<span class='fl'>3</span>), <span class='fu'>rbinom</span>(<span class='fl'>3</span>, <span class='fl'>1</span>, <span class='fl'>0.5</span>)) / <span class='fl'>10</span>,
              <span class='kw'>rho</span> <span class='kw'>=</span> <span class='kw'>function</span>(<span class='no'>a</span>, <span class='no'>b</span>) { <span class='fu'>sin</span>(<span class='no'>a</span> + <span class='no'>b</span>) + <span class='fl'>1</span> },
-             <span class='kw'>arguments</span> <span class='kw'>=</span> <span class='fu'>list</span>(<span class='kw'>rho</span> <span class='kw'>=</span> <span class='fu'>list</span>(<span class='kw'>b</span> <span class='kw'>=</span> <span class='fl'>0.5</span>)))</div><div class='output co'>#&gt;    ID       time event origin           X.1 X.2
-#&gt; 1   1 0.01861909     1      0  0.0589009328 0.0
-#&gt; 2   1 0.52726749     1      0  0.0589009328 0.0
-#&gt; 3   1 1.34455452     1      0  0.0589009328 0.0
-#&gt; 4   1 3.00000000     0      0  0.0589009328 0.0
-#&gt; 5   2 0.86099861     1      0  0.0009064008 0.1
-#&gt; 6   2 1.76107014     1      0  0.0009064008 0.1
-#&gt; 7   2 3.00000000     0      0  0.0009064008 0.1
-#&gt; 8   3 1.14813642     1      0 -0.1308545902 0.1
-#&gt; 9   3 1.62841663     1      0 -0.1308545902 0.1
-#&gt; 10  3 1.79871860     1      0 -0.1308545902 0.1
-#&gt; 11  3 1.85527480     1      0 -0.1308545902 0.1
-#&gt; 12  3 1.86515283     1      0 -0.1308545902 0.1
-#&gt; 13  3 2.18318911     1      0 -0.1308545902 0.1
-#&gt; 14  3 2.46708060     1      0 -0.1308545902 0.1
-#&gt; 15  3 3.00000000     0      0 -0.1308545902 0.1</div><div class='input'>
+             <span class='kw'>arguments</span> <span class='kw'>=</span> <span class='fu'>list</span>(<span class='kw'>rho</span> <span class='kw'>=</span> <span class='fu'>list</span>(<span class='kw'>b</span> <span class='kw'>=</span> <span class='fl'>0.5</span>)))</div><div class='output co'>#&gt;    ID      time event origin        X.1 X.2
+#&gt; 1   1 1.5167398     1      0  0.1030954 0.0
+#&gt; 2   1 1.5431697     1      0  0.1030954 0.0
+#&gt; 3   1 3.0000000     0      0  0.1030954 0.0
+#&gt; 4   2 0.3088196     1      0  0.1111229 0.0
+#&gt; 5   2 0.8353292     1      0  0.1111229 0.0
+#&gt; 6   2 1.0073809     1      0  0.1111229 0.0
+#&gt; 7   2 1.0367684     1      0  0.1111229 0.0
+#&gt; 8   2 1.4103297     1      0  0.1111229 0.0
+#&gt; 9   2 1.8250740     1      0  0.1111229 0.0
+#&gt; 10  2 3.0000000     0      0  0.1111229 0.0
+#&gt; 11  3 0.9886770     1      0 -0.1580618 0.1
+#&gt; 12  3 2.5418989     1      0 -0.1580618 0.1
+#&gt; 13  3 2.6646361     1      0 -0.1580618 0.1
+#&gt; 14  3 2.8260430     1      0 -0.1580618 0.1
+#&gt; 15  3 3.0000000     0      0 -0.1580618 0.1</div><div class='input'>
 <span class='co'>## quadratic B-splines with one internal knot at "time = 1"</span>
 <span class='co'>## (using function 'bSpline' from splines2 package)</span>
 <span class='fu'>simEvent</span>(<span class='kw'>rho</span> <span class='kw'>=</span> <span class='st'>"bSpline"</span>, <span class='kw'>rhoCoef</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='fl'>0.4</span>, <span class='fl'>0.5</span>, <span class='fl'>0.3</span>, <span class='fl'>0.6</span>),
          <span class='kw'>arguments</span> <span class='kw'>=</span> <span class='fu'>list</span>(<span class='kw'>rho</span> <span class='kw'>=</span> <span class='fu'>list</span>(<span class='kw'>degree</span> <span class='kw'>=</span> <span class='fl'>2</span>, <span class='kw'>knots</span> <span class='kw'>=</span> <span class='fl'>1</span>,
                                      <span class='kw'>intercept</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
                                      <span class='kw'>Boundary.knots</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='fl'>0</span>, <span class='fl'>3</span>))))</div><div class='output co'>#&gt; 'simEvent' S4 class object:
-#&gt; [1] 1.963846</div><div class='input'>
+#&gt; [1] 0.1747549</div><div class='input'>
 
 <span class='co'>### frailty effect</span>
 <span class='co'>## Gamma distribution with mean one</span>
 <span class='fu'>simEvent</span>(<span class='kw'>z</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='fl'>0.5</span>, <span class='fl'>1</span>), <span class='kw'>zCoef</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='fl'>1</span>, <span class='fl'>0</span>), <span class='kw'>frailty</span> <span class='kw'>=</span> <span class='st'>"rgamma"</span>,
          <span class='kw'>arguments</span> <span class='kw'>=</span> <span class='fu'>list</span>(<span class='kw'>frailty</span> <span class='kw'>=</span> <span class='fu'>list</span>(<span class='kw'>shape</span> <span class='kw'>=</span> <span class='fl'>2</span>, <span class='kw'>scale</span> <span class='kw'>=</span> <span class='fl'>0.5</span>)))</div><div class='output co'>#&gt; 'simEvent' S4 class object:
-#&gt; [1] 2.446174 2.999561</div><div class='input'>
+#&gt; [1] 0.5037103 0.5743342 0.5861403 1.2165246 1.2177707</div><div class='input'>
 <span class='co'>## lognormal with mean zero (on the log scale)</span>
 <span class='fu'>set.seed</span>(<span class='fl'>123</span>)
 <span class='fu'>simEvent</span>(<span class='kw'>z</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='fl'>0.5</span>, <span class='fl'>1</span>), <span class='kw'>zCoef</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='fl'>1</span>, <span class='fl'>0</span>), <span class='kw'>frailty</span> <span class='kw'>=</span> <span class='st'>"rlnorm"</span>,
