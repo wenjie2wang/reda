@@ -64,7 +64,7 @@ na_stop <- function(x, sub_env = c("current", "parent", "grandparent"),
 
 ## is x a numeric matrix (optionally of nRow rows and nCol columns)
 isNumMatrix <- function(x, nRow = NULL, nCol = NULL,
-                        warn_na = TRUE, error_na = ! warn_na,
+                        warn_na = FALSE, error_na = FALSE,
                         sub_env = "parent", ...)
 {
     out <- is.numeric(x) && is.matrix(x)
@@ -79,7 +79,7 @@ isNumMatrix <- function(x, nRow = NULL, nCol = NULL,
 }
 
 ## is x a numeric vector
-isNumVector <- function(x, warn_na = TRUE, error_na = ! warn_na,
+isNumVector <- function(x, warn_na = FALSE, error_na = FALSE,
                         sub_env = "parent", ...)
 {
     out <- is.numeric(x) && is.vector(x)
@@ -97,7 +97,7 @@ isNumOne <- function(x, sub_env = "grandparent", ...)
 }
 
 ## is x a character vector
-isCharVector <- function(x, warn_na = TRUE, error_na = ! warn_na,
+isCharVector <- function(x, warn_na = FALSE, error_na = FALSE,
                          sub_env = "parent", ...)
 {
     out <- is.character(x) && is.vector(x)
@@ -115,7 +115,7 @@ isCharOne <- function(x, sub_env = "grandparent", ...)
 }
 
 ## is x a logical vector
-isLogicalVector <- function(x, warn_na = TRUE, error_na = ! warn_na,
+isLogicalVector <- function(x, warn_na = FALSE, error_na = FALSE,
                             sub_env = "parent", ...)
 {
     out <- is.logical(x) && is.vector(x)

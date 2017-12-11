@@ -29,9 +29,8 @@ NULL
 ##' survival time (the first event time) from one stochastic process. The
 ##' function \code{simEventData} provides a simple wrapper that calls
 ##' \code{simEvent} internally and collects the generated survival data or
-##' recurrent events into a data frame. More demonstration and introduction is
-##' available in one of the package vignettes in addition to the function
-##' documentation.
+##' recurrent events into a data frame. More examples are available in one of
+##' the package vignettes in addition to the function documentation.
 ##'
 ##' For each process, a time-invariant or time-varying baseline hazard rate
 ##' (intensity) function of failure can be specified.  Covariates and their
@@ -64,13 +63,13 @@ NULL
 ##' the end point of the process \code{endTime}, functions that generate random
 ##' numbers can be specified. An argument \code{n = 1} will be implicitly
 ##' specified if the function has an argument named \code{n}, which is designed
-##' for those common functions generating random numbers from \code{stats}
+##' for those common functions generating random numbers from \pkg{stats}
 ##' package. Similar to \code{z}, \code{zCoef}, and \code{rho}, other arguments
 ##' of the function can be specified through a named list in \code{arguments}.
 ##'
 ##' For time-varying covariates, the function \code{simEventData} assumes
 ##' covariates can be observed only at event times and censoring times. Thus,
-##' covariate values are returned only at these time points. If we want more
+##' covariate values are returned only at these time points. If we want other
 ##' observed covariate values to be recorded, we may write a simple wrapper
 ##' function for \code{simEvent} similar to \code{simEventData}.
 ##'
@@ -78,24 +77,26 @@ NULL
 ##'
 ##' @usage
 ##' simEvent(z = 0, zCoef = 1, rho = 1, rhoCoef = 1, origin = 0, endTime = 3,
-##'          frailty = 1, recurrent = TRUE, interarrival = "rexp",
+##'          frailty = 1, recurrent = TRUE, interarrival = stats::rexp,
 ##'          relativeRisk = c("exponential", "linear", "excess"),
 ##'          method = c("thinning", "inversion"), arguments = list(), ...)
 ##'
 ##' @param z Time-invariant or time-varying covariates. The default value is
 ##'     \code{0} for no covariate effect.  This argument should be a numeric
-##'     vector for time-invariant covariates or a function of time that returns
-##'     a numeric vector for time-varying covariates.
+##'     vector for time-invariant covariates or a function of times that returns
+##'     a numeric matrix for time-varying covariates, where each row represents
+##'     the covariate vector at one perticular time point.
 ##' @param zCoef Time-invariant or time-varying coefficients of covariates. The
 ##'     default value is \code{1}. Similar to the argument \code{z}, this
 ##'     argument should be a numeric vector for time-invariant coefficients or a
-##'     function of time that returns a numeric vector for time-varying
-##'     coefficients. The length of the numeric vector specified or returned
-##'     from \code{z} and \code{zCoef} has to be always the same.
+##'     function of times that returns a numeric matrix for time-varying
+##'     coefficients, where each row represents the coefficient vector at one
+##'     perticular time point. The dimension of the \code{z} and \code{zCoef}
+##'     (either specified or generated) has to match with each other.
 ##' @param rho Baseline rate (or intensity) function for the Poisson process.
 ##'     The default is \code{1} for a homogenous process of unit intensity. This
 ##'     argument can be either a non-negative numeric value for a homogenous
-##'     process or a function of time for a non-homogenous process.
+##'     process or a function of times for a non-homogenous process.
 ##' @param rhoCoef Coefficients of baseline rate function. The default value is
 ##'     \code{1}. It can be useful when \code{rho} is a function generating
 ##'     spline bases.
@@ -106,38 +107,37 @@ NULL
 ##'     Similar to \code{origin}, \code{endTime} should be either a numeric
 ##'     value greater than \code{origin} or a function that returns such a
 ##'     numeric value.
-##' @param frailty A positive number, a function, or a function name for frailty
-##'     effect. The default value is \code{1} for no frailty effect.  Other
-##'     positive value can be specified directly for a shared frailty effect
-##'     within a cluster.  Similar to \code{z}, \code{zCoef}, and \code{rho}, a
-##'     function or a function name can be specified for other distribution of
-##'     the frailty effect. The specified function should randomly return a
-##'     positive numeric value. The functions that generate random numbers
-##'     following a certain distribution from \code{stats} package can be
-##'     directly used. The arguments of the function can be specified through a
-##'     list named \code{frailty} in \code{arguments}. For example, if we
-##'     consider Gamma distribution with mean one as the distribution of frailty
-##'     effect, we may specify \code{frailty = "rgamma"} or \code{frailty =
-##'     rgamma}. The shape and scale parameter needs to be specified through a
-##'     list named \code{frailty} in \code{arguments}, such as \code{arguments =
-##'     list(frailty = list(shape = 2, scale = 0.5))}.
+##' @param frailty A positive number or a function for frailty effect. The
+##'     default value is \code{1} for no frailty effect.  Other positive value
+##'     can be specified directly for a shared frailty effect within a cluster.
+##'     Similar to \code{z}, \code{zCoef}, and \code{rho}, a function can be
+##'     specified for other distribution of the frailty effect. The specified
+##'     function should randomly return a positive numeric value. The functions
+##'     that generate random numbers following a certain distribution from
+##'     \code{stats} package can be directly used. The arguments of the function
+##'     can be specified through a list named \code{frailty} in
+##'     \code{arguments}. For example, if we consider Gamma distribution with
+##'     mean one as the distribution of frailty effect, we may specify
+##'     \code{frailty = stats::rgamma}. The shape and scale parameter needs to
+##'     be specified through a list named \code{frailty} in \code{arguments},
+##'     such as \code{arguments = list(frailty = list(shape = 2, scale = 0.5))}.
 ##' @param recurrent A logical value with default value \code{TRUE} indicating
 ##'     whether to generate recurrent event data or survival data.
-##' @param interarrival A function object (or a function name) for randomly
-##'     generating (positive) interarrival time between two successive
-##'     arrivals/events.  The default value is \code{"rexp"} for generating
-##'     interarrival times following exponential distribution, which leads to a
-##'     Poisson process. If the assumption of exponential interarrival times
-##'     cannot be justified, we may consider a renewal process, (a
-##'     generalization of Poisson process), in which interarrival times between
-##'     events independently follows an identical distribution. A customized
-##'     function can be specified in this case. It must have at least one
-##'     argument named \code{rate} for the expected number of arrivals/events in
-##'     unit time and returns one positive numerical value. If the function
-##'     contains an argument named \code{n}, it is assumed that the function
-##'     returns \code{n} interarrival times in one function call to possibly
-##'     speed up the random number generation procedure.  Other arguments can be
-##'     specified through a named list inside \code{arguments}.
+##' @param interarrival A function object for randomly generating (positive)
+##'     interarrival time between two successive arrivals/events.  The default
+##'     value is \code{stats::rexp} for generating interarrival times following
+##'     exponential distribution, which leads to a Poisson process. If the
+##'     assumption of exponential interarrival times cannot be justified, we may
+##'     consider a renewal process, (a generalization of Poisson process), in
+##'     which interarrival times between events independently follows an
+##'     identical distribution. A customized function can be specified in this
+##'     case. It must have at least one argument named \code{rate} for the
+##'     expected number of arrivals/events in unit time and returns one positive
+##'     numerical value. If the function contains an argument named \code{n}, it
+##'     is assumed that the function returns \code{n} interarrival times in one
+##'     function call to possibly speed up the random number generation
+##'     procedure.  Other arguments can be specified through a named list inside
+##'     \code{arguments}.
 ##' @param relativeRisk Relateive risk function for incorporating the covariates
 ##'     and the covariate coefficients into the intensity function. The
 ##'     applicable choices include \code{exponential} (the default) for regular
@@ -192,7 +192,7 @@ NULL
 ##'
 ##' @examples
 ##' library(reda)
-##' set.seed(1216)
+##' set.seed(123)
 ##' ### time-invariant covariates and coefficients
 ##' ## one process
 ##' simEvent(z = c(0.5, 1), zCoef = c(1, 0))
@@ -206,10 +206,10 @@ NULL
 ##'
 ##' ### time-varying covariates and time-varying coefficients
 ##' zFun <- function(time, intercept) {
-##'    c(time / 10 + intercept, as.numeric(time > 1))
+##'    cbind(time / 10 + intercept, as.numeric(time > 1))
 ##' }
 ##' zCoefFun <- function(x, shift) {
-##'   c(sqrt(x + shift), 1)
+##'   cbind(sqrt(x + shift), 1)
 ##' }
 ##' simEvent(z = zFun, zCoef = zCoefFun,
 ##'          arguments = list(z = list(intercept = 0.1),
@@ -246,7 +246,7 @@ NULL
 ##'
 ##' ## quadratic B-splines with one internal knot at "time = 1"
 ##' ## (using function 'bSpline' from splines2 package)
-##' simEvent(rho = "bSpline", rhoCoef = c(0.4, 0.5, 0.3, 0.6),
+##' simEvent(rho = splines2::bSpline, rhoCoef = c(0.8, 0.5, 1, 0.6),
 ##'          arguments = list(rho = list(degree = 2, knots = 1,
 ##'                                      intercept = TRUE,
 ##'                                      Boundary.knots = c(0, 3))))
@@ -254,12 +254,12 @@ NULL
 ##'
 ##' ### frailty effect
 ##' ## Gamma distribution with mean one
-##' simEvent(z = c(0.5, 1), zCoef = c(1, 0), frailty = "rgamma",
+##' simEvent(z = c(0.5, 1), zCoef = c(1, 0), frailty = rgamma,
 ##'          arguments = list(frailty = list(shape = 2, scale = 0.5)))
 ##'
 ##' ## lognormal with mean zero (on the log scale)
 ##' set.seed(123)
-##' simEvent(z = c(0.5, 1), zCoef = c(1, 0), frailty = "rlnorm",
+##' simEvent(z = c(0.5, 1), zCoef = c(1, 0), frailty = rlnorm,
 ##'          arguments = list(frailty = list(sdlog = 1)))
 ##' ## or equivalently
 ##' set.seed(123)
@@ -292,13 +292,14 @@ NULL
 ##'          arguments = list(relativeRisk = list(intercept = 1)))
 ##'
 ##' @importFrom stats integrate optimize qexp rexp runif rgamma rpois uniroot
+##' @importFrom splines2 bSpline
 ##' @export
 simEvent <- function(z = 0, zCoef = 1,
                      rho = 1, rhoCoef = 1,
                      origin = 0, endTime = 3,
                      frailty = 1,
                      recurrent = TRUE,
-                     interarrival = "rexp",
+                     interarrival = stats::rexp,
                      relativeRisk = c("exponential", "linear", "excess"),
                      method = c("thinning", "inversion"),
                      arguments = list(), ...)
@@ -309,77 +310,66 @@ simEvent <- function(z = 0, zCoef = 1,
     method <- match.arg(method, c("thinning", "inversion"))
 
     ## check covariate z
-    zVecIdx <- isNumVector(z, error_na = TRUE)
-    if (! (zVecIdx || is.function(z) || isCharOne(z, error_na = TRUE)))
+    zVecIdx <- isNumVector(z)
+    if (! (zVecIdx || is.function(z) || isCharOne(z)))
         stop(wrapMessages(
             "The covariates 'z' has to be a numeric vector / matrix,",
-            "a function or a function name."
+            "or a function."
         ), call. = FALSE)
     ## check coefficients zCoef
-    zCoefVecIdx <- isNumVector(zCoef, error_na = TRUE)
+    zCoefVecIdx <- isNumVector(zCoef)
     if (! (zCoefVecIdx || is.function(zCoef) ||
-           isCharOne(zCoef, error_na = TRUE)))
+           isCharOne(zCoef)))
         stop(wrapMessages(
             "The covariate coefficients 'zCoef' has to be a numeric vector,",
-            "a function or a function name."
+            "a function."
         ), call. = FALSE)
     if (zVecIdx && zCoefVecIdx && length(zCoef) < (tmp <- length(z)))
         zCoef <- rep(zCoef, length.out = tmp)
     ## check baseline rate function rho
-    rhoVecIdx <- isNumOne(rho, error_na = TRUE)
-    if (! (rhoVecIdx || is.function(rho) || isCharOne(rho, error_na = TRUE)))
+    rhoVecIdx <- isNumOne(rho)
+    if (! (rhoVecIdx || is.function(rho) || isCharOne(rho)))
         stop(wrapMessages(
             "The baseline hazard rate function",
-            "'rho' has to be a numeric vector, a function or a function name."
+            "'rho' has to be a numeric vector, a function."
         ), call. = FALSE)
     if (rhoVecIdx && rho < 0)
         stop("The baseline hazard rate function 'rho' has to be non-negative.",
              call. = FALSE)
     ## check the baseline rate function coefficients, rhoCoef
-    if (! isNumVector(rhoCoef, error_na = TRUE))
+    if (! isNumVector(rhoCoef))
         stop(wrapMessages(
             "The 'rhoCoef' has to be a numeric vector",
             "(without no missing value)."
         ))
     n_rhoCoef <- length(rhoCoef)
     ## check function for interarrival time
-    if (! (is.function(interarrival) ||
-           isCharOne(interarrival, error_na = TRUE)))
-        stop("The 'interarrival' has to be a function or a function name.",
+    if (! (is.function(interarrival) || isCharOne(interarrival)))
+        stop("The 'interarrival' has to be a function.",
              call. = FALSE)
-    interarrivalFun <- if (isCharOne(interarrival, error_na = TRUE)) {
-                           eval(parse(text = interarrival))
-                       } else {
-                           interarrival
-                       }
     defaultIntArvIdx <- missing(interarrival) ||
-        identical(interarrivalFun, stats::rexp)
+        identical(interarrival, stats::rexp)
     ## match relative risk function
     rriskNames <- c("exponential", "linear", "excess")
     rriskFun <- if (rriskFunIdx <- is.function(relativeRisk)) {
                     relativeRisk
-                } else if (isCharVector(relativeRisk, error_na = TRUE)) {
-                    rriskInd <- pmatch(relativeRisk, rriskNames,
-                                       nomatch = - 1)[1L]
-                    if (rriskInd < 0) {
-                        ## customized function name
-                        if (length(relativeRisk) != 1L)
-                            stop(wrapMessages(
-                                "The customized relative risk function name",
-                                "should be of length one."
-                            ), call. = FALSE)
-                        relativeRisk
-                    } else {
-                        relativeRisk <- rriskNames[rriskInd]
-                        ## strange function names that user may not create
-                        eval(parse(
-                            text = paste0(".rrisk_", relativeRisk, "_")
-                        ))
-                    }
+                } else if (isCharVector(relativeRisk)) {
+                    rriskInd <- pmatch(relativeRisk, rriskNames)[1L]
+                    if (is.na(rriskInd))
+                        stop(wrapMessages(
+                            "The specified relative risk function",
+                            "is not available."
+                        ), call. = FALSE)
+                    relativeRisk <- rriskNames[rriskInd]
+                    ## strange function names that user may not create
+                    switch(relativeRisk,
+                           "exponential" = .rrisk_exponential,
+                           "linear" = .rrisk_linear,
+                           "excess" = .rrisk_excess)
                 } else {
                     stop(wrapMessages(
-                        "The specified relative risk function 'relativeRisk'",
-                        "should be a function (or a function name)."
+                        "The specified relative risk function `relativeRisk`",
+                        "should be a function."
                     ), call. = FALSE)
                 }
 
@@ -400,11 +390,11 @@ simEvent <- function(z = 0, zCoef = 1,
     interarrival_args <- lapply(arguments[["interarrival"]], eval)
     interarrival_args <-
         interarrival_args[! names(interarrival_args) %in% c("n", "rate")]
-    intArvArgs <- names(as.list(args(interarrivalFun)))
+    intArvArgs <- names(as.list(args(interarrival)))
     if (! "rate" %in% intArvArgs)
         stop(wrapMessages(
             "The function for interarrival times must have",
-            "at least one argument named 'rate' for the expected number of",
+            "at least one argument named `rate` for the expected number of",
             "events/arrivals in unit time."
         ), call. = FALSE)
 
@@ -414,13 +404,12 @@ simEvent <- function(z = 0, zCoef = 1,
     if (any(! c("z", "zCoef") %in% rriskFunArgs))
         stop(wrapMessages(
             "The relative risk function must have",
-            "at least one argument named 'z' for covariates and",
-            "another argument named 'zCoef' for covariate coefficients."
+            "at least one argument named `z` for covariates and",
+            "another argument named `zCoef` for covariate coefficients."
         ), call. = FALSE)
 
     ## check origin
-    if ((originFunIdx <- is.function(origin)) ||
-        isCharOne(origin, error_na = TRUE)) {
+    if ((originFunIdx <- is.function(origin)) || isCharOne(origin)) {
         ## add "n = 1" for common distribution from stats library
         if ("n" %in% names(as.list(args(origin))))
             origin_args <- c(list(n = 1), origin_args)
@@ -431,8 +420,7 @@ simEvent <- function(z = 0, zCoef = 1,
         originFun <- origin_args <- NULL
     }
     ## check endTime similarly to origin
-    if ((endTimeFunIdx <- is.function(endTime)) ||
-        isCharOne(endTime, error_na = TRUE)) {
+    if (endTimeFunIdx <- is.function(endTime)) {
         ## add "n = 1" for common distribution from stats library
         if ("n" %in% names(as.list(args(endTime))))
             endTime_args <- c(list(n = 1), endTime_args)
@@ -443,8 +431,7 @@ simEvent <- function(z = 0, zCoef = 1,
         endTimeFun <- endTime_args <- NULL
     }
     ## check origin and endTime
-    if (! (isNumOne(origin, error_na = TRUE) &&
-           isNumOne(endTime, error_na = TRUE) &&
+    if (! (isNumOne(origin) && isNumOne(endTime) &&
            origin < endTime && is.finite(endTime))) {
         stop(wrapMessages(
             "The `origin` and `endTime`",
@@ -453,11 +440,10 @@ simEvent <- function(z = 0, zCoef = 1,
     }
 
     ## prepare frailty effect
-    if (isNumOne(frailty, error_na = TRUE)) {
+    if (isNumOne(frailty)) {
         frailtyEffect <- frailty
         frailtyFun <- NULL
-    } else if ((frailtyFunIdx <- is.function(frailty)) ||
-               isCharOne(frailty, error_na = TRUE)) {
+    } else if (frailtyFunIdx <- is.function(frailty)) {
         ## add "n = 1" for common distribution from stats library
         if ("n" %in% names(as.list(args(frailty))))
             frailty_args <- c(list(n = 1), frailty_args)
@@ -466,56 +452,75 @@ simEvent <- function(z = 0, zCoef = 1,
     } else {
         frailtyEffect <- - 1            # leads to errors
     }
-    if (! isNumOne(frailtyEffect, error_na = TRUE) || frailtyEffect <= 0)
+    if (! isNumOne(frailtyEffect) || frailtyEffect <= 0)
         stop(wrapMessages(
-            "The argument 'frailty' has to be a positive number or",
+            "The argument `frailty` has to be a positive number or",
             "a function that generates a positive number."
         ), call. = FALSE)
 
     ## rate function
-    rateFun <- function(timeNum, forOptimize = TRUE) {
-        zVec <- if (zVecIdx) {
-                    z
-                } else {
-                    do.call(z, c(list(timeNum), z_args))
-                }
-        zCoefVec <- if (zCoefVecIdx) {
-                        zCoef
-                    } else {
-                        do.call(zCoef, c(list(timeNum), zCoef_args))
-                    }
-        rhoMat <- if (rhoVecIdx) {
-                      rho
-                  } else {
-                      do.call(rho, c(list(timeNum), rho_args))
-                  }
-        if (n_rhoCoef != NCOL(rhoMat))
-            stop("The baseline rate function, 'rho'",
-                 "and its cofficients, 'rhoCoef', does not match.")
-        covEffect <- do.call(rriskFun,
-                             c(list(z = zVec, zCoef = zCoefVec), rrisk_args))
-        if (! isNumOne(covEffect, error_na = TRUE) || covEffect <= 0)
-            stop("The relative risk function should return a positive number.",
-                 call. = FALSE)
+    ## takes a number of time points (including one point)
+    ## returns rate function at those time points and zMat, zCoefMat, rhoMat
+    rateFun <- function(timeVec, forOptimize = TRUE) {
+        nTime <- length(timeVec)
+        if (zVecIdx) {
+            zMat <- matrix(z, nrow = 1)
+            zMat_ind <- rep(1L, nTime)
+        } else {
+            zMat <- matrix(do.call(z, c(list(timeVec), z_args)),
+                           nrow = nTime)
+            zMat_ind <- seq_len(nTime)
+        }
+        if (zCoefVecIdx) {
+            zCoefMat <- matrix(zCoef, nrow = 1)
+            zCoefMat_ind <- rep(1L, nTime)
+        } else {
+            zCoefMat <- matrix(do.call(zCoef, c(list(timeVec), zCoef_args)),
+                               nrow = nTime)
+            zCoefMat_ind <- seq_len(nTime)
+        }
+        if (rhoVecIdx) {
+            rhoMat <- matrix(rho, nrow = 1)
+            rhoMat_ind <- rep(1L, nTime)
+        } else {
+            rhoMat <- matrix(do.call(rho, c(list(timeVec), rho_args)),
+                             nrow = nTime)
+            rhoMat_ind <- seq_len(nTime)
+        }
+        ## possibly improve performance for time-invariant z and zCoef
+        covEffect <-
+            if (zVecIdx && zCoefVecIdx) {
+                rep(do.call(rriskFun,
+                            c(list(z = zMat[1, ], zCoef = zCoefMat[1, ]),
+                              rrisk_args)), nTime)
+            } else {
+                mapply(function(i, j) {
+                    do.call(rriskFun,
+                            c(list(z = zMat[i, ], zCoef = zCoefMat[j, ]),
+                              rrisk_args))
+                }, i = zMat_ind, j = zCoefMat_ind, USE.NAMES = FALSE)
+            }
         rhoVec <- as.numeric(rhoMat %*% rhoCoef)
         rho_t <- frailtyEffect * rhoVec * covEffect
         if (forOptimize)
             return(rho_t)
+        ## check if it is not for optimize
+        if (! isNumVector(covEffect) || any(covEffect <= 0))
+            stop(wrapMessages(
+                "The relative risk function should return positive values."
+            ), call. = FALSE)
+        ## the rate function has to be non-negative
+        if (any(rho_t < 0))
+            stop(wrapMessages(
+                "The rate function has to be non-negative",
+                "from `origin` to `endTime`."
+            ), call. = FALSE)
         ## else return
         list(rho_t = rho_t,
-             rhoMat = matrix(rhoMat, nrow = 1),
-             zVec = matrix(zVec, nrow = 1),
-             zCoefVec = matrix(zCoefVec, nrow = 1))
+             rhoMat = rhoMat[rhoMat_ind, , drop = FALSE],
+             zMat = zMat[zMat_ind, , drop = FALSE],
+             zCoefMat = zCoefMat[zCoefMat_ind, , drop = FALSE])
     }
-
-    ## the baseline rate function has to be non-negative
-    rhoMinObj <- stats::optimize(rateFun, interval = c(origin, endTime),
-                                 maximum = FALSE)
-    if (rhoMinObj$objective < 0)
-        stop(wrapMessages(
-            "The rate function has to be non-negative",
-            "from 'origin' to 'endTime'."
-        ), call. = FALSE)
 
     ## step 1: calculate the supremum value of rate function
     rhoMaxObj <- tryCatch(
@@ -525,7 +530,6 @@ simEvent <- function(z = 0, zCoef = 1,
                      control = list(fnscale = - 1)),
         error = function(e) e
     )
-
     ## if the supremum is finite, use thinning method
     if ("error" %in% class(rhoMaxObj)) {
         if (method == "thinning") {
@@ -541,8 +545,8 @@ simEvent <- function(z = 0, zCoef = 1,
 
     ## values at end time (censoring time)
     cenList <- rateFun(endTime, forOptimize = FALSE)
-    zMat_cen <- cenList$zVec
-    zCoefMat_cen <- cenList$zCoefVec
+    zMat_cen <- cenList$zMat
+    zCoefMat_cen <- cenList$zCoefMat
     rhoMat_cen <- cenList$rhoMat
 
     ## thinning method
@@ -555,12 +559,12 @@ simEvent <- function(z = 0, zCoef = 1,
         ## if we want all the recurrent event times
         if (recurrent) {
             ## estimate the number of W_i before censoring
-            batchNum <- ceiling((endTime - origin) / stats::qexp(0.20, rho_max))
+            batchNum <- ceiling((endTime - origin) / stats::qexp(0.8, rho_max))
             if ("n" %in% intArvArgs)
                 interarrivalArgs <- c(list(n = batchNum), interarrivalArgs)
             while (lastEventTime < endTime) {
                 W <- do.call(interarrival, interarrivalArgs)
-                if (! isNumVector(W, error_na = TRUE) || any(W < 0))
+                if (! isNumVector(W) || any(W < 0))
                     stop("The interarrival times must be nonnegative!",
                          call. = FALSE)
                 ## step 3: update evnet times
@@ -575,8 +579,8 @@ simEvent <- function(z = 0, zCoef = 1,
                 xOut <- numeric(0)
             } else {
                 ## step 4: thinning
-                resList <- lapply(eventTime, rateFun, forOptimize = FALSE)
-                rho_t <- sapply(resList, function(a) a$rho_t)
+                resList <- rateFun(eventTime, forOptimize = FALSE)
+                rho_t <- resList$rho_t
                 U <- runif(n = len_eventTime)
                 ind <- U <= rho_t / rho_max
                 xOut <- eventTime[ind]
@@ -590,7 +594,7 @@ simEvent <- function(z = 0, zCoef = 1,
             while (lastEventTime < endTime) {
                 xOut <- numeric(0)
                 W <- do.call(interarrival, interarrivalArgs)
-                if (! isNumVector(W, error_na = TRUE) || any(W < 0))
+                if (! isNumVector(W) || any(W < 0))
                     stop("The interarrival times must be nonnegative!",
                          call. = FALSE)
                 ## step 3: update evnet times
@@ -604,8 +608,8 @@ simEvent <- function(z = 0, zCoef = 1,
                     break;
                 } else {
                     ## step 4: thinning
-                    resList <- lapply(eventTime, rateFun, forOptimize = FALSE)
-                    rho_t <- sapply(resList, function(a) a$rho_t)
+                    resList <- rateFun(eventTime, forOptimize = FALSE)
+                    rho_t <- resList$rho_t
                     U <- runif(n = len_eventTime)
                     ind <- U <= rho_t / rho_max
                     if (any(ind)) {
@@ -619,15 +623,9 @@ simEvent <- function(z = 0, zCoef = 1,
 
         ## update zMat, zCoefMat, and rhoMat
         if (length(xOut) > 0L) {
-            zMat <- do.call(rbind, lapply(resList[ind], function(a) {
-                a$zVec
-            }))
-            zCoefMat <- do.call(rbind, lapply(resList[ind], function(a) {
-                a$zCoefVec
-            }))
-            rhoMat <- do.call(rbind, lapply(resList[ind], function(a) {
-                a$rhoMat
-            }))
+            zMat <- resList$zMat[ind, , drop = FALSE]
+            zCoefMat <- resList$zCoefMat[ind, , drop = FALSE]
+            rhoMat <- resList$rhoMat[ind, , drop = FALSE]
         } else {
             ## only return values on end time
             zMat <- zMat_cen
@@ -637,9 +635,8 @@ simEvent <- function(z = 0, zCoef = 1,
 
     } else {
         ## the inversion method
-        vecRateFun <- Vectorize(rateFun)
         intRate <- tryCatch(
-            stats::integrate(vecRateFun, lower = origin,
+            stats::integrate(rateFun, lower = origin,
                              upper = endTime)$value,
             error = function(e) e)
         ## error if rate function is not integrable
@@ -686,7 +683,7 @@ simEvent <- function(z = 0, zCoef = 1,
             ## use inversion method numerically / the hard way
             invFun <- function(prob) {
                 foo <- function(timeNum) {
-                    stats::integrate(vecRateFun, lower = origin,
+                    stats::integrate(rateFun, lower = origin,
                                      upper = timeNum)$value / intRate - prob
                 }
                 stats::uniroot(foo, interval = c(origin + .Machine$double.eps,
@@ -694,10 +691,10 @@ simEvent <- function(z = 0, zCoef = 1,
             }
             xOut <- sapply(U, invFun)
             ## compute zMat, zCoefMat, and rhoMat
-            resList <- lapply(xOut, rateFun, forOptimize = FALSE)
-            zMat <- do.call(rbind, lapply(resList, function(a) a$zVec))
-            zCoefMat <- do.call(rbind, lapply(resList, function(a) a$zCoefVec))
-            rhoMat <- do.call(rbind, lapply(resList, function(a) a$rhoMat))
+            resList <- rateFun(xOut, forOptimize = FALSE)
+            zMat <- resList$zMat
+            zCoefMat <- resList$zCoefMat
+            rhoMat <- resList$rhoMat
         }
     }
 
@@ -811,13 +808,13 @@ simEventData <- function(nProcess = 1,
     ## check covariate z
     ## convert vector z to matrix
     if (isNumVector(z, error_na = TRUE)) z <- matrix(z, nrow = 1)
-    if (! (is.matrix(z) || is.function(z) || isCharOne(z, error_na = TRUE)))
+    if (! (is.matrix(z) || is.function(z)))
         stop(wrapMessages(
             "The covariates 'z' has to be a numeric vector / matrix,",
-            "a function or a function name."
+            "or a function."
         ))
     ## if covariates are given as a matrix
-    if (isZmatIdx <- is.matrix(z)) {
+    if (zMatIdx <- isNumMatrix(z, error_na = TRUE)) {
         if (missing(nProcess)) {
             ## determine number of process from z
             nProcess <- nrow(z)
@@ -832,33 +829,51 @@ simEventData <- function(nProcess = 1,
     }
 
     ## take care of origin, endTime, and frailty before simEvent
-    originFunIdx <- is.function(origin) || isCharOne(origin, error_na = TRUE)
+    originFunIdx <- is.function(origin)
     if (! originFunIdx) {
         if (! isNumVector(origin, error_na = TRUE))
             stop("The time origins, `origin` has to be a numeric vector.")
         origin <- rep(origin, length.out = nProcess)
     }
-    endTimeFunIdx <- is.function(endTime) || isCharOne(endTime, error_na = TRUE)
+    endTimeFunIdx <- is.function(endTime)
     if (! endTimeFunIdx) {
         if (! isNumVector(endTime, error_na = TRUE))
             stop("The ends of time, `endTime` has to be a numeric vector.")
         endTime <- rep(endTime, length.out = nProcess)
     }
-    frailtyFunIdx <- is.function(frailty) || isCharOne(frailty, error_na = TRUE)
+    frailtyFunIdx <- is.function(frailty)
     if (! frailtyFunIdx) {
         if (! isNumVector(frailty, error_na = TRUE))
             stop("The frailty effects has to be a numeric vector.")
         frailty <- rep(frailty, length.out = nProcess)
     }
 
+    ## split cases outside the loop for better performance
+    z_i <- if (zMatIdx) {function(i) z[i, ]} else {function(i) z}
+    origin_i <- if (originFunIdx) {
+                    function(i) origin
+                } else {
+                    function(i) origin[i]
+                }
+    endTime_i <- if (endTimeFunIdx) {
+                     function(i) endTime
+                 } else {
+                     function(i) endTime[i]
+                 }
+    frailty_i <- if (frailtyFunIdx) {
+                     function(i) frailty
+                 } else {
+                     function(i) frailty[i]
+                 }
     ## generate simulated data for each process
     resList <- lapply(seq_len(nProcess), function(i) {
-        res <- simEvent(z = if (isZmatIdx) z[i, ] else z,
-                        origin = if (originFunIdx) origin else origin[i],
-                        endTime = if (endTimeFunIdx) endTime else endTime[i],
-                        frailty = if (frailtyFunIdx) frailty else frailty[i],
-                        ...)
-        simEvent2data(ID = i, res)
+        simEvent2data(ID = i,
+                      simEvent(z = z_i(i),
+                               origin = origin_i(i),
+                               endTime = endTime_i(i),
+                               frailty = frailty_i(i),
+                               ...)
+                      )
     })
 
     ## prepare for output
@@ -879,13 +894,15 @@ simEventData <- function(nProcess = 1,
 ### internal functions =========================================================
 ## function convert results from simEvent to data.frame
 simEvent2data <- function(ID, obj) {
-    timeVec <- obj@.Data
-    out <- if (length(timeVec) > 0L) {
+    ## using obj@.Data is much slower
+    timeVec <- unclass(obj)
+    nTime <- length(timeVec)
+    out <- if (nTime > 0L) {
                ## if any event
                data.frame(
                    ID = ID,
                    time = c(timeVec, obj@endTime$endTime),
-                   event = c(rep(1, length(timeVec)), 0),
+                   event = c(rep(1, nTime), 0),
                    origin = obj@origin$origin,
                    X = rbind(obj@z$z, obj@censoring$z)
                )
@@ -904,16 +921,16 @@ simEvent2data <- function(ID, obj) {
 }
 
 ## exponential relative risk function
-.rrisk_exponential_ <- function(z, zCoef, ...) {
+.rrisk_exponential <- function(z, zCoef, ...) {
     as.numeric(base::exp(z %*% zCoef))
 }
 
 ## linear relative risk function
-.rrisk_linear_ <- function(z, zCoef, ...) {
+.rrisk_linear <- function(z, zCoef, ...) {
     1 + as.numeric(z %*% zCoef)
 }
 
 ## excess relative risk function
-.rrisk_excess_ <- function(z, zCoef, ...) {
+.rrisk_excess <- function(z, zCoef, ...) {
     exp(sum(log1p(z * zCoef)))
 }

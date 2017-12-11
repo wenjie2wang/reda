@@ -6,7 +6,7 @@
 \title{Simulated Survival times or Recurrent Events}
 \usage{
 simEvent(z = 0, zCoef = 1, rho = 1, rhoCoef = 1, origin = 0, endTime = 3,
-         frailty = 1, recurrent = TRUE, interarrival = "rexp",
+         frailty = 1, recurrent = TRUE, interarrival = stats::rexp,
          relativeRisk = c("exponential", "linear", "excess"),
          method = c("thinning", "inversion"), arguments = list(), ...)
 
@@ -43,40 +43,40 @@ Similar to \code{origin}, \code{endTime} should be either a numeric
 value greater than \code{origin} or a function that returns such a
 numeric value.}
 
-\item{frailty}{A positive number, a function, or a function name for frailty
-effect. The default value is \code{1} for no frailty effect.  Other
-positive value can be specified directly for a shared frailty effect
-within a cluster.  Similar to \code{z}, \code{zCoef}, and \code{rho}, a
-function or a function name can be specified for other distribution of
-the frailty effect. The specified function should randomly return a
-positive numeric value. The functions that generate random numbers
-following a certain distribution from \code{stats} package can be
-directly used. The arguments of the function can be specified through a
-list named \code{frailty} in \code{arguments}. For example, if we
-consider Gamma distribution with mean one as the distribution of frailty
-effect, we may specify \code{frailty = "rgamma"} or \code{frailty =
-rgamma}. The shape and scale parameter needs to be specified through a
-list named \code{frailty} in \code{arguments}, such as \code{arguments =
+\item{frailty}{A positive number or a function for frailty effect. The
+default value is \code{1} for no frailty effect.  Other positive value
+can be specified directly for a shared frailty effect within a cluster.
+Similar to \code{z}, \code{zCoef}, and \code{rho}, a function can be
+specified for other distribution of the frailty effect. The specified
+function should randomly return a positive numeric value. The functions
+that generate random numbers following a certain distribution from
+\code{stats} package can be directly used. The arguments of the function
+can be specified through a list named \code{frailty} in
+\code{arguments}. For example, if we consider Gamma distribution with
+mean one as the distribution of frailty effect, we may specify
+\code{frailty = "rgamma"} or \code{frailty = rgamma}. The shape and
+scale parameter needs to be specified through a list named
+\code{frailty} in \code{arguments}, such as \code{arguments =
 list(frailty = list(shape = 2, scale = 0.5))}.}
 
 \item{recurrent}{A logical value with default value \code{TRUE} indicating
 whether to generate recurrent event data or survival data.}
 
-\item{interarrival}{A function object (or a function name) for randomly
-generating (positive) interarrival time between two successive
-arrivals/events.  The default value is \code{"rexp"} for generating
-interarrival times following exponential distribution, which leads to a
-Poisson process. If the assumption of exponential interarrival times
-cannot be justified, we may consider a renewal process, (a
-generalization of Poisson process), in which interarrival times between
-events independently follows an identical distribution. A customized
-function can be specified in this case. It must have at least one
-argument named \code{rate} for the expected number of arrivals/events in
-unit time and returns one positive numerical value. If the function
-contains an argument named \code{n}, it is assumed that the function
-returns \code{n} interarrival times in one function call to possibly
-speed up the random number generation procedure.  Other arguments can be
-specified through a named list inside \code{arguments}.}
+\item{interarrival}{A function object for randomly generating (positive)
+interarrival time between two successive arrivals/events.  The default
+value is \code{stats::rexp} for generating interarrival times following
+exponential distribution, which leads to a Poisson process. If the
+assumption of exponential interarrival times cannot be justified, we may
+consider a renewal process, (a generalization of Poisson process), in
+which interarrival times between events independently follows an
+identical distribution. A customized function can be specified in this
+case. It must have at least one argument named \code{rate} for the
+expected number of arrivals/events in unit time and returns one positive
+numerical value. If the function contains an argument named \code{n}, it
+is assumed that the function returns \code{n} interarrival times in one
+function call to possibly speed up the random number generation
+procedure.  Other arguments can be specified through a named list inside
+\code{arguments}.}
 
 \item{relativeRisk}{Relateive risk function for incorporating the covariates
 and the covariate coefficients into the intensity function. The
@@ -123,9 +123,8 @@ The function \code{simEvent} generates simulated recurrent events or
 survival time (the first event time) from one stochastic process. The
 function \code{simEventData} provides a simple wrapper that calls
 \code{simEvent} internally and collects the generated survival data or
-recurrent events into a data frame. More demonstration and introduction is
-available in one of the package vignettes in addition to the function
-documentation.
+recurrent events into a data frame. More examples are available in one of
+the package vignettes in addition to the function documentation.
 }
 \details{
 For each process, a time-invariant or time-varying baseline hazard rate
@@ -159,19 +158,19 @@ For the frailty effect \code{frailty}, the starting point \code{origin}, and
 the end point of the process \code{endTime}, functions that generate random
 numbers can be specified. An argument \code{n = 1} will be implicitly
 specified if the function has an argument named \code{n}, which is designed
-for those common functions generating random numbers from \code{stats}
+for those common functions generating random numbers from \pkg{stats}
 package. Similar to \code{z}, \code{zCoef}, and \code{rho}, other arguments
 of the function can be specified through a named list in \code{arguments}.
 
 For time-varying covariates, the function \code{simEventData} assumes
 covariates can be observed only at event times and censoring times. Thus,
-covariate values are returned only at these time points. If we want more
+covariate values are returned only at these time points. If we want other
 observed covariate values to be recorded, we may write a simple wrapper
 function for \code{simEvent} similar to \code{simEventData}.
 }
 \examples{
 library(reda)
-set.seed(1216)
+set.seed(123)
 ### time-invariant covariates and coefficients
 ## one process
 simEvent(z = c(0.5, 1), zCoef = c(1, 0))
@@ -185,10 +184,10 @@ simEventData(z = matrix(rnorm(5)), zCoef = 0.5, recurrent = FALSE)
 
 ### time-varying covariates and time-varying coefficients
 zFun <- function(time, intercept) {
-   c(time / 10 + intercept, as.numeric(time > 1))
+   cbind(time / 10 + intercept, as.numeric(time > 1))
 }
 zCoefFun <- function(x, shift) {
-  c(sqrt(x + shift), 1)
+  cbind(sqrt(x + shift), 1)
 }
 simEvent(z = zFun, zCoef = zCoefFun,
          arguments = list(z = list(intercept = 0.1),
@@ -225,7 +224,7 @@ simEventData(z = cbind(rnorm(3), rbinom(3, 1, 0.5)) / 10,
 
 ## quadratic B-splines with one internal knot at "time = 1"
 ## (using function 'bSpline' from splines2 package)
-simEvent(rho = "bSpline", rhoCoef = c(0.4, 0.5, 0.3, 0.6),
+simEvent(rho = splines2::bSpline, rhoCoef = c(0.8, 0.5, 1, 0.6),
          arguments = list(rho = list(degree = 2, knots = 1,
                                      intercept = TRUE,
                                      Boundary.knots = c(0, 3))))
@@ -233,12 +232,12 @@ simEvent(rho = "bSpline", rhoCoef = c(0.4, 0.5, 0.3, 0.6),
 
 ### frailty effect
 ## Gamma distribution with mean one
-simEvent(z = c(0.5, 1), zCoef = c(1, 0), frailty = "rgamma",
+simEvent(z = c(0.5, 1), zCoef = c(1, 0), frailty = rgamma,
          arguments = list(frailty = list(shape = 2, scale = 0.5)))
 
 ## lognormal with mean zero (on the log scale)
 set.seed(123)
-simEvent(z = c(0.5, 1), zCoef = c(1, 0), frailty = "rlnorm",
+simEvent(z = c(0.5, 1), zCoef = c(1, 0), frailty = rlnorm,
          arguments = list(frailty = list(sdlog = 1)))
 ## or equivalently
 set.seed(123)
