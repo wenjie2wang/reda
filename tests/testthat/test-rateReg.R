@@ -116,11 +116,11 @@ test_that("Quick tests for normal usages", {
     expect_equivalent(class(plot(br_constFit, conf.int = TRUE)),
                       c("gg", "ggplot"))
     ## trigger warnings
-    set.seed(123)
-    sinDat <- simEventData(200, rho = function(tVec) 1 - sin(tVec))
-    sinFit <- rateReg(Survr(ID, time, event) ~ 1, sinDat,
-                      knots = c(1, 2), degree = 3)
-    expect_error(baseRate(sinFit), "variance-covariance", fixed = TRUE)
+    ## set.seed(123)
+    ## sinDat <- simEventData(100, rho = function(tVec) 1 - sin(tVec))
+    ## sinFit <- rateReg(Survr(ID, time, event) ~ 1, sinDat,
+    ##                   knots = c(2), degree = 3)
+    ## expect_error(baseRate(sinFit), "variance-covariance", fixed = TRUE)
 
     ## test mcf,rateReg-method
     mcf_constFit <- mcf(constFit)
