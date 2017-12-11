@@ -135,7 +135,7 @@ specified `origin` is recycled for these ten processes.
 ```{r hpp-data-3}
 ## survival data by set 'recurrent = FALSE'
 simEventData(z = cbind(rnorm(10), 1), zCoef = c(0.2, - 0.5), rho = 0.1,
-             origin = c(0, 1), endTime = "rnorm", recurrent = FALSE,
+             origin = c(0, 1), endTime = stats::rnorm, recurrent = FALSE,
              arguments = list(endTime = list(mean = 10)))
 ```
 
@@ -171,12 +171,12 @@ distribution of interarrival times and consider more general renewal processes.
 
 In function `simEvent` (and `simEventData`), we may specify the distribution of
 the interarrival times via the argument `interarrival`, which takes the function
-name `"rexp"` (from the **stats** package) for generating interarrival times
-following exponential distribution by default. In general, the argument
-`interarrival` takes a function with at least one argument named `rate` for
-generating random (nonnegative) interarrival times from a certain distribution
-at the given arrival rate. A quick example of generating the interarrival times
-following Gamma distribution of scale one is given as follows:
+`stats::rexp` for generating interarrival times following exponential
+distribution by default. In general, the argument `interarrival` takes a
+function with at least one argument named `rate` for generating random
+(nonnegative) interarrival times from a certain distribution at the given
+arrival rate. A quick example of generating the interarrival times following
+Gamma distribution of scale one is given as follows:
 
 ```{r rgamma-wi-n}
 set.seed(123)
@@ -207,7 +207,7 @@ time-variant.
 
 ```{r time-varying-covariates-1}
 set.seed(123)
-zFun1 <- function(time) c(time / 10 + 1, as.numeric(time > 1), 0.5)
+zFun1 <- function(time) cbind(time / 10 + 1, as.numeric(time > 1), 0.5)
 simEventData(z = zFun1, zCoef = c(0.1, 0.5, - 0.5))
 ```
 
@@ -218,7 +218,7 @@ below produces the equivalent results.
 
 ```{r time-varying-covariates-2}
 set.seed(123)
-zFun2 <- function(x, a, b) c(x / 10 + a, as.numeric(x > b), 0.5)
+zFun2 <- function(x, a, b) cbind(x / 10 + a, as.numeric(x > b), 0.5)
 simEventData(z = zFun2, zCoef = c(0.1, 0.5, - 0.5),
              arguments = list(z = list(a = 1, b = 1)))
 ```
@@ -238,7 +238,7 @@ that case, we specify the function parameters inside the `quote` function as
 follows:
 
 ```{r time-varying-covariates-3}
-zFun3 <- function(time, a, b) c(time / 10 + a, as.numeric(time > b))
+zFun3 <- function(time, a, b) cbind(time / 10 + a, as.numeric(time > b))
 (simDat <- simEventData(nProcess = 3, z = zFun3, zCoef = c(- 0.1, 0.5),
                         arguments = list(z = list(a = quote(rpois(1, 10) / 10),
                                                   b = quote(runif(1, 1, 3))))))
@@ -295,7 +295,7 @@ list(shape = 2, scale = 0.5))` as follows:
 
 ```{r frailty-gamma}
 set.seed(123)
-simEventData(z = zFun1, zCoef = c(0.1, 0.5, - 0.5), frailty = "rgamma",
+simEventData(z = zFun1, zCoef = c(0.1, 0.5, - 0.5), frailty = stats::rgamma,
              arguments = list(frailty = list(shape = 2, scale = 0.5)))
 ```
 
@@ -317,7 +317,7 @@ follows log-normal distribution of mean one.
 ```{r frailty-lognormal-1}
 set.seed(123)
 ## use function `rlnorm` from the stats package
-simEvent(z = zFun1, zCoef = c(0.1, 0.5, - 0.5), frailty = "rlnorm",
+simEvent(z = zFun1, zCoef = c(0.1, 0.5, - 0.5), frailty = stats::rlnorm,
          arguments = list(frailty = list(sdlog = 1)))
 ```
 
