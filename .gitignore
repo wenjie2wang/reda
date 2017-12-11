@@ -4,6 +4,8 @@ manuscript/
 TODO.md
 *.tar.gz
 *.Rcheck/
+*.o
+*.so
 *.*~
 *~
 
