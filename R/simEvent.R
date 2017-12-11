@@ -291,6 +291,9 @@ NULL
 ##' simEvent(relativeRisk = rriskFun,
 ##'          arguments = list(relativeRisk = list(intercept = 1)))
 ##'
+##' @importFrom Rcpp sourceCpp
+##' @useDynLib reda
+##'
 ##' @importFrom stats integrate optimize qexp rexp runif rgamma rpois uniroot
 ##' @importFrom splines2 bSpline
 ##' @export
@@ -363,9 +366,9 @@ simEvent <- function(z = 0, zCoef = 1,
                     relativeRisk <- rriskNames[rriskInd]
                     ## strange function names that user may not create
                     switch(relativeRisk,
-                           "exponential" = .rrisk_exponential,
-                           "linear" = .rrisk_linear,
-                           "excess" = .rrisk_excess)
+                           "exponential" = rrisk_exponential,
+                           "linear" = rrisk_linear,
+                           "excess" = rrisk_excess)
                 } else {
                     stop(wrapMessages(
                         "The specified relative risk function `relativeRisk`",

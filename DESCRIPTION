@@ -1,7 +1,7 @@
 Package: reda
 Title: Recurrent Event Data Analysis
 Version: 0.4.0.9000
-Date: 2017-12-09
+Date: 2017-12-11
 Authors@R: c(
     person(given = "Wenjie", family = "Wang",
            email = "wenjie.2.wang@uconn.edu",
@@ -16,12 +16,14 @@ Description: Functions for (1) simulating survival, recurrent event, and
     function, and gamma frailty model with spline rate function, and (3)
     comparing two-sample recurrent event responses with the pseudo-score tests.
 Imports:
+    Rcpp,
     ggplot2,
     graphics,
     grDevices,
     methods,
     splines2,
     stats
+LinkingTo: Rcpp, RcppArmadillo
 Suggests:
     knitr,
     rmarkdown,
@@ -32,6 +34,7 @@ License: GPL (>= 3)
 LazyData: true
 VignetteBuilder: knitr
 Collate:
+    'RcppExports.R'
     'class.R'
     'Survr.R'
     'aic.R'
