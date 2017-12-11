@@ -67,4 +67,4 @@ updateMeta: $(objects) $(cprt)
 
 .PHONY: clean
 clean:
-	rm -rf *~ */*~ *.Rhistroy *.tar.gz *.Rcheck/ .\#*
+	rm -rf *~ */*~ *.Rhistroy *.tar.gz src/*.so src/*.o *.Rcheck/ .\#*
