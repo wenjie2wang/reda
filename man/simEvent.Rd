@@ -15,20 +15,22 @@ simEventData(nProcess, z = 0, origin = 0, endTime = 3, frailty = 1, ...)
 \arguments{
 \item{z}{Time-invariant or time-varying covariates. The default value is
 \code{0} for no covariate effect.  This argument should be a numeric
-vector for time-invariant covariates or a function of time that returns
-a numeric vector for time-varying covariates.}
+vector for time-invariant covariates or a function of times that returns
+a numeric matrix for time-varying covariates, where each row represents
+the covariate vector at one perticular time point.}
 
 \item{zCoef}{Time-invariant or time-varying coefficients of covariates. The
 default value is \code{1}. Similar to the argument \code{z}, this
 argument should be a numeric vector for time-invariant coefficients or a
-function of time that returns a numeric vector for time-varying
-coefficients. The length of the numeric vector specified or returned
-from \code{z} and \code{zCoef} has to be always the same.}
+function of times that returns a numeric matrix for time-varying
+coefficients, where each row represents the coefficient vector at one
+perticular time point. The dimension of the \code{z} and \code{zCoef}
+(either specified or generated) has to match with each other.}
 
 \item{rho}{Baseline rate (or intensity) function for the Poisson process.
 The default is \code{1} for a homogenous process of unit intensity. This
 argument can be either a non-negative numeric value for a homogenous
-process or a function of time for a non-homogenous process.}
+process or a function of times for a non-homogenous process.}
 
 \item{rhoCoef}{Coefficients of baseline rate function. The default value is
 \code{1}. It can be useful when \code{rho} is a function generating
@@ -54,10 +56,9 @@ that generate random numbers following a certain distribution from
 can be specified through a list named \code{frailty} in
 \code{arguments}. For example, if we consider Gamma distribution with
 mean one as the distribution of frailty effect, we may specify
-\code{frailty = "rgamma"} or \code{frailty = rgamma}. The shape and
-scale parameter needs to be specified through a list named
-\code{frailty} in \code{arguments}, such as \code{arguments =
-list(frailty = list(shape = 2, scale = 0.5))}.}
+\code{frailty = stats::rgamma}. The shape and scale parameter needs to
+be specified through a list named \code{frailty} in \code{arguments},
+such as \code{arguments = list(frailty = list(shape = 2, scale = 0.5))}.}
 
 \item{recurrent}{A logical value with default value \code{TRUE} indicating
 whether to generate recurrent event data or survival data.}

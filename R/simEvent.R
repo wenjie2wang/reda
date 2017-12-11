@@ -463,42 +463,37 @@ simEvent <- function(z = 0, zCoef = 1,
     ## returns rate function at those time points and zMat, zCoefMat, rhoMat
     rateFun <- function(timeVec, forOptimize = TRUE) {
         nTime <- length(timeVec)
-        if (zVecIdx) {
-            zMat <- matrix(z, nrow = 1)
-            zMat_ind <- rep(1L, nTime)
-        } else {
-            zMat <- matrix(do.call(z, c(list(timeVec), z_args)),
-                           nrow = nTime)
-            zMat_ind <- seq_len(nTime)
-        }
-        if (zCoefVecIdx) {
-            zCoefMat <- matrix(zCoef, nrow = 1)
-            zCoefMat_ind <- rep(1L, nTime)
-        } else {
-            zCoefMat <- matrix(do.call(zCoef, c(list(timeVec), zCoef_args)),
+        seqTime <- seq_len(nTime)
+        repTime <- rep(1L, nTime)
+        zMat <- if (zVecIdx) {
+                    matrix(z, nrow = 1)[repTime, , drop = FALSE]
+                } else {
+                    matrix(do.call(z, c(list(timeVec), z_args)),
+                           nrow = nTime)[seqTime, , drop = FALSE]
+                }
+        zCoefMat <- if (zCoefVecIdx) {
+                        matrix(zCoef, nrow = 1)[repTime, , drop = FALSE]
+                    } else {
+                        matrix(do.call(zCoef, c(list(timeVec), zCoef_args)),
                                nrow = nTime)
-            zCoefMat_ind <- seq_len(nTime)
-        }
-        if (rhoVecIdx) {
-            rhoMat <- matrix(rho, nrow = 1)
-            rhoMat_ind <- rep(1L, nTime)
-        } else {
-            rhoMat <- matrix(do.call(rho, c(list(timeVec), rho_args)),
+                    }
+        rhoMat <- if (rhoVecIdx) {
+                      matrix(rho, nrow = 1)[repTime, , drop = FALSE]
+                  } else {
+                      matrix(do.call(rho, c(list(timeVec), rho_args)),
                              nrow = nTime)
-            rhoMat_ind <- seq_len(nTime)
-        }
+                  }
         ## possibly improve performance for time-invariant z and zCoef
         covEffect <-
             if (zVecIdx && zCoefVecIdx) {
                 rep(do.call(rriskFun,
-                            c(list(z = zMat[1, ], zCoef = zCoefMat[1, ]),
+                            c(list(z = zMat[1L, , drop = FALSE],
+                                   zCoef = zCoefMat[1L, , drop = FALSE]),
                               rrisk_args)), nTime)
             } else {
-                mapply(function(i, j) {
-                    do.call(rriskFun,
-                            c(list(z = zMat[i, ], zCoef = zCoefMat[j, ]),
-                              rrisk_args))
-                }, i = zMat_ind, j = zCoefMat_ind, USE.NAMES = FALSE)
+                do.call(rriskFun,
+                        c(list(z = zMat, zCoef = zCoefMat),
+                          rrisk_args))
             }
         rhoVec <- as.numeric(rhoMat %*% rhoCoef)
         rho_t <- frailtyEffect * rhoVec * covEffect
@@ -517,9 +512,9 @@ simEvent <- function(z = 0, zCoef = 1,
             ), call. = FALSE)
         ## else return
         list(rho_t = rho_t,
-             rhoMat = rhoMat[rhoMat_ind, , drop = FALSE],
-             zMat = zMat[zMat_ind, , drop = FALSE],
-             zCoefMat = zCoefMat[zCoefMat_ind, , drop = FALSE])
+             rhoMat = rhoMat,
+             zMat = zMat,
+             zCoefMat = zCoefMat)
     }
 
     ## step 1: calculate the supremum value of rate function
@@ -922,15 +917,21 @@ simEvent2data <- function(ID, obj) {
 
 ## exponential relative risk function
 .rrisk_exponential <- function(z, zCoef, ...) {
-    as.numeric(base::exp(z %*% zCoef))
+    sapply(seq_len(nrow(z)), function(i) {
+        as.numeric(base::exp(z[i, ] %*% zCoef[i, ]))
+    })
 }
 
 ## linear relative risk function
 .rrisk_linear <- function(z, zCoef, ...) {
-    1 + as.numeric(z %*% zCoef)
+    sapply(seq_len(nrow(z)), function(i) {
+        1 + as.numeric(z[i, ] %*% zCoef[i, ])
+    })
 }
 
 ## excess relative risk function
 .rrisk_excess <- function(z, zCoef, ...) {
-    exp(sum(log1p(z * zCoef)))
+    sapply(seq_len(nrow(z)), function(i) {
+        exp(sum(log1p(z[i, ] * zCoef[i, ])))
+    })
 }
