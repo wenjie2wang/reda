@@ -81,13 +81,15 @@ procedure.  Other arguments can be specified through a named list inside
 
 \item{relativeRisk}{Relateive risk function for incorporating the covariates
 and the covariate coefficients into the intensity function. The
-applicable choices include \code{exponential} (the default) for regular
-Cox model or Andersen-Gill model, \code{linear} for linear model
+applicable choices include \code{exponential} (the default) for the
+regular Cox model or Andersen-Gill model, \code{linear} for linear model
 (including an intercept term), and \code{excess} for excess model. A
 customized function can be specified. The specified function must have
-at least one argument named \code{z} for covariates and another argument
-named {zCoef} for covariate coefficients.  Other arguments can be
-specified through a named list inside \code{arguments}.}
+at least one argument named \code{z} for the covariate vector and
+another argument named {zCoef} for covariate coefficient vector.  The
+function should return a numeric value for given \code{z} vector and
+\code{zCoef} vector.  Other arguments can be specified through a named
+list inside \code{arguments}.}
 
 \item{method}{A character string specifying the method for generating
 simulated recurrent or survival data. The default method is thinning
@@ -130,16 +132,18 @@ the package vignettes in addition to the function documentation.
 \details{
 For each process, a time-invariant or time-varying baseline hazard rate
 (intensity) function of failure can be specified.  Covariates and their
-coefficients can be specified and are incorporated by default based on the
-Cox proportional hazard model (Cox 1972) for survival data or Andersen-Gill
-model (Andersen and Gill 1982) for recurrent events. Other relative risk
-function can be specified through the argument \code{relativeRisk}. In
-addition, a frailty effect can be considered.  Conditional on predictors (or
-covariates) and the unobserved frailty effect, the process is by default a
-Poisson process, where the interarrival times between two successive
-arrivals/events follow exponential distribution. A general renewal process
-can be specified through \code{interarrival} for other distributions of the
-interarrival times in addition to the exponential distribution.
+coefficients can be specified and incorporated by the specified relative
+risk functions. The default is the exponential relative risk function, which
+corresponds to the Cox proportional hazard model (Cox 1972) for survival
+data or Andersen-Gill model (Andersen and Gill 1982) for recurrent
+events. Other relative risk function can be specified through the argument
+\code{relativeRisk}. In addition, a frailty effect can be considered.
+Conditional on predictors (or covariates) and the unobserved frailty effect,
+the process is by default a Poisson process, where the interarrival times
+between two successive arrivals/events follow exponential distribution. A
+general renewal process can be specified through \code{interarrival} for
+other distributions of the interarrival times in addition to the exponential
+distribution.
 
 The thinning method (Lewis and Shedler 1979) is applied for bounded hazard
 rate function by default. The inversion method (Cinlar 1975) is also

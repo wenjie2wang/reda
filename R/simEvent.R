@@ -34,16 +34,18 @@ NULL
 ##'
 ##' For each process, a time-invariant or time-varying baseline hazard rate
 ##' (intensity) function of failure can be specified.  Covariates and their
-##' coefficients can be specified and are incorporated by default based on the
-##' Cox proportional hazard model (Cox 1972) for survival data or Andersen-Gill
-##' model (Andersen and Gill 1982) for recurrent events. Other relative risk
-##' function can be specified through the argument \code{relativeRisk}. In
-##' addition, a frailty effect can be considered.  Conditional on predictors (or
-##' covariates) and the unobserved frailty effect, the process is by default a
-##' Poisson process, where the interarrival times between two successive
-##' arrivals/events follow exponential distribution. A general renewal process
-##' can be specified through \code{interarrival} for other distributions of the
-##' interarrival times in addition to the exponential distribution.
+##' coefficients can be specified and incorporated by the specified relative
+##' risk functions. The default is the exponential relative risk function, which
+##' corresponds to the Cox proportional hazard model (Cox 1972) for survival
+##' data or Andersen-Gill model (Andersen and Gill 1982) for recurrent
+##' events. Other relative risk function can be specified through the argument
+##' \code{relativeRisk}. In addition, a frailty effect can be considered.
+##' Conditional on predictors (or covariates) and the unobserved frailty effect,
+##' the process is by default a Poisson process, where the interarrival times
+##' between two successive arrivals/events follow exponential distribution. A
+##' general renewal process can be specified through \code{interarrival} for
+##' other distributions of the interarrival times in addition to the exponential
+##' distribution.
 ##'
 ##' The thinning method (Lewis and Shedler 1979) is applied for bounded hazard
 ##' rate function by default. The inversion method (Cinlar 1975) is also
@@ -140,13 +142,15 @@ NULL
 ##'     \code{arguments}.
 ##' @param relativeRisk Relateive risk function for incorporating the covariates
 ##'     and the covariate coefficients into the intensity function. The
-##'     applicable choices include \code{exponential} (the default) for regular
-##'     Cox model or Andersen-Gill model, \code{linear} for linear model
+##'     applicable choices include \code{exponential} (the default) for the
+##'     regular Cox model or Andersen-Gill model, \code{linear} for linear model
 ##'     (including an intercept term), and \code{excess} for excess model. A
 ##'     customized function can be specified. The specified function must have
-##'     at least one argument named \code{z} for covariates and another argument
-##'     named {zCoef} for covariate coefficients.  Other arguments can be
-##'     specified through a named list inside \code{arguments}.
+##'     at least one argument named \code{z} for the covariate vector and
+##'     another argument named {zCoef} for covariate coefficient vector.  The
+##'     function should return a numeric value for given \code{z} vector and
+##'     \code{zCoef} vector.  Other arguments can be specified through a named
+##'     list inside \code{arguments}.
 ##' @param method A character string specifying the method for generating
 ##'     simulated recurrent or survival data. The default method is thinning
 ##'     method (Lewis and Shedler 1979). Another available option is the
@@ -355,7 +359,7 @@ simEvent <- function(z = 0, zCoef = 1,
     ## match relative risk function
     rriskNames <- c("exponential", "linear", "excess")
     rriskFun <- if (rriskFunIdx <- is.function(relativeRisk)) {
-                    relativeRisk
+                    .vectorize_rrisk(relativeRisk)
                 } else if (isCharVector(relativeRisk)) {
                     rriskInd <- pmatch(relativeRisk, rriskNames)[1L]
                     if (is.na(rriskInd))
@@ -586,18 +590,18 @@ simEvent <- function(z = 0, zCoef = 1,
         } else {
             ## if only the first event is of interest
             ## we may break the loop once we get the first event
-            batchNum <- 5
+            batchNum <- 10
             if ("n" %in% intArvArgs)
                 interarrivalArgs <- c(list(n = batchNum), interarrivalArgs)
+            xOut <- numeric(0)
             while (lastEventTime < endTime) {
-                xOut <- numeric(0)
                 W <- do.call(interarrival, interarrivalArgs)
                 if (! isNumVector(W) || any(W < 0))
                     stop("The interarrival times must be nonnegative!",
                          call. = FALSE)
                 ## step 3: update evnet times
-                eventTime <- c(eventTime, lastEventTime + cumsum(W))
-                lastEventTime <- eventTime[length(eventTime)]
+                eventTime <- lastEventTime + cumsum(W)
+                lastEventTime <- eventTime[batchNum]
                 ## only keep event time before end time
                 eventTime <- eventTime[eventTime <= endTime]
                 len_eventTime <- length(eventTime)
@@ -918,23 +922,11 @@ simEvent2data <- function(ID, obj) {
     out
 }
 
-## exponential relative risk function
-.rrisk_exponential <- function(z, zCoef, ...) {
-    sapply(seq_len(nrow(z)), function(i) {
-        as.numeric(base::exp(z[i, ] %*% zCoef[i, ]))
-    })
-}
-
-## linear relative risk function
-.rrisk_linear <- function(z, zCoef, ...) {
-    sapply(seq_len(nrow(z)), function(i) {
-        1 + as.numeric(z[i, ] %*% zCoef[i, ])
-    })
-}
-
-## excess relative risk function
-.rrisk_excess <- function(z, zCoef, ...) {
-    sapply(seq_len(nrow(z)), function(i) {
-        exp(sum(log1p(z[i, ] * zCoef[i, ])))
-    })
+## vectorize relative risk function based on input FUN
+.vectorize_rrisk <- function(FUN) {
+    function(z, zCoef, ...) {
+        sapply(seq_len(nrow(z)), function(i) {
+            as.numeric(FUN(z[i, ], zCoef[i, ], ...))
+        })
+    }
 }
