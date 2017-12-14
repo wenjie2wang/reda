@@ -6,8 +6,8 @@
 \title{Simulated Survival times or Recurrent Events}
 \usage{
 simEvent(z = 0, zCoef = 1, rho = 1, rhoCoef = 1, origin = 0, endTime = 3,
-         frailty = 1, recurrent = TRUE, interarrival = stats::rexp,
-         relativeRisk = c("exponential", "linear", "excess"),
+         frailty = 1, recurrent = TRUE, interarrival = "rexp",
+         relativeRisk = c("exponential", "linear", "excess", "none"),
          method = c("thinning", "inversion"), arguments = list(), ...)
 
 simEventData(nProcess, z = 0, origin = 0, endTime = 3, frailty = 1, ...)
@@ -30,7 +30,10 @@ perticular time point. The dimension of the \code{z} and \code{zCoef}
 \item{rho}{Baseline rate (or intensity) function for the Poisson process.
 The default is \code{1} for a homogenous process of unit intensity. This
 argument can be either a non-negative numeric value for a homogenous
-process or a function of times for a non-homogenous process.}
+process or a function of times for a non-homogenous process. In the
+latter case, the function should be able to take a vector of time points
+and return a numerical matrix (or vector) with each row representing the
+baseline hazard rate vector (or scalar value) at each time point.}
 
 \item{rhoCoef}{Coefficients of baseline rate function. The default value is
 \code{1}. It can be useful when \code{rho} is a function generating
@@ -56,25 +59,26 @@ that generate random numbers following a certain distribution from
 can be specified through a list named \code{frailty} in
 \code{arguments}. For example, if we consider Gamma distribution with
 mean one as the distribution of frailty effect, we may specify
-\code{frailty = stats::rgamma}. The shape and scale parameter needs to
-be specified through a list named \code{frailty} in \code{arguments},
-such as \code{arguments = list(frailty = list(shape = 2, scale = 0.5))}.}
+\code{frailty = "rgamma"}. The shape and scale parameter needs to be
+specified through a list named \code{frailty} in \code{arguments}, such
+as \code{arguments = list(frailty = list(shape = 2, scale = 0.5))}.}
 
 \item{recurrent}{A logical value with default value \code{TRUE} indicating
 whether to generate recurrent event data or survival data.}
 
 \item{interarrival}{A function object for randomly generating (positive)
 interarrival time between two successive arrivals/events.  The default
-value is \code{stats::rexp} for generating interarrival times following
-exponential distribution, which leads to a Poisson process. If the
-assumption of exponential interarrival times cannot be justified, we may
-consider a renewal process, (a generalization of Poisson process), in
-which interarrival times between events independently follows an
-identical distribution. A customized function can be specified in this
-case. It must have at least one argument named \code{rate} for the
-expected number of arrivals/events in unit time and returns one positive
-numerical value. If the function contains an argument named \code{n}, it
-is assumed that the function returns \code{n} interarrival times in one
+value is \code{"rexp"} (i.e., function \code{\link[stats]{rexp}}) for
+generating interarrival times following exponential distribution, which
+leads to a Poisson process. If the assumption of exponential
+interarrival times cannot be justified, we may consider a renewal
+process, (a generalization of Poisson process), in which interarrival
+times between events independently follows an identical distribution. A
+customized function can be specified in this case. It must have at least
+one argument named \code{rate} for the expected number of
+arrivals/events in unit time and returns one positive numerical
+value. If the function contains an argument named \code{n}, it is
+assumed that the function returns \code{n} interarrival times in one
 function call to possibly speed up the random number generation
 procedure.  Other arguments can be specified through a named list inside
 \code{arguments}.}
@@ -83,11 +87,12 @@ procedure.  Other arguments can be specified through a named list inside
 and the covariate coefficients into the intensity function. The
 applicable choices include \code{exponential} (the default) for the
 regular Cox model or Andersen-Gill model, \code{linear} for linear model
-(including an intercept term), and \code{excess} for excess model. A
-customized function can be specified. The specified function must have
-at least one argument named \code{z} for the covariate vector and
-another argument named {zCoef} for covariate coefficient vector.  The
-function should return a numeric value for given \code{z} vector and
+(including an intercept term), \code{excess} for excess model, and
+\code{none} for not incorporating the covariates through a relative risk
+function. A customized function can be specified. The specified function
+must have at least one argument named \code{z} for the covariate vector
+and another argument named {zCoef} for covariate coefficient vector.
+The function should return a numeric value for given \code{z} vector and
 \code{zCoef} vector.  Other arguments can be specified through a named
 list inside \code{arguments}.}
 
@@ -242,7 +247,7 @@ simEvent(z = c(0.5, 1), zCoef = c(1, 0), frailty = rgamma,
 
 ## lognormal with mean zero (on the log scale)
 set.seed(123)
-simEvent(z = c(0.5, 1), zCoef = c(1, 0), frailty = rlnorm,
+simEvent(z = c(0.5, 1), zCoef = c(1, 0), frailty = "rlnorm",
          arguments = list(frailty = list(sdlog = 1)))
 ## or equivalently
 set.seed(123)
