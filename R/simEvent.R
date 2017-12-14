@@ -525,7 +525,7 @@ simEvent <- function(z = 0, zCoef = 1,
                 "The relative risk function should return positive values."
             ), call. = FALSE)
         ## the rate function has to be non-negative
-        if (any(rho_t < 0))
+        if (any(is.na(rho_t) || rho_t < 0))
             stop(wrapMessages(
                 "The rate function has to be non-negative",
                 "from `origin` to `endTime`."
@@ -903,6 +903,83 @@ simEventData <- function(nProcess = 1,
     row.names(out) <- NULL
     ## return
     out
+}
+
+
+##' Parametrizations of Covariates and Covariate Coefficients
+##'
+##' This function helps the parametrizations of covariates and covariate
+##' coeffcients when users specify a general hazard rate function in function
+##' \code{simEvent} and \code{simEventData}. It applies the specified function
+##' (or the built-in option) \code{FUN} to the \eqn{i_{th}} row of the covariate
+##' matrix \code{z} and the \eqn{i_{th}} row of the coefficient matrix,
+##' iteratively, for \eqn{i} from one to the number of rows of the covariate
+##' matrix \code{z}.
+##'
+##' @usage
+##' parametrize(z, zCoef, FUN = c("exponential", "linear", "excess"), ...)
+##'
+##' @param z A numeric matrix, each row of which represents the covariate vector
+##'     at one perticular time point.
+##' @param zCoef A numeric matrix, each row of which represents the covariate
+##'     coeffcient vector at one perticular time point.
+##' @param FUN The parametrization of the model parameter(s) with covariates and
+##'     covariate coefficients. The built-in options include
+##'     \code{"exponential"}, \code{"linear"}, \code{"excess"} for
+##'     parametrization in the exponential, linear, excess relative risk model
+##'     form, respectively. It can also be a function that at least has argument
+##'     \code{z} and \code{zCoef} for incorporating the covariates and covariate
+##'     coefficients into the model. The user-specified function should expect
+##'     that both the input \code{z} and \code{zCoef} are numeric vectors and
+##'     return a numeric value (or can be convected to a numeric value by
+##'     \code{as.numeric}).
+##' @param ... Other arguments that can be passed to the function \code{FUN}.
+##'
+##' @return A numeric vector.
+##' @examples
+##' ## time points
+##' timeVec <- c(0.5, 2)
+##' ## time-variant covariates
+##' zMat <- cbind(0.5, ifelse(timeVec > 1, 1, 0))
+##' ## time-varying coefficients
+##' zCoefMat <- cbind(sin(timeVec), timeVec)
+##'
+##' ## the following three ways are equivalent for the exponential form,
+##' ## where the first one (using the built-in option) has the best performance
+##' parametrize(zMat, zCoefMat, FUN = "exponential")
+##' parametrize(zMat, zCoefMat, function(z, zCoef) exp(z %*% zCoef))
+##' sapply(1 : 2, function(i) as.numeric(exp(zMat[i, ] %*% zCoefMat[i, ])))
+##'
+##' @seealso \code{simEvent}
+##' @export
+parametrize <- function(z, zCoef,
+                        FUN = c("exponential", "linear", "excess"),
+                        ...)
+{
+    if (isCharVector(FUN)) {
+        funNames <- c("exponential", "linear", "excess", "none")
+        idx <- pmatch(FUN, funNames)[1L]
+        if (is.na(idx)) {
+            FUN <- match.fun(FUN)
+        } else {
+            FUN <- switch(funNames[idx],
+                          "exponential" = rrisk_exponential,
+                          "linear" = rrisk_linear,
+                          "excess" = rrisk_excess,
+                          "none" = rrisk_none)
+            return(FUN(z = z, zCoef))
+        }
+    }
+    if (is.function(FUN)) {
+        do.call(.vectorize_rrisk(FUN),
+                c(list(z = z, zCoef = zCoef),
+                  list(...)["..." %in% names(as.list(args(FUN)))]
+                  ))
+    } else {
+        stop(wrapMessages(
+            "Cannot found the function `FUN`."
+        ), call. = FALSE)
+    }
 }
 
 
