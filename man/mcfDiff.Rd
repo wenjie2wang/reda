@@ -4,7 +4,7 @@
 \name{mcfDiff}
 \alias{mcfDiff}
 \alias{-,mcf.formula,mcf.formula-method}
-\alias{-,mcf.formula-method}
+\alias{`-`,mcf.formula-method}
 \alias{mcfDiff.test}
 \title{Comparing Two-Sample MCFs}
 \usage{

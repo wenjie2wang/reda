@@ -219,7 +219,7 @@ mcfDiff <- function(mcf1, mcf2 = NULL, level = 0.95, ...)
 
 
 ##' @rdname mcfDiff
-##' @aliases -,mcf.formula-method
+##' @aliases `-`,mcf.formula-method
 ##'
 ##' @param e1 The first \code{mcf.formula} object, \code{mcf1}.
 ##' @param e2 The second \code{mcf.formula} object, \code{mcf2}.
