@@ -6,11 +6,8 @@ output:
   rmarkdown::html_document:
     toc: true
     toc_depth: 2
-    toc_float:
-      collapsed: false
-      smooth_scroll: false
-bibliography:
-- ../inst/bib/reda.bib
+    toc_float: true
+bibliography: ../inst/bib/reda.bib
 vignette: >
   %\VignetteIndexEntry{Introduction to reda through Examples}
   %\VignetteEngine{knitr::rmarkdown}
@@ -20,9 +17,9 @@ vignette: >
 
 In this vignette, we introduce how to explore recurrent event data by
 nonparametric sample mean function (also called Nelson-Aalen estimator) and
-modeling the event counts of interest by gamma frailty model with the **R**
-package **reda** through examples. Most functions in the package are S4 methods
-that produce S4 class objects.  The details of function syntax and the produced
+modeling the event counts of interest by gamma frailty model with the **reda**
+package through examples. Most functions in the package are S4 methods that
+produce S4 class objects.  The details of function syntax and the produced
 objects are available in the package manual, which will thus not be covered in
 this vignette.
 
@@ -81,7 +78,9 @@ The subject's ID will be pinpointed (in most cases) if its observation violates
 any given checking rule.
 
 
-# Sample mean cumulative function {#mcf-formula}
+# Exploratory analysis
+
+## Computing sample MCF {#mcf-formula}
 
 The nonparametric sample mean cumulative function (MCF) is also called
 Nelson-Aalen Estimator [@nelson2003siam]. The point estimate of MCF at each time
@@ -177,7 +176,7 @@ and a narrower confidence band. In practice, the Lawless and Nadeau method is
 suggested if it is hard to justify the Poisson process assumption.
 
 
-## Comparing Two-Sample MCFs {#mcfDiff}
+## Comparing two-sample MCFs {#mcfDiff}
 
 The function `mcfDiff.test` is an implementation of the pseudo-score tests for
 comparing two-sample MCFs proposed by @cook1996biometrics, while the function
@@ -216,7 +215,7 @@ comparison.
 plot(mcf_diff0)
 ```
 
-# Fitting gamma frailty model {#rateReg}
+# Gamma frailty model {#rateReg}
 
 ## Model with constant rate function {#constFit}
 
