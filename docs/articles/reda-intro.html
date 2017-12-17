@@ -78,13 +78,13 @@
       <h1>Introduction to reda through Examples</h1>
                         <h4 class="author">Wenjie Wang</h4>
             
-            <h4 class="date">2017-12-09</h4>
+            <h4 class="date">2017-12-17</h4>
           </div>
 
     
     
 <div class="contents">
-<p>In this vignette, we introduce how to explore recurrent event data by nonparametric sample mean function (also called Nelson-Aalen estimator) and modeling the event counts of interest by gamma frailty model with the <strong>R</strong> package <strong>reda</strong> through examples. Most functions in the package are S4 methods that produce S4 class objects. The details of function syntax and the produced objects are available in the package manual, which will thus not be covered in this vignette.</p>
+<p>In this vignette, we introduce how to explore recurrent event data by nonparametric sample mean function (also called Nelson-Aalen estimator) and modeling the event counts of interest by gamma frailty model with the <strong>reda</strong> package through examples. Most functions in the package are S4 methods that produce S4 class objects. The details of function syntax and the produced objects are available in the package manual, which will thus not be covered in this vignette.</p>
 <section id="introduction" class="level1"><h1>Introduction</h1>
 <section id="simuDat" class="level2"><h2>Simulated recurrent event data</h2>
 <pre class="sourceCode r" id="cb1"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="kw">library</span>(reda)</a></code></pre>
@@ -130,7 +130,8 @@
 <li>Subjects may have different time origins. But one subject must has only one time origin.</li>
 </ul>
 <p>The subject’s ID will be pinpointed (in most cases) if its observation violates any given checking rule.</p>
-</section></section><section id="mcf-formula" class="level1"><h1>Sample mean cumulative function</h1>
+</section></section><section id="exploratory-analysis" class="level1"><h1>Exploratory analysis</h1>
+<section id="mcf-formula" class="level2"><h2>Computing sample MCF</h2>
 <p>The nonparametric sample mean cumulative function (MCF) is also called Nelson-Aalen Estimator <span class="citation" data-cites="nelson2003siam">(Nelson 2003)</span>. The point estimate of MCF at each time point does not assume any particular underlying model. The variance estimates at each time point is computed by the Lawless and Nadeau method <span class="citation" data-cites="lawless1995technometrics">(Lawless and Nadeau 1995)</span>, Poisson process method or based on the well-known bootstrap method <span class="citation" data-cites="efron1979aos">(Efron 1979)</span> with subjects as resampling units. The approximate confidence intervals are provided as well, which are constructed based on the asymptotic normality of the MCF estimates itself (the default) or logarithm of the MCF estimates.</p>
 <p>The function <code>mcf</code> is a generic function for the MCF estimates from a sample data or a fitted gamma frailty model (as demonstrated later). If a formula with <code>Survr</code> as response is specified in function <code>mcf</code>, the formula method for estimating the sample MCF will be called. The covariate specified at the right hand side of the formula should be either <code>1</code> or any “linear” combination of factor variables in the data. The former computes the overall sample MCF. The latter computes the sample MCF for each level of the combination of the factor variable(s) specified, respectively.</p>
 <p>The valve-seat dataset in <span class="citation" data-cites="nelson1995technometrics">Nelson (1995)</span> and the simulated sample data are used for demonstration as follows:</p>
@@ -175,7 +176,7 @@
 <a class="sourceLine" id="cb10-6" data-line-number="6"><span class="st">    </span><span class="kw"><a href="http://www.rdocumentation.org/packages/ggplot2/topics/labs">xlab</a></span>(<span class="st">"Days"</span>) <span class="op">+</span><span class="st"> </span><span class="kw"><a href="http://www.rdocumentation.org/packages/ggplot2/topics/labs">ylab</a></span>(<span class="st">"Confidence intervals"</span>) <span class="op">+</span><span class="st"> </span><span class="kw"><a href="http://www.rdocumentation.org/packages/ggplot2/topics/ggtheme">theme_bw</a></span>()</a></code></pre>
 <p><img src="reda-intro_files/figure-html/plot:mcfCI-1.png" width="672"></p>
 <p>From the comparison, we may find that the SE estimates and the confidence intervals from the Lawless and Nadaeu method and the bootstrap method have good agreement, while the Poisson process method gives slightly smaller SE estimates and a narrower confidence band. In practice, the Lawless and Nadeau method is suggested if it is hard to justify the Poisson process assumption.</p>
-<section id="mcfDiff" class="level2"><h2>Comparing Two-Sample MCFs</h2>
+</section><section id="mcfDiff" class="level2"><h2>Comparing two-sample MCFs</h2>
 <p>The function <code>mcfDiff.test</code> is an implementation of the pseudo-score tests for comparing two-sample MCFs proposed by <span class="citation" data-cites="cook1996biometrics">Cook, Lawless, and Nadeau (1996)</span>, while the function <code>mcfDiff</code> gives the difference estimates and wraps the pseudo-score testing results from <code>mcfDiff.test</code> (by default).</p>
 <p>Suppose we are interested in comparing the two-sample MCFs between the treatment and control group in the simulated data. We may simply feed the <code>mcf.formula</code> object returned from the function <code>mcf</code> to function <code>mcfDiff</code> as follows:</p>
 <pre class="sourceCode r" id="cb11"><code class="sourceCode r"><a class="sourceLine" id="cb11-1" data-line-number="1">## one sample MCF object of two groups</a>
@@ -211,7 +212,7 @@
 <p>Similarly, a <code>plot</code> method based on <strong>ggplot2</strong> is available for visual comparison.</p>
 <pre class="sourceCode r" id="cb15"><code class="sourceCode r"><a class="sourceLine" id="cb15-1" data-line-number="1"><span class="kw">plot</span>(mcf_diff0)</a></code></pre>
 <p><img src="reda-intro_files/figure-html/plot:mcfDiff-1.png" width="672"></p>
-</section></section><section id="rateReg" class="level1"><h1>Fitting gamma frailty model</h1>
+</section></section><section id="rateReg" class="level1"><h1>Gamma frailty model</h1>
 <section id="constFit" class="level2"><h2>Model with constant rate function</h2>
 <p>The default model when argument <code>df</code>, <code>knots</code>, and <code>degree</code> are not specified is gamma frailty model with (one piece) constant rate function, which is equivalent to negative binomial regression with the same shape and rate parameter in the gamma prior.</p>
 <pre class="sourceCode r" id="cb16"><code class="sourceCode r"><a class="sourceLine" id="cb16-1" data-line-number="1">(constFit &lt;-<span class="st"> </span><span class="kw"><a href="../reference/rateReg.html">rateReg</a></span>(<span class="kw"><a href="../reference/Survr.html">Survr</a></span>(ID, time, event) <span class="op">~</span><span class="st"> </span>group <span class="op">+</span><span class="st"> </span>x1, <span class="dt">data =</span> simuDat))</a></code></pre>
@@ -498,12 +499,13 @@
       </ul>
 </li>
       <li>
-<a href="#mcf-formula">Sample mean cumulative function</a><ul class="nav nav-pills nav-stacked">
-<li><a href="#mcfDiff">Comparing Two-Sample MCFs</a></li>
+<a href="#exploratory-analysis">Exploratory analysis</a><ul class="nav nav-pills nav-stacked">
+<li><a href="#mcf-formula">Computing sample MCF</a></li>
+      <li><a href="#mcfDiff">Comparing two-sample MCFs</a></li>
       </ul>
 </li>
       <li>
-<a href="#rateReg">Fitting gamma frailty model</a><ul class="nav nav-pills nav-stacked">
+<a href="#rateReg">Gamma frailty model</a><ul class="nav nav-pills nav-stacked">
 <li><a href="#constFit">Model with constant rate function</a></li>
       <li><a href="#piecesFit">Model with piecewise constant rate function</a></li>
       <li><a href="#splineFit">Model with spline rate function</a></li>

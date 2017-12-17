@@ -78,7 +78,7 @@
       <h1>Simulate Survival and Recurrent Event Data with reda</h1>
                         <h4 class="author">Wenjie Wang</h4>
             
-            <h4 class="date">2017-12-09</h4>
+            <h4 class="date">2017-12-17</h4>
           </div>
 
     
@@ -87,15 +87,30 @@
 <p>In this vignette, we briefly introduce how to simulate survival and recurrent event data from stochastic process point of view with the <strong>reda</strong> package. The core function named <code>simEvent</code> provides an intuitive and flexible interface for simulating survival and recurrent event times from one stochastic process. Another function named <code>simEventData</code> is simply a wrapper that calls <code>simEvent</code> internally and collects the event times and the covariates of a given number of processes into a data frame. Examples of generating random samples from common survival and recurrent models are provided. The details of function syntax and the objects produced are available in the package manual and thus not covered in this vignette.</p>
 <section id="intro" class="level1"><h1>Introduction</h1>
 <section id="intensity" class="level2"><h2>Intensity function</h2>
-<p>We first introduce the general form of hazard rate function considered and implemented in the function <code>simEvent</code>.</p>
-<p>Consider <span class="math inline">\(n\)</span> stochastic processes with the baseline hazard rate function <span class="math inline">\(\rho(t)\)</span> of time <span class="math inline">\(t\)</span>. For the stochastic process <span class="math inline">\(i\)</span>, <span class="math inline">\(i\in\{1,\ldots,n\}\)</span>, let <span class="math inline">\(\mathbf{z}_i=(z_{i1},\ldots,z_{ip})^{\top}\)</span> denote the covariate vector of length <span class="math inline">\(p\)</span>, and <span class="math inline">\(\boldsymbol{\beta}=(\beta_1,\ldots,\beta_p)^{\top}\)</span> denote the covariate coefficients. We may incorporate the covariates and their coefficients into the stochastic process by specifying the intensity as a function of time <span class="math inline">\(t\)</span> and the covariates <span class="math inline">\(\mathbf{z}_i\)</span> as follows: <span class="math display">\[\lambda(t
-\mid \mathbf{z}_i) = \rho(t)\,r(\mathbf{z}_i, \boldsymbol{\beta}),\]</span> where <span class="math inline">\(r(\mathbf{z}_i, \boldsymbol{\beta})\)</span> is the relative risk function. For the regular Cox model <span class="citation" data-cites="cox1972jrssb">(Cox 1972)</span> or the Andersen-Gill model <span class="citation" data-cites="andersen1982aos">(Andersen and Gill 1982)</span>, <span class="math inline">\(r(\mathbf{z}_i, \boldsymbol{\beta})= \exp\{\boldsymbol{\beta}^{\top}\mathbf{z}_i\}\)</span>. Other common choices include the linear relative risk model: <span class="math inline">\(r(\mathbf{z}_i, \boldsymbol{\beta}) = 1 + \boldsymbol{\beta}^{\top}\mathbf{z}_i\)</span>, and the excess relative risk model: <span class="math inline">\(r(\mathbf{z}_i, \boldsymbol{\beta}) = \prod_{j=1}^p(1 + \beta_j z_{ij})\)</span>.</p>
-<p>We may extend the model by considering a random frailty effect <span class="math inline">\(w_i\)</span> (with expectation one) to account for heterogeneity between different processes or processes from different clusters. The intensity function becomes <span class="math display">\[\lambda(t
-\mid \mathbf{z}_i, w_i) = \rho(t)\,r(\mathbf{z}_i, \boldsymbol{\beta})\,w_i.\]</span> The common choices for distribution of the random frailty effect include Gamma distribution of mean one, and lognormal distribution of mean zero in logarithm scale.</p>
-<p>Furthermore, both covariates and coefficients may be time-varying. So the general form of the intensity function is given as follows: <span class="math display">\[\lambda\bigl(t
-\mid \mathbf{z}_i(t), w_i\bigr) = \rho(t)\,r\bigl(\mathbf{z}_i(t),
-\boldsymbol{\beta}(t)\bigr)\,w_i.\]</span></p>
-</section><section id="sampling-methods" class="level2"><h2>Sampling methods</h2>
+<p>We introduce the general form of hazard rate function considered and implemented in the function <code>simEvent</code>, which can be generalized to two classes called the relative risk model, and the accelerated failure time model. The introduction is based on Section 2.2 and Section 2.3 of <span class="citation" data-cites="kalbfleisch2002wiley">Kalbfleisch and Prentice (2002)</span>. Other helpful references include <span class="citation" data-cites="aalen2008springer">Aalen, Borgan, and Gjessing (2008)</span>, <span class="citation" data-cites="kleinbaum2011springer">Kleinbaum and Klein (2011)</span>, among others.</p>
+<p>Let’s consider <span class="math inline">\(n\)</span> stochastic processes with the baseline hazard rate function <span class="math inline">\(\rho(t)\)</span> of time <span class="math inline">\(t\)</span>. For the stochastic process <span class="math inline">\(i\)</span>, <span class="math inline">\(i\in\{1,\ldots,n\}\)</span>, let <span class="math inline">\(\mathbf{z}_i=(z_{i1},\ldots,z_{ip})^{\top}\)</span> denote the covariate vector of length <span class="math inline">\(p\)</span>, and <span class="math inline">\(\boldsymbol{\beta}=(\beta_1,\ldots,\beta_p)^{\top}\)</span> denote the covariate coefficients.</p>
+<section id="relative-risk-model" class="level3"><h3>Relative risk model</h3>
+<p>Given the covariates <span class="math inline">\(\mathbf{z}_i\)</span> (not including the intercept term), the intensity function of time <span class="math inline">\(t\)</span> for the relative risk regression model can be specified as follows: <span class="math display">\[\lambda(t \mid \mathbf{z}_i) = \rho(t)\,r(\mathbf{z}_i,
+\boldsymbol{\beta}),\]</span> where <span class="math inline">\(r(\mathbf{z}_i, \boldsymbol{\beta})\)</span> is the relative risk function. For the Cox model <span class="citation" data-cites="cox1972jrssb">(Cox 1972)</span> and the Andersen-Gill model <span class="citation" data-cites="andersen1982aos">(Andersen and Gill 1982)</span>, <span class="math inline">\(r(\mathbf{z}_i, \boldsymbol{\beta})= \exp\{\boldsymbol{\beta}^{\top}\mathbf{z}_i\}\)</span>. Other common choices include the linear relative risk function: <span class="math inline">\(r(\mathbf{z}_i, \boldsymbol{\beta}) = 1 + \boldsymbol{\beta}^{\top}\mathbf{z}_i\)</span>, and the excess relative risk function: <span class="math inline">\(r(\mathbf{z}_i, \boldsymbol{\beta}) = \prod_{j=1}^p(1 + \beta_j z_{ij})\)</span>, both of which, however, suffer from the drawback that the <span class="math inline">\(r(\mathbf{z}_i, \boldsymbol{\beta})\)</span> is not necessarily positive. Therefore, the coefficient estimates must be restricted to guarantee that the relative risk function is positive for all possible covariates. The restriction disappears for the exponential relative risk function since it always returns positive values.</p>
+<p>We may extend the model by considering a random frailty effect <span class="math inline">\(u_i\)</span> (of expectation one) to account for heterogeneity between different processes or processes from different clusters. The intensity function becomes <span class="math display">\[\lambda(t
+\mid \mathbf{z}_i, u_i) = u_i\,\rho(t)\,r(\mathbf{z}_i, \boldsymbol{\beta}).\]</span> The common choices for distribution of the random frailty effect include Gamma distribution of mean one, and lognormal distribution of mean zero in logarithm scale.</p>
+<p>Furthermore, both covariates and coefficients may be time-varying. So a general form of the intensity function for the relative risk model is given as follows: <span class="math display">\[\lambda\bigl(t \mid \mathbf{z}_i(t), u_i\bigr) =
+u_i\,\rho(t)\,r\bigl(\mathbf{z}_i(t), \boldsymbol{\beta}(t)\bigr).\]</span></p>
+</section><section id="accelerated-failure-time-model" class="level3"><h3>Accelerated failure time model</h3>
+<p>The relative risk models incorporate the covariates and their coefficients through a relative risk function multiplied by the baseline hazard rate, which provides an intuitive interpretation. However, we may consider a direct relationship between the covraiates <span class="math inline">\(\mathbf{z}\)</span> (including the intercept term) and the time to failure <span class="math inline">\(T&gt;0\)</span>, <span class="math inline">\(\log(T) = \alpha + \sigma W\)</span>, where <span class="math inline">\(W\)</span> is a standardized random error variable with density function <span class="math inline">\(f_W(w)\)</span>, suvival function <span class="math inline">\(S_W(w)\)</span> and hazard function <span class="math inline">\(\rho(w) = f_W(w) / S_W(w)\)</span>, <span class="math inline">\(\sigma\)</span> represents the standard error, and <span class="math inline">\(\alpha = \boldsymbol{\beta}^{\top}\mathbf{z}\)</span>. We assume that <span class="math inline">\(W\)</span> is independent of <span class="math inline">\(\boldsymbol{\beta}\)</span> given the covariates <span class="math inline">\(\mathbf{z}\)</span>. Taking exponentiation gives <span class="math inline">\(T=\exp(\boldsymbol{\beta}^{\top}\mathbf{z})\exp(W)\)</span> with density <span class="math inline">\(f_T(t) = \frac{1}{\sigma t}f_W\bigl((\log(t) - \alpha)/\sigma\bigr)\)</span>, survival function <span class="math inline">\(S_T(t) = S_W\bigl((\log(t) - \alpha)/\sigma\bigr)\)</span>, and hazard function <span class="math display">\[\lambda(t \mid \mathbf{z}_i) = \frac{1}{\sigma t}\rho\bigl((\log(t) -
+\alpha)/\sigma\bigr).\]</span> Let <span class="math inline">\(\lambda_{\mathbf{z}}=\exp(- \alpha)\)</span> and <span class="math inline">\(p = 1 / \sigma\)</span>, we may rewrite the hazard function as follows: <span class="math display">\[\lambda(t \mid
+\mathbf{z}_i) = \frac{p}{t}\rho\bigl(p\log(\lambda_{\mathbf{z}} t)\bigr).\]</span> The resulting model is called accelerated failure time (AFT) model.</p>
+<p>For example, suppose <span class="math inline">\(W\)</span> follows standard logistic distribution with density <span class="math inline">\(f_W(w) = e^w / (1 + e^w) ^ 2\)</span>, survival function <span class="math inline">\(S_W(w) = 1 / (1 + e^w)\)</span>, and hazard function <span class="math inline">\(\rho(w) = e^w / (1 + e^w)\)</span>. This leads to log-logistic model of <span class="math inline">\(T\)</span> with hazard function <span class="math display">\[\lambda(t \mid \mathbf{z}_i) = \frac{p
+(t\lambda_{\mathbf{z}})^p/t}{1 + (t\lambda_{\mathbf{z}})^p}.\]</span></p>
+<p>Similarly, we may further consider frailty factor, time-variant covariates, and time-varying covariate coefficients. So a general form of the intensity function may be given as follows: <span class="math display">\[\lambda\bigl(t \mid \mathbf{z}_i(t), u_i\bigr) =
+\frac{u_i\,p}{t}\,\rho\bigl( p \log(t) -
+p \boldsymbol{\beta}(t)^{\top}\mathbf{z}_i(t)\bigr).\]</span></p>
+</section><section id="intensity-function-in-general-form" class="level3"><h3>Intensity function in general form</h3>
+<p>The function <code>simEvent</code> and <code>simEventData</code> allow users to specify an intensity function in an even more general form given below. <span class="math display">\[\lambda\bigl(t \mid
+\mathbf{z}_i(t), u_i\bigr) = u_i\,\rho\bigl(t, \mathbf{z}_i(t),
+\boldsymbol{\beta}(t)\bigr) \,r\bigl(\mathbf{z}_i(t),
+\boldsymbol{\beta}(t)\bigr),\]</span> where <span class="math inline">\(u_i\)</span>, <span class="math inline">\(\rho(\cdot)\)</span>, and <span class="math inline">\(r(\cdot)\)</span> corresponds to the argument <code>frailty</code>, <code>rho</code>, and <code>relativeRisk</code>, respectively.</p>
+</section></section><section id="sampling-methods" class="level2"><h2>Sampling methods</h2>
 <p>The thinning method <span class="citation" data-cites="lewis1979nrlq">(Lewis and Shedler 1979)</span> and the inversion method <span class="citation" data-cites="cinlar1975printice">(Çinlar 1975)</span> are implemented for sampling event times. It can be shown that both methods achieve the given hazard rate. For function <code>simEvent</code>, the thinning method is the default method when the hazard rate function is bounded within follow-ups. Otherwise, the inversion method will be used. We may specify the sampling method via the argument <code>method</code> in function <code>simEvent</code> and <code>simEventData</code>.</p>
 </section></section><section id="getting-started" class="level1"><h1>Getting started</h1>
 <pre class="sourceCode r" id="cb1"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="kw">library</span>(reda)                    <span class="co"># attach reda package to the search path</span></a>
@@ -113,67 +128,62 @@
 <pre class="sourceCode r" id="cb6"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" data-line-number="1">## HPP from 0 to 10 of baseline hazard rate 0.5 with two covariates</a>
 <a class="sourceLine" id="cb6-2" data-line-number="2"><span class="kw"><a href="../reference/simEvent.html">simEvent</a></span>(<span class="dt">z =</span> <span class="kw">c</span>(<span class="fl">0.2</span>, <span class="fl">0.5</span>), <span class="dt">zCoef =</span> <span class="kw">c</span>(<span class="fl">0.5</span>, <span class="op">-</span><span class="st"> </span><span class="fl">0.1</span>), <span class="dt">rho =</span> <span class="fl">0.5</span>, <span class="dt">endTime =</span> <span class="dv">10</span>)</a></code></pre>
 <pre><code>## 'simEvent' S4 class object:
-## [1] 2.57 5.14 7.36</code></pre>
+## [1] 0.717 1.076 2.692 5.666 6.577 7.701</code></pre>
 <p>The function <code>simEventData</code> enable us to simulate multiple processes and collect the simulated event times into a survival or recurrent event data format.</p>
 <pre class="sourceCode r" id="cb8"><code class="sourceCode r"><a class="sourceLine" id="cb8-1" data-line-number="1">## recurrent events from two processes with same covariates</a>
 <a class="sourceLine" id="cb8-2" data-line-number="2"><span class="kw"><a href="../reference/simEvent.html">simEventData</a></span>(<span class="dv">2</span>, <span class="dt">z =</span> <span class="kw">c</span>(<span class="fl">0.2</span>, <span class="fl">0.5</span>), <span class="dt">zCoef =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="op">-</span><span class="st"> </span><span class="fl">0.5</span>), <span class="dt">rho =</span> <span class="fl">0.5</span>, <span class="dt">endTime =</span> <span class="dv">5</span>)</a></code></pre>
-<pre><code>##   ID  time event origin X.1 X.2
-## 1  1 2.759     1      0 0.2 0.5
-## 2  1 2.949     1      0 0.2 0.5
-## 3  1 3.593     1      0 0.2 0.5
-## 4  1 5.000     0      0 0.2 0.5
-## 5  2 0.887     1      0 0.2 0.5
-## 6  2 3.696     1      0 0.2 0.5
-## 7  2 5.000     0      0 0.2 0.5</code></pre>
+<pre><code>##   ID time event origin X.1 X.2
+## 1  1 3.38     1      0 0.2 0.5
+## 2  1 5.00     0      0 0.2 0.5
+## 3  2 1.84     1      0 0.2 0.5
+## 4  2 5.00     0      0 0.2 0.5</code></pre>
 <p>In the example given above, the number of process is explicitly specified to be two. However, if it is not specified, it will be the number of rows of the covariate matrix. See the example given below.</p>
 <pre class="sourceCode r" id="cb10"><code class="sourceCode r"><a class="sourceLine" id="cb10-1" data-line-number="1">## recurrent events from two processes</a>
 <a class="sourceLine" id="cb10-2" data-line-number="2">## with different time-invariant covariates and time origins</a>
 <a class="sourceLine" id="cb10-3" data-line-number="3"><span class="kw"><a href="../reference/simEvent.html">simEventData</a></span>(<span class="dt">z =</span> <span class="kw">cbind</span>(<span class="kw">rnorm</span>(<span class="dv">2</span>), <span class="fl">0.5</span>), <span class="dt">zCoef =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="op">-</span><span class="st"> </span><span class="fl">0.5</span>),</a>
 <a class="sourceLine" id="cb10-4" data-line-number="4">             <span class="dt">rho =</span> <span class="fl">0.2</span>, <span class="dt">origin =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">0</span>), <span class="dt">endTime =</span> <span class="kw">c</span>(<span class="dv">10</span>, <span class="dv">9</span>))</a></code></pre>
-<pre><code>##   ID  time event origin    X.1 X.2
-## 1  1  7.49     1      1 -1.072 0.5
-## 2  1 10.00     0      1 -1.072 0.5
-## 3  2  3.05     1      0  0.304 0.5
-## 4  2  5.76     1      0  0.304 0.5
-## 5  2  6.79     1      0  0.304 0.5
-## 6  2  9.00     0      0  0.304 0.5</code></pre>
+<pre><code>##   ID  time event origin   X.1 X.2
+## 1  1  4.91     1      1 0.838 0.5
+## 2  1  6.31     1      1 0.838 0.5
+## 3  1  7.04     1      1 0.838 0.5
+## 4  1 10.00     0      1 0.838 0.5
+## 5  2  3.44     1      0 0.153 0.5
+## 6  2  6.68     1      0 0.153 0.5
+## 7  2  9.00     0      0 0.153 0.5</code></pre>
 <p>We can also simulate survival data by taking the first event of each process. Setting <code>recurrent = FALSE</code> in function <code>simEvent</code> (or function <code>simEventData</code>) gives us the survival time(s) or the right censoring time(s). In the example given below, we specified <code>endTime = "rnorm"</code> and <code>arguments = list(endTime = list(mean = 10))</code> for generating a random censoring times from normal distribution with mean ten and unit standard deviation. Also note that the specified <code>origin</code> is recycled for these ten processes.</p>
 <pre class="sourceCode r" id="cb12"><code class="sourceCode r"><a class="sourceLine" id="cb12-1" data-line-number="1">## survival data by set 'recurrent = FALSE'</a>
 <a class="sourceLine" id="cb12-2" data-line-number="2"><span class="kw"><a href="../reference/simEvent.html">simEventData</a></span>(<span class="dt">z =</span> <span class="kw">cbind</span>(<span class="kw">rnorm</span>(<span class="dv">10</span>), <span class="dv">1</span>), <span class="dt">zCoef =</span> <span class="kw">c</span>(<span class="fl">0.2</span>, <span class="op">-</span><span class="st"> </span><span class="fl">0.5</span>), <span class="dt">rho =</span> <span class="fl">0.1</span>,</a>
-<a class="sourceLine" id="cb12-3" data-line-number="3">             <span class="dt">origin =</span> <span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="dt">endTime =</span> <span class="st">"rnorm"</span>, <span class="dt">recurrent =</span> <span class="ot">FALSE</span>,</a>
+<a class="sourceLine" id="cb12-3" data-line-number="3">             <span class="dt">origin =</span> <span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="dt">endTime =</span> stats<span class="op">::</span>rnorm, <span class="dt">recurrent =</span> <span class="ot">FALSE</span>,</a>
 <a class="sourceLine" id="cb12-4" data-line-number="4">             <span class="dt">arguments =</span> <span class="kw">list</span>(<span class="dt">endTime =</span> <span class="kw">list</span>(<span class="dt">mean =</span> <span class="dv">10</span>)))</a></code></pre>
-<pre><code>##    ID  time event origin      X.1 X.2
-## 1   1  6.41     1      0  0.18130   1
-## 2   2 10.24     0      1 -0.13889   1
-## 3   3  3.95     1      0  0.00576   1
-## 4   4  4.09     1      1  0.38528   1
-## 5   5  9.44     0      0 -0.37066   1
-## 6   6  8.33     0      1  0.64438   1
-## 7   7  8.20     1      0 -0.22049   1
-## 8   8  5.58     1      1  0.33178   1
-## 9   9  1.24     1      0  1.09684   1
-## 10 10  3.32     1      1  0.43518   1</code></pre>
+<pre><code>##    ID  time event origin    X.1 X.2
+## 1   1  9.11     0      0 -0.772   1
+## 2   2 10.38     0      1  0.287   1
+## 3   3  4.55     1      0 -1.221   1
+## 4   4 10.39     0      1  0.435   1
+## 5   5  9.55     1      0  0.800   1
+## 6   6  8.97     0      1 -0.164   1
+## 7   7  8.25     1      0  1.243   1
+## 8   8 10.96     0      1 -0.934   1
+## 9   9 10.08     0      0  0.394   1
+## 10 10 11.13     0      1  0.404   1</code></pre>
 </section><section id="nhpp" class="level2"><h2>Nonhomogeneous Poisson process</h2>
 <p>In contrast to HPP, a nonhomogeneous Poisson process (NHPP) has a time-varying hazard rate function. In that case, we may specify the baseline hazard rate function <code>rho</code> to be a function object whose first argument represents the time variable. A quick example is given below, where the baseline hazard rate function <span class="math inline">\(\rho(t) = \sin(t) + 1\)</span>.</p>
 <pre class="sourceCode r" id="cb14"><code class="sourceCode r"><a class="sourceLine" id="cb14-1" data-line-number="1">rhoFun &lt;-<span class="st"> </span><span class="cf">function</span>(x, <span class="dt">b =</span> <span class="dv">1</span>) (<span class="kw">sin</span>(x) <span class="op">+</span><span class="st"> </span><span class="dv">1</span>) <span class="op">*</span><span class="st"> </span>b</a>
 <a class="sourceLine" id="cb14-2" data-line-number="2"><span class="kw"><a href="../reference/simEvent.html">simEvent</a></span>(<span class="dt">rho =</span> rhoFun)</a></code></pre>
 <pre><code>## 'simEvent' S4 class object:
-## [1] 0.865 1.521 2.168 2.402 2.418 2.495</code></pre>
+## [1] 1.15</code></pre>
 <p>As demonstrated in the last example for HPP, other possible arguments of the function objects can be specified via the <code>arguments</code>. For example, that <code>arguments = list(rho = list(b = 0.5))</code> specifies the baseline hazard rate function to be <span class="math inline">\(\rho(t) = 0.5(\sin(t) + 1)\)</span>.</p>
 <pre class="sourceCode r" id="cb16"><code class="sourceCode r"><a class="sourceLine" id="cb16-1" data-line-number="1"><span class="kw"><a href="../reference/simEvent.html">simEventData</a></span>(<span class="dt">z =</span> <span class="kw">cbind</span>(<span class="kw">rexp</span>(<span class="dv">2</span>), <span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">1</span>)), <span class="dt">zCoef =</span> <span class="kw">c</span>(<span class="fl">0.1</span>, <span class="op">-</span><span class="st"> </span><span class="fl">0.5</span>),</a>
 <a class="sourceLine" id="cb16-2" data-line-number="2">             <span class="dt">rho =</span> rhoFun, <span class="dt">arguments =</span> <span class="kw">list</span>(<span class="dt">rho =</span> <span class="kw">list</span>(<span class="dt">b =</span> <span class="fl">0.5</span>)))</a></code></pre>
-<pre><code>##   ID time event origin   X.1 X.2
-## 1  1 0.48     1      0 4.210   0
-## 2  1 1.21     1      0 4.210   0
-## 3  1 1.61     1      0 4.210   0
-## 4  1 2.05     1      0 4.210   0
-## 5  1 3.00     0      0 4.210   0
-## 6  2 1.72     1      0 0.963   1
-## 7  2 2.57     1      0 0.963   1
-## 8  2 3.00     0      0 0.963   1</code></pre>
+<pre><code>##   ID  time event origin    X.1 X.2
+## 1  1 3.000     0      0 0.0687   0
+## 2  2 0.715     1      0 0.5692   1
+## 3  2 1.120     1      0 0.5692   1
+## 4  2 2.208     1      0 0.5692   1
+## 5  2 3.000     0      0 0.5692   1</code></pre>
 </section></section><section id="renewal-processes" class="level1"><h1>Renewal processes</h1>
 <p>In the Poisson process, the interarrival times between two successive arrivals (or events) follow exponential distribution independently. We may generalize the distribution of interarrival times and consider more general renewal processes.</p>
-<p>In function <code>simEvent</code> (and <code>simEventData</code>), we may specify the distribution of the interarrival times via the argument <code>interarrival</code>, which takes the function name <code>"rexp"</code> (from the <strong>stats</strong> package) for generating interarrival times following exponential distribution by default. In general, the argument <code>interarrival</code> takes a function with at least one argument named <code>rate</code> for generating random (nonnegative) interarrival times from a certain distribution at the given arrival rate. A quick example of generating the interarrival times following Gamma distribution of scale one is given as follows:</p>
+<p>In function <code>simEvent</code> (and <code>simEventData</code>), we may specify the distribution of the interarrival times via the argument <code>interarrival</code>, which takes the function <code><a href="http://www.rdocumentation.org/packages/stats/topics/Exponential">stats::rexp</a></code> for generating interarrival times following exponential distribution by default. In general, the argument <code>interarrival</code> takes a function with at least one argument named <code>rate</code> for generating random (nonnegative) interarrival times from a certain distribution at the given arrival rate. A quick example of generating the interarrival times following Gamma distribution of scale one is given as follows:</p>
 <pre class="sourceCode r" id="cb18"><code class="sourceCode r"><a class="sourceLine" id="cb18-1" data-line-number="1"><span class="kw">set.seed</span>(<span class="dv">123</span>)</a>
 <a class="sourceLine" id="cb18-2" data-line-number="2"><span class="kw"><a href="../reference/simEvent.html">simEvent</a></span>(<span class="dt">interarrival =</span> <span class="cf">function</span>(n, rate) <span class="kw">rgamma</span>(n, <span class="dt">shape =</span> <span class="dv">1</span> <span class="op">/</span><span class="st"> </span>rate))</a></code></pre>
 <pre><code>## 'simEvent' S4 class object:
@@ -187,10 +197,10 @@
 <section id="time-variant-covariates" class="level2"><h2>Time-variant covariates</h2>
 <p>In pratice, some covariates such as patients’ age, automobile’s mileage may vary over time. The argument <code>z</code> in the function <code>simEvent</code> and <code>simEventData</code> may take a function of time that returns a vector of covariates for generating event times with the time-varying covariates. Let’s consider an example of generating recurrent event times with three covariates, where two of which are time-variant.</p>
 <pre class="sourceCode r" id="cb22"><code class="sourceCode r"><a class="sourceLine" id="cb22-1" data-line-number="1"><span class="kw">set.seed</span>(<span class="dv">123</span>)</a>
-<a class="sourceLine" id="cb22-2" data-line-number="2">zFun1 &lt;-<span class="st"> </span><span class="cf">function</span>(time) <span class="kw">c</span>(time <span class="op">/</span><span class="st"> </span><span class="dv">10</span> <span class="op">+</span><span class="st"> </span><span class="dv">1</span>, <span class="kw">as.numeric</span>(time <span class="op">&gt;</span><span class="st"> </span><span class="dv">1</span>), <span class="fl">0.5</span>)</a>
+<a class="sourceLine" id="cb22-2" data-line-number="2">zFun1 &lt;-<span class="st"> </span><span class="cf">function</span>(time) <span class="kw">cbind</span>(time <span class="op">/</span><span class="st"> </span><span class="dv">10</span> <span class="op">+</span><span class="st"> </span><span class="dv">1</span>, <span class="kw">as.numeric</span>(time <span class="op">&gt;</span><span class="st"> </span><span class="dv">1</span>), <span class="fl">0.5</span>)</a>
 <a class="sourceLine" id="cb22-3" data-line-number="3"><span class="kw"><a href="../reference/simEvent.html">simEventData</a></span>(<span class="dt">z =</span> zFun1, <span class="dt">zCoef =</span> <span class="kw">c</span>(<span class="fl">0.1</span>, <span class="fl">0.5</span>, <span class="op">-</span><span class="st"> </span><span class="fl">0.5</span>))</a></code></pre>
 <pre><code>##   ID  time event origin  X.1 X.2 X.3
-## 1  1 0.577     1      0 1.06   0 0.5
+## 1  1 0.971     1      0 1.10   0 0.5
 ## 2  1 1.880     1      0 1.19   1 0.5
 ## 3  1 1.902     1      0 1.19   1 0.5
 ## 4  1 1.940     1      0 1.19   1 0.5
@@ -200,11 +210,11 @@
 ## 8  1 3.000     0      0 1.30   1 0.5</code></pre>
 <p>In the example given above, the covariate vector is <span class="math inline">\(\mathbf{z}(t)=(0.1t+1, \boldsymbol{1}(t &gt; 1), 0.5)^{\top}\)</span>. If the covariate function has more arguments, we may specify them by a named list in <code>arguments</code>. The example given below produces the equivalent results.</p>
 <pre class="sourceCode r" id="cb24"><code class="sourceCode r"><a class="sourceLine" id="cb24-1" data-line-number="1"><span class="kw">set.seed</span>(<span class="dv">123</span>)</a>
-<a class="sourceLine" id="cb24-2" data-line-number="2">zFun2 &lt;-<span class="st"> </span><span class="cf">function</span>(x, a, b) <span class="kw">c</span>(x <span class="op">/</span><span class="st"> </span><span class="dv">10</span> <span class="op">+</span><span class="st"> </span>a, <span class="kw">as.numeric</span>(x <span class="op">&gt;</span><span class="st"> </span>b), <span class="fl">0.5</span>)</a>
+<a class="sourceLine" id="cb24-2" data-line-number="2">zFun2 &lt;-<span class="st"> </span><span class="cf">function</span>(x, a, b) <span class="kw">cbind</span>(x <span class="op">/</span><span class="st"> </span><span class="dv">10</span> <span class="op">+</span><span class="st"> </span>a, <span class="kw">as.numeric</span>(x <span class="op">&gt;</span><span class="st"> </span>b), <span class="fl">0.5</span>)</a>
 <a class="sourceLine" id="cb24-3" data-line-number="3"><span class="kw"><a href="../reference/simEvent.html">simEventData</a></span>(<span class="dt">z =</span> zFun2, <span class="dt">zCoef =</span> <span class="kw">c</span>(<span class="fl">0.1</span>, <span class="fl">0.5</span>, <span class="op">-</span><span class="st"> </span><span class="fl">0.5</span>),</a>
 <a class="sourceLine" id="cb24-4" data-line-number="4">             <span class="dt">arguments =</span> <span class="kw">list</span>(<span class="dt">z =</span> <span class="kw">list</span>(<span class="dt">a =</span> <span class="dv">1</span>, <span class="dt">b =</span> <span class="dv">1</span>)))</a></code></pre>
 <pre><code>##   ID  time event origin  X.1 X.2 X.3
-## 1  1 0.577     1      0 1.06   0 0.5
+## 1  1 0.971     1      0 1.10   0 0.5
 ## 2  1 1.880     1      0 1.19   1 0.5
 ## 3  1 1.902     1      0 1.19   1 0.5
 ## 4  1 1.940     1      0 1.19   1 0.5
@@ -213,65 +223,58 @@
 ## 7  1 2.471     1      0 1.25   1 0.5
 ## 8  1 3.000     0      0 1.30   1 0.5</code></pre>
 <p>Notice that in the examples given above, if we generate event times for more than one process, the time-varying covariate function will remain the same for different processes, which may not be the case in pratice. A more realistic situation is that the time-variant covariate functions are different among different processes but coming from a common function family. Let’s consider the Stanford heart transplant data <span class="citation" data-cites="crowley1977jasa">(Crowley and Hu 1977)</span> as an example (the <code>heart</code> data available in the <strong>survival</strong> package). The covariate <code>transplant</code> indicating whether the patient has already received a heart transplant before time <code>t</code> is time-dependent and can be represented by a indicator function family, <span class="math inline">\(\boldsymbol{1}(t &gt; b)\)</span>, where <span class="math inline">\(b\)</span> is a known parameter that may differ among patients. For a perticular patient <span class="math inline">\(i\)</span>, <span class="math inline">\(b = b_i\)</span> is a known constant. In that case, we specify the function parameters inside the <code>quote</code> function as follows:</p>
-<pre class="sourceCode r" id="cb26"><code class="sourceCode r"><a class="sourceLine" id="cb26-1" data-line-number="1">zFun3 &lt;-<span class="st"> </span><span class="cf">function</span>(time, a, b) <span class="kw">c</span>(time <span class="op">/</span><span class="st"> </span><span class="dv">10</span> <span class="op">+</span><span class="st"> </span>a, <span class="kw">as.numeric</span>(time <span class="op">&gt;</span><span class="st"> </span>b))</a>
+<pre class="sourceCode r" id="cb26"><code class="sourceCode r"><a class="sourceLine" id="cb26-1" data-line-number="1">zFun3 &lt;-<span class="st"> </span><span class="cf">function</span>(time, a, b) <span class="kw">cbind</span>(time <span class="op">/</span><span class="st"> </span><span class="dv">10</span> <span class="op">+</span><span class="st"> </span>a, <span class="kw">as.numeric</span>(time <span class="op">&gt;</span><span class="st"> </span>b))</a>
 <a class="sourceLine" id="cb26-2" data-line-number="2">(simDat &lt;-<span class="st"> </span><span class="kw"><a href="../reference/simEvent.html">simEventData</a></span>(<span class="dt">nProcess =</span> <span class="dv">3</span>, <span class="dt">z =</span> zFun3, <span class="dt">zCoef =</span> <span class="kw">c</span>(<span class="op">-</span><span class="st"> </span><span class="fl">0.1</span>, <span class="fl">0.5</span>),</a>
 <a class="sourceLine" id="cb26-3" data-line-number="3">                        <span class="dt">arguments =</span> <span class="kw">list</span>(<span class="dt">z =</span> <span class="kw">list</span>(<span class="dt">a =</span> <span class="kw">quote</span>(<span class="kw">rpois</span>(<span class="dv">1</span>, <span class="dv">10</span>) <span class="op">/</span><span class="st"> </span><span class="dv">10</span>),</a>
 <a class="sourceLine" id="cb26-4" data-line-number="4">                                                  <span class="dt">b =</span> <span class="kw">quote</span>(<span class="kw">runif</span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">3</span>))))))</a></code></pre>
 <pre><code>##    ID  time event origin   X.1 X.2
-## 1   1 1.045     1      0 0.905   0
-## 2   1 1.066     1      0 0.907   0
-## 3   1 1.464     1      0 0.946   1
-## 4   1 2.907     1      0 1.091   1
-## 5   1 3.000     0      0 1.100   1
-## 6   2 0.214     1      0 1.321   0
-## 7   2 0.961     1      0 1.396   0
-## 8   2 1.180     1      0 1.418   0
-## 9   2 1.862     1      0 1.486   1
-## 10  2 3.000     0      0 1.600   1
-## 11  3 0.524     1      0 1.052   0
-## 12  3 0.571     1      0 1.057   0
-## 13  3 0.924     1      0 1.092   0
-## 14  3 1.635     1      0 1.164   0
-## 15  3 2.268     1      0 1.227   0
-## 16  3 2.507     1      0 1.251   1
-## 17  3 3.000     0      0 1.300   1</code></pre>
+## 1   1 0.104     1      0 1.710   0
+## 2   1 0.328     1      0 1.733   0
+## 3   1 1.335     1      0 1.833   0
+## 4   1 3.000     0      0 2.000   1
+## 5   2 0.583     1      0 1.258   0
+## 6   2 2.327     1      0 1.433   1
+## 7   2 3.000     0      0 1.500   1
+## 8   3 0.804     1      0 0.680   0
+## 9   3 0.838     1      0 0.684   0
+## 10  3 1.472     1      0 0.747   0
+## 11  3 3.000     0      0 0.900   1</code></pre>
 <p>In the example given above, the covariate <code>X.2</code> is simulated from the indicator function famliy, <span class="math inline">\(\boldsymbol{1}(t &gt; b)\)</span>, where parameter <span class="math inline">\(b\)</span> follows uniform distribution between 1 and 3. Internally, the parameters specified in <code>arguments</code> were evaluated for each process. We may check the values of the parameter <code>a</code> from the generated covariate <code>X.1</code> for different processes as follows:</p>
 <pre class="sourceCode r" id="cb28"><code class="sourceCode r"><a class="sourceLine" id="cb28-1" data-line-number="1">## check the values of parameter `a` for different processes</a>
 <a class="sourceLine" id="cb28-2" data-line-number="2"><span class="kw">with</span>(simDat, <span class="kw">unique</span>(<span class="kw">cbind</span>(ID, <span class="dt">a =</span> X<span class="fl">.1</span> <span class="op">-</span><span class="st"> </span>time <span class="op">/</span><span class="st"> </span><span class="dv">10</span>)))</a></code></pre>
 <pre><code>##      ID   a
-## [1,]  1 0.8
-## [2,]  2 1.3
-## [3,]  3 1.0</code></pre>
+## [1,]  1 1.7
+## [2,]  2 1.2
+## [3,]  3 0.6</code></pre>
 </section><section id="time-variant-covariate-coefficients" class="level2"><h2>Time-variant covariate coefficients</h2>
 <p>The assumption of time-invariance on the covariate coefficients can be hard to justify in practice. We may simulate event times with time-varying covariate coefficients by specifying the argument <code>zCoef</code> to be a function of time that returns a vector of coefficients at the input time point. How we may specify the argument <code>zCoef</code> for time-varying coefficients is very similar to the way we may specify the argument <code>z</code> for time-varying covariates introduced in last section. For example, we may generate event times with both covariates and their coefficients being time-variant as follows:</p>
-<pre class="sourceCode r" id="cb30"><code class="sourceCode r"><a class="sourceLine" id="cb30-1" data-line-number="1">zCoefFun &lt;-<span class="st"> </span><span class="cf">function</span>(time, shift) <span class="kw">c</span>(<span class="kw">sqrt</span>(time <span class="op">/</span><span class="st"> </span><span class="dv">10</span>), <span class="kw">sin</span>(time <span class="op">+</span><span class="st"> </span>shift), <span class="fl">0.1</span>)</a>
+<pre class="sourceCode r" id="cb30"><code class="sourceCode r"><a class="sourceLine" id="cb30-1" data-line-number="1">zCoefFun &lt;-<span class="st"> </span><span class="cf">function</span>(time, shift) <span class="kw">cbind</span>(<span class="kw">sqrt</span>(time <span class="op">/</span><span class="st"> </span><span class="dv">10</span>), <span class="kw">sin</span>(time <span class="op">+</span><span class="st"> </span>shift), <span class="fl">0.1</span>)</a>
 <a class="sourceLine" id="cb30-2" data-line-number="2"><span class="kw"><a href="../reference/simEvent.html">simEventData</a></span>(<span class="dt">z =</span> zFun1, <span class="dt">zCoef =</span> zCoefFun,</a>
 <a class="sourceLine" id="cb30-3" data-line-number="3">             <span class="dt">arguments =</span> <span class="kw">list</span>(<span class="dt">zCoef =</span> <span class="kw">list</span>(<span class="dt">shift =</span> <span class="dv">1</span>)))</a></code></pre>
-<pre><code>##   ID  time event origin  X.1 X.2 X.3
-## 1  1 0.643     1      0 1.06   0 0.5
-## 2  1 1.198     1      0 1.12   1 0.5
-## 3  1 1.268     1      0 1.13   1 0.5
-## 4  1 1.770     1      0 1.18   1 0.5
-## 5  1 2.296     1      0 1.23   1 0.5
-## 6  1 2.405     1      0 1.24   1 0.5
-## 7  1 2.773     1      0 1.28   1 0.5
-## 8  1 3.000     0      0 1.30   1 0.5</code></pre>
+<pre><code>##   ID time event origin  X.1 X.2 X.3
+## 1  1 1.12     1      0 1.11   1 0.5
+## 2  1 1.34     1      0 1.13   1 0.5
+## 3  1 2.31     1      0 1.23   1 0.5
+## 4  1 2.43     1      0 1.24   1 0.5
+## 5  1 3.00     0      0 1.30   1 0.5</code></pre>
 <p>As demonstrated in the example given above, we may similarly specify the other arguments of the time-varying coefficient function via a named list in <code>arguments</code>.</p>
 </section></section><section id="frailty" class="level1"><h1>Frailty models</h1>
 <section id="individual-frailty" class="level2"><h2>Frailty for individual processes</h2>
 <p>Let’s consider frailty factors for individual processes first, where each process <span class="math inline">\(i\)</span> has its own frailty effect <span class="math inline">\(w_i\)</span>. A popular choice of the frailty distribution is the one-parameter gamma distribution of mean one, which often leads to an explicit marginal likelihood in a relatively simple expression. Similar to the argument <code>z</code>, <code>zCoef</code>, and <code>rho</code>, the argument <code>frailty</code> may take a fucntion as input for simulating the frailty effect. For example, we may simulate the recurrent event times for one process with frailty factor following gamma(2, 0.5) via <code>frailty = "rgamma"</code> and <code>arguments = list(frailty = list(shape = 2, scale = 0.5))</code> as follows:</p>
 <pre class="sourceCode r" id="cb32"><code class="sourceCode r"><a class="sourceLine" id="cb32-1" data-line-number="1"><span class="kw">set.seed</span>(<span class="dv">123</span>)</a>
-<a class="sourceLine" id="cb32-2" data-line-number="2"><span class="kw"><a href="../reference/simEvent.html">simEventData</a></span>(<span class="dt">z =</span> zFun1, <span class="dt">zCoef =</span> <span class="kw">c</span>(<span class="fl">0.1</span>, <span class="fl">0.5</span>, <span class="op">-</span><span class="st"> </span><span class="fl">0.5</span>), <span class="dt">frailty =</span> <span class="st">"rgamma"</span>,</a>
+<a class="sourceLine" id="cb32-2" data-line-number="2"><span class="kw"><a href="../reference/simEvent.html">simEventData</a></span>(<span class="dt">z =</span> zFun1, <span class="dt">zCoef =</span> <span class="kw">c</span>(<span class="fl">0.1</span>, <span class="fl">0.5</span>, <span class="op">-</span><span class="st"> </span><span class="fl">0.5</span>), <span class="dt">frailty =</span> stats<span class="op">::</span>rgamma,</a>
 <a class="sourceLine" id="cb32-3" data-line-number="3">             <span class="dt">arguments =</span> <span class="kw">list</span>(<span class="dt">frailty =</span> <span class="kw">list</span>(<span class="dt">shape =</span> <span class="dv">2</span>, <span class="dt">scale =</span> <span class="fl">0.5</span>)))</a></code></pre>
-<pre><code>##   ID time event origin  X.1 X.2 X.3
-## 1  1 1.10     1      0 1.11   1 0.5
-## 2  1 1.32     1      0 1.13   1 0.5
-## 3  1 3.00     0      0 1.30   1 0.5</code></pre>
+<pre><code>##   ID  time event origin  X.1 X.2 X.3
+## 1  1 0.135     1      0 1.01   0 0.5
+## 2  1 0.620     1      0 1.06   0 0.5
+## 3  1 1.102     1      0 1.11   1 0.5
+## 4  1 1.324     1      0 1.13   1 0.5
+## 5  1 3.000     0      0 1.30   1 0.5</code></pre>
 <p>The named list <code>list(shape = 2, scale = 0.5)</code> was passed to the function <code>rgamma</code> (from the <strong>stats</strong> package). The random number seed was reset so that we might compare the results with the first example of time-variant covariates. Note that it is users’ job to make sure the specified distribution of the frailty factor has mean one (or makes sense in a certain way). The function <code>simEvent</code> and <code>simEventData</code> only check the sign of the simulated frailty effect. An error will be thrown out if the generated frailty effect is not positive.</p>
 <p>To demonstrate how to specify other distribution of the frailty factor, we simulate the recurrent event times for one process by three slightly different but equivalent approaches in the following examples, where the frailty effect follows log-normal distribution of mean one.</p>
 <pre class="sourceCode r" id="cb34"><code class="sourceCode r"><a class="sourceLine" id="cb34-1" data-line-number="1"><span class="kw">set.seed</span>(<span class="dv">123</span>)</a>
 <a class="sourceLine" id="cb34-2" data-line-number="2">## use function `rlnorm` from the stats package</a>
-<a class="sourceLine" id="cb34-3" data-line-number="3"><span class="kw"><a href="../reference/simEvent.html">simEvent</a></span>(<span class="dt">z =</span> zFun1, <span class="dt">zCoef =</span> <span class="kw">c</span>(<span class="fl">0.1</span>, <span class="fl">0.5</span>, <span class="op">-</span><span class="st"> </span><span class="fl">0.5</span>), <span class="dt">frailty =</span> <span class="st">"rlnorm"</span>,</a>
+<a class="sourceLine" id="cb34-3" data-line-number="3"><span class="kw"><a href="../reference/simEvent.html">simEvent</a></span>(<span class="dt">z =</span> zFun1, <span class="dt">zCoef =</span> <span class="kw">c</span>(<span class="fl">0.1</span>, <span class="fl">0.5</span>, <span class="op">-</span><span class="st"> </span><span class="fl">0.5</span>), <span class="dt">frailty =</span> stats<span class="op">::</span>rlnorm,</a>
 <a class="sourceLine" id="cb34-4" data-line-number="4">         <span class="dt">arguments =</span> <span class="kw">list</span>(<span class="dt">frailty =</span> <span class="kw">list</span>(<span class="dt">sdlog =</span> <span class="dv">1</span>)))</a></code></pre>
 <pre><code>## 'simEvent' S4 class object:
 ## [1] 1.59 1.63 1.70 2.08 2.45 2.63</code></pre>
@@ -295,63 +298,148 @@
 <p>In the function <code>simEvent</code> (<code>simEventData</code>), the argument <code>frailty</code> may take a numeric number (vector) as input for specific shared frailty effect for clusters. For instance, we may simulate the recurrent event times for four processes coming from two clusters with shared gamma frailty within cluster, where the first two processes come from one cluster while the remaining two come from another cluster.</p>
 <pre class="sourceCode r" id="cb40"><code class="sourceCode r"><a class="sourceLine" id="cb40-1" data-line-number="1">## shared gamma frailty for processes from two clusters</a>
 <a class="sourceLine" id="cb40-2" data-line-number="2">frailtyEffect &lt;-<span class="st"> </span><span class="kw">rgamma</span>(<span class="dv">2</span>, <span class="dt">shape =</span> <span class="dv">2</span>, <span class="dt">scale =</span> <span class="fl">0.5</span>)</a>
-<a class="sourceLine" id="cb40-3" data-line-number="3"><span class="kw"><a href="../reference/simEvent.html">simEventData</a></span>(<span class="dt">nProcess =</span> <span class="dv">4</span>, <span class="dt">frailty =</span> <span class="kw">rep</span>(frailtyEffect, <span class="dt">each =</span> <span class="dv">2</span>))</a></code></pre>
-<pre><code>##    ID  time event origin X
-## 1   1 0.720     1      0 0
-## 2   1 1.828     1      0 0
-## 3   1 2.834     1      0 0
-## 4   1 3.000     0      0 0
-## 5   2 1.230     1      0 0
-## 6   2 2.051     1      0 0
-## 7   2 3.000     0      0 0
-## 8   3 1.254     1      0 0
-## 9   3 3.000     0      0 0
-## 10  4 0.531     1      0 0
-## 11  4 0.864     1      0 0
-## 12  4 1.515     1      0 0
-## 13  4 1.574     1      0 0
-## 14  4 2.020     1      0 0
-## 15  4 2.919     1      0 0
-## 16  4 3.000     0      0 0</code></pre>
+<a class="sourceLine" id="cb40-3" data-line-number="3"><span class="kw"><a href="../reference/simEvent.html">simEventData</a></span>(<span class="dt">nProcess =</span> <span class="dv">4</span>, <span class="dt">z =</span> zFun1, <span class="dt">zCoef =</span> <span class="kw">c</span>(<span class="fl">0.1</span>, <span class="fl">0.5</span>, <span class="op">-</span><span class="st"> </span><span class="fl">0.5</span>),</a>
+<a class="sourceLine" id="cb40-4" data-line-number="4">             <span class="dt">frailty =</span> <span class="kw">rep</span>(frailtyEffect, <span class="dt">each =</span> <span class="dv">2</span>))</a></code></pre>
+<pre><code>##    ID  time event origin  X.1 X.2 X.3
+## 1   1 0.572     1      0 1.06   0 0.5
+## 2   1 1.625     1      0 1.16   1 0.5
+## 3   1 1.947     1      0 1.19   1 0.5
+## 4   1 2.345     1      0 1.23   1 0.5
+## 5   1 3.000     0      0 1.30   1 0.5
+## 6   2 1.695     1      0 1.17   1 0.5
+## 7   2 2.776     1      0 1.28   1 0.5
+## 8   2 3.000     0      0 1.30   1 0.5
+## 9   3 1.702     1      0 1.17   1 0.5
+## 10  3 2.876     1      0 1.29   1 0.5
+## 11  3 3.000     0      0 1.30   1 0.5
+## 12  4 0.276     1      0 1.03   0 0.5
+## 13  4 2.443     1      0 1.24   1 0.5
+## 14  4 3.000     0      0 1.30   1 0.5</code></pre>
 <p>If the length of the specified frailty vector is less than the number of processes, the vector will be recycled internally. In the example given below, the process 1 and process 3 shared a same frailty effect (<code>frailtyEffect[1L]</code>). Similarly, the process 2 and process 4 shared a same frailty effect (<code>frailtyEffect[2L]</code>).</p>
 <pre class="sourceCode r" id="cb42"><code class="sourceCode r"><a class="sourceLine" id="cb42-1" data-line-number="1"><span class="kw">set.seed</span>(<span class="dv">123</span>)</a>
-<a class="sourceLine" id="cb42-2" data-line-number="2"><span class="kw"><a href="../reference/simEvent.html">simEventData</a></span>(<span class="dt">nProcess =</span> <span class="dv">4</span>, <span class="dt">frailty =</span> frailtyEffect)</a></code></pre>
-<pre><code>##    ID  time event origin X
-## 1   1 0.629     1      0 0
-## 2   1 1.059     1      0 0
-## 3   1 2.050     1      0 0
-## 4   1 2.074     1      0 0
-## 5   1 2.116     1      0 0
-## 6   1 2.352     1      0 0
-## 7   1 2.586     1      0 0
-## 8   1 2.695     1      0 0
-## 9   1 3.000     0      0 0
-## 10  2 1.882     1      0 0
-## 11  2 3.000     0      0 0
-## 12  3 0.917     1      0 0
-## 13  3 1.506     1      0 0
-## 14  3 1.976     1      0 0
-## 15  3 2.912     1      0 0
-## 16  3 3.000     0      0 0
-## 17  4 3.000     0      0 0</code></pre>
-</section></section><section id="common-survival-models" class="level1"><h1>Common survival models</h1>
-<p>In this section, we present examples for generating event times with time-invariant covariates for several common survival models.</p>
+<a class="sourceLine" id="cb42-2" data-line-number="2"><span class="kw"><a href="../reference/simEvent.html">simEventData</a></span>(<span class="dt">nProcess =</span> <span class="dv">4</span>, <span class="dt">z =</span> zFun1, <span class="dt">zCoef =</span> <span class="kw">c</span>(<span class="fl">0.1</span>, <span class="fl">0.5</span>, <span class="op">-</span><span class="st"> </span><span class="fl">0.5</span>),</a>
+<a class="sourceLine" id="cb42-3" data-line-number="3">             <span class="dt">frailty =</span> frailtyEffect)</a></code></pre>
+<pre><code>##    ID  time event origin  X.1 X.2 X.3
+## 1   1 0.956     1      0 1.10   0 0.5
+## 2   1 1.851     1      0 1.19   1 0.5
+## 3   1 1.873     1      0 1.19   1 0.5
+## 4   1 1.910     1      0 1.19   1 0.5
+## 5   1 2.124     1      0 1.21   1 0.5
+## 6   1 2.335     1      0 1.23   1 0.5
+## 7   1 2.433     1      0 1.24   1 0.5
+## 8   1 3.000     0      0 1.30   1 0.5
+## 9   2 0.315     1      0 1.03   0 0.5
+## 10  2 0.472     1      0 1.05   0 0.5
+## 11  2 1.181     1      0 1.12   1 0.5
+## 12  2 2.486     1      0 1.25   1 0.5
+## 13  2 2.886     1      0 1.29   1 0.5
+## 14  2 3.000     0      0 1.30   1 0.5
+## 15  3 1.000     1      0 1.10   1 0.5
+## 16  3 1.908     1      0 1.19   1 0.5
+## 17  3 2.695     1      0 1.27   1 0.5
+## 18  3 3.000     0      0 1.30   1 0.5
+## 19  4 0.499     1      0 1.05   0 0.5
+## 20  4 2.308     1      0 1.23   1 0.5
+## 21  4 2.731     1      0 1.27   1 0.5
+## 22  4 2.948     1      0 1.29   1 0.5
+## 23  4 3.000     0      0 1.30   1 0.5</code></pre>
+</section></section><section id="common-parametric-survival-models" class="level1"><h1>Common parametric survival models</h1>
+<p>In this section, we present examples for generating event times with time-invariant covariates for several common parametric survival models.</p>
 <section id="weibull-model" class="level2"><h2>Weibull model</h2>
-<p>The Weibull model is one of the most widely used parametric survival models. Assume the event times of the process <span class="math inline">\(i\)</span>, <span class="math inline">\(i\in\{1,\ldots,n\}\)</span>, follow Weibull model with hazard function <span class="math inline">\(h_i(t) = \lambda_i p t^{p-1}\)</span>, where <span class="math inline">\(p&gt;0\)</span> is the shape parameter, and <span class="math inline">\(\lambda_i\)</span> can be reparameterized with regression coefficients.</p>
-<p>The common reparameterization is <span class="math inline">\(\lambda_i = \exp(\beta_0 + \boldsymbol{\beta}^{\top}\mathbf{z}_i)\)</span>, which results in Weibull proportional hazard model. Let <span class="math inline">\(\lambda_0 = \exp(\beta_0)\)</span> and we may rewrite the hazard function <span class="math inline">\(h_i(t) = \rho(t) \exp(\boldsymbol{\beta}^{\top}\mathbf{z}_i)\)</span>, where <span class="math inline">\(\rho(t) = \lambda_0 p t^{p-1}\)</span> is the baseline hazard function.</p>
-<pre class="sourceCode r" id="cb44"><code class="sourceCode r"><a class="sourceLine" id="cb44-1" data-line-number="1">weibull_ph &lt;-<span class="st"> </span><span class="cf">function</span>(x, lambda, p) lambda <span class="op">*</span><span class="st"> </span>p <span class="op">*</span><span class="st"> </span>x <span class="op">^</span><span class="st"> </span>(p <span class="op">-</span><span class="st"> </span><span class="dv">1</span>)</a>
-<a class="sourceLine" id="cb44-2" data-line-number="2"><span class="kw"><a href="../reference/simEvent.html">simEventData</a></span>(<span class="dt">z =</span> <span class="kw">cbind</span>(<span class="kw">rnorm</span>(<span class="dv">2</span>), <span class="kw">rbinom</span>(<span class="dv">2</span>, <span class="dv">1</span>, <span class="fl">0.5</span>)),</a>
-<a class="sourceLine" id="cb44-3" data-line-number="3">             <span class="dt">zCoef =</span> <span class="kw">c</span>(<span class="fl">0.5</span>, <span class="fl">0.2</span>), <span class="dt">rho =</span> weibull_ph,</a>
-<a class="sourceLine" id="cb44-4" data-line-number="4">             <span class="dt">arguments =</span> <span class="kw">list</span>(<span class="dt">rho =</span> <span class="kw">list</span>(<span class="dt">lambda =</span> <span class="fl">0.1</span>, <span class="dt">p =</span> <span class="dv">2</span>)),</a>
-<a class="sourceLine" id="cb44-5" data-line-number="5">             <span class="dt">recurrent =</span> <span class="ot">FALSE</span>, <span class="dt">end =</span> <span class="dv">5</span>)</a></code></pre>
-<pre><code>##   ID time event origin    X.1 X.2
-## 1  1 1.34     1      0  0.380   0
-## 2  2 1.85     1      0 -0.502   1</code></pre>
-</section><section id="log-normal-model" class="level2"><h2>Log-normal model</h2>
+<p>The Weibull model is one of the most widely used parametric survival models. Assume the event times of the process <span class="math inline">\(i\)</span>, <span class="math inline">\(i\in\{1,\ldots,n\}\)</span>, follow Weibull model with hazard function <span class="math inline">\(h_i(t) = \lambda_i p t^{p-1}\)</span>, where <span class="math inline">\(p&gt;0\)</span> is the shape parameter, and <span class="math inline">\(\lambda_i\)</span> can be reparameterized with regression coefficients. When <span class="math inline">\(p=1\)</span>, the Weibull model reduces to the exponential model, whose hazard rate is a constant over time.</p>
+<p>One common reparameterization is <span class="math inline">\(\lambda_i = \exp(\beta_0 + \boldsymbol{\beta}^{\top}\mathbf{z}_i)\)</span>, which results in Weibull proportional hazard (PH) model. Let <span class="math inline">\(\lambda_0 = \exp(\beta_0)\)</span> and we may rewrite the hazard function <span class="math inline">\(h_i(t) = \rho(t) \exp(\boldsymbol{\beta}^{\top}\mathbf{z}_i)\)</span>, where <span class="math inline">\(\rho(t) = \lambda_0 p t^{p-1}\)</span> is the baseline hazard function. For example, we may simulate the survival data of ten processes from Weibull PH model as follows:</p>
+<pre class="sourceCode r" id="cb44"><code class="sourceCode r"><a class="sourceLine" id="cb44-1" data-line-number="1">nProcess &lt;-<span class="st"> </span><span class="dv">10</span></a>
+<a class="sourceLine" id="cb44-2" data-line-number="2">rho_weibull_ph &lt;-<span class="st"> </span><span class="cf">function</span>(x, lambda, p) lambda <span class="op">*</span><span class="st"> </span>p <span class="op">*</span><span class="st"> </span>x <span class="op">^</span><span class="st"> </span>(p <span class="op">-</span><span class="st"> </span><span class="dv">1</span>)</a>
+<a class="sourceLine" id="cb44-3" data-line-number="3"><span class="kw"><a href="../reference/simEvent.html">simEventData</a></span>(<span class="dt">z =</span> <span class="kw">cbind</span>(<span class="kw">rnorm</span>(nProcess), <span class="kw">rbinom</span>(nProcess, <span class="dv">1</span>, <span class="fl">0.5</span>)),</a>
+<a class="sourceLine" id="cb44-4" data-line-number="4">             <span class="dt">zCoef =</span> <span class="kw">c</span>(<span class="fl">0.5</span>, <span class="fl">0.2</span>), <span class="dt">endTime =</span> <span class="kw">rnorm</span>(nProcess, <span class="dv">10</span>),</a>
+<a class="sourceLine" id="cb44-5" data-line-number="5">             <span class="dt">recurrent =</span> <span class="ot">FALSE</span>, <span class="dt">rho =</span> rho_weibull_ph,</a>
+<a class="sourceLine" id="cb44-6" data-line-number="6">             <span class="dt">arguments =</span> <span class="kw">list</span>(<span class="dt">rho =</span> <span class="kw">list</span>(<span class="dt">lambda =</span> <span class="fl">0.01</span>, <span class="dt">p =</span> <span class="dv">2</span>)))</a></code></pre>
+<pre><code>##    ID  time event origin    X.1 X.2
+## 1   1  7.48     1      0  0.887   1
+## 2   2  4.24     1      0 -0.151   1
+## 3   3  6.81     1      0  0.330   0
+## 4   4 10.59     1      0 -3.227   0
+## 5   5  4.73     1      0 -0.772   1
+## 6   6 10.28     0      0  0.287   0
+## 7   7  6.93     1      0 -1.221   1
+## 8   8  4.35     1      0  0.435   0
+## 9   9  3.78     1      0  0.800   0
+## 10 10  8.93     0      0 -0.164   1</code></pre>
+</section><section id="gompertz-model" class="level2"><h2>Gompertz model</h2>
+<p>The baseline hazard function of the gompertz model is <span class="math inline">\(\rho(t) = \lambda\exp(\alpha t)\)</span>, where <span class="math inline">\(\lambda &gt; 0\)</span> is the scale parameter and <span class="math inline">\(\alpha\)</span> is the shape paramter. So the logrithm of the baseline hazard function is linear in time <span class="math inline">\(t\)</span>.</p>
+<p>Similar to the example for the Weibull model given in last section, we may simulate the survival data of ten processes as follows:</p>
+<pre class="sourceCode r" id="cb46"><code class="sourceCode r"><a class="sourceLine" id="cb46-1" data-line-number="1">rho_gompertz &lt;-<span class="st"> </span><span class="cf">function</span>(time, lambda, alpha) lambda <span class="op">*</span><span class="st"> </span><span class="kw">exp</span>(alpha <span class="op">*</span><span class="st"> </span>time)</a>
+<a class="sourceLine" id="cb46-2" data-line-number="2"><span class="kw"><a href="../reference/simEvent.html">simEventData</a></span>(<span class="dt">z =</span> <span class="kw">cbind</span>(<span class="kw">rnorm</span>(nProcess), <span class="kw">rbinom</span>(nProcess, <span class="dv">1</span>, <span class="fl">0.5</span>)),</a>
+<a class="sourceLine" id="cb46-3" data-line-number="3">             <span class="dt">zCoef =</span> <span class="kw">c</span>(<span class="fl">0.5</span>, <span class="fl">0.2</span>), <span class="dt">endTime =</span> <span class="kw">rnorm</span>(nProcess, <span class="dv">10</span>),</a>
+<a class="sourceLine" id="cb46-4" data-line-number="4">             <span class="dt">recurrent =</span> <span class="ot">FALSE</span>, <span class="dt">rho =</span> rho_gompertz,</a>
+<a class="sourceLine" id="cb46-5" data-line-number="5">             <span class="dt">arguments =</span> <span class="kw">list</span>(<span class="dt">rho =</span> <span class="kw">list</span>(<span class="dt">lambda =</span> <span class="fl">0.1</span>, <span class="dt">alpha =</span> <span class="fl">0.1</span>)))</a></code></pre>
+<pre><code>##    ID time event origin    X.1 X.2
+## 1   1 8.95     0      0 -1.462   1
+## 2   2 8.74     0      0  0.688   0
+## 3   3 4.92     1      0  2.100   0
+## 4   4 9.43     1      0 -1.287   1
+## 5   5 5.41     1      0  0.788   1
+## 6   6 3.35     1      0  0.769   0
+## 7   7 7.29     1      0  0.332   0
+## 8   8 4.48     1      0 -1.008   1
+## 9   9 7.40     1      0 -0.119   1
+## 10 10 9.78     0      0 -0.280   0</code></pre>
 </section><section id="log-logistic-model" class="level2"><h2>Log-logistic model</h2>
+<p>As discussed in Section <a href="#accelerated-failure-time-model">accelerated failure time model</a>, the hazard function of the log-logistic model is <span class="math display">\[\lambda(t \mid \mathbf{z}_i) = \frac{p
+(t\lambda_{\mathbf{z}})^p/t}{1 + (t\lambda_{\mathbf{z}})^p}.\]</span> So we may simulate the survival data of ten processes from the log-logistic model as follows:</p>
+<pre class="sourceCode r" id="cb48"><code class="sourceCode r"><a class="sourceLine" id="cb48-1" data-line-number="1">rho_loglogistic &lt;-<span class="st"> </span><span class="cf">function</span>(time, z, zCoef, p) {</a>
+<a class="sourceLine" id="cb48-2" data-line-number="2">    lambda &lt;-<span class="st"> </span><span class="dv">1</span> <span class="op">/</span><span class="st"> </span><span class="kw"><a href="../reference/parametrize.html">parametrize</a></span>(z, zCoef, <span class="dt">FUN =</span> <span class="st">"exponential"</span>)</a>
+<a class="sourceLine" id="cb48-3" data-line-number="3">    lambda <span class="op">*</span><span class="st"> </span>p <span class="op">*</span><span class="st"> </span>(lambda <span class="op">*</span><span class="st"> </span>time) <span class="op">^</span><span class="st"> </span>(p <span class="op">-</span><span class="st"> </span><span class="dv">1</span>) <span class="op">/</span><span class="st"> </span>(<span class="dv">1</span> <span class="op">+</span><span class="st"> </span>(lambda <span class="op">*</span><span class="st"> </span>time) <span class="op">^</span><span class="st"> </span>p)</a>
+<a class="sourceLine" id="cb48-4" data-line-number="4">}</a>
+<a class="sourceLine" id="cb48-5" data-line-number="5"><span class="kw"><a href="../reference/simEvent.html">simEventData</a></span>(<span class="dt">z =</span> <span class="kw">cbind</span>(<span class="dv">1</span>, <span class="kw">rnorm</span>(nProcess), <span class="kw">rbinom</span>(nProcess, <span class="dv">1</span>, <span class="fl">0.5</span>)),</a>
+<a class="sourceLine" id="cb48-6" data-line-number="6">             <span class="dt">zCoef =</span> <span class="kw">c</span>(<span class="fl">0.3</span>, <span class="fl">0.5</span>, <span class="fl">0.2</span>), <span class="dt">end =</span> <span class="kw">rnorm</span>(nProcess, <span class="dv">10</span>),</a>
+<a class="sourceLine" id="cb48-7" data-line-number="7">             <span class="dt">recurrent =</span> <span class="ot">FALSE</span>, <span class="dt">relativeRisk =</span> <span class="st">"none"</span>, <span class="dt">rho =</span> rho_loglogistic,</a>
+<a class="sourceLine" id="cb48-8" data-line-number="8">             <span class="dt">arguments =</span> <span class="kw">list</span>(<span class="dt">rho =</span> <span class="kw">list</span>(<span class="dt">p =</span> <span class="fl">1.5</span>)))</a></code></pre>
+<pre><code>##    ID   time event origin X.1     X.2 X.3
+## 1   1  0.206     1      0   1  0.9625   1
+## 2   2  1.350     1      0   1  0.6843   0
+## 3   3  1.972     1      0   1 -1.3953   1
+## 4   4  3.480     1      0   1  0.8496   1
+## 5   5  0.834     1      0   1 -0.4466   0
+## 6   6 11.054     0      0   1  0.1748   1
+## 7   7  0.916     1      0   1  0.0746   1
+## 8   8  1.664     1      0   1  0.4282   1
+## 9   9  3.238     1      0   1  0.0247   1
+## 10 10  0.279     1      0   1 -1.6675   1</code></pre>
+<p>Notice that in the function <code>rho_loglogistic</code> for the hazard function of the log-logistic model, we wrapped the parametrization of the covariates and covariate coefficients with the function <code>parametrize</code> and specified that <code>FUN = "exponential"</code>. In addition, we specified <code>relativeRisk = "none"</code> when calling <code>simEventData</code> for AFT models.</p>
+</section><section id="log-normal-model" class="level2"><h2>Log-normal model</h2>
+<p>By following the discussion given in Section <a href="#accelerated-failure-time-model">accelerated failure time model</a>, it is not hard to obtain the hazard function of the log-normal model, <span class="math display">\[\lambda(t \mid \mathbf{z}_i) = \frac{p}{t}
+\lambda_W\bigl(p(\log(t) - \boldsymbol{\beta}^{\top}\mathbf{z}_i)\bigr),\]</span> where <span class="math inline">\(\rho(w) = \phi(w) / \bigl(1 - \Phi(w)\bigr)\)</span>, <span class="math inline">\(\phi(w)\)</span> and <span class="math inline">\(\Phi(w)\)</span> is the density and cumulative distribution function of random variable following standard normal distribution.</p>
+<p>The example of simulating survival times of ten processes from the log-normal model is given as follows:</p>
+<pre class="sourceCode r" id="cb50"><code class="sourceCode r"><a class="sourceLine" id="cb50-1" data-line-number="1">rho_lognormal &lt;-<span class="st"> </span><span class="cf">function</span>(time, z, zCoef, p) {</a>
+<a class="sourceLine" id="cb50-2" data-line-number="2">    foo &lt;-<span class="st"> </span><span class="cf">function</span>(x) <span class="kw">dnorm</span>(x) <span class="op">/</span><span class="st"> </span><span class="kw">pnorm</span>(x, <span class="dt">lower.tail =</span> <span class="ot">FALSE</span>)</a>
+<a class="sourceLine" id="cb50-3" data-line-number="3">    alpha &lt;-<span class="st"> </span><span class="kw"><a href="../reference/parametrize.html">parametrize</a></span>(z, zCoef, <span class="dt">FUN =</span> <span class="st">"linear"</span>) <span class="op">-</span><span class="st"> </span><span class="dv">1</span></a>
+<a class="sourceLine" id="cb50-4" data-line-number="4">    w &lt;-<span class="st"> </span>p <span class="op">*</span><span class="st"> </span>(<span class="kw">log</span>(time) <span class="op">-</span><span class="st"> </span>alpha)</a>
+<a class="sourceLine" id="cb50-5" data-line-number="5">    <span class="kw">foo</span>(w) <span class="op">*</span><span class="st"> </span>p <span class="op">/</span><span class="st"> </span>time</a>
+<a class="sourceLine" id="cb50-6" data-line-number="6">}</a>
+<a class="sourceLine" id="cb50-7" data-line-number="7"><span class="kw"><a href="../reference/simEvent.html">simEventData</a></span>(<span class="dt">z =</span> <span class="kw">cbind</span>(<span class="dv">1</span>, <span class="kw">rnorm</span>(nProcess), <span class="kw">rbinom</span>(nProcess, <span class="dv">1</span>, <span class="fl">0.5</span>)),</a>
+<a class="sourceLine" id="cb50-8" data-line-number="8">             <span class="dt">zCoef =</span> <span class="kw">c</span>(<span class="fl">0.3</span>, <span class="fl">0.5</span>, <span class="fl">0.2</span>), <span class="dt">end =</span> <span class="kw">rnorm</span>(nProcess, <span class="dv">10</span>),</a>
+<a class="sourceLine" id="cb50-9" data-line-number="9">             <span class="dt">recurrent =</span> <span class="ot">FALSE</span>, <span class="dt">relativeRisk =</span> <span class="st">"none"</span>,</a>
+<a class="sourceLine" id="cb50-10" data-line-number="10">             <span class="dt">rho =</span> rho_lognormal, <span class="dt">method =</span> <span class="st">"inversion"</span>,</a>
+<a class="sourceLine" id="cb50-11" data-line-number="11">             <span class="dt">arguments =</span> <span class="kw">list</span>(<span class="dt">rho =</span> <span class="kw">list</span>(<span class="dt">p =</span> <span class="fl">0.5</span>)))</a></code></pre>
+<pre><code>##    ID    time event origin X.1    X.2 X.3
+## 1   1  0.0907     1      0   1  0.433   1
+## 2   2  3.7646     1      0   1  0.510   0
+## 3   3  8.8247     0      0   1  1.196   1
+## 4   4  0.1732     1      0   1 -1.084   0
+## 5   5  0.2221     1      0   1 -1.145   1
+## 6   6  8.8738     0      0   1  0.155   1
+## 7   7  2.6047     1      0   1 -0.492   1
+## 8   8 10.5684     0      0   1  2.367   1
+## 9   9  0.1656     1      0   1 -1.434   1
+## 10 10  0.2125     1      0   1 -1.611   0</code></pre>
+<p>Notice that the time origin was set to be zero by default. So the time variable <span class="math inline">\(t\)</span> in the denominator of the hazard function <span class="math inline">\(\lambda(t | \mid \mathbf{z}_i)\)</span>, may result in undefined value when <span class="math inline">\(t=0\)</span>. Therefore, we specified <code>method = "inversion"</code> for the inversion sampling method for the log-normal model.</p>
 </section></section><section id="multiple-event-data" class="level1"><h1>Multiple event data</h1>
 </section><section id="reference" class="level1 unnumbered"><h1>Reference</h1>
 <div id="refs" class="references">
+<div id="ref-aalen2008springer">
+<p>Aalen, Odd, Ornulf Borgan, and Hakon Gjessing. 2008. <em>Survival and Event History Analysis: A Process Point of View</em>. Springer Science &amp; Business Media.</p>
+</div>
 <div id="ref-andersen1982aos">
 <p>Andersen, Per Kragh, and Richard David Gill. 1982. “Cox’s Regression Model for Counting Processes: A Large Sample Study.” <em>The Annals of Statistics</em> 10 (4). JSTOR:1100–1120.</p>
 </div>
@@ -363,6 +451,12 @@
 </div>
 <div id="ref-crowley1977jasa">
 <p>Crowley, John, and Marie Hu. 1977. “Covariance Analysis of Heart Transplant Survival Data.” <em>Journal of the American Statistical Association</em> 72 (357). Taylor &amp; Francis Group:27–36.</p>
+</div>
+<div id="ref-kalbfleisch2002wiley">
+<p>Kalbfleisch, John D, and Ross L Prentice. 2002. <em>The Statistical Analysis of Failure Time Data</em>. Vol. 360. John Wiley &amp; Sons.</p>
+</div>
+<div id="ref-kleinbaum2011springer">
+<p>Kleinbaum, D G, and M Klein. 2011. <em>Survival Analysis: A Self-Learning Text</em>. New York: Springer.</p>
 </div>
 <div id="ref-lewis1979nrlq">
 <p>Lewis, P A, and G S Shedler. 1979. “Simulation of Nonhomogeneous Poisson Processes by Thinning.” <em>Naval Research Logistics Quarterly</em> 26 (3). Wiley Online Library:403–13.</p>
@@ -404,10 +498,11 @@
       </ul>
 </li>
       <li>
-<a href="#common-survival-models">Common survival models</a><ul class="nav nav-pills nav-stacked">
+<a href="#common-parametric-survival-models">Common parametric survival models</a><ul class="nav nav-pills nav-stacked">
 <li><a href="#weibull-model">Weibull model</a></li>
-      <li><a href="#log-normal-model">Log-normal model</a></li>
+      <li><a href="#gompertz-model">Gompertz model</a></li>
       <li><a href="#log-logistic-model">Log-logistic model</a></li>
+      <li><a href="#log-normal-model">Log-normal model</a></li>
       </ul>
 </li>
       <li><a href="#multiple-event-data">Multiple event data</a></li>
