@@ -6,9 +6,7 @@ output:
   rmarkdown::html_document:
     toc: true
     toc_depth: 2
-    toc_float:
-      collapsed: false
-      smooth_scroll: false
+    toc_float: true
 bibliography: ../inst/bib/reda.bib
 vignette: >
   %\VignetteIndexEntry{Simulate Survival and Recurrent Event Data with reda}
@@ -33,40 +31,98 @@ this vignette.
 
 ## Intensity function {#intensity}
 
-We first introduce the general form of hazard rate function considered and
-implemented in the function `simEvent`.
+We introduce the general form of hazard rate function considered and implemented
+in the function `simEvent`, which can be generalized to two classes called the
+relative risk model, and the accelerated failure time model.  The introduction
+is based on Section 2.2 and Section 2.3 of @kalbfleisch2002wiley.  Other helpful
+references include @aalen2008springer, @kleinbaum2011springer, among others.
 
 
-Consider $n$ stochastic processes with the baseline hazard rate function
+Let's consider $n$ stochastic processes with the baseline hazard rate function
 $\rho(t)$ of time $t$.  For the stochastic process $i$, $i\in\{1,\ldots,n\}$,
 let $\mathbf{z}_i=(z_{i1},\ldots,z_{ip})^{\top}$ denote the covariate vector of
 length $p$, and $\boldsymbol{\beta}=(\beta_1,\ldots,\beta_p)^{\top}$ denote the
-covariate coefficients.  We may incorporate the covariates and their
-coefficients into the stochastic process by specifying the intensity as a
-function of time $t$ and the covariates $\mathbf{z}_i$ as follows: $$\lambda(t
-\mid \mathbf{z}_i) = \rho(t)\,r(\mathbf{z}_i, \boldsymbol{\beta}),$$ where
-$r(\mathbf{z}_i, \boldsymbol{\beta})$ is the relative risk function. For the
-regular Cox model [@cox1972jrssb] or the Andersen-Gill model [@andersen1982aos],
-$r(\mathbf{z}_i, \boldsymbol{\beta})=
+covariate coefficients.
+
+
+### Relative risk model
+
+Given the covariates $\mathbf{z}_i$ (not including the intercept term), the
+intensity function of time $t$ for the relative risk regression model can be
+specified as follows: $$\lambda(t \mid \mathbf{z}_i) = \rho(t)\,r(\mathbf{z}_i,
+\boldsymbol{\beta}),$$ where $r(\mathbf{z}_i, \boldsymbol{\beta})$ is the
+relative risk function. For the Cox model [@cox1972jrssb] and the Andersen-Gill
+model [@andersen1982aos], $r(\mathbf{z}_i, \boldsymbol{\beta})=
 \exp\{\boldsymbol{\beta}^{\top}\mathbf{z}_i\}$. Other common choices include the
-linear relative risk model: $r(\mathbf{z}_i, \boldsymbol{\beta}) = 1 +
-\boldsymbol{\beta}^{\top}\mathbf{z}_i$, and the excess relative risk model:
-$r(\mathbf{z}_i, \boldsymbol{\beta}) = \prod_{j=1}^p(1 + \beta_j z_{ij})$.
+linear relative risk function: $r(\mathbf{z}_i, \boldsymbol{\beta}) = 1 +
+\boldsymbol{\beta}^{\top}\mathbf{z}_i$, and the excess relative risk function:
+$r(\mathbf{z}_i, \boldsymbol{\beta}) = \prod_{j=1}^p(1 + \beta_j z_{ij})$, both
+of which, however, suffer from the drawback that the $r(\mathbf{z}_i,
+\boldsymbol{\beta})$ is not necessarily positive. Therefore, the coefficient
+estimates must be restricted to guarantee that the relative risk function is
+positive for all possible covariates. The restriction disappears for the
+exponential relative risk function since it always returns positive values.
 
 
-We may extend the model by considering a random frailty effect $w_i$ (with
+We may extend the model by considering a random frailty effect $u_i$ (of
 expectation one) to account for heterogeneity between different processes or
 processes from different clusters. The intensity function becomes $$\lambda(t
-\mid \mathbf{z}_i, w_i) = \rho(t)\,r(\mathbf{z}_i, \boldsymbol{\beta})\,w_i.$$
+\mid \mathbf{z}_i, u_i) = u_i\,\rho(t)\,r(\mathbf{z}_i, \boldsymbol{\beta}).$$
 The common choices for distribution of the random frailty effect include Gamma
 distribution of mean one, and lognormal distribution of mean zero in logarithm
 scale.
 
 
-Furthermore, both covariates and coefficients may be time-varying. So the
-general form of the intensity function is given as follows: $$\lambda\bigl(t
-\mid \mathbf{z}_i(t), w_i\bigr) = \rho(t)\,r\bigl(\mathbf{z}_i(t),
-\boldsymbol{\beta}(t)\bigr)\,w_i.$$
+Furthermore, both covariates and coefficients may be time-varying. So a general
+form of the intensity function for the relative risk model is given as follows:
+$$\lambda\bigl(t \mid \mathbf{z}_i(t), u_i\bigr) =
+u_i\,\rho(t)\,r\bigl(\mathbf{z}_i(t), \boldsymbol{\beta}(t)\bigr).$$
+
+
+### Accelerated failure time model
+
+The relative risk models incorporate the covariates and their coefficients
+through a relative risk function multiplied by the baseline hazard rate, which
+provides an intuitive interpretation. However, we may consider a direct
+relationship between the covraiates $\mathbf{z}$ (including the intercept term)
+and the time to failure $T>0$, $\log(T) = \alpha + \sigma W$, where $W$ is a
+standardized random error variable with density function $f_W(w)$, suvival
+function $S_W(w)$ and hazard function $\rho(w) = f_W(w) / S_W(w)$, $\sigma$
+represents the standard error, and $\alpha =
+\boldsymbol{\beta}^{\top}\mathbf{z}$.  We assume that $W$ is independent of
+$\boldsymbol{\beta}$ given the covariates $\mathbf{z}$.  Taking exponentiation
+gives $T=\exp(\boldsymbol{\beta}^{\top}\mathbf{z})\exp(W)$ with density $f_T(t)
+= \frac{1}{\sigma t}f_W\bigl((\log(t) - \alpha)/\sigma\bigr)$, survival function
+$S_T(t) = S_W\bigl((\log(t) - \alpha)/\sigma\bigr)$, and hazard function
+$$\lambda(t \mid \mathbf{z}_i) = \frac{1}{\sigma t}\rho\bigl((\log(t) -
+\alpha)/\sigma\bigr).$$ Let $\lambda_{\mathbf{z}}=\exp(- \alpha)$ and $p = 1 /
+\sigma$, we may rewrite the hazard function as follows: $$\lambda(t \mid
+\mathbf{z}_i) = \frac{p}{t}\rho\bigl(p\log(\lambda_{\mathbf{z}} t)\bigr).$$
+The resulting model is called accelerated failure time (AFT) model.
+
+
+For example, suppose $W$ follows standard logistic distribution with density
+$f_W(w) = e^w / (1 + e^w) ^ 2$, survival function $S_W(w) = 1 / (1 + e^w)$, and
+hazard function $\rho(w) = e^w / (1 + e^w)$. This leads to log-logistic model of
+$T$ with hazard function $$\lambda(t \mid \mathbf{z}_i) = \frac{p
+(t\lambda_{\mathbf{z}})^p/t}{1 + (t\lambda_{\mathbf{z}})^p}.$$
+
+
+Similarly, we may further consider frailty factor, time-variant covariates, and
+time-varying covariate coefficients. So a general form of the intensity function
+may be given as follows: $$\lambda\bigl(t \mid \mathbf{z}_i(t), u_i\bigr) =
+\frac{u_i\,p}{t}\,\rho\bigl( p \log(t) -
+p \boldsymbol{\beta}(t)^{\top}\mathbf{z}_i(t)\bigr).$$
+
+
+### Intensity function in general form
+
+The function `simEvent` and `simEventData` allow users to specify an intensity
+function in an even more general form given below.  $$\lambda\bigl(t \mid
+\mathbf{z}_i(t), u_i\bigr) = u_i\,\rho\bigl(t, \mathbf{z}_i(t),
+\boldsymbol{\beta}(t)\bigr) \,r\bigl(\mathbf{z}_i(t),
+\boldsymbol{\beta}(t)\bigr),$$ where $u_i$, $\rho(\cdot)$, and $r(\cdot)$
+corresponds to the argument `frailty`, `rho`, and `relativeRisk`, respectively.
 
 
 ## Sampling methods
@@ -269,7 +325,7 @@ For example, we may generate event times with both covariates and their
 coefficients being time-variant as follows:
 
 ```{r time-varying-coef-1}
-zCoefFun <- function(time, shift) c(sqrt(time / 10), sin(time + shift), 0.1)
+zCoefFun <- function(time, shift) cbind(sqrt(time / 10), sin(time + shift), 0.1)
 simEventData(z = zFun1, zCoef = zCoefFun,
              arguments = list(zCoef = list(shift = 1)))
 ```
@@ -361,7 +417,8 @@ from another cluster.
 ```{r shared-frailty-1}
 ## shared gamma frailty for processes from two clusters
 frailtyEffect <- rgamma(2, shape = 2, scale = 0.5)
-simEventData(nProcess = 4, frailty = rep(frailtyEffect, each = 2))
+simEventData(nProcess = 4, z = zFun1, zCoef = c(0.1, 0.5, - 0.5),
+             frailty = rep(frailtyEffect, each = 2))
 ```
 
 If the length of the specified frailty vector is less than the number of
@@ -372,14 +429,15 @@ frailty effect (`frailtyEffect[2L]`).
 
 ```{r shared-frailty-2}
 set.seed(123)
-simEventData(nProcess = 4, frailty = frailtyEffect)
+simEventData(nProcess = 4, z = zFun1, zCoef = c(0.1, 0.5, - 0.5),
+             frailty = frailtyEffect)
 ```
 
 
-# Common survival models
+# Common parametric survival models
 
 In this section, we present examples for generating event times with
-time-invariant covariates for several common survival models.
+time-invariant covariates for several common parametric survival models.
 
 ## Weibull model
 
@@ -387,31 +445,107 @@ The Weibull model is one of the most widely used parametric survival models.
 Assume the event times of the process $i$, $i\in\{1,\ldots,n\}$, follow Weibull
 model with hazard function $h_i(t) = \lambda_i p t^{p-1}$, where $p>0$ is the
 shape parameter, and $\lambda_i$ can be reparameterized with regression
-coefficients.
+coefficients. When $p=1$, the Weibull model reduces to the exponential model,
+whose hazard rate is a constant over time.
 
 
-The common reparameterization is $\lambda_i = \exp(\beta_0 +
+One common reparameterization is $\lambda_i = \exp(\beta_0 +
 \boldsymbol{\beta}^{\top}\mathbf{z}_i)$, which results in Weibull proportional
-hazard model. Let $\lambda_0 = \exp(\beta_0)$ and we may rewrite the hazard
+hazard (PH) model. Let $\lambda_0 = \exp(\beta_0)$ and we may rewrite the hazard
 function $h_i(t) = \rho(t) \exp(\boldsymbol{\beta}^{\top}\mathbf{z}_i)$, where
-$\rho(t) = \lambda_0 p t^{p-1}$ is the baseline hazard function.
+$\rho(t) = \lambda_0 p t^{p-1}$ is the baseline hazard function. For example, we
+may simulate the survival data of ten processes from Weibull PH model as
+follows:
 
 ```{r weibull-ph}
-weibull_ph <- function(x, lambda, p) lambda * p * x ^ (p - 1)
-simEventData(z = cbind(rnorm(2), rbinom(2, 1, 0.5)),
-             zCoef = c(0.5, 0.2), rho = weibull_ph,
-             arguments = list(rho = list(lambda = 0.1, p = 2)),
-             recurrent = FALSE, end = 5)
+nProcess <- 10
+rho_weibull_ph <- function(x, lambda, p) lambda * p * x ^ (p - 1)
+simEventData(z = cbind(rnorm(nProcess), rbinom(nProcess, 1, 0.5)),
+             zCoef = c(0.5, 0.2), endTime = rnorm(nProcess, 10),
+             recurrent = FALSE, rho = rho_weibull_ph,
+             arguments = list(rho = list(lambda = 0.01, p = 2)))
 ```
 
+## Gompertz model
+
+The baseline hazard function of the gompertz model is $\rho(t) =
+\lambda\exp(\alpha t)$, where $\lambda > 0$ is the scale parameter and $\alpha$
+is the shape paramter. So the logrithm of the baseline hazard function is linear
+in time $t$.
+
+Similar to the example for the Weibull model given in last section, we may
+simulate the survival data of ten processes as follows:
+
+```{r gompertz}
+rho_gompertz <- function(time, lambda, alpha) lambda * exp(alpha * time)
+simEventData(z = cbind(rnorm(nProcess), rbinom(nProcess, 1, 0.5)),
+             zCoef = c(0.5, 0.2), endTime = rnorm(nProcess, 10),
+             recurrent = FALSE, rho = rho_gompertz,
+             arguments = list(rho = list(lambda = 0.1, alpha = 0.1)))
+```
+
+
+## Log-logistic model
+
+As discussed in Section [accelerated failure time
+model](#accelerated-failure-time-model), the hazard function of the log-logistic
+model is $$\lambda(t \mid \mathbf{z}_i) = \frac{p
+(t\lambda_{\mathbf{z}})^p/t}{1 + (t\lambda_{\mathbf{z}})^p}.$$ So we may
+simulate the survival data of ten processes from the log-logistic model as
+follows:
+
+```{r loglogistic}
+rho_loglogistic <- function(time, z, zCoef, p) {
+    lambda <- 1 / parametrize(z, zCoef, FUN = "exponential")
+    lambda * p * (lambda * time) ^ (p - 1) / (1 + (lambda * time) ^ p)
+}
+simEventData(z = cbind(1, rnorm(nProcess), rbinom(nProcess, 1, 0.5)),
+             zCoef = c(0.3, 0.5, 0.2), end = rnorm(nProcess, 10),
+             recurrent = FALSE, relativeRisk = "none", rho = rho_loglogistic,
+             arguments = list(rho = list(p = 1.5)))
+```
+
+Notice that in the function `rho_loglogistic` for the hazard function of the
+log-logistic model, we wrapped the parametrization of the covariates and
+covariate coefficients with the function `parametrize` and specified that `FUN =
+"exponential"`. In addition, we specified `relativeRisk = "none"` when calling
+`simEventData` for AFT models.
 
 
 ## Log-normal model
 
-## Log-logistic model
+By following the discussion given in Section [accelerated failure time
+model](#accelerated-failure-time-model), it is not hard to obtain the hazard
+function of the log-normal model, $$\lambda(t \mid \mathbf{z}_i) = \frac{p}{t}
+\lambda_W\bigl(p(\log(t) - \boldsymbol{\beta}^{\top}\mathbf{z}_i)\bigr),$$ where
+$\rho(w) = \phi(w) / \bigl(1 - \Phi(w)\bigr)$, $\phi(w)$ and $\Phi(w)$ is the
+density and cumulative distribution function of random variable following
+standard normal distribution.
+
+The example of simulating survival times of ten processes from the log-normal
+model is given as follows:
+
+```{r log-normal}
+rho_lognormal <- function(time, z, zCoef, p) {
+    foo <- function(x) dnorm(x) / pnorm(x, lower.tail = FALSE)
+    alpha <- parametrize(z, zCoef, FUN = "linear") - 1
+    w <- p * (log(time) - alpha)
+    foo(w) * p / time
+}
+simEventData(z = cbind(1, rnorm(nProcess), rbinom(nProcess, 1, 0.5)),
+             zCoef = c(0.3, 0.5, 0.2), end = rnorm(nProcess, 10),
+             recurrent = FALSE, relativeRisk = "none",
+             rho = rho_lognormal, method = "inversion",
+             arguments = list(rho = list(p = 0.5)))
+```
+
+Notice that the time origin was set to be zero by default.  So the time variable
+$t$ in the denominator of the hazard function $\lambda(t | \mid \mathbf{z}_i)$,
+may result in undefined value when $t=0$. Therefore, we specified `method =
+"inversion"` for the inversion sampling method for the log-normal model.
+
 
 # Multiple event data
-
 
 
 # Reference
