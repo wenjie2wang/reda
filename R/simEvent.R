@@ -327,7 +327,7 @@ simEvent <- function(z = 0, zCoef = 1,
     if (isCharOne(z)) z <- match.fun(z)
     if (! (zVecIdx || is.function(z)))
         stop(wrapMessages(
-            "The covariates `z` has to be a numeric vector / matrix,",
+            "The covariates `z` has to be a numeric vector,",
             "or a function."
         ), call. = FALSE)
     ## check coefficients zCoef
@@ -537,27 +537,26 @@ simEvent <- function(z = 0, zCoef = 1,
              zCoefMat = zCoefMat)
     }
 
-    ## step 1: calculate the supremum value of rate function
-    rhoMaxObj <- tryCatch(
-        stats::optim((origin + endTime) / 2, rateFun,
-                     lower = origin, upper = endTime,
-                     method = "L-BFGS-B",
-                     control = list(fnscale = - 1)),
-        error = function(e) e
-    )
-    ## if the supremum is finite, use thinning method
-    if ("error" %in% class(rhoMaxObj)) {
-        if (method == "thinning") {
+    if (method == "thinning") {
+        ## step 1: calculate the supremum value of rate function
+        rhoMaxObj <- tryCatch(
+            stats::optim((origin + endTime) / 2, rateFun,
+                         lower = origin, upper = endTime,
+                         method = "L-BFGS-B",
+                         control = list(fnscale = - 1)),
+            error = function(e) e
+        )
+        ## if the supremum is finite, use thinning method
+        if ("error" %in% class(rhoMaxObj)) {
             method <- "inversion"
             warning(wrapMessages(
                 "The rate function may go to infinite.",
                 "The Inversion method was used."
             ), call. = FALSE)
+        } else {
+            rho_max <- rhoMaxObj$value
         }
-    } else {
-        rho_max <- rhoMaxObj$value
     }
-
     ## values at end time (censoring time)
     cenList <- rateFun(endTime, forOptimize = FALSE)
     zMat_cen <- cenList$zMat
