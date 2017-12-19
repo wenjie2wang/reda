@@ -27,10 +27,8 @@ preview: $(vignettes)
 
 .PHONY: pkgdown
 pkgdown:
-	@if [ ! -h "docs/inst/bib" ];\
-	then mkdir -p docs/inst/ && cd $$_; ln -s ../../inst/bib .;\
-	echo "created symbolic link for bib file(s)";\
-	fi;
+	@mkdir -p docs/inst/bib/; cp inst/bib/$(pkg).bib docs/inst/bib/;
+	@echo "added/updated the package bib file"
 	Rscript -e "library(methods); pkgdown::build_site();"
 
 $(tar): $(objects)

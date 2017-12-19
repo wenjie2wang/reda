@@ -78,7 +78,7 @@
       <h1>Introduction to reda through Examples</h1>
                         <h4 class="author">Wenjie Wang</h4>
             
-            <h4 class="date">2017-12-17</h4>
+            <h4 class="date">2017-12-18</h4>
           </div>
 
     
@@ -87,9 +87,9 @@
 <p>In this vignette, we introduce how to explore recurrent event data by nonparametric sample mean function (also called Nelson-Aalen estimator) and modeling the event counts of interest by gamma frailty model with the <strong>reda</strong> package through examples. Most functions in the package are S4 methods that produce S4 class objects. The details of function syntax and the produced objects are available in the package manual, which will thus not be covered in this vignette.</p>
 <section id="introduction" class="level1"><h1>Introduction</h1>
 <section id="simuDat" class="level2"><h2>Simulated recurrent event data</h2>
-<pre class="sourceCode r" id="cb1"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="kw">library</span>(reda)</a></code></pre>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="kw">library</span>(reda)</a></code></pre></div>
 <p>First of all, the sample recurrent event data we are going to use in the following examples is called <code>simuDat</code>, which contains totally 500 observations of 6 variables.</p>
-<pre class="sourceCode r" id="cb2"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" data-line-number="1"><span class="kw">head</span>(simuDat)</a></code></pre>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" data-line-number="1"><span class="kw">head</span>(simuDat)</a></code></pre></div>
 <pre><code>##   ID time event group    x1 gender
 ## 1  1    1     1 Contr -1.93 female
 ## 2  1   22     1 Contr -1.93 female
@@ -97,7 +97,7 @@
 ## 4  1   57     1 Contr -1.93 female
 ## 5  1  112     0 Contr -1.93 female
 ## 6  2  140     0 Treat -0.11 female</code></pre>
-<pre class="sourceCode r" id="cb4"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" data-line-number="1"><span class="kw">str</span>(simuDat)</a></code></pre>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" data-line-number="1"><span class="kw">str</span>(simuDat)</a></code></pre></div>
 <pre><code>## 'data.frame':    500 obs. of  6 variables:
 ##  $ ID    : num  1 1 1 1 1 2 3 3 4 4 ...
 ##  $ time  : num  1 22 23 57 112 140 40 168 14 112 ...
@@ -135,23 +135,23 @@
 <p>The nonparametric sample mean cumulative function (MCF) is also called Nelson-Aalen Estimator <span class="citation" data-cites="nelson2003siam">(Nelson 2003)</span>. The point estimate of MCF at each time point does not assume any particular underlying model. The variance estimates at each time point is computed by the Lawless and Nadeau method <span class="citation" data-cites="lawless1995technometrics">(Lawless and Nadeau 1995)</span>, Poisson process method or based on the well-known bootstrap method <span class="citation" data-cites="efron1979aos">(Efron 1979)</span> with subjects as resampling units. The approximate confidence intervals are provided as well, which are constructed based on the asymptotic normality of the MCF estimates itself (the default) or logarithm of the MCF estimates.</p>
 <p>The function <code>mcf</code> is a generic function for the MCF estimates from a sample data or a fitted gamma frailty model (as demonstrated later). If a formula with <code>Survr</code> as response is specified in function <code>mcf</code>, the formula method for estimating the sample MCF will be called. The covariate specified at the right hand side of the formula should be either <code>1</code> or any “linear” combination of factor variables in the data. The former computes the overall sample MCF. The latter computes the sample MCF for each level of the combination of the factor variable(s) specified, respectively.</p>
 <p>The valve-seat dataset in <span class="citation" data-cites="nelson1995technometrics">Nelson (1995)</span> and the simulated sample data are used for demonstration as follows:</p>
-<pre class="sourceCode r" id="cb6"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" data-line-number="1">## Example 1. valve-seat data</a>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" data-line-number="1">## Example 1. valve-seat data</a>
 <a class="sourceLine" id="cb6-2" data-line-number="2">valveMcf0 &lt;-<span class="st"> </span><span class="kw"><a href="../reference/mcf.html">mcf</a></span>(<span class="kw"><a href="../reference/Survr.html">Survr</a></span>(ID, Days, No.) <span class="op">~</span><span class="st"> </span><span class="dv">1</span>, <span class="dt">data =</span> valveSeats)</a>
 <a class="sourceLine" id="cb6-3" data-line-number="3"></a>
 <a class="sourceLine" id="cb6-4" data-line-number="4">## Example 2. the simulated data</a>
 <a class="sourceLine" id="cb6-5" data-line-number="5">simuMcf &lt;-<span class="st"> </span><span class="kw"><a href="../reference/mcf.html">mcf</a></span>(<span class="kw"><a href="../reference/Survr.html">Survr</a></span>(ID, time, event) <span class="op">~</span><span class="st"> </span>group <span class="op">+</span><span class="st"> </span>gender,</a>
-<a class="sourceLine" id="cb6-6" data-line-number="6">               <span class="dt">data =</span> simuDat, <span class="dt">subset =</span> ID <span class="op">%in%</span><span class="st"> </span><span class="dv">1</span> <span class="op">:</span><span class="st"> </span><span class="dv">50</span>)</a></code></pre>
+<a class="sourceLine" id="cb6-6" data-line-number="6">               <span class="dt">data =</span> simuDat, <span class="dt">subset =</span> ID <span class="op">%in%</span><span class="st"> </span><span class="dv">1</span> <span class="op">:</span><span class="st"> </span><span class="dv">50</span>)</a></code></pre></div>
 <p>After estimation, we may plot the sample MCF by function <code>plot</code>, which actually returns a <code>ggplot</code> object so that the plot produced can be easily further customized by <strong>ggplot2</strong>. The <code>legendname</code> and <code>legendLevels</code> can be specified to easily customize the legend in the plot. Two examples are given as follows:</p>
-<pre class="sourceCode r" id="cb7"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" data-line-number="1">## overall sample MCF for valve-seat data in Nelson (1995)</a>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" data-line-number="1">## overall sample MCF for valve-seat data in Nelson (1995)</a>
 <a class="sourceLine" id="cb7-2" data-line-number="2"><span class="kw">plot</span>(valveMcf0, <span class="dt">conf.int =</span> <span class="ot">TRUE</span>, <span class="dt">mark.time =</span> <span class="ot">TRUE</span>, <span class="dt">addOrigin =</span> <span class="ot">TRUE</span>, <span class="dt">col =</span> <span class="dv">2</span>) <span class="op">+</span></a>
-<a class="sourceLine" id="cb7-3" data-line-number="3"><span class="st">    </span>ggplot2<span class="op">::</span><span class="kw"><a href="http://www.rdocumentation.org/packages/ggplot2/topics/labs">xlab</a></span>(<span class="st">"Days"</span>) <span class="op">+</span><span class="st"> </span>ggplot2<span class="op">::</span><span class="kw"><a href="http://www.rdocumentation.org/packages/ggplot2/topics/ggtheme">theme_bw</a></span>()</a></code></pre>
+<a class="sourceLine" id="cb7-3" data-line-number="3"><span class="st">    </span>ggplot2<span class="op">::</span><span class="kw"><a href="http://www.rdocumentation.org/packages/ggplot2/topics/labs">xlab</a></span>(<span class="st">"Days"</span>) <span class="op">+</span><span class="st"> </span>ggplot2<span class="op">::</span><span class="kw"><a href="http://www.rdocumentation.org/packages/ggplot2/topics/ggtheme">theme_bw</a></span>()</a></code></pre></div>
 <p><img src="reda-intro_files/figure-html/plot:sampleMcf-1.png" width="672"></p>
-<pre class="sourceCode r" id="cb8"><code class="sourceCode r"><a class="sourceLine" id="cb8-1" data-line-number="1">## sample MCF for different groups (the default theme)</a>
-<a class="sourceLine" id="cb8-2" data-line-number="2"><span class="kw">plot</span>(simuMcf, <span class="dt">conf.int =</span> <span class="ot">TRUE</span>, <span class="dt">lty =</span> <span class="dv">1</span> <span class="op">:</span><span class="st"> </span><span class="dv">4</span>, <span class="dt">legendName =</span> <span class="st">"Treatment &amp; Gender"</span>)</a></code></pre>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb8-1" data-line-number="1">## sample MCF for different groups (the default theme)</a>
+<a class="sourceLine" id="cb8-2" data-line-number="2"><span class="kw">plot</span>(simuMcf, <span class="dt">conf.int =</span> <span class="ot">TRUE</span>, <span class="dt">lty =</span> <span class="dv">1</span> <span class="op">:</span><span class="st"> </span><span class="dv">4</span>, <span class="dt">legendName =</span> <span class="st">"Treatment &amp; Gender"</span>)</a></code></pre></div>
 <p><img src="reda-intro_files/figure-html/plot:sampleMcf-2.png" width="672"></p>
 <p>Notice that in the first plot, the censoring times was marked on the step curve by specifying <code>mark.time = TRUE</code> and the time origins was included in the curve by specifying <code>addOrigin = TRUE</code>. In addition, the type and color of the line can be specified through <code>lty</code> and <code>col</code>, respectively.</p>
 <p>As for the variance estimates, the Poisson process method assumes that the underlying counting process is a Poisson process and may underestimate the variance if the assumption cannot be justified. While, the Lawless and Nadeau method is more robust to departures from the Poisson process assumption. The nonparametric bootstrap method can be considered as well if an extra computational burden is not of concern. We may perform a quick comparison among the standard error estimates and the confidence intervals from these methods for the valve seats data as follows:</p>
-<pre class="sourceCode r" id="cb9"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" data-line-number="1">## Poisson process method</a>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" data-line-number="1">## Poisson process method</a>
 <a class="sourceLine" id="cb9-2" data-line-number="2">valveMcf1 &lt;-<span class="st"> </span><span class="kw"><a href="../reference/mcf.html">mcf</a></span>(<span class="kw"><a href="../reference/Survr.html">Survr</a></span>(ID, Days, No.) <span class="op">~</span><span class="st"> </span><span class="dv">1</span>, valveSeats, <span class="dt">variance =</span> <span class="st">"Poisson"</span>)</a>
 <a class="sourceLine" id="cb9-3" data-line-number="3"></a>
 <a class="sourceLine" id="cb9-4" data-line-number="4">## bootstrap method (with 1,000 bootstrap samples)</a>
@@ -166,22 +166,22 @@
 <a class="sourceLine" id="cb9-13" data-line-number="13">               <span class="kw">cbind</span>(valveMcf2<span class="op">@</span>MCF, <span class="dt">Method =</span> <span class="st">"Bootstrap"</span>))</a>
 <a class="sourceLine" id="cb9-14" data-line-number="14"><span class="kw"><a href="http://www.rdocumentation.org/packages/ggplot2/topics/ggplot">ggplot</a></span>(ciDat, <span class="kw"><a href="http://www.rdocumentation.org/packages/ggplot2/topics/aes">aes</a></span>(<span class="dt">x =</span> time, <span class="dt">y =</span> se)) <span class="op">+</span></a>
 <a class="sourceLine" id="cb9-15" data-line-number="15"><span class="st">    </span><span class="kw"><a href="http://www.rdocumentation.org/packages/ggplot2/topics/geom_path">geom_step</a></span>(<span class="kw"><a href="http://www.rdocumentation.org/packages/ggplot2/topics/aes">aes</a></span>(<span class="dt">color =</span> Method, <span class="dt">linetype =</span> Method)) <span class="op">+</span></a>
-<a class="sourceLine" id="cb9-16" data-line-number="16"><span class="st">    </span><span class="kw"><a href="http://www.rdocumentation.org/packages/ggplot2/topics/labs">xlab</a></span>(<span class="st">"Days"</span>) <span class="op">+</span><span class="st"> </span><span class="kw"><a href="http://www.rdocumentation.org/packages/ggplot2/topics/labs">ylab</a></span>(<span class="st">"SE estimates"</span>) <span class="op">+</span><span class="st"> </span><span class="kw"><a href="http://www.rdocumentation.org/packages/ggplot2/topics/ggtheme">theme_bw</a></span>()</a></code></pre>
+<a class="sourceLine" id="cb9-16" data-line-number="16"><span class="st">    </span><span class="kw"><a href="http://www.rdocumentation.org/packages/ggplot2/topics/labs">xlab</a></span>(<span class="st">"Days"</span>) <span class="op">+</span><span class="st"> </span><span class="kw"><a href="http://www.rdocumentation.org/packages/ggplot2/topics/labs">ylab</a></span>(<span class="st">"SE estimates"</span>) <span class="op">+</span><span class="st"> </span><span class="kw"><a href="http://www.rdocumentation.org/packages/ggplot2/topics/ggtheme">theme_bw</a></span>()</a></code></pre></div>
 <p><img src="reda-intro_files/figure-html/plot:mcfSE-1.png" width="672"></p>
-<pre class="sourceCode r" id="cb10"><code class="sourceCode r"><a class="sourceLine" id="cb10-1" data-line-number="1">## comparing the confidence intervals</a>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb10-1" data-line-number="1">## comparing the confidence intervals</a>
 <a class="sourceLine" id="cb10-2" data-line-number="2"><span class="kw"><a href="http://www.rdocumentation.org/packages/ggplot2/topics/ggplot">ggplot</a></span>(ciDat, <span class="kw"><a href="http://www.rdocumentation.org/packages/ggplot2/topics/aes">aes</a></span>(<span class="dt">x =</span> time)) <span class="op">+</span></a>
 <a class="sourceLine" id="cb10-3" data-line-number="3"><span class="st">    </span><span class="kw"><a href="http://www.rdocumentation.org/packages/ggplot2/topics/geom_path">geom_step</a></span>(<span class="kw"><a href="http://www.rdocumentation.org/packages/ggplot2/topics/aes">aes</a></span>(<span class="dt">y =</span> MCF), <span class="dt">color =</span> <span class="st">"grey"</span>) <span class="op">+</span></a>
 <a class="sourceLine" id="cb10-4" data-line-number="4"><span class="st">    </span><span class="kw"><a href="http://www.rdocumentation.org/packages/ggplot2/topics/geom_path">geom_step</a></span>(<span class="kw"><a href="http://www.rdocumentation.org/packages/ggplot2/topics/aes">aes</a></span>(<span class="dt">y =</span> lower, <span class="dt">color =</span> Method, <span class="dt">linetype =</span> Method)) <span class="op">+</span></a>
 <a class="sourceLine" id="cb10-5" data-line-number="5"><span class="st">    </span><span class="kw"><a href="http://www.rdocumentation.org/packages/ggplot2/topics/geom_path">geom_step</a></span>(<span class="kw"><a href="http://www.rdocumentation.org/packages/ggplot2/topics/aes">aes</a></span>(<span class="dt">y =</span> upper, <span class="dt">color =</span> Method, <span class="dt">linetype =</span> Method)) <span class="op">+</span></a>
-<a class="sourceLine" id="cb10-6" data-line-number="6"><span class="st">    </span><span class="kw"><a href="http://www.rdocumentation.org/packages/ggplot2/topics/labs">xlab</a></span>(<span class="st">"Days"</span>) <span class="op">+</span><span class="st"> </span><span class="kw"><a href="http://www.rdocumentation.org/packages/ggplot2/topics/labs">ylab</a></span>(<span class="st">"Confidence intervals"</span>) <span class="op">+</span><span class="st"> </span><span class="kw"><a href="http://www.rdocumentation.org/packages/ggplot2/topics/ggtheme">theme_bw</a></span>()</a></code></pre>
+<a class="sourceLine" id="cb10-6" data-line-number="6"><span class="st">    </span><span class="kw"><a href="http://www.rdocumentation.org/packages/ggplot2/topics/labs">xlab</a></span>(<span class="st">"Days"</span>) <span class="op">+</span><span class="st"> </span><span class="kw"><a href="http://www.rdocumentation.org/packages/ggplot2/topics/labs">ylab</a></span>(<span class="st">"Confidence intervals"</span>) <span class="op">+</span><span class="st"> </span><span class="kw"><a href="http://www.rdocumentation.org/packages/ggplot2/topics/ggtheme">theme_bw</a></span>()</a></code></pre></div>
 <p><img src="reda-intro_files/figure-html/plot:mcfCI-1.png" width="672"></p>
 <p>From the comparison, we may find that the SE estimates and the confidence intervals from the Lawless and Nadaeu method and the bootstrap method have good agreement, while the Poisson process method gives slightly smaller SE estimates and a narrower confidence band. In practice, the Lawless and Nadeau method is suggested if it is hard to justify the Poisson process assumption.</p>
 </section><section id="mcfDiff" class="level2"><h2>Comparing two-sample MCFs</h2>
 <p>The function <code>mcfDiff.test</code> is an implementation of the pseudo-score tests for comparing two-sample MCFs proposed by <span class="citation" data-cites="cook1996biometrics">Cook, Lawless, and Nadeau (1996)</span>, while the function <code>mcfDiff</code> gives the difference estimates and wraps the pseudo-score testing results from <code>mcfDiff.test</code> (by default).</p>
 <p>Suppose we are interested in comparing the two-sample MCFs between the treatment and control group in the simulated data. We may simply feed the <code>mcf.formula</code> object returned from the function <code>mcf</code> to function <code>mcfDiff</code> as follows:</p>
-<pre class="sourceCode r" id="cb11"><code class="sourceCode r"><a class="sourceLine" id="cb11-1" data-line-number="1">## one sample MCF object of two groups</a>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb11-1" data-line-number="1">## one sample MCF object of two groups</a>
 <a class="sourceLine" id="cb11-2" data-line-number="2">mcf0 &lt;-<span class="st"> </span><span class="kw"><a href="../reference/mcf.html">mcf</a></span>(<span class="kw"><a href="../reference/Survr.html">Survr</a></span>(ID, time, event) <span class="op">~</span><span class="st"> </span>group, <span class="dt">data =</span> simuDat)</a>
-<a class="sourceLine" id="cb11-3" data-line-number="3">(mcf_diff0 &lt;-<span class="st"> </span><span class="kw"><a href="../reference/mcfDiff.html">mcfDiff</a></span>(mcf0))</a></code></pre>
+<a class="sourceLine" id="cb11-3" data-line-number="3">(mcf_diff0 &lt;-<span class="st"> </span><span class="kw"><a href="../reference/mcfDiff.html">mcfDiff</a></span>(mcf0))</a></code></pre></div>
 <pre><code>## Call: 
 ## mcfDiff(mcf1 = mcf0)
 ## 
@@ -194,10 +194,10 @@
 ## 
 ## Variance Estimator: robust</code></pre>
 <p>Then what if the covariate <code>group</code> contains more than two levels? In that case, we may compute the sample MCF for each group, respectively, and feed both of the generated <code>mcf.formula</code> objects to <code>mcfDiff</code> as the first two arguments. Alternatively, an intuitive <code>-</code> method is available for comparing the difference between two <code>mcf.formual</code> objects, <code>mcf1</code> and <code>mcf2</code>, returned from the <code>mcf</code> formula method, which means that the function call <code>mcf1 - mcf2</code> is equivalent to <code><a href="../reference/mcfDiff.html">mcfDiff(mcf1, mcf2)</a></code>. A simple example is given below.</p>
-<pre class="sourceCode r" id="cb13"><code class="sourceCode r"><a class="sourceLine" id="cb13-1" data-line-number="1">## explicitly ask for the difference of two sample MCF</a>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb13-1" data-line-number="1">## explicitly ask for the difference of two sample MCF</a>
 <a class="sourceLine" id="cb13-2" data-line-number="2">mcf1 &lt;-<span class="st"> </span><span class="kw"><a href="../reference/mcf.html">mcf</a></span>(<span class="kw"><a href="../reference/Survr.html">Survr</a></span>(ID, time, event) <span class="op">~</span><span class="st"> </span><span class="dv">1</span>, simuDat, group <span class="op">%in%</span><span class="st"> "Contr"</span>)</a>
 <a class="sourceLine" id="cb13-3" data-line-number="3">mcf2 &lt;-<span class="st"> </span><span class="kw"><a href="../reference/mcf.html">mcf</a></span>(<span class="kw"><a href="../reference/Survr.html">Survr</a></span>(ID, time, event) <span class="op">~</span><span class="st"> </span><span class="dv">1</span>, simuDat, group <span class="op">%in%</span><span class="st"> "Treat"</span>)</a>
-<a class="sourceLine" id="cb13-4" data-line-number="4">mcf1 <span class="op">-</span><span class="st"> </span>mcf2</a></code></pre>
+<a class="sourceLine" id="cb13-4" data-line-number="4">mcf1 <span class="op">-</span><span class="st"> </span>mcf2</a></code></pre></div>
 <pre><code>## Call: 
 ## mcfDiff(mcf1 = mcf1, mcf2 = mcf2)
 ## 
@@ -210,12 +210,12 @@
 ## 
 ## Variance Estimator: robust</code></pre>
 <p>Similarly, a <code>plot</code> method based on <strong>ggplot2</strong> is available for visual comparison.</p>
-<pre class="sourceCode r" id="cb15"><code class="sourceCode r"><a class="sourceLine" id="cb15-1" data-line-number="1"><span class="kw">plot</span>(mcf_diff0)</a></code></pre>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb15-1" data-line-number="1"><span class="kw">plot</span>(mcf_diff0)</a></code></pre></div>
 <p><img src="reda-intro_files/figure-html/plot:mcfDiff-1.png" width="672"></p>
 </section></section><section id="rateReg" class="level1"><h1>Gamma frailty model</h1>
 <section id="constFit" class="level2"><h2>Model with constant rate function</h2>
 <p>The default model when argument <code>df</code>, <code>knots</code>, and <code>degree</code> are not specified is gamma frailty model with (one piece) constant rate function, which is equivalent to negative binomial regression with the same shape and rate parameter in the gamma prior.</p>
-<pre class="sourceCode r" id="cb16"><code class="sourceCode r"><a class="sourceLine" id="cb16-1" data-line-number="1">(constFit &lt;-<span class="st"> </span><span class="kw"><a href="../reference/rateReg.html">rateReg</a></span>(<span class="kw"><a href="../reference/Survr.html">Survr</a></span>(ID, time, event) <span class="op">~</span><span class="st"> </span>group <span class="op">+</span><span class="st"> </span>x1, <span class="dt">data =</span> simuDat))</a></code></pre>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb16-1" data-line-number="1">(constFit &lt;-<span class="st"> </span><span class="kw"><a href="../reference/rateReg.html">rateReg</a></span>(<span class="kw"><a href="../reference/Survr.html">Survr</a></span>(ID, time, event) <span class="op">~</span><span class="st"> </span>group <span class="op">+</span><span class="st"> </span>x1, <span class="dt">data =</span> simuDat))</a></code></pre></div>
 <pre><code>## Call: 
 ## rateReg(formula = Survr(ID, time, event) ~ group + x1, data = simuDat)
 ## 
@@ -236,9 +236,9 @@
 <p>When argument <code>df</code> or <code>knots</code> (at least one internal knot) is specified, the model becomes gamma frailty model with piecewise constant rate function or so-called HEART model <span class="citation" data-cites="fu2014jbs">(Fu, Luo, and Qu 2016)</span> if argument degree is specified to be zero as default.</p>
 <p>We may specify <code>df</code> and leave <code>knots</code> and <code>degree</code> as default. Then piecewise constant rate function will be applied and the number of pieces will equal <code>df</code>. The internal knots will be automatically specified at suitable quantiles of the covariate representing event and censoring time.</p>
 <p>For example, two pieces’ constant rate function can be simply specified by setting <code>df = 2</code>. The internal knot will be the median time of all the event and censoring time. Also, we can fit the models on the first 50 subjects by specifying argument <code>subset</code>.</p>
-<pre class="sourceCode r" id="cb18"><code class="sourceCode r"><a class="sourceLine" id="cb18-1" data-line-number="1"><span class="co"># two pieces' constant rate function</span></a>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb18-1" data-line-number="1"><span class="co"># two pieces' constant rate function</span></a>
 <a class="sourceLine" id="cb18-2" data-line-number="2">(twoPiecesFit &lt;-<span class="st"> </span><span class="kw"><a href="../reference/rateReg.html">rateReg</a></span>(<span class="kw"><a href="../reference/Survr.html">Survr</a></span>(ID, time, event) <span class="op">~</span><span class="st"> </span>group <span class="op">+</span><span class="st"> </span>x1, <span class="dt">df =</span> <span class="dv">2</span>,</a>
-<a class="sourceLine" id="cb18-3" data-line-number="3">                         <span class="dt">data =</span> simuDat, <span class="dt">subset =</span> ID <span class="op">%in%</span><span class="st"> </span><span class="dv">1</span><span class="op">:</span><span class="dv">50</span>))</a></code></pre>
+<a class="sourceLine" id="cb18-3" data-line-number="3">                         <span class="dt">data =</span> simuDat, <span class="dt">subset =</span> ID <span class="op">%in%</span><span class="st"> </span><span class="dv">1</span><span class="op">:</span><span class="dv">50</span>))</a></code></pre></div>
 <pre><code>## Call: 
 ## rateReg(formula = Survr(ID, time, event) ~ group + x1, data = simuDat, 
 ##     subset = ID %in% 1:50, df = 2)
@@ -260,8 +260,8 @@
 ## 0.03396500 0.04889013</code></pre>
 <p>In the example shown above, the internal knots is set automatically to be 102 and the baseline rate function is two pieces’ constant.</p>
 <p>If internal <code>knots</code> are specified explicitly, the <code>df</code> will be neglected even if it is specified. An example of model with six pieces’ constant rate function is given as follows:</p>
-<pre class="sourceCode r" id="cb20"><code class="sourceCode r"><a class="sourceLine" id="cb20-1" data-line-number="1">(piecesFit &lt;-<span class="st"> </span><span class="kw"><a href="../reference/rateReg.html">rateReg</a></span>(<span class="kw"><a href="../reference/Survr.html">Survr</a></span>(ID, time, event) <span class="op">~</span><span class="st"> </span>group <span class="op">+</span><span class="st"> </span>x1, <span class="dt">data =</span> simuDat,</a>
-<a class="sourceLine" id="cb20-2" data-line-number="2">                      <span class="dt">knots =</span> <span class="kw">seq</span>(<span class="dt">from =</span> <span class="dv">28</span>, <span class="dt">to =</span> <span class="dv">140</span>, <span class="dt">by =</span> <span class="dv">28</span>)))</a></code></pre>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb20-1" data-line-number="1">(piecesFit &lt;-<span class="st"> </span><span class="kw"><a href="../reference/rateReg.html">rateReg</a></span>(<span class="kw"><a href="../reference/Survr.html">Survr</a></span>(ID, time, event) <span class="op">~</span><span class="st"> </span>group <span class="op">+</span><span class="st"> </span>x1, <span class="dt">data =</span> simuDat,</a>
+<a class="sourceLine" id="cb20-2" data-line-number="2">                      <span class="dt">knots =</span> <span class="kw">seq</span>(<span class="dt">from =</span> <span class="dv">28</span>, <span class="dt">to =</span> <span class="dv">140</span>, <span class="dt">by =</span> <span class="dv">28</span>)))</a></code></pre></div>
 <pre><code>## Call: 
 ## rateReg(formula = Survr(ID, time, event) ~ group + x1, data = simuDat, 
 ##     knots = seq(from = 28, to = 140, by = 28))
@@ -284,9 +284,9 @@
 </section><section id="splineFit" class="level2"><h2>Model with spline rate function</h2>
 <p>When argument <code>degree</code> is specified to be a positive integer, the baseline rate function is fitted by splines. The type or flavor of the splines can be specified by argument <code>spline</code>. The available option for <code>spline</code> are <code>bSplines</code> for B-splines and <code>mSplines</code> for M-splines. (See <strong>R</strong> package <strong>spline2</strong> for details about the spline functions used internally.) A partial matching on names is allowed.</p>
 <p>For example, one may want to fit the baseline rate function by a cubic spline with two internal knots. Then we may explicitly specify <code>degree = 3</code> and <code>knots</code> to be a length-two numeric vector. Or we may simply specify <code>degree = 3</code> and <code>df = 6</code> Then the internal knots will be automatically specified at suitable quantiles of the covariate representing event and censoring time. Generally speaking, the degree of freedom of spline (or the number of spline bases) equals the summation of the number of internal knots and the degree of each spline base, plus one if intercept is included in spline bases.</p>
-<pre class="sourceCode r" id="cb22"><code class="sourceCode r"><a class="sourceLine" id="cb22-1" data-line-number="1">## internal knots are set as 33% and 67% quantiles of time variable</a>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb22-1" data-line-number="1">## internal knots are set as 33% and 67% quantiles of time variable</a>
 <a class="sourceLine" id="cb22-2" data-line-number="2">(splineFit &lt;-<span class="st"> </span><span class="kw"><a href="../reference/rateReg.html">rateReg</a></span>(<span class="kw"><a href="../reference/Survr.html">Survr</a></span>(ID, time, event) <span class="op">~</span><span class="st"> </span>group <span class="op">+</span><span class="st"> </span>x1, <span class="dt">data =</span> simuDat,</a>
-<a class="sourceLine" id="cb22-3" data-line-number="3">                      <span class="dt">df =</span> <span class="dv">6</span>, <span class="dt">degree =</span> <span class="dv">3</span>, <span class="dt">spline =</span> <span class="st">"mSplines"</span>))</a></code></pre>
+<a class="sourceLine" id="cb22-3" data-line-number="3">                      <span class="dt">df =</span> <span class="dv">6</span>, <span class="dt">degree =</span> <span class="dv">3</span>, <span class="dt">spline =</span> <span class="st">"mSplines"</span>))</a></code></pre></div>
 <pre><code>## Call: 
 ## rateReg(formula = Survr(ID, time, event) ~ group + x1, data = simuDat, 
 ##     df = 6, degree = 3, spline = "mSplines")
@@ -306,9 +306,9 @@
 ## Coefficients of spline bases:
 ## M-spline1 M-spline2 M-spline3 M-spline4 M-spline5 M-spline6 
 ## 0.3431193 1.5542060 0.1478426 1.7829521 1.3690238 0.1828846</code></pre>
-<pre class="sourceCode r" id="cb24"><code class="sourceCode r"><a class="sourceLine" id="cb24-1" data-line-number="1">## or internal knots are expicitly specified</a>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb24-1" data-line-number="1">## or internal knots are expicitly specified</a>
 <a class="sourceLine" id="cb24-2" data-line-number="2">(splineFit &lt;-<span class="st"> </span><span class="kw"><a href="../reference/rateReg.html">rateReg</a></span>(<span class="kw"><a href="../reference/Survr.html">Survr</a></span>(ID, time, event) <span class="op">~</span><span class="st"> </span>group <span class="op">+</span><span class="st"> </span>x1, <span class="dt">data =</span> simuDat,</a>
-<a class="sourceLine" id="cb24-3" data-line-number="3">                      <span class="dt">spline =</span> <span class="st">"bSp"</span>, <span class="dt">degree =</span> 3L, <span class="dt">knots =</span> <span class="kw">c</span>(<span class="dv">56</span>, <span class="dv">112</span>)))</a></code></pre>
+<a class="sourceLine" id="cb24-3" data-line-number="3">                      <span class="dt">spline =</span> <span class="st">"bSp"</span>, <span class="dt">degree =</span> 3L, <span class="dt">knots =</span> <span class="kw">c</span>(<span class="dv">56</span>, <span class="dv">112</span>)))</a></code></pre></div>
 <pre><code>## Call: 
 ## rateReg(formula = Survr(ID, time, event) ~ group + x1, data = simuDat, 
 ##     knots = c(56, 112), degree = 3L, spline = "bSp")
@@ -330,7 +330,7 @@
 ## 0.01809635 0.04107572 0.01770835 0.02399031 0.06318482 0.03172925</code></pre>
 </section><section id="summary-rateReg" class="level2"><h2>Summary of model fits</h2>
 <p>A brief summary of the fitted model is given by <code>show</code> method as shown in the previous examples. Further, <code>summary</code> method for <code>rateReg</code> object provides a more specific summary of the model fitted. For instance, the summary of the models fitted in section of model fitting can be called as follows:</p>
-<pre class="sourceCode r" id="cb26"><code class="sourceCode r"><a class="sourceLine" id="cb26-1" data-line-number="1"><span class="kw">summary</span>(constFit)</a></code></pre>
+<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb26-1" data-line-number="1"><span class="kw">summary</span>(constFit)</a></code></pre></div>
 <pre><code>## Call: 
 ## rateReg(formula = Survr(ID, time, event) ~ group + x1, data = simuDat)
 ## 
@@ -355,7 +355,7 @@
 ## B-spline1 0.030419   0.0057
 ## 
 ## Loglikelihood:  -1676.422</code></pre>
-<pre class="sourceCode r" id="cb28"><code class="sourceCode r"><a class="sourceLine" id="cb28-1" data-line-number="1"><span class="kw">summary</span>(piecesFit, <span class="dt">showCall =</span> <span class="ot">FALSE</span>)</a></code></pre>
+<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb28-1" data-line-number="1"><span class="kw">summary</span>(piecesFit, <span class="dt">showCall =</span> <span class="ot">FALSE</span>)</a></code></pre></div>
 <pre><code>## 
 ## Coefficients of covariates: 
 ##                coef exp(coef) se(coef)       z Pr(&gt;|z|)  
@@ -386,7 +386,7 @@
 ## B-spline6 0.047927   0.0105
 ## 
 ## Loglikelihood:  -1663.792</code></pre>
-<pre class="sourceCode r" id="cb30"><code class="sourceCode r"><a class="sourceLine" id="cb30-1" data-line-number="1"><span class="kw">summary</span>(splineFit, <span class="dt">showCall =</span> <span class="ot">FALSE</span>, <span class="dt">showKnots =</span> <span class="ot">FALSE</span>)</a></code></pre>
+<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb30-1" data-line-number="1"><span class="kw">summary</span>(splineFit, <span class="dt">showCall =</span> <span class="ot">FALSE</span>, <span class="dt">showKnots =</span> <span class="ot">FALSE</span>)</a></code></pre></div>
 <pre><code>## 
 ## Coefficients of covariates: 
 ##                coef exp(coef) se(coef)       z Pr(&gt;|z|)  
@@ -413,51 +413,51 @@
 ## Loglikelihood:  -1663.285</code></pre>
 <p>The summary includes the function call, estimated covariate coefficients, estimated parameter of frailty variable, internal knots (if exist), boundary knots, degree of spline bases if splines are applied, coefficients of rate function bases (pieces), and log-likelihood of the model fitted. Outputs of function call or knots, may be suppressed by specifying argument <code>showCall</code> or <code>showKnots</code> to be <code>FALSE</code>, respectively, in <code>summary</code> method, which would be especially useful for a relatively concise summary in a reproducible report using <strong>Rmarkdown</strong>, etc.</p>
 <p>What’s more, the corresponding <code>coef</code> and <code>confint</code> method for point estimates and confidence interval for covariate coefficients are provided as well. Let’s take the fitted model with spline rate function as an example.</p>
-<pre class="sourceCode r" id="cb32"><code class="sourceCode r"><a class="sourceLine" id="cb32-1" data-line-number="1">## point estimates of covariate coefficients</a>
-<a class="sourceLine" id="cb32-2" data-line-number="2"><span class="kw">coef</span>(splineFit)</a></code></pre>
+<div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb32-1" data-line-number="1">## point estimates of covariate coefficients</a>
+<a class="sourceLine" id="cb32-2" data-line-number="2"><span class="kw">coef</span>(splineFit)</a></code></pre></div>
 <pre><code>## groupTreat         x1 
 ## -0.6352812  0.3061369</code></pre>
-<pre class="sourceCode r" id="cb34"><code class="sourceCode r"><a class="sourceLine" id="cb34-1" data-line-number="1">## confidence interval for covariate coefficients</a>
-<a class="sourceLine" id="cb34-2" data-line-number="2"><span class="kw">confint</span>(splineFit, <span class="dt">level =</span> <span class="fl">0.95</span>)</a></code></pre>
+<div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb34-1" data-line-number="1">## confidence interval for covariate coefficients</a>
+<a class="sourceLine" id="cb34-2" data-line-number="2"><span class="kw">confint</span>(splineFit, <span class="dt">level =</span> <span class="fl">0.95</span>)</a></code></pre></div>
 <pre><code>##                   2.5%      97.5%
 ## groupTreat -1.19445835 -0.0761041
 ## x1         -0.02020186  0.6324757</code></pre>
 </section><section id="model-selection" class="level2"><h2>Model selection</h2>
 <p>Two handy functions are provided for model selection. We may compare and select the models with different baseline rate function based on Akaike Information Criterion (AIC) by function <code>AIC</code> or Bayesian Information Criterion (BIC) by function <code>BIC</code>. A friendly warning will be thrown out if the numbers of observation were different in the model comparison by AIC.</p>
-<pre class="sourceCode r" id="cb36"><code class="sourceCode r"><a class="sourceLine" id="cb36-1" data-line-number="1"><span class="kw">AIC</span>(constFit, piecesFit, splineFit)</a></code></pre>
+<div class="sourceCode" id="cb36"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb36-1" data-line-number="1"><span class="kw">AIC</span>(constFit, piecesFit, splineFit)</a></code></pre></div>
 <pre><code>##           df      AIC
 ## constFit   4 3360.843
 ## piecesFit  9 3345.585
 ## splineFit  9 3344.570</code></pre>
-<pre class="sourceCode r" id="cb38"><code class="sourceCode r"><a class="sourceLine" id="cb38-1" data-line-number="1"><span class="kw">BIC</span>(constFit, piecesFit, splineFit)</a></code></pre>
+<div class="sourceCode" id="cb38"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb38-1" data-line-number="1"><span class="kw">BIC</span>(constFit, piecesFit, splineFit)</a></code></pre></div>
 <pre><code>##           df      BIC
 ## constFit   4 3377.702
 ## piecesFit  9 3383.516
 ## splineFit  9 3382.501</code></pre>
 </section><section id="baseRate" class="level2"><h2>Baseline rate function</h2>
 <p>Function <code>baseRate</code> produces <code>baseRate.rateReg</code> object representing the estimated baseline rate function for a fitter model. An associated <code>plot</code> method is available. For example, the baseline rate function and its confidence band estimated by cubic splines can be plotted as follows:</p>
-<pre class="sourceCode r" id="cb40"><code class="sourceCode r"><a class="sourceLine" id="cb40-1" data-line-number="1">baseRateObj &lt;-<span class="st"> </span><span class="kw"><a href="../reference/baseRate.html">baseRate</a></span>(splineFit)</a>
-<a class="sourceLine" id="cb40-2" data-line-number="2"><span class="kw">plot</span>(baseRateObj, <span class="dt">conf.int =</span> <span class="ot">TRUE</span>)</a></code></pre>
+<div class="sourceCode" id="cb40"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb40-1" data-line-number="1">baseRateObj &lt;-<span class="st"> </span><span class="kw"><a href="../reference/baseRate.html">baseRate</a></span>(splineFit)</a>
+<a class="sourceLine" id="cb40-2" data-line-number="2"><span class="kw">plot</span>(baseRateObj, <span class="dt">conf.int =</span> <span class="ot">TRUE</span>)</a></code></pre></div>
 <p><img src="reda-intro_files/figure-html/baseRate-1.png" width="672"></p>
 </section><section id="mcf-rateReg" class="level2"><h2>Estimated MCF from the fitted model</h2>
 <p>If <code>rateReg</code> object is supplied to function <code>mcf</code>, the method for <code>rateReg</code> is called, which returns the estimated baseline MCF from the fitted model if <code>newdata</code> is not specified in the function. The example estimating and plotting the baseline MCF from the fitted model with piecewise constant rate function is shown as follows:</p>
-<pre class="sourceCode r" id="cb41"><code class="sourceCode r"><a class="sourceLine" id="cb41-1" data-line-number="1">piecesMcf &lt;-<span class="st"> </span><span class="kw"><a href="../reference/mcf.html">mcf</a></span>(piecesFit)</a>
-<a class="sourceLine" id="cb41-2" data-line-number="2"><span class="kw">plot</span>(piecesMcf, <span class="dt">conf.int =</span> <span class="ot">TRUE</span>, <span class="dt">col =</span> <span class="st">"blueviolet"</span>) <span class="op">+</span><span class="st"> </span><span class="kw"><a href="http://www.rdocumentation.org/packages/ggplot2/topics/labs">xlab</a></span>(<span class="st">"Days"</span>)</a></code></pre>
+<div class="sourceCode" id="cb41"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb41-1" data-line-number="1">piecesMcf &lt;-<span class="st"> </span><span class="kw"><a href="../reference/mcf.html">mcf</a></span>(piecesFit)</a>
+<a class="sourceLine" id="cb41-2" data-line-number="2"><span class="kw">plot</span>(piecesMcf, <span class="dt">conf.int =</span> <span class="ot">TRUE</span>, <span class="dt">col =</span> <span class="st">"blueviolet"</span>) <span class="op">+</span><span class="st"> </span><span class="kw"><a href="http://www.rdocumentation.org/packages/ggplot2/topics/labs">xlab</a></span>(<span class="st">"Days"</span>)</a></code></pre></div>
 <p><img src="reda-intro_files/figure-html/piecesMcf-1.png" width="672"></p>
 <p>The argument <code>newdata</code> allows one to estimate the MCF for a given dataset instead of the baseline MCF. If <code>newdata</code> is specified, the data frame should have the same column names as the covariate names appearing in the formula of original fitting. The MCF will be estimated for each unique row in the data frame and its confidence intervals are constructed based on Delta-method.</p>
 <p>In addition, we may specify the name for grouping each unique row and the levels of each group through <code>groupName</code> and <code>groupLevels</code>, respectively. For example, we may specify <code>groupName = "Gender"</code> and <code>groupLevels = c("Male", "Female")</code> for estimation of different gender groups.</p>
 <p>As the last two examples in this vignette, we estimate the MCF from fitted model with spline rate function for the different treatment groups and plot the estimated MCFs and their confidence intervals correspondingly.</p>
-<pre class="sourceCode r" id="cb42"><code class="sourceCode r"><a class="sourceLine" id="cb42-1" data-line-number="1">newDat &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">x1 =</span> <span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">0</span>), <span class="dt">group =</span> <span class="kw">c</span>(<span class="st">"Treat"</span>, <span class="st">"Contr"</span>))</a>
+<div class="sourceCode" id="cb42"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb42-1" data-line-number="1">newDat &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">x1 =</span> <span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">0</span>), <span class="dt">group =</span> <span class="kw">c</span>(<span class="st">"Treat"</span>, <span class="st">"Contr"</span>))</a>
 <a class="sourceLine" id="cb42-2" data-line-number="2">estmcf &lt;-<span class="st"> </span><span class="kw"><a href="../reference/mcf.html">mcf</a></span>(splineFit, <span class="dt">newdata =</span> newDat, <span class="dt">groupName =</span> <span class="st">"Group"</span>,</a>
 <a class="sourceLine" id="cb42-3" data-line-number="3">              <span class="dt">groupLevels =</span> <span class="kw">c</span>(<span class="st">"Treatment"</span>, <span class="st">"Control"</span>))</a>
 <a class="sourceLine" id="cb42-4" data-line-number="4"><span class="kw">plot</span>(estmcf, <span class="dt">conf.int =</span> <span class="ot">TRUE</span>, <span class="dt">col =</span> <span class="kw">c</span>(<span class="st">"royalblue"</span>, <span class="st">"red"</span>), <span class="dt">lty =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">5</span>)) <span class="op">+</span></a>
-<a class="sourceLine" id="cb42-5" data-line-number="5"><span class="st">    </span><span class="kw"><a href="http://www.rdocumentation.org/packages/ggplot2/topics/labs">ggtitle</a></span>(<span class="st">"Control vs. Treatment"</span>) <span class="op">+</span><span class="st"> </span><span class="kw"><a href="http://www.rdocumentation.org/packages/ggplot2/topics/labs">xlab</a></span>(<span class="st">"Days"</span>)</a></code></pre>
+<a class="sourceLine" id="cb42-5" data-line-number="5"><span class="st">    </span><span class="kw"><a href="http://www.rdocumentation.org/packages/ggplot2/topics/labs">ggtitle</a></span>(<span class="st">"Control vs. Treatment"</span>) <span class="op">+</span><span class="st"> </span><span class="kw"><a href="http://www.rdocumentation.org/packages/ggplot2/topics/labs">xlab</a></span>(<span class="st">"Days"</span>)</a></code></pre></div>
 <p><img src="reda-intro_files/figure-html/splineMcf-1.png" width="672"></p>
 <p>The data frame containing the MCF estimates is stored in the slot named <code>MCF</code>. So it is not hard to make further customization to the MCF plot.</p>
-<pre class="sourceCode r" id="cb43"><code class="sourceCode r"><a class="sourceLine" id="cb43-1" data-line-number="1"><span class="kw">plot</span>(estmcf) <span class="op">+</span></a>
+<div class="sourceCode" id="cb43"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb43-1" data-line-number="1"><span class="kw">plot</span>(estmcf) <span class="op">+</span></a>
 <a class="sourceLine" id="cb43-2" data-line-number="2"><span class="st">    </span><span class="kw"><a href="http://www.rdocumentation.org/packages/ggplot2/topics/geom_ribbon">geom_ribbon</a></span>(<span class="dt">data =</span> estmcf<span class="op">@</span>MCF, <span class="dt">alpha =</span> <span class="fl">0.2</span>,</a>
 <a class="sourceLine" id="cb43-3" data-line-number="3">                <span class="kw"><a href="http://www.rdocumentation.org/packages/ggplot2/topics/aes">aes</a></span>(<span class="dt">x =</span> time, <span class="dt">ymin =</span> lower, <span class="dt">ymax =</span> upper, <span class="dt">fill =</span> Group)) <span class="op">+</span></a>
-<a class="sourceLine" id="cb43-4" data-line-number="4"><span class="st">    </span><span class="kw"><a href="http://www.rdocumentation.org/packages/ggplot2/topics/labs">ggtitle</a></span>(<span class="st">"Control vs. Treatment"</span>) <span class="op">+</span><span class="st"> </span><span class="kw"><a href="http://www.rdocumentation.org/packages/ggplot2/topics/labs">xlab</a></span>(<span class="st">"Days"</span>)</a></code></pre>
+<a class="sourceLine" id="cb43-4" data-line-number="4"><span class="st">    </span><span class="kw"><a href="http://www.rdocumentation.org/packages/ggplot2/topics/labs">ggtitle</a></span>(<span class="st">"Control vs. Treatment"</span>) <span class="op">+</span><span class="st"> </span><span class="kw"><a href="http://www.rdocumentation.org/packages/ggplot2/topics/labs">xlab</a></span>(<span class="st">"Days"</span>)</a></code></pre></div>
 <p><img src="reda-intro_files/figure-html/plot:ribbon-1.png" width="672"></p>
 </section></section><section id="reference" class="level1 unnumbered"><h1>Reference</h1>
 <div id="refs" class="references">
