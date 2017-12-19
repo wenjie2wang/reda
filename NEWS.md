@@ -1,3 +1,10 @@
+# reda 0.4.1
+
+# Bug fixes
+
+* Fixed compiling errors when using clang.
+
+
 # reda 0.4.0
 
 ## New features
