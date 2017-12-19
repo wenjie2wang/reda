@@ -22,9 +22,11 @@ simulating survival and recurrent event times from one stochastic process.
 Another function named `simEventData` is simply a wrapper that calls `simEvent`
 internally and collects the event times and the covariates of a given number of
 processes into a data frame.  Examples of generating random samples from common
-survival and recurrent models are provided. The details of function syntax and
-the objects produced are available in the package manual and thus not covered in
-this vignette.
+survival and recurrent models are provided. In fact, the function `simEvent` and
+`simEventData` may serve as the building blocks for simulating multitype event
+data including multiple type event data, recurrent events with termination, and
+competing risk data.  The details of function syntax and the objects produced
+are available in the package manual and thus not covered in this vignette.
 
 
 # Introduction {#intro}
@@ -254,7 +256,7 @@ simEvent(interarrival = function(rate) rgamma(n = 1, shape = 1 / rate))
 
 ## Time-variant covariates
 
-In pratice, some covariates such as patients' age, automobile's mileage may vary
+In practice, some covariates such as patients' age, automobile's mileage may vary
 over time.  The argument `z` in the function `simEvent` and `simEventData` may
 take a function of time that returns a vector of covariates for generating event
 times with the time-varying covariates. Let's consider an example of generating
@@ -281,7 +283,7 @@ simEventData(z = zFun2, zCoef = c(0.1, 0.5, - 0.5),
 
 Notice that in the examples given above, if we generate event times for more
 than one process, the time-varying covariate function will remain the same for
-different processes, which may not be the case in pratice.  A more realistic
+different processes, which may not be the case in practice.  A more realistic
 situation is that the time-variant covariate functions are different among
 different processes but coming from a common function family. Let's consider the
 Stanford heart transplant data [@crowley1977jasa] as an example (the `heart`
@@ -289,7 +291,7 @@ data available in the **survival** package). The covariate `transplant`
 indicating whether the patient has already received a heart transplant before
 time `t` is time-dependent and can be represented by a indicator function
 family, $\boldsymbol{1}(t > b)$, where $b$ is a known parameter that may differ
-among patients. For a perticular patient $i$, $b = b_i$ is a known constant.  In
+among patients. For a particular patient $i$, $b = b_i$ is a known constant.  In
 that case, we specify the function parameters inside the `quote` function as
 follows:
 
@@ -344,7 +346,7 @@ process $i$ has its own frailty effect $w_i$. A popular choice of the frailty
 distribution is the one-parameter gamma distribution of mean one, which often
 leads to an explicit marginal likelihood in a relatively simple expression.
 Similar to the argument `z`, `zCoef`, and `rho`, the argument `frailty` may take
-a fucntion as input for simulating the frailty effect.  For example, we may
+a function as input for simulating the frailty effect.  For example, we may
 simulate the recurrent event times for one process with frailty factor following
 gamma(2, 0.5) via `frailty = "rgamma"` and `arguments = list(frailty =
 list(shape = 2, scale = 0.5))` as follows:
@@ -444,12 +446,12 @@ time-invariant covariates for several common parametric survival models.
 The Weibull model is one of the most widely used parametric survival models.
 Assume the event times of the process $i$, $i\in\{1,\ldots,n\}$, follow Weibull
 model with hazard function $h_i(t) = \lambda_i p t^{p-1}$, where $p>0$ is the
-shape parameter, and $\lambda_i$ can be reparameterized with regression
+shape parameter, and $\lambda_i$ can be reparametrized with regression
 coefficients. When $p=1$, the Weibull model reduces to the exponential model,
 whose hazard rate is a constant over time.
 
 
-One common reparameterization is $\lambda_i = \exp(\beta_0 +
+One common reparametrization is $\lambda_i = \exp(\beta_0 +
 \boldsymbol{\beta}^{\top}\mathbf{z}_i)$, which results in Weibull proportional
 hazard (PH) model. Let $\lambda_0 = \exp(\beta_0)$ and we may rewrite the hazard
 function $h_i(t) = \rho(t) \exp(\boldsymbol{\beta}^{\top}\mathbf{z}_i)$, where
@@ -543,9 +545,6 @@ Notice that the time origin was set to be zero by default.  So the time variable
 $t$ in the denominator of the hazard function $\lambda(t | \mid \mathbf{z}_i)$,
 may result in undefined value when $t=0$. Therefore, we specified `method =
 "inversion"` for the inversion sampling method for the log-normal model.
-
-
-# Multiple event data
 
 
 # Reference
