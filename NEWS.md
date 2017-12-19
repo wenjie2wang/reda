@@ -1,6 +1,6 @@
 # reda 0.4.1
 
-# Bug fixes
+## Bug fixes
 
 * Fixed compiling errors when using clang.
 
