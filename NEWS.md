@@ -1,4 +1,4 @@
-# reda 0.4.0.9000
+# reda 0.4.0
 
 ## New features
 
@@ -18,6 +18,9 @@
 
 * Updated checking rule of argument `event` of function `Survr` for modeling
   sample MCF of cost in addition to number of events.
+
+* Updated Lawless and Nadaeu (1995) variance estimates in method `mcf.formula`
+  for sample MCF.
 
 * Renamed class `sampleMcf` to `mcf.formula`, `rateRegMcf` to `mcf.rateReg`,
   `baseRateReg` to `baseRate.rateReg`, `summaryRateReg` to `summary.rateReg`.

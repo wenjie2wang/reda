@@ -1,5 +1,7 @@
 # reda
 
+## Overview
+
 The R pacakge **reda** provides functions for
 
 - simulating survival, recurrent event, and multiple event data from stochastic
@@ -39,13 +41,13 @@ remotes::install_github("wenjie2wang/reda", ref = "dev")
 ```
 
 
-## Get Started
+## Getting Started
 
-- [Package vignette][vignette] provides a quick demonstration for the basic
-  usage of main functions.
-
-- [Package help manual][pdf-manual] is also available for more technical
-  details.
+- [Online documentation][homepage]
+    - [Package vignette][reda-intro] on exploring and modeling recurrent event
+      data.
+    - [Package vignette][reda-simulate] on simulating survival and recurrent
+      event data.
 
 
 ## License
@@ -67,8 +69,9 @@ FITNESS FOR A PARTICULAR PURPOSE.
 [travis-master]: https://travis-ci.org/wenjie2wang/reda.svg?branch=master
 [travis-dev]: https://travis-ci.org/wenjie2wang/reda.svg?branch=dev
 [github-url]: https://github.com/wenjie2wang/reda
-[vignette]: https://wenjie-stat.me/reda/
-[pdf-manual]: https://wenjie-stat.me/reda/reda.pdf
+[homepage]: https://wenjie-stat.me/reda/
+[reda-intro]: https://wenjie-stat.me/reda/articles/reda-intro.html
+[reda-simulate]: https://wenjie-stat.me/reda/articles/reda-simulate.html
 [gpl-url]: https://www.gnu.org/licenses/
 [codecov]: https://codecov.io/gh/wenjie2wang/reda
 [codecov-master]: https://codecov.io/gh/wenjie2wang/reda/branch/master/graph/badge.svg
