@@ -32,7 +32,7 @@ install.packages("reda")
 [![codecov][codecov-dev]][codecov]
 
 The latest version of package is under development at [GitHub][github-url] in
-branch 'dev'.  If it is able to pass the building check by Travis CI, you may
+branch `dev`.  If it is able to pass the building check by Travis CI, you may
 consider installing it with the help of **remotes** by
 
 ```R
@@ -43,11 +43,15 @@ remotes::install_github("wenjie2wang/reda", ref = "dev")
 
 ## Getting Started
 
-- [Online documentation][homepage]
+- [Online documentation][homepage] for the latest CRAN version
+
     - [Package vignette][reda-intro] on exploring and modeling recurrent event
       data.
     - [Package vignette][reda-simulate] on simulating survival and recurrent
       event data.
+
+
+- [Online documentation][dev-doc] for the latest version under development
 
 
 ## License
@@ -70,6 +74,7 @@ FITNESS FOR A PARTICULAR PURPOSE.
 [travis-dev]: https://travis-ci.org/wenjie2wang/reda.svg?branch=dev
 [github-url]: https://github.com/wenjie2wang/reda
 [homepage]: https://wenjie-stat.me/reda/
+[dev-doc]: https://web.wenjie-stat.me/reda/
 [reda-intro]: https://wenjie-stat.me/reda/articles/reda-intro.html
 [reda-simulate]: https://wenjie-stat.me/reda/articles/reda-simulate.html
 [gpl-url]: https://www.gnu.org/licenses/
