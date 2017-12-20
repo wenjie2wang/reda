@@ -78,7 +78,7 @@
       <h1>Simulate Survival and Recurrent Event Data with reda</h1>
                         <h4 class="author">Wenjie Wang</h4>
             
-            <h4 class="date">2017-12-19</h4>
+            <h4 class="date">2017-12-20</h4>
           </div>
 
     
@@ -409,7 +409,7 @@ p \boldsymbol{\beta}(t)^{\top}\mathbf{z}_i(t)\bigr).\]</span></p>
 <p>Notice that in the function <code>rho_loglogistic</code> for the hazard function of the log-logistic model, we wrapped the parametrization of the covariates and covariate coefficients with the function <code>parametrize</code> and specified that <code>FUN = "exponential"</code>. In addition, we specified <code>relativeRisk = "none"</code> when calling <code>simEventData</code> for AFT models.</p>
 </section><section id="log-normal-model" class="level2"><h2>Log-normal model</h2>
 <p>By following the discussion given in Section <a href="#accelerated-failure-time-model">accelerated failure time model</a>, it is not hard to obtain the hazard function of the log-normal model, <span class="math display">\[\lambda(t \mid \mathbf{z}_i) = \frac{p}{t}
-\lambda_W\bigl(p(\log(t) - \boldsymbol{\beta}^{\top}\mathbf{z}_i)\bigr),\]</span> where <span class="math inline">\(\rho(w) = \phi(w) / \bigl(1 - \Phi(w)\bigr)\)</span>, <span class="math inline">\(\phi(w)\)</span> and <span class="math inline">\(\Phi(w)\)</span> is the density and cumulative distribution function of random variable following standard normal distribution.</p>
+\rho\bigl(p(\log(t) - \boldsymbol{\beta}^{\top}\mathbf{z}_i)\bigr),\]</span> where <span class="math inline">\(\rho(w) = \phi(w) / \bigl(1 - \Phi(w)\bigr)\)</span>, <span class="math inline">\(\phi(w)\)</span> and <span class="math inline">\(\Phi(w)\)</span> is the density and cumulative distribution function of random variable following standard normal distribution.</p>
 <p>The example of simulating survival times of ten processes from the log-normal model is given as follows:</p>
 <div class="sourceCode" id="cb50"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb50-1" data-line-number="1">rho_lognormal &lt;-<span class="st"> </span><span class="cf">function</span>(time, z, zCoef, p) {</a>
 <a class="sourceLine" id="cb50-2" data-line-number="2">    foo &lt;-<span class="st"> </span><span class="cf">function</span>(x) <span class="kw">dnorm</span>(x) <span class="op">/</span><span class="st"> </span><span class="kw">pnorm</span>(x, <span class="dt">lower.tail =</span> <span class="ot">FALSE</span>)</a>
@@ -433,7 +433,7 @@ p \boldsymbol{\beta}(t)^{\top}\mathbf{z}_i(t)\bigr).\]</span></p>
 ## 8   8 10.5684     0      0   1  2.367   1
 ## 9   9  0.1656     1      0   1 -1.434   1
 ## 10 10  0.2125     1      0   1 -1.611   0</code></pre>
-<p>Notice that the time origin was set to be zero by default. So the time variable <span class="math inline">\(t\)</span> in the denominator of the hazard function <span class="math inline">\(\lambda(t | \mid \mathbf{z}_i)\)</span>, may result in undefined value when <span class="math inline">\(t=0\)</span>. Therefore, we specified <code>method = "inversion"</code> for the inversion sampling method for the log-normal model.</p>
+<p>Notice that the time origin was set to be zero by default. So the time variable <span class="math inline">\(t\)</span> in the denominator of the hazard function <span class="math inline">\(\lambda(t \mid \mathbf{z}_i)\)</span>, may result in undefined value when <span class="math inline">\(t=0\)</span>. Therefore, we specified <code>method = "inversion"</code> for the inversion sampling method for the log-normal model.</p>
 </section></section><section id="reference" class="level1 unnumbered"><h1>Reference</h1>
 <div id="refs" class="references">
 <div id="ref-aalen2008springer">
