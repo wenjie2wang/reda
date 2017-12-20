@@ -519,7 +519,7 @@ covariate coefficients with the function `parametrize` and specified that `FUN =
 By following the discussion given in Section [accelerated failure time
 model](#accelerated-failure-time-model), it is not hard to obtain the hazard
 function of the log-normal model, $$\lambda(t \mid \mathbf{z}_i) = \frac{p}{t}
-\lambda_W\bigl(p(\log(t) - \boldsymbol{\beta}^{\top}\mathbf{z}_i)\bigr),$$ where
+\rho\bigl(p(\log(t) - \boldsymbol{\beta}^{\top}\mathbf{z}_i)\bigr),$$ where
 $\rho(w) = \phi(w) / \bigl(1 - \Phi(w)\bigr)$, $\phi(w)$ and $\Phi(w)$ is the
 density and cumulative distribution function of random variable following
 standard normal distribution.
@@ -542,7 +542,7 @@ simEventData(z = cbind(1, rnorm(nProcess), rbinom(nProcess, 1, 0.5)),
 ```
 
 Notice that the time origin was set to be zero by default.  So the time variable
-$t$ in the denominator of the hazard function $\lambda(t | \mid \mathbf{z}_i)$,
+$t$ in the denominator of the hazard function $\lambda(t \mid \mathbf{z}_i)$,
 may result in undefined value when $t=0$. Therefore, we specified `method =
 "inversion"` for the inversion sampling method for the log-normal model.
 
