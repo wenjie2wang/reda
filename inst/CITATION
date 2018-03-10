@@ -5,12 +5,12 @@ citEntry(entry = "Manual",
          Author = personList(as.person("Wenjie Wang"),
                              as.person("Haoda Fu"),
                              as.person("Jun Yan")),
-         Note =	"{R} package version 0.4.2.9000",
+         Note =	"{R} package version 0.4.1.9000",
          Year =	"2018",
          Url = "https://CRAN.R-project.org/package=reda",
 
          textVersion = paste("Wang, W., Fu, H., Yan, J. (2018). reda:",
                              "Recurrent Event Data Analysis.",
-                             "R package version 0.4.2.9000.",
+                             "R package version 0.4.1.9000.",
                              "https://CRAN.R-project.org/package=reda")
 )
