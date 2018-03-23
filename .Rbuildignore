@@ -18,3 +18,7 @@
 ^TODO\.org$
 ^docs$
 ^_pkgdown\.yml$
+^TAGS$
+^GTAGS$
+^GRTAGS$
+^GPATH$

@@ -24,3 +24,8 @@ TODO.md
 vignettes/*.html
 vignettes/*.pdf
 
+# ignore tags
+TAGS
+GTAGS
+GRTAGS
+GPATH
