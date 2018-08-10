@@ -16,6 +16,7 @@ The R pacakge **reda** provides functions for
 
 [![CRAN_Status_Badge][r-pkg-badge]][cran-url]
 [![Build Status][travis-master]][travis]
+[![AppVeyor Build Status][appveyor-master]][appveyor]
 [![codecov][codecov-master]][codecov]
 
 
@@ -29,6 +30,7 @@ install.packages("reda")
 ## Development
 
 [![Build Status][travis-dev]][travis]
+[![AppVeyor Build Status][appveyor-dev]][appveyor]
 [![codecov][codecov-dev]][codecov]
 
 The latest version of package is under development at [GitHub][github-url] in
@@ -68,6 +70,9 @@ FITNESS FOR A PARTICULAR PURPOSE.
 [travis]: https://travis-ci.org/wenjie2wang/reda
 [travis-master]: https://travis-ci.org/wenjie2wang/reda.svg?branch=master
 [travis-dev]: https://travis-ci.org/wenjie2wang/reda.svg?branch=dev
+[appveyor]: https://ci.appveyor.com/project/wenjie2wang/reda
+[appveyor-master]: https://ci.appveyor.com/api/projects/status/github/wenjie2wang/reda?branch=master&svg=true
+[appveyor-dev]: https://ci.appveyor.com/api/projects/status/github/wenjie2wang/reda?branch=dev&svg=true
 [github-url]: https://github.com/wenjie2wang/reda
 [homepage]: https://wenjie-stat.me/reda/
 [reda-intro]: https://wenjie-stat.me/reda/articles/reda-intro.html
