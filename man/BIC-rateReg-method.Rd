@@ -10,7 +10,7 @@
 \arguments{
 \item{object}{An object used to dispatch a method.}
 
-\item{...}{Optionally more fitted model objects.}
+\item{...}{More fitted model objects.}
 }
 \value{
 If just one object is provided, a numeric value representing

@@ -1,13 +1,15 @@
 Package: reda
 Title: Recurrent Event Data Analysis
 Version: 0.4.1.9000
-Date: 2018-08-10
+Date: 2019-08-27
 Authors@R: c(
     person(given = "Wenjie", family = "Wang",
            email = "wenjie.2.wang@uconn.edu",
-           role = c("aut", "cre")),
+           role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0003-0363-3180")),
     person(given = "Haoda", family = "Fu", role = "aut"),
-    person(given = "Jun", family = "Yan", role = "ctb")
+    person(given = "Jun", family = "Yan", role = "ctb",
+           comment = c(ORCID = "0000-0003-4401-7296"))
     )
 Description: Functions for (1) simulating survival and recurrent event data from
     stochastic process point of view, (2) exploring and modeling recurrent event
@@ -55,4 +57,3 @@ Collate:
 URL: https://github.com/wenjie2wang/reda
 BugReports: https://github.com/wenjie2wang/reda/issues
 Encoding: UTF-8
-RoxygenNote: 6.1.0
