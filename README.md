@@ -12,13 +12,9 @@ The R pacakge **reda** provides functions for
 - comparing two-sample recurrent event responses with the pseudo-score tests.
 
 
-## Installation of CRAN Version
+## Installation
 
 [![CRAN_Status_Badge][r-pkg-badge]][cran-url]
-[![Build Status][travis-master]][travis]
-[![AppVeyor Build Status][appveyor-master]][appveyor]
-[![codecov][codecov-master]][codecov]
-
 
 You can install the released version from [CRAN][cran-url].
 
@@ -26,31 +22,30 @@ You can install the released version from [CRAN][cran-url].
 install.packages("reda")
 ```
 
-
 ## Development
 
-[![Build Status][travis-dev]][travis]
-[![AppVeyor Build Status][appveyor-dev]][appveyor]
-[![codecov][codecov-dev]][codecov]
+[![Build Status][travis-master]][travis]
+[![AppVeyor Build Status][appveyor-master]][appveyor]
+[![codecov][codecov-master]][codecov]
 
-The latest version of package is under development at [GitHub][github-url] in
-branch `dev`.  If it is able to pass the building check by Travis CI, you may
-consider installing it with the help of **remotes** by
+The latest version of the package is under development at [GitHub][github-url].
+If it is able to pass the building check by Travis CI, you may consider
+installing it with the help of **remotes** by
 
 ```R
 if (! require(remotes)) install.packages("remotes")
-remotes::install_github("wenjie2wang/reda", ref = "dev")
+remotes::install_github("wenjie2wang/reda")
 ```
 
 
 ## Getting Started
 
-- [Online documentation][homepage] for the latest CRAN version
+- [Online documentation][homepage] for the latest version
+  - [Package vignette][reda-intro] on exploring and modeling recurrent event
+    data.
+  - [Package vignette][reda-simulate] on simulating survival and recurrent
+    event data.
 
-    - [Package vignette][reda-intro] on exploring and modeling recurrent event
-      data.
-    - [Package vignette][reda-simulate] on simulating survival and recurrent
-      event data.
 
 ## License
 
@@ -69,10 +64,8 @@ FITNESS FOR A PARTICULAR PURPOSE.
 [cran-url]: https://CRAN.R-project.org/package=reda
 [travis]: https://travis-ci.org/wenjie2wang/reda
 [travis-master]: https://travis-ci.org/wenjie2wang/reda.svg?branch=master
-[travis-dev]: https://travis-ci.org/wenjie2wang/reda.svg?branch=dev
 [appveyor]: https://ci.appveyor.com/project/wenjie2wang/reda
-[appveyor-master]: https://ci.appveyor.com/api/projects/status/github/wenjie2wang/reda?branch=master&svg=true
-[appveyor-dev]: https://ci.appveyor.com/api/projects/status/github/wenjie2wang/reda?branch=dev&svg=true
+[appveyor-master]: https://ci.appveyor.com/api/projects/status/w6pr8b4clsnyfp32?svg=true
 [github-url]: https://github.com/wenjie2wang/reda
 [homepage]: https://wenjie-stat.me/reda/
 [reda-intro]: https://wenjie-stat.me/reda/articles/reda-intro.html
@@ -80,4 +73,3 @@ FITNESS FOR A PARTICULAR PURPOSE.
 [gpl-url]: https://www.gnu.org/licenses/
 [codecov]: https://codecov.io/gh/wenjie2wang/reda
 [codecov-master]: https://codecov.io/gh/wenjie2wang/reda/branch/master/graph/badge.svg
-[codecov-dev]: https://codecov.io/gh/wenjie2wang/reda/branch/dev/graph/badge.svg
