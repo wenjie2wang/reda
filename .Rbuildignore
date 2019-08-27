@@ -19,6 +19,7 @@
 ^appveyor\.yml$
 ^docs$
 ^manuscript$
+^misc$
 ^reference$
 ^simulation$
 ^test$
