@@ -1,7 +1,7 @@
 ################################################################################
 ##
 ##   R package reda by Wenjie Wang, Haoda Fu, and Jun Yan
-##   Copyright (C) 2015-2018
+##   Copyright (C) 2015-2019
 ##
 ##   This file is part of the R package reda.
 ##
@@ -103,7 +103,7 @@ setMethod(f = "AIC", signature = "rateReg",
 ##' \code{help(BIC, stats)} for other details.
 ##'
 ##' @param object An object used to dispatch a method.
-##' @param ... Optionally more fitted model objects.
+##' @param ... More fitted model objects.
 ##' @return If just one object is provided, a numeric value representing
 ##' calculated BIC.
 ##' If multiple objects are provided, a data frame with rows
