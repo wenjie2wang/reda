@@ -523,7 +523,7 @@ simEvent <- function(z = 0, zCoef = 1,
                 "The relative risk function should return positive values."
             ), call. = FALSE)
         ## the rate function has to be non-negative
-        if (any(is.na(rho_t) || rho_t < 0))
+        if (anyNA(rho_t) || any(rho_t < 0))
             stop(wrapMessages(
                 "The rate function has to be non-negative",
                 "from `origin` to `endTime`."
