@@ -85,7 +85,7 @@ check_Survr <- function(dat, check, ...)
     event <- dat[, "event"]
     origin <- dat[, "origin"]
 
-    if (any(is.na(ID)))
+    if (anyNA(ID))
         stop("'ID' cannot contain missing values.", call. = FALSE)
     if (inherits(time, "difftime") || inherits(time, "Date"))
         time <- unclass(time)

@@ -1,7 +1,7 @@
 Package: reda
 Title: Recurrent Event Data Analysis
 Version: 0.4.1.9000
-Date: 2019-08-27
+Date: 2019-09-01
 Authors@R: c(
     person(given = "Wenjie", family = "Wang",
            email = "wenjie.2.wang@uconn.edu",
@@ -38,6 +38,7 @@ VignetteBuilder: knitr
 Collate:
     'RcppExports.R'
     'class.R'
+    'Recur.R'
     'Survr.R'
     'aic.R'
     'baseline.R'

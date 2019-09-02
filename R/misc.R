@@ -129,17 +129,50 @@ isLogicalOne <- function(x, sub_env = "grandparent", ...) {
     isLogicalVector(x, sub_env = sub_env, ...) && length(x) == 1L
 }
 
+## is `x` object of class `foo`?
 ## is x a Survr object
 is.Survr <- function(x) {
     is(x, "Survr")
 }
-
+is.Recur <- function(x)
+{
+    inherits(x, "Recur")
+}
 ## is x a mcf.sample object
 is.mcf.formula <- function(x) {
     is(x, "mcf.formula")
 }
-
 ## is x a rateReg object
 is.rateReg <- function(x) {
     is(x, "rateReg")
+}
+
+## throw warnings if `...` is specified by mistake
+warn_dots <- function(...) {
+    dotsList <- list(...)
+    .fun_name <- as.character(sys.call(- 1L)[[1L]])
+    if (length(dotsList) > 0) {
+        list_names <- names(dotsList)
+        if (is.null(list_names)) {
+            warning(wrapMessages(
+                sprintf(paste("Some invalid argument(s) went into `...`",
+                              "of %s()"),
+                        .fun_name)
+            ), call. = FALSE)
+        } else {
+            list_names <- list_names[list_names != ""]
+            if (length(list_names) > 2) {
+                all_names <- paste(sprintf("'%s'", list_names), collapse = ", ")
+                all_names <- gsub("(.+), (.+)$", "\\1, and \\2", all_names)
+            } else {
+                all_names <- paste(sprintf("'%s'", list_names),
+                                   collapse = " and ")
+            }
+            warning(wrapMessages(
+                sprintf("Invalid argument %s went into `...` of %s()",
+                        all_names, .fun_name)
+            ), call. = FALSE)
+        }
+    }
+    invisible(NULL)
 }
