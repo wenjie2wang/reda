@@ -29,7 +29,7 @@ LinkingTo: Rcpp, RcppArmadillo
 Suggests:
     knitr,
     rmarkdown,
-    testthat
+    tinytest
 Depends:
     R (>= 3.2.3)
 License: GPL (>= 3)
