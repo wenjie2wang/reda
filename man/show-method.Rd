@@ -3,6 +3,7 @@
 \docType{methods}
 \name{show-method}
 \alias{show-method}
+\alias{show,Recur-method}
 \alias{show,rateReg-method}
 \alias{show,summary.rateReg-method}
 \alias{show,summaryRateReg-method}
@@ -13,6 +14,8 @@
 \alias{show,mcfDiff.test-method}
 \title{Show an object.}
 \usage{
+\S4method{show}{Recur}(object)
+
 \S4method{show}{rateReg}(object)
 
 \S4method{show}{summary.rateReg}(object)

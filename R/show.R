@@ -33,6 +33,44 @@ NULL
 
 
 ##' @rdname show-method
+##' @aliases show,Recur-method
+##' @export
+setMethod(f = "show", signature = "Recur",
+          definition = function(object) {
+              ## determine the number of significant digits
+              charNum <- unique(as.character(
+                  object@.Data[, c("time1", "time2")]
+              ))
+              tmpList <- strsplit(charNum, "\\.")
+              sigMax <- max(sapply(tmpList, function(a) {
+                  if (length(a) > 1)
+                      return(nchar(a[2L]))
+                  0
+              }))
+              fmt <- sprintf("(%s.%df, %s.%df%s]",
+                             "%", sigMax, "%", sigMax, "%s")
+              ## create a character vector representing the recurrent events
+              char_rec <- tapply(
+                  seq_along(object@ord), object@ID,
+                  function(idx) {
+                      sub_time1 <- object@.Data[idx, "time1"]
+                      sub_time2 <- object@.Data[idx, "time2"]
+                      sub_death <- max(object@.Data[idx, "death"])
+                      sub_end <- ifelse(sub_death > 0, "*", "+")
+                      sub_sign <- rep("", length(idx))
+                      sub_sign[length(idx)] <- sub_end
+                      out <- sprintf(fmt, sort(sub_time1),
+                                     sort(sub_time2), sub_sign)
+                      char_id <- sprintf("%s:", object@ID[idx[1L]])
+                      paste(char_id, paste(out, collapse = ", "))
+                  })
+              char_rec <- unname(as.character(char_rec))
+              print(char_rec, quote = FALSE)
+              invisible(object)
+          })
+
+
+##' @rdname show-method
 ##' @aliases show,rateReg-method
 ##' @export
 setMethod(f = "show", signature = "rateReg",
