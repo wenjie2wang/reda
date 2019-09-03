@@ -181,6 +181,7 @@ function for \code{simEvent} similar to \code{simEventData}.
 \examples{
 library(reda)
 set.seed(123)
+
 ### time-invariant covariates and coefficients
 ## one process
 simEvent(z = c(0.5, 1), zCoef = c(1, 0))
@@ -194,10 +195,10 @@ simEventData(z = matrix(rnorm(5)), zCoef = 0.5, recurrent = FALSE)
 
 ### time-varying covariates and time-varying coefficients
 zFun <- function(time, intercept) {
-   cbind(time / 10 + intercept, as.numeric(time > 1))
+    cbind(time / 10 + intercept, as.numeric(time > 1))
 }
 zCoefFun <- function(x, shift) {
-  cbind(sqrt(x + shift), 1)
+    cbind(sqrt(x + shift), 1)
 }
 simEvent(z = zFun, zCoef = zCoefFun,
          arguments = list(z = list(intercept = 0.1),
@@ -255,6 +256,7 @@ logNorm <- function(a) exp(rnorm(n = 1, mean = 0, sd = a))
 simEvent(z = c(0.5, 1), zCoef = c(1, 0), frailty = logNorm,
          arguments = list(frailty = list(a = 1)))
 
+
 ### renewal process
 ## interarrival times following uniform distribution
 rUnif <- function(n, rate, min) runif(n, min, max = 2 / rate)
@@ -268,6 +270,7 @@ simEvent(interarrival = function(n, rate) rgamma(n, shape = 1 / rate))
 set.seed(123)
 simEvent(interarrival = function(rate) rgamma(n = 1, shape = 1 / rate))
 
+
 ### relative risk functioin
 set.seed(123)
 simEvent(relativeRisk = "linear")
@@ -278,7 +281,6 @@ rriskFun <- function(z, zCoef, intercept) {
 set.seed(123)
 simEvent(relativeRisk = rriskFun,
          arguments = list(relativeRisk = list(intercept = 1)))
-
 }
 \references{
 Andersen, P. K., & Gill, R. D. (1982). Cox's regression model for counting
