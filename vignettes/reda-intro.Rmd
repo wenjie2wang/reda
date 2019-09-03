@@ -60,10 +60,10 @@ data. See another package vignette for details.)
 ## Data checking
 
 The subjects' ID, event or censoring times, event indicators or costs, and time
-origins of the follow-up is specified through the corresponding arguments, `ID`,
-`time`, `event`, and `origin` in function `Survr`, where the argument `event`
-takes negative values as censoring, and positive values as costs or event
-indicators.  The function `Survr` serves as the formula response and contains a
+origins of the follow-up is specified through the corresponding arguments,
+`time`, `id`, `event`, and `origin` in function `Recur`, where the argument
+`event` takes negative values as censoring, and positive values as costs or event
+indicators.  The function `Recur` serves as the formula response and contains a
 considerate data checking procedure for recurrent event data modeled by methods
 based on counts and rate function. The observations of the covariates specified
 in the formula will be checked first, where the checking rules include
@@ -94,7 +94,7 @@ logarithm of the MCF estimates.
 
 The function `mcf` is a generic function for the MCF estimates from a sample
 data or a fitted gamma frailty model (as demonstrated later). If a formula with
-`Survr` as response is specified in function `mcf`, the formula method for
+`Recur` as response is specified in function `mcf`, the formula method for
 estimating the sample MCF will be called.  The covariate specified at the right
 hand side of the formula should be either `1` or any "linear" combination of
 factor variables in the data.  The former computes the overall sample MCF.  The
@@ -106,10 +106,10 @@ are used for demonstration as follows:
 
 ```{r sampleMcf}
 ## Example 1. valve-seat data
-valveMcf0 <- mcf(Survr(ID, Days, No.) ~ 1, data = valveSeats)
+valveMcf0 <- mcf(Recur(Days, ID, No.) ~ 1, data = valveSeats)
 
 ## Example 2. the simulated data
-simuMcf <- mcf(Survr(ID, time, event) ~ group + gender,
+simuMcf <- mcf(Recur(time, ID, event) ~ group + gender,
                data = simuDat, subset = ID %in% 1 : 50)
 ```
 
@@ -143,11 +143,11 @@ the valve seats data as follows:
 
 ```{r plot:mcfSE}
 ## Poisson process method
-valveMcf1 <- mcf(Survr(ID, Days, No.) ~ 1, valveSeats, variance = "Poisson")
+valveMcf1 <- mcf(Recur(Days, ID, No.) ~ 1, valveSeats, variance = "Poisson")
 
 ## bootstrap method (with 1,000 bootstrap samples)
 set.seed(123)
-valveMcf2 <- mcf(Survr(ID, Days, No.) ~ 1, valveSeats,
+valveMcf2 <- mcf(Recur(Days, ID, No.) ~ 1, valveSeats,
                  variance = "bootstrap", control = list(B = 1e3))
 
 ## comparing the standard error estimates
@@ -189,7 +189,7 @@ object returned from the function `mcf` to function `mcfDiff` as follows:
 
 ```{r mcfDiff1}
 ## one sample MCF object of two groups
-mcf0 <- mcf(Survr(ID, time, event) ~ group, data = simuDat)
+mcf0 <- mcf(Recur(time, ID, event) ~ group, data = simuDat)
 (mcf_diff0 <- mcfDiff(mcf0))
 ```
 
@@ -203,8 +203,8 @@ to `mcfDiff(mcf1, mcf2)`. A simple example is given below.
 
 ```{r mcfDiff2}
 ## explicitly ask for the difference of two sample MCF
-mcf1 <- mcf(Survr(ID, time, event) ~ 1, simuDat, group %in% "Contr")
-mcf2 <- mcf(Survr(ID, time, event) ~ 1, simuDat, group %in% "Treat")
+mcf1 <- mcf(Recur(time, ID, event) ~ 1, simuDat, group %in% "Contr")
+mcf2 <- mcf(Recur(time, ID, event) ~ 1, simuDat, group %in% "Treat")
 mcf1 - mcf2
 ```
 
@@ -225,7 +225,7 @@ to negative binomial regression with the same shape and rate parameter in the
 gamma prior.
 
 ```{r const}
-(constFit <- rateReg(Survr(ID, time, event) ~ group + x1, data = simuDat))
+(constFit <- rateReg(Recur(time, ID, event) ~ group + x1, data = simuDat))
 ```
 
 The function `rateReg` returns `rateReg` object, which can be printed out by
@@ -251,7 +251,7 @@ specifying argument `subset`.
 
 ```{r twoPieces}
 # two pieces' constant rate function
-(twoPiecesFit <- rateReg(Survr(ID, time, event) ~ group + x1, df = 2,
+(twoPiecesFit <- rateReg(Recur(time, ID, event) ~ group + x1, df = 2,
                          data = simuDat, subset = ID %in% 1:50))
 ```
 
@@ -264,7 +264,7 @@ even if it is specified. An example of model with six pieces' constant rate
 function is given as follows:
 
 ```{r sixPieces}
-(piecesFit <- rateReg(Survr(ID, time, event) ~ group + x1, data = simuDat,
+(piecesFit <- rateReg(Recur(time, ID, event) ~ group + x1, data = simuDat,
                       knots = seq(from = 28, to = 140, by = 28)))
 ```
 
@@ -289,10 +289,10 @@ base, plus one if intercept is included in spline bases.
 
 ```{r spline}
 ## internal knots are set as 33% and 67% quantiles of time variable
-(splineFit <- rateReg(Survr(ID, time, event) ~ group + x1, data = simuDat,
+(splineFit <- rateReg(Recur(time, ID, event) ~ group + x1, data = simuDat,
                       df = 6, degree = 3, spline = "mSplines"))
 ## or internal knots are expicitly specified
-(splineFit <- rateReg(Survr(ID, time, event) ~ group + x1, data = simuDat,
+(splineFit <- rateReg(Recur(time, ID, event) ~ group + x1, data = simuDat,
                       spline = "bSp", degree = 3L, knots = c(56, 112)))
 ```
 
