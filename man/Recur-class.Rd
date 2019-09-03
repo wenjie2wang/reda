@@ -15,11 +15,10 @@ objects of this class.  See ``Slots'' for details.
 \item{\code{.Data}}{A numeric matrix that consists of the following columns:
 \itemize{ \item \code{time1}: the beginning of time segements; \item
 \code{time2}: the end of time segements; \item \code{id}: Identificators
-of units having recurrent events; \item \code{event}: Event indicators;
-\item: \code{death}: Indicators of terminal events.}}
+of subjects; \item \code{event}: Event indicators; \item: \code{death}:
+Indicators of terminal events.}}
 
-\item{\code{ID}}{A charactrer vector for original identificators of units having
-recurrent events.}
+\item{\code{ID}}{A charactrer vector for original identificators of subjects.}
 
 \item{\code{ord}}{An integer vector for increasingly ordering data by \code{id},
 \code{time2}, and \code{- event}.}
@@ -27,11 +26,11 @@ recurrent events.}
 \item{\code{rev_ord}}{An integer vector for reversing the increasing ordered data to
 the original ordering.}
 
-\item{\code{first_idx}}{An integer vector indicating the first record of each units
-in the sorted data.}
+\item{\code{first_idx}}{An integer vector indicating the first record of each
+subject in the sorted data.}
 
-\item{\code{last_idx}}{An integer vector indicating the last record of each units in
-the sorted data.}
+\item{\code{last_idx}}{An integer vector indicating the last record of each subject
+in the sorted data.}
 
 \item{\code{check}}{A logical value indicating whether the data checking is
 performed.}

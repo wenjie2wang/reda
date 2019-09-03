@@ -76,14 +76,26 @@ NULL
 ##' @param id Subject identificators. It can be numeric vector, character
 ##'     vector, or a factor vector.  If it is left unspecified, \code{Recur}
 ##'     will assume that each row represents a subject.
-##' @param event A numeric vector that represents event indicators, event costs,
-##'     or event types. Logical vector is allowed and converted to numeric
-##'     vector. Censoring is indicated by non-positive values.
-##' @param death A numeric vector
-##' @param origin The time origin of each subject or process. In addition to
-##'     numeric values, \code{Date} and \code{difftime} are also supported and
-##'     converted to numeric values.  Different subjects may have different
-##'     origins. However, one subject must have the same origin.
+##' @param event A numeric vector that may represent the status, costs, or types
+##'     of the recurrent events. Logical vector is allowed and converted to
+##'     numeric vector. Non-positive values are internally converted to zero
+##'     indicating censoring status.
+##' @param death A numeric vector that may represent the status, costs, or types
+##'     of the terminal events.  Logival vector is allowed and converted to
+##'     numeric vector.  Non-positive values are internally converted to zero
+##'     indicating censoring status.  If a scalar value is specified, all
+##'     subjects will have the same status of terminal events at their last
+##'     recurrent episodes.  The length of the specified \code{death} should be
+##'     equal to the number of subjects, or number of data rows.  In the latter
+##'     case, each subject may have at most one positive entry of \code{death}
+##'     at the last recurrent episode.
+##' @param origin The time origin of each subject.  If a scalar value is
+##'     specified, all subjects will have the same origin at the specified
+##'     value.  The length of the specified \code{origin} should be equal to the
+##'     number of subjects, or number of data rows.  In the latter case,
+##'     different subjects may have different origins.  However, one subject
+##'     must have the same origin.  In addition to numeric values, \code{Date}
+##'     and \code{difftime} are also supported and converted to numeric values.
 ##' @param check A logical value suggesting whether to perform data checking
 ##'     procedure. The default value is \code{TRUE}. \code{FALSE} should be set
 ##'     with caution and only for processed data already in recerruent event
@@ -94,6 +106,8 @@ NULL
 ##' @aliases Recur
 ##'
 ##' @return An \code{Recur} object.
+##'
+##' @example inst/examples/ex_Recur.R
 ##'
 ##' @export
 Recur <- function(time, id, event, death, origin, check = TRUE, ...)
@@ -155,7 +169,7 @@ Recur <- function(time, id, event, death, origin, check = TRUE, ...)
     if (is.null(time1)) {
         ## "origin" is all zero by default
         if (missing(origin)) {
-            origin <- 0
+            sorted_origin <- origin <- 0
         } else {
             if (inherits(origin, "Date")) {
                 origin <- as.numeric(origin)
@@ -167,10 +181,14 @@ Recur <- function(time, id, event, death, origin, check = TRUE, ...)
             ## check the length of 'origin'
             len_origin <- length(origin)
             if (len_origin == nRec) {
-                origin <- origin[ord][first_idx]
+                sorted_origin <- origin[ord]
+                origin <- sorted_origin[first_idx]
             } else if (len_origin == nSubject) {
                 origin <- origin[ord_id]
-            } else if (len_origin != 1L) {
+                sorted_origin <- origin[match(sorted_id, uid[ord_id])]
+            } else if (len_origin == 1L) {
+                sorted_origin <- origin
+            } else {
                 stop(wrapMessages(
                     "The length of 'origin' should be equal to one,",
                     "the number of unique ID's, or the number of records."
@@ -178,7 +196,7 @@ Recur <- function(time, id, event, death, origin, check = TRUE, ...)
             }
         }
         sorted_time1 <- c(NA, sorted_time2[- nRec])
-        sorted_time1[which(first_idx)] <- origin
+        sorted_time1[first_idx] <- origin
     } else {
         ## throw warning if origin is specified
         if (! missing(origin)) {
@@ -192,8 +210,9 @@ Recur <- function(time, id, event, death, origin, check = TRUE, ...)
 
     ## "death" can be left unspecified
     ## all censoring by default
+    sorted_death <- rep(0, nRec)
     if (missing(death)) {
-        sorted_death <- 0
+        sorted_death[last_idx] <- 0
     } else {
         if (isLogicalVector(death)) {
             death <- as.numeric(death)
@@ -203,10 +222,9 @@ Recur <- function(time, id, event, death, origin, check = TRUE, ...)
         if (len_death == nRec) {
             sorted_death <- death[ord]
         } else if (len_death == nSubject) {
-            sorted_death <- rep(0, nRec)
-            sorted_death[which(last_idx)] <- death[ord_id]
+            sorted_death[last_idx] <- death[ord_id]
         } else if (len_death == 1L) {
-            sorted_death <- death
+            sorted_death[last_idx] <- death
         } else {
             stop(wrapMessages(
                 "The length of 'death' should be equal to",
@@ -220,7 +238,8 @@ Recur <- function(time, id, event, death, origin, check = TRUE, ...)
                         time2 = sorted_time2,
                         id = sorted_id,
                         event = sorted_event,
-                        death = sorted_death)
+                        death = sorted_death,
+                        origin = sorted_origin)
     attr(sorted_mat, "ID") <- ID[ord]
     attr(sorted_mat, "ord") <- ord
 
@@ -268,10 +287,21 @@ check_Recur <- function(sorted_dat, first_idx = NULL, last_idx = NULL)
     idx <- ! sCensor[last_idx]
     if (any(idx)) {
         stop(wrapMessages(
-            "Every subject must have one censored time",
-            "not earlier than any event time.",
+            "Every subject must have one censoring time",
+            "that is not earlier than any event time.",
             "Please check subject:",
             paste0(paste(sID[last_idx][idx], collapse = ", "), ".")
+        ), call. = FALSE)
+    }
+
+    ## stop if more than one censoring time
+    deathID <- sID[sDeath > 0]
+    idx <- duplicated(deathID)
+    if (any(idx)) {
+        stop(wrapMessages(
+            "Every subject must have only one terminal event time.",
+            "Please check subject:",
+            paste0(paste(deathID[idx], collapse = ", "), ".")
         ), call. = FALSE)
     }
 
@@ -280,10 +310,10 @@ check_Recur <- function(sorted_dat, first_idx = NULL, last_idx = NULL)
     idx <- duplicated(cenID)
     if (any(idx)) {
         stop(wrapMessages(
-            "Every subject must have only one censored time.",
-            "Please check subject:",
-            paste0(paste(cenID[idx], collapse = ", "), ".")
-        ), call. = FALSE)
+                 "Every subject must have only one censoring time.",
+                 "Please check subject:",
+                 paste0(paste(cenID[idx], collapse = ", "), ".")
+             ), call. = FALSE)
     }
 
     ## stop if missing value of 'time'

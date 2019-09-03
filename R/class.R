@@ -54,18 +54,17 @@ setClass(
 ##' @slot .Data A numeric matrix that consists of the following columns:
 ##'     \itemize{ \item \code{time1}: the beginning of time segements; \item
 ##'     \code{time2}: the end of time segements; \item \code{id}: Identificators
-##'     of units having recurrent events; \item \code{event}: Event indicators;
-##'     \item: \code{death}: Indicators of terminal events.}
-##' @slot ID A charactrer vector for original identificators of units having
-##'     recurrent events.
+##'     of subjects; \item \code{event}: Event indicators; \item: \code{death}:
+##'     Indicators of terminal events.}
+##' @slot ID A charactrer vector for original identificators of subjects.
 ##' @slot ord An integer vector for increasingly ordering data by \code{id},
 ##'     \code{time2}, and \code{- event}.
 ##' @slot rev_ord An integer vector for reversing the increasing ordered data to
 ##'     the original ordering.
-##' @slot first_idx An integer vector indicating the first record of each units
+##' @slot first_idx An integer vector indicating the first record of each
+##'     subject in the sorted data.
+##' @slot last_idx An integer vector indicating the last record of each subject
 ##'     in the sorted data.
-##' @slot last_idx An integer vector indicating the last record of each units in
-##'     the sorted data.
 ##' @slot check A logical value indicating whether the data checking is
 ##'     performed.
 ##'

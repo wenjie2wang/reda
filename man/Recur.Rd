@@ -19,16 +19,28 @@ will be thrown if this argument is not specified.}
 vector, or a factor vector.  If it is left unspecified, \code{Recur}
 will assume that each row represents a subject.}
 
-\item{event}{A numeric vector that represents event indicators, event costs,
-or event types. Logical vector is allowed and converted to numeric
-vector. Censoring is indicated by non-positive values.}
+\item{event}{A numeric vector that may represent the status, costs, or types
+of the recurrent events. Logical vector is allowed and converted to
+numeric vector. Non-positive values are internally converted to zero
+indicating censoring status.}
 
-\item{death}{A numeric vector}
+\item{death}{A numeric vector that may represent the status, costs, or types
+of the terminal events.  Logival vector is allowed and converted to
+numeric vector.  Non-positive values are internally converted to zero
+indicating censoring status.  If a scalar value is specified, all
+subjects will have the same status of terminal events at their last
+recurrent episodes.  The length of the specified \code{death} should be
+equal to the number of subjects, or number of data rows.  In the latter
+case, each subject may have at most one positive entry of \code{death}
+at the last recurrent episode.}
 
-\item{origin}{The time origin of each subject or process. In addition to
-numeric values, \code{Date} and \code{difftime} are also supported and
-converted to numeric values.  Different subjects may have different
-origins. However, one subject must have the same origin.}
+\item{origin}{The time origin of each subject.  If a scalar value is
+specified, all subjects will have the same origin at the specified
+value.  The length of the specified \code{origin} should be equal to the
+number of subjects, or number of data rows.  In the latter case,
+different subjects may have different origins.  However, one subject
+must have the same origin.  In addition to numeric values, \code{Date}
+and \code{difftime} are also supported and converted to numeric values.}
 
 \item{check}{A logical value suggesting whether to perform data checking
 procedure. The default value is \code{TRUE}. \code{FALSE} should be set
@@ -56,4 +68,11 @@ The checking rules apply to each subject respectively and include that
     \item The time origin has to be the same and not later than any event
         time.
 }
+}
+\examples{
+library(reda)
+with(valveSeats, Recur(Days, ID))
+with(valveSeats, Recur(Days, ID, No.))
+with(valveSeats, Recur(Days, ID, No., death = 1))
+with(valveSeats, Recur(Days, ID, No., origin = 10))
 }
