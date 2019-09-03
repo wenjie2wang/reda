@@ -59,9 +59,9 @@ setMethod(
             stop(wrapMessages(
                 "The argument 'logConfint' has to be",
                 "either 'TRUE' or 'FALSE'."
-            ))
+            ), call. = FALSE)
         if (! isNumOne(level, error_na = TRUE) || level <= 0 || level >= 1)
-            stop("Confidence level must be between 0 and 1.")
+            stop("Confidence level must be between 0 and 1.", call = FALSE)
 
         ## get the data and take care of the possible subset
         if (missing(data))
@@ -70,7 +70,7 @@ setMethod(
             sSubset <- substitute(subset)
             subIdx <- eval(sSubset, data, parent.frame())
             if (! is.logical(subIdx))
-                stop("'subset' must be logical.")
+                stop("'subset' must be logical.", call. = FALSE)
             subIdx <- subIdx & ! is.na(subIdx)
             data <- data[subIdx, ]
         }
@@ -96,18 +96,21 @@ setMethod(
         mt <- attr(mf, "terms")
         mm <- stats::model.matrix(object, data = mf)
 
-        ## check response constructed from Survr
+        ## check response constructed from Recur
         resp <- stats::model.extract(mf, "response")
-        if (! is.Survr(resp))
-            stop("Response in formula must be a survival recurrent object.")
+        if (! (is.Recur(resp) || is.Survr(resp)) )
+            stop("Response in formula must be an 'Recur' object.",
+                 call. = FALSE)
         ## check covariate in formula
         if (! NCOL(mm))
-            stop("'1' or covariates must be specified in formula.")
+            stop("'1' or covariates must be specified in formula.",
+                 call. = FALSE)
         Terms <- stats::terms(object)
         ord <- attr(Terms, "order")
 
         if (length(ord) & any(ord != 1))
-            stop("Interaction term is not supported for this function.")
+            stop("Interaction term is not supported for this function.",
+                 call. = FALSE)
 
         ## update control list
         control <- do.call(mcf_formula_control, control)
@@ -122,7 +125,11 @@ setMethod(
                 message("Observations with missing value in covariates ",
                         "are removed.\nChecking the new dataset again...\n",
                         appendLF = FALSE)
-            check_Survr(resp, check = TRUE)
+            if (is.Recur(resp)) {
+                check_Recur(resp)
+            } else {
+                check_Survr(resp, check = TRUE)
+            }
             if (control$verbose)
                 message("Done!")
         }
@@ -132,6 +139,11 @@ setMethod(
 
         ## data processed
         dat <- as.data.frame(mf[[1L]])
+        ## for compatibility of Survr
+        if (is.Recur(resp)) {
+            dat <- dat[, c("id", "time2", "event", "origin")]
+        }
+
         if (nBeta) {
             ## covariates' names
             covar_names <- names(mf)[- 1L]
@@ -177,7 +189,8 @@ setMethod(
         ## number of levels
         num_levels <- NROW(xGrid)
         if (num_levels == 1L)
-            warning("There is only one level in the covariates.")
+            warning("There is only one level in the covariates.",
+                    call. = FALSE)
 
         ## initialize origin for each level...
         originVec <- rep(NA, num_levels)
@@ -247,7 +260,7 @@ sMcf_point <- function(inpDat, groupLabel = NULL)
     ## different origins?
     origin_idx <- length(unique(inpDat$origin)) > 1
     if (origin_idx) {
-        ## already sorted by ID, time, and (1 - event) by Survr
+        ## already sorted by ID, time, and (1 - event) by Recur
         dup_idx <- duplicated(inpDat$ID)
         originVec <- inpDat$origin[! dup_idx]
         rightVec <- inpDat[! inpDat$event, "time"]

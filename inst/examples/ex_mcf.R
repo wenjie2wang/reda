@@ -3,15 +3,15 @@ library(reda)
 ### sample MCF
 ## Example 1. valve-seat data
 ## the default variance estimates by Lawless and Nadeau (1995) method
-valveMcf0 <- mcf(Survr(ID, Days, No.) ~ 1, data = valveSeats)
+valveMcf0 <- mcf(Recur(Days, ID, No.) ~ 1, data = valveSeats)
 plot(valveMcf0, conf.int = TRUE, mark.time = TRUE, addOrigin = TRUE) +
     ggplot2::xlab("Days") + ggplot2::theme_bw()
 
 ## variance estimates following Poisson process model
-valveMcf1 <- mcf(Survr(ID, Days, No.) ~ 1,
+valveMcf1 <- mcf(Recur(Days, ID, No.) ~ 1,
                  data = valveSeats, variance = "Poisson")
 ## variance estimates by bootstrap method (with 1,000 bootstrap samples)
-valveMcf2 <- mcf(Survr(ID, Days, No.) ~ 1,
+valveMcf2 <- mcf(Recur(Days, ID, No.) ~ 1,
                  data = valveSeats, variance = "bootstrap",
                  control = list(B = 2e2))
 
@@ -33,14 +33,14 @@ ggplot(ciDat, aes(x = time)) +
 
 
 ## Example 2. the simulated data
-simuMcf <- mcf(Survr(ID, time, event) ~ group + gender,
+simuMcf <- mcf(Recur(time, ID, event) ~ group + gender,
                data = simuDat, ID %in% 1 : 50)
 plot(simuMcf, conf.int = TRUE, lty = 1 : 4,
      legendName = "Treatment & Gender")
 
 ### estimate MCF difference between two groups
 ## one sample MCF object of two groups
-mcf0 <- mcf(Survr(ID, time, event) ~ group, data = simuDat)
+mcf0 <- mcf(Recur(time, ID, event) ~ group, data = simuDat)
 ## two-sample pseudo-score tests
 mcfDiff.test(mcf0)
 ## difference estimates over time
@@ -48,9 +48,9 @@ mcf0_diff <- mcfDiff(mcf0, testVariance = "none")
 plot(mcf0_diff)
 
 ## or explicitly ask for the difference of two sample MCF
-mcf1 <- mcf(Survr(ID, time, event) ~ 1, data = simuDat,
+mcf1 <- mcf(Recur(time, ID, event) ~ 1, data = simuDat,
             subset = group %in% "Contr")
-mcf2 <- mcf(Survr(ID, time, event) ~ 1, data = simuDat,
+mcf2 <- mcf(Recur(time, ID, event) ~ 1, data = simuDat,
             subset = group %in% "Treat")
 ## perform two-sample tests and estimate difference at the same time
 mcf12_diff1 <- mcfDiff(mcf1, mcf2)

@@ -65,7 +65,7 @@ NULL
 Survr <- function(ID, time, event, origin = 0, check = TRUE, ...)
 {
     ## deprecated from version 0.5.0
-    ## .Deprecated(new = "Recur")
+    .Deprecated(new = "Recur")
 
     if (missing(ID))
         stop("ID variable cannot be missing.")

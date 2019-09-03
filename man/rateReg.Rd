@@ -9,7 +9,7 @@ rateReg(formula, data, subset, df = NULL, knots = NULL,
         start = list(), control = list(), contrasts = NULL, ...)
 }
 \arguments{
-\item{formula}{\code{Survr} object produced by function \code{\link{Survr}}.}
+\item{formula}{\code{Recur} object produced by function \code{\link{Recur}}.}
 
 \item{data}{An optional data frame, list or environment containing the
 variables in the model.  If not found in data, the variables are taken
@@ -102,10 +102,10 @@ gamma prior. Spline (including piecewise constant) baseline hazard rate
 function can be specified for the model fitting.
 }
 \details{
-Function \code{\link{Survr}} in the formula response by default first checks
+Function \code{\link{Recur}} in the formula response by default first checks
 the dataset and will report an error if the dataset does not fall into
 recurrent event data framework.  Subject's ID will be pinpointed if its
-observation violates any checking rule. See \code{\link{Survr}} for all the
+observation violates any checking rule. See \code{\link{Recur}} for all the
 checking rules.
 
 Function \code{rateReg} first constructs the design matrix from
@@ -152,15 +152,15 @@ The available options additional to those that can be passed from
 library(reda)
 
 ## constant rate function
-(constFit <- rateReg(Survr(ID, time, event) ~ group + x1, data = simuDat))
+(constFit <- rateReg(Recur(time, ID, event) ~ group + x1, data = simuDat))
 
 ## six pieces' piecewise constant rate function
-(piecesFit <- rateReg(Survr(ID, time, event) ~ group + x1,
+(piecesFit <- rateReg(Recur(time, ID, event) ~ group + x1,
                       data = simuDat, subset = ID \%in\% 1:50,
                       knots = seq.int(28, 140, by = 28)))
 
 ## fit rate function with cubic spline
-(splineFit <- rateReg(Survr(ID, time, event) ~ group + x1, data = simuDat,
+(splineFit <- rateReg(Recur(time, ID, event) ~ group + x1, data = simuDat,
                       knots = c(56, 84, 112), degree = 3))
 
 ## more specific summary

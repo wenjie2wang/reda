@@ -27,7 +27,7 @@ NULL
 ##' estimates from a fitted model or returns the nonparametric MCF estimates
 ##' (also called the Nelson-Aalen estimator) from the sample data.
 ##'
-##' For \code{formula} object with \code{\link{Survr}} object as response, the
+##' For \code{formula} object with \code{\link{Recur}} object as response, the
 ##' covariate specified at the right hand side of the formula should be either
 ##' \code{1} or any "linear" conbination of categorical variable in the data.
 ##' The former computes the overall sample MCF.  The latter computes the sample

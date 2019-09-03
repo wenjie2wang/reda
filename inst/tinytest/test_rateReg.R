@@ -14,8 +14,8 @@ expect_error(rateReg(data = simuDat), "formula")
 expect_error(rateReg(Survr(ID, time, event) ~ group, simuDat, subset = 1),
              "subset")
 
-## error if formula response is not of class 'Survr'
-expect_error(rateReg(ID ~ group, simuDat), "Survr")
+## error if formula response is not of class 'Recur'
+expect_error(rateReg(ID ~ group, simuDat), "formula")
 
 ## warning if some spline basis does cover any event
 expect_error(

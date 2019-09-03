@@ -30,10 +30,10 @@ NULL
 ##' gamma prior. Spline (including piecewise constant) baseline hazard rate
 ##' function can be specified for the model fitting.
 ##'
-##' Function \code{\link{Survr}} in the formula response by default first checks
+##' Function \code{\link{Recur}} in the formula response by default first checks
 ##' the dataset and will report an error if the dataset does not fall into
 ##' recurrent event data framework.  Subject's ID will be pinpointed if its
-##' observation violates any checking rule. See \code{\link{Survr}} for all the
+##' observation violates any checking rule. See \code{\link{Recur}} for all the
 ##' checking rules.
 ##'
 ##' Function \code{rateReg} first constructs the design matrix from
@@ -81,7 +81,7 @@ NULL
 ##'         degree = 0L, na.action, spline = c("bSplines", "mSplines"),
 ##'         start = list(), control = list(), contrasts = NULL, ...)
 ##'
-##' @param formula \code{Survr} object produced by function \code{\link{Survr}}.
+##' @param formula \code{Recur} object produced by function \code{\link{Recur}}.
 ##' @param data An optional data frame, list or environment containing the
 ##'     variables in the model.  If not found in data, the variables are taken
 ##'     from \code{environment(formula)}, usually the environment from which
@@ -159,60 +159,8 @@ NULL
 ##' Hypoglycemic events analysis via recurrent time-to-event (HEART) models.
 ##' \emph{Journal Of Biopharmaceutical Statistics}, 26(2), 280--298.
 ##'
-##' @examples
-##' library(reda)
+##' @example inst/examples/ex_rateReg.R
 ##'
-##' ## constant rate function
-##' (constFit <- rateReg(Survr(ID, time, event) ~ group + x1, data = simuDat))
-##'
-##' ## six pieces' piecewise constant rate function
-##' (piecesFit <- rateReg(Survr(ID, time, event) ~ group + x1,
-##'                       data = simuDat, subset = ID %in% 1:50,
-##'                       knots = seq.int(28, 140, by = 28)))
-##'
-##' ## fit rate function with cubic spline
-##' (splineFit <- rateReg(Survr(ID, time, event) ~ group + x1, data = simuDat,
-##'                       knots = c(56, 84, 112), degree = 3))
-##'
-##' ## more specific summary
-##' summary(constFit)
-##' summary(piecesFit)
-##' summary(splineFit)
-##'
-##' ## model selection based on AIC or BIC
-##' AIC(constFit, piecesFit, splineFit)
-##' BIC(constFit, piecesFit, splineFit)
-##'
-##' ## estimated covariate coefficients
-##' coef(piecesFit)
-##' coef(splineFit)
-##'
-##' ## confidence intervals for covariate coefficients
-##' confint(piecesFit)
-##' confint(splineFit, "x1", 0.9)
-##' confint(splineFit, 1, 0.975)
-##'
-##' ## estimated baseline rate function
-##' splinesBase <- baseRate(splineFit)
-##' plot(splinesBase, conf.int = TRUE)
-##'
-##' ## estimated baseline mean cumulative function (MCF) from a fitted model
-##' piecesMcf <- mcf(piecesFit)
-##' plot(piecesMcf, conf.int = TRUE, col = "blueviolet")
-##'
-##' ## estimated MCF for given new data
-##' newDat <- data.frame(x1 = rep(0, 2), group = c("Treat", "Contr"))
-##' splineMcf <- mcf(splineFit, newdata = newDat, groupName = "Group",
-##'                  groupLevels = c("Treatment", "Control"))
-##' plot(splineMcf, conf.int = TRUE, lty = c(1, 5))
-##'
-##' ## example of further customization by ggplot2
-##' library(ggplot2)
-##' plot(splineMcf) +
-##'     geom_ribbon(aes(x = time, ymin = lower,
-##'                     ymax = upper, fill = Group),
-##'                 data = splineMcf@MCF, alpha = 0.2) +
-##'     xlab("Days")
 ##' @seealso
 ##' \code{\link{summary,rateReg-method}} for summary of fitted model;
 ##' \code{\link{coef,rateReg-method}} for estimated covariate coefficients;
@@ -264,10 +212,10 @@ rateReg <- function(formula, data, subset, df = NULL, knots = NULL, degree = 0L,
     mt <- attr(mf, "terms")
     mm <- stats::model.matrix(formula, data = mf, contrasts.arg = contrasts)
 
-    ## check response constructed from Survr
+    ## check response constructed from Recur
     resp <- stats::model.extract(mf, "response")
-    if (! is.Survr(resp))
-        stop("Response in the formula must be an 'Survr' object.")
+    if (! (is.Recur(resp) || is.Survr(resp)))
+        stop("Response in the formula must be an 'Recur' object.")
 
     ## number of covariates excluding intercept
     nBeta <- ncol(mm) - 1L
@@ -291,7 +239,11 @@ rateReg <- function(formula, data, subset, df = NULL, knots = NULL, degree = 0L,
             message("Observations with missing value in covariates ",
                     "are removed.\nChecking the new dataset again...\n",
                     appendLF = FALSE)
-        check_Survr(resp, check = TRUE)
+        if (is.Recur(resp)) {
+            check_Recur(resp)
+        } else {
+            check_Survr(resp, check = TRUE)
+        }
         if (control4rateReg$verbose)
             message("Done!")
     }
@@ -300,7 +252,16 @@ rateReg <- function(formula, data, subset, df = NULL, knots = NULL, degree = 0L,
     ord <- attr(resp, "ord")
     ## data matrix processed
     xMat <- mm[ord, - 1L, drop = FALSE]
-    dat <- as.data.frame(cbind(resp[ord, ], xMat))
+    dat <- if (is.Recur(resp)) {
+               as.data.frame(cbind(
+                   resp[ord, c("id", "time2", "event", "origin")], xMat
+               ))
+           } else {
+               as.data.frame(cbind(
+                   resp[ord, ], xMat
+               ))
+           }
+
     colnames(dat) <- c("ID", "time", "event", "origin", covar_names)
     nObs <- nrow(dat)
 
