@@ -61,10 +61,12 @@ NULL
 ##'
 ##' @aliases Survr
 ##'
-##' @seealso \code{\link{rateReg}} for model fitting.
 ##' @export
 Survr <- function(ID, time, event, origin = 0, check = TRUE, ...)
 {
+    ## deprecated from version 0.5.0
+    ## .Deprecated(new = "Recur")
+
     if (missing(ID))
         stop("ID variable cannot be missing.")
     if (missing(time))

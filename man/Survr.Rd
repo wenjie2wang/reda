@@ -50,6 +50,3 @@ The checking rules apply to each subject respectively and include that
         time.
 }
 }
-\seealso{
-\code{\link{rateReg}} for model fitting.
-}

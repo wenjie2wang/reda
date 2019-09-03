@@ -468,13 +468,13 @@ logL_rateReg <- function(par, nBeta, nSub, xMat, ind_event, ind_cens,
     par_alpha <- par[(nBeta + 2L) : length(par)]
     expXBeta <-
         if (nBeta) {
-            as.vector(exp(xMat %*% as.matrix(par[seq_len(nBeta)])))
+            as.numeric(exp(xMat %*% as.matrix(par[seq_len(nBeta)])))
         } else {
             rep(1, nrow(xMat))
         }
 
     ## baseline rate function
-    rho_0_ij <- pmax(as.vector(bMat_event %*% par_alpha), .Machine$double.eps)
+    rho_0_ij <- pmax(as.numeric(bMat_event %*% par_alpha), .Machine$double.eps)
     rho_i <- pmax(expXBeta[ind_event] * rho_0_ij, .Machine$double.eps)
     sum_log_rho_i <- sum(log(rho_i))
 
@@ -482,7 +482,7 @@ logL_rateReg <- function(par, nBeta, nSub, xMat, ind_event, ind_cens,
     sum_log_theta_j_1 <- sum(log(theta_j_1))
 
     ## baseline mcf, integral of rho_0 that involves censoring time tau
-    mu0i <- as.vector(dmu0_dalpha %*% par_alpha)
+    mu0i <- as.numeric(dmu0_dalpha %*% par_alpha)
     mui <- mu0i * expXBeta[ind_cens]
     mui_theta <- pmax(par_theta + mui, .Machine$double.eps)
     sum_log_theta_mui <- sum((n_ij_theta <- n_ij + par_theta) * log(mui_theta))
@@ -526,13 +526,13 @@ logL_rateReg_grad <- function(par, nBeta, nSub, xMat, ind_event, ind_cens,
     par_theta <- max(par[nBeta + 1L], .Machine$double.eps)
     n_ij_theta <- n_ij + par_theta
     par_alpha <- par[(nBeta + 2L) : length(par)]
-    expXBeta <- as.vector(exp(xMat %*% as.matrix(par[seq_len(nBeta)])))
+    expXBeta <- as.numeric(exp(xMat %*% as.matrix(par[seq_len(nBeta)])))
 
     ## baseline rate function
-    rho_0_ij <- pmax(as.vector(bMat_event %*% par_alpha), .Machine$double.eps)
+    rho_0_ij <- pmax(as.numeric(bMat_event %*% par_alpha), .Machine$double.eps)
 
     ## baseline mcf, integral of rho_0 that involves censoring time tau
-    mu0i <- as.vector(dmu0_dalpha %*% par_alpha)
+    mu0i <- as.numeric(dmu0_dalpha %*% par_alpha)
     mui <- mu0i * expXBeta[ind_cens]
     mui_theta <- pmax(par_theta + mui, .Machine$double.eps)
 
