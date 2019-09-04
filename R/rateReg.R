@@ -232,17 +232,16 @@ rateReg <- function(formula, data, subset, df = NULL, knots = NULL, degree = 0L,
     ## for possible missing values in covaraites
     if (length(na.action <- attr(mf, "na.action"))) {
         ## update if there is missing value removed
-        resp@ord <- order(resp[, "ID"], resp[, "time"])
-        resp@ID <- resp@ID[- na.action]
+        attr(resp, "ID") <- attr(resp, "ID")[- na.action]
         ## check data for possible error caused by removal of missing values
         if (control4rateReg$verbose)
             message("Observations with missing value in covariates ",
                     "are removed.\nChecking the new dataset again...\n",
                     appendLF = FALSE)
         if (is.Recur(resp)) {
-            check_Recur(resp)
+            resp <- check_Recur(resp)
         } else {
-            check_Survr(resp, check = TRUE)
+            resp <- check_Survr(resp, check = TRUE)
         }
         if (control4rateReg$verbose)
             message("Done!")

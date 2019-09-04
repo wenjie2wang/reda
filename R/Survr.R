@@ -65,7 +65,11 @@ NULL
 Survr <- function(ID, time, event, origin = 0, check = TRUE, ...)
 {
     ## deprecated from version 0.5.0
-    .Deprecated(new = "Recur")
+    .Deprecated(new = "Recur",
+                msg = sprintf(paste("'%s()' is deprecated.",
+                                    "Please use '%s()' instead.",
+                                    "\n'help(\"Recur\")' for details."),
+                              "Survr", "Recur"))
 
     if (missing(ID))
         stop("ID variable cannot be missing.")
@@ -116,7 +120,7 @@ check_Survr <- function(dat, check, ...)
 
     ## whether data were ordered or not
     ord <- attr(dat, "ord")
-    sortDat <- if (is.null(ord)) {
+    sortDat <- if (is.null(ord) || length(ord) != length(ID_)) {
                    ## sort the data by ID, time, and event
                    as.data.frame(dat[(ord <- order(ID, time, - event)), ])
                } else {

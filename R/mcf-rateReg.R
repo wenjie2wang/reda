@@ -101,8 +101,10 @@ setMethod(
                                      na.action = na.action,
                                      xlev = object@xlevels)
             na.action <- paste0("na.", class(attr(mf, "na.action")))
-            X <- stats::model.matrix(Terms, mf, contrasts.arg =
-                                                    object@contrasts$constracts)
+            X <- stats::model.matrix(
+                            Terms, mf,
+                            contrasts.arg = object@contrasts$constracts
+                        )
             ## remove intercept and deplicated rows
             X <- unique(base::subset(X, select = - `(Intercept)`))
             if (ncol(X) != nBeta)
