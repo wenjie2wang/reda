@@ -3,12 +3,12 @@ library(reda)
 data(valveSeats)
 valveSeats$group <- cut(valveSeats$ID, c(250, 400, 450))
 valveSeats$group3 <- cut(valveSeats$ID, c(250, 380, 410, 450))
-mcf0 <- mcf(Survr(ID, Days, No.) ~ group, valveSeats)
-mcf1 <- mcf(Survr(ID, Days, No.) ~ 1, valveSeats, ID < 400)
-mcf2 <- mcf(Survr(ID, Days, No.) ~ 1, valveSeats, ID >= 400)
+mcf0 <- mcf(Recur(Days, ID, No.) ~ group, valveSeats)
+mcf1 <- mcf(Recur(Days, ID, No.) ~ 1, valveSeats, ID < 400)
+mcf2 <- mcf(Recur(Days, ID, No.) ~ 1, valveSeats, ID >= 400)
 
 ## error for objects not from mcf.formula class
-expect_error(mcfDiff(with(valveSeats, Survr(ID, Days, No.) ~ group)),
+expect_error(mcfDiff(with(valveSeats, Recur(Days, ID, No.) ~ group)),
              "mcf.formula")
 expect_error(mcfDiff(mcf1 = mcf0, mcf2 = NA), "mcf.formula")
 expect_error(mcfDiff(mcf1 = 1, mcf2 = mcf0), "mcf.formula")
@@ -21,7 +21,7 @@ expect_error(mcfDiff(mcf0, level = NA), "level")
 expect_error(mcfDiff(mcf0, level = NA_real_), "level")
 
 ## error if mcf1 has more than two levels
-expect_error(mcfDiff(mcf(Survr(ID, Days, No.) ~ group3, valveSeats)),
+expect_error(mcfDiff(mcf(Recur(Days, ID, No.) ~ group3, valveSeats)),
              "more than two groups")
 
 ## warning if mcf1 has two levels and mcf2 is not NULL
@@ -35,7 +35,7 @@ expect_error(mcfDiff(mcf1, mcf0), "only one group")
 
 ## warning if the methods for variance estimates are different
 expect_warning(mcfDiff(mcf1,
-                       mcf(Survr(ID, Days, No.) ~ 1, valveSeats,
+                       mcf(Recur(Days, ID, No.) ~ 1, valveSeats,
                            ID < 400, variance = "Poisson"),
                        testVariance = "none"),
                "not consistent")
@@ -43,8 +43,8 @@ expect_warning(mcfDiff(mcf1,
 ## warning if time origins are not the same
 valveSeats$orig <- ifelse(valveSeats$ID < 400, 0, 1)
 expect_warning(
-    mcfDiff(mcf(Survr(ID, Days, No., orig) ~ group, data = valveSeats),
-            testVariance = "none"),
+    mcfDiff(mcf(Recur(Days, ID, No., origin = orig) ~ group,
+                data = valveSeats), testVariance = "none"),
     "The earliest time origins")
 
 ## mcfDiff(mcf1, mcf2) should be equivalent to mcf1 - mcf2
@@ -61,9 +61,9 @@ expect_equal(show(diff12), diff12)
 
 
 ## test mcfDiff.test
-mcf0_noData <- mcf(Survr(ID, Days, No.) ~ group, valveSeats,
+mcf0_noData <- mcf(Recur(Days, ID, No.) ~ group, valveSeats,
                    control = list(keep.data = FALSE))
-mcf2_noData <- mcf(Survr(ID, Days, No.) ~ 1, valveSeats, ID >= 400,
+mcf2_noData <- mcf(Recur(Days, ID, No.) ~ 1, valveSeats, ID >= 400,
                    control = list(keep.data = FALSE))
 emptyObj <- methods::new("mcfDiff.test")
 
@@ -82,7 +82,7 @@ expect_error(mcfDiff.test(mcf1 = 1, mcf2 = mcf0),
              "mcf.formula")
 
 ## error if mcf1 has more than two levels
-expect_error(mcfDiff.test(mcf(Survr(ID, Days, No.) ~ group3, valveSeats)),
+expect_error(mcfDiff.test(mcf(Recur(Days, ID, No.) ~ group3, valveSeats)),
              "more than two groups")
 
 ## warning if mcf1 has two levels and mcf2 is not NULL
@@ -100,7 +100,8 @@ expect_warning(mcfDiff.test(mcf1, mcf2_noData), "No processed data")
 ## warning if time origins are not the same
 valveSeats$orig <- ifelse(valveSeats$ID < 400, 0, 1)
 expect_warning(
-    mcfDiff.test(mcf(Survr(ID, Days, No., orig) ~ group, valveSeats)),
+    mcfDiff.test(mcf(Recur(Days, ID, No., origin = orig) ~ group,
+                     data = valveSeats)),
     "The earliest time origins")
 
 ## try alternative option testVariance = "Poisson"
@@ -108,7 +109,7 @@ expect_equivalent(class(mcfDiff.test(mcf1, mcf2, testVariance = "Pois")),
                   "mcfDiff.test")
 
 ## try extreme cases
-tmp <- mcf(Survr(ID, Days, No.) ~ 1, valveSeats, ID == 251)
+tmp <- mcf(Recur(Days, ID, No.) ~ 1, valveSeats, ID == 251)
 tmpTest <- mcfDiff.test(tmp, tmp)
 expect_equal(tmpTest@.Data[, 1L], tmpTest@.Data[, 2L])
 

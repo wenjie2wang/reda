@@ -206,6 +206,8 @@ Recur <- function(time, id, event, death, origin, check = TRUE, ...)
             ), call. = FALSE)
         }
         sorted_time1 <- time1[ord]
+        origin <- sorted_time1[first_idx]
+        sorted_origin <- origin[match(sorted_id, uid[ord_id])]
     }
 
     ## "death" can be left unspecified
@@ -240,47 +242,61 @@ Recur <- function(time, id, event, death, origin, check = TRUE, ...)
                         event = sorted_event,
                         death = sorted_death,
                         origin = sorted_origin)
-    attr(sorted_mat, "ID") <- ID[ord]
-    attr(sorted_mat, "ord") <- ord
 
-    ## perform detailed checks
-    if (check) {
-        check_Recur(sorted_mat, ...)
-    }
     ## convert to original ordering
     rev_ord <- order(ord)
 
+    ## create Recur object for checking
+    out <- methods::new("Recur",
+                        .Data = sorted_mat[rev_ord, , drop = FALSE],
+                        ID = ID,
+                        ord = ord,
+                        rev_ord = rev_ord,
+                        first_idx = which(first_idx[rev_ord]),
+                        last_idx = which(last_idx[rev_ord]),
+                        check = check)
+
+    ## perform optional checks
+    if (check) {
+        check_Recur(out, ...)
+    }
+
     ## return
-    methods::new("Recur",
-                 .Data = sorted_mat[rev_ord, ],
-                 ID = ID,
-                 ord = ord,
-                 rev_ord = rev_ord,
-                 first_idx = which(first_idx),
-                 last_idx = which(last_idx),
-                 check = check)
+    out
 }
 
 ## helper function that performs detailed checks
-check_Recur <- function(sorted_dat, first_idx = NULL, last_idx = NULL)
+check_Recur <- function(obj)
 {
-    ## if dat input has an attr 'ID' for internal usage
-    sID <- attr(sorted_dat, "ID")
-    if (is.null(sID)) {
-        sID <- sorted_dat[, "id"]
+    ## sort data by id, time2, and - event
+    ord <- attr(obj, "ord")
+    if (is.null(ord) || length(ord) != length(attr(obj, "ID"))) {
+        obj@ord <- ord <- order(obj[, "id"], obj[, "time2"], - obj[, "event"])
+        obj@rev_ord <- order(ord)
     }
-    sTime1 <- sorted_dat[, "time1"]
-    sTime2 <- sorted_dat[, "time2"]
-    sEvent <- sorted_dat[, "event"]
-    sDeath <- sorted_dat[, "death"]
+    sObj <- obj[ord, , drop = FALSE]
+
+    ## if data input has an attr 'ID' for internal usage
+    sID <- attr(sObj, "ID")[ord]
+    if (is.null(sID)) {
+        sID <- sObj[, "id"]
+    }
+    sTime1 <- sObj[, "time1"]
+    sTime2 <- sObj[, "time2"]
+    sEvent <- sObj[, "event"]
+    sDeath <- sObj[, "death"]
     sCensor <- sEvent <= 0 | sDeath > 0
 
     ## set index of the first and the last record of each subject
+    first_idx <- attr(sObj, "first_idx")
     if (is.null(first_idx)) {
         first_idx <- ! duplicated(sID)
+        obj@first_idx <- which(first_idx[obj@rev_ord])
     }
+    last_idx <- attr(sObj, "last_idx")
     if (is.null(last_idx)) {
         last_idx <- ! duplicated(sID, fromLast = TRUE)
+        obj@last_idx <- which(last_idx[obj@rev_ord])
     }
 
     ## stop if event time after censoring time or without censoring time
@@ -336,8 +352,8 @@ check_Recur <- function(sorted_dat, first_idx = NULL, last_idx = NULL)
         ), call. = FALSE)
     }
 
-    ## return NULL invisibly
-    invisible(NULL)
+    ## return (updated) object invisibly
+    invisible(obj)
 }
 
 ## helper function to process 'time'

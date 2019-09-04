@@ -10,8 +10,12 @@ data(simuDat)
 ## error if formula is not specified
 expect_error(rateReg(data = simuDat), "formula")
 
+## compatibility of Survr
+expect_warning(rateReg(Survr(ID, time, event) ~ group, simuDat),
+               "deprecated")
+
 ## error if subset is not logical
-expect_error(rateReg(Survr(ID, time, event) ~ group, simuDat, subset = 1),
+expect_error(rateReg(Recur(time, ID, event) ~ group, simuDat, subset = 1),
              "subset")
 
 ## error if formula response is not of class 'Recur'
@@ -19,7 +23,7 @@ expect_error(rateReg(ID ~ group, simuDat), "formula")
 
 ## warning if some spline basis does cover any event
 expect_error(
-    rateReg(Survr(ID, time, event) ~ group, simuDat,
+    rateReg(Recur(time, ID, event) ~ group, simuDat,
             knots = c(50, 100, 150, 170),
             control = list(Boundary.knots = c(0, 180))),
     "does not capture any event"
@@ -27,19 +31,19 @@ expect_error(
 
 ## error if verbose is not logical vector of length one
 expect_error(
-    rateReg(Survr(ID, time, event) ~ group, simuDat,
+    rateReg(Recur(time, ID, event) ~ group, simuDat,
             control = list(verbose = 1)),
     "logical value"
 )
 
 ## error if something is wrong with the starting values
 expect_error(
-    rateReg(Survr(ID, time, event) ~ group, simuDat,
+    rateReg(Recur(time, ID, event) ~ group, simuDat,
             start = list(beta = c(0.1, 1))),
     "coefficients"
 )
 expect_error(
-    rateReg(Survr(ID, time, event) ~ group, simuDat,
+    rateReg(Recur(time, ID, event) ~ group, simuDat,
             start = list(theta = 0)),
     "frailty"
 )
@@ -49,15 +53,15 @@ expect_error(
 
 ## Quick tests for normal usages
 ## try the case without any covariates
-expect_equal(coef(rateReg(Survr(ID, time, event) ~ 1, simuDat)),
+expect_equal(coef(rateReg(Recur(time, ID, event) ~ 1, simuDat)),
              numeric(0))
-expect_equal(coef(rateReg(Survr(ID, time, event) ~ 1, simuDat,
+expect_equal(coef(rateReg(Recur(time, ID, event) ~ 1, simuDat,
                           spline = "mSplines")),
              numeric(0))
 
 ## test on subsetting
 expect_equal(length(coef(
-    rateReg(Survr(ID, time, event) ~ group + gender,
+    rateReg(Recur(time, ID, event) ~ group + gender,
             simuDat, subset = ID %in% seq_len(50))
 )), 2)
 
@@ -65,18 +69,18 @@ expect_equal(length(coef(
 tmpDat <- subset(simuDat, ID %in% seq_len(50))
 tmpDat[6 : 8, "x1"] <- NA
 expect_equal(attr(
-    rateReg(Survr(ID, time, event) ~ group + x1,
+    rateReg(Recur(time, ID, event) ~ group + x1,
             tmpDat, na.action = na.exclude), "na.action"
 ), "na.exclude")
 expect_error(
-    rateReg(Survr(ID, time, event) ~ group + x1,
+    rateReg(Recur(time, ID, event) ~ group + x1,
             tmpDat, na.action = "na.fail"),
     "missing values"
 )
 
 ## test on contrasts
 expect_equal(names(coef(
-    rateReg(Survr(ID, time, event) ~ x1 + group + gender,
+    rateReg(Recur(time, ID, event) ~ x1 + group + gender,
             simuDat, ID %in% seq_len(50),
             contrasts = list(group = "contr.sum",
                              gender = "contr.poly"))
@@ -85,11 +89,11 @@ expect_equal(names(coef(
 ## test related methods
 ## set up three fitted objects
 testDat <- base::subset(simuDat, ID %in% seq_len(50))
-constFit <- rateReg(Survr(ID, time, event) ~ x1 + group + gender,
+constFit <- rateReg(Recur(time, ID, event) ~ x1 + group + gender,
                     testDat)
-piecesFit <- rateReg(Survr(ID, time, event) ~ x1 + group + gender,
+piecesFit <- rateReg(Recur(time, ID, event) ~ x1 + group + gender,
                      testDat, knots = seq.int(28, 140, 28))
-splineFit <- rateReg(Survr(ID, time, event) ~ x1 + group + gender,
+splineFit <- rateReg(Recur(time, ID, event) ~ x1 + group + gender,
                      testDat, knots = c(60, 90, 120), degree = 3,
                      spline = "mSplines")
 ## test summary
@@ -122,7 +126,7 @@ expect_equivalent(class(plot(br_constFit, conf.int = TRUE)),
 ## trigger warnings
 ## set.seed(123)
 ## sinDat <- simEventData(100, rho = function(tVec) 1 - sin(tVec))
-## sinFit <- rateReg(Survr(ID, time, event) ~ 1, sinDat,
+## sinFit <- rateReg(Recur(time, ID, event) ~ 1, sinDat,
 ##                   knots = c(2), degree = 3)
 ## expect_error(baseRate(sinFit), "variance-covariance")
 
