@@ -4,7 +4,8 @@
 \alias{Recur}
 \title{Formula Response for Recurrent Event Data}
 \usage{
-Recur(time, id, event, death, origin, check = TRUE, ...)
+Recur(time, id, event, death, origin,
+      check = c("hard", "soft", "none"), ...)
 }
 \arguments{
 \item{time}{A numerical vector representing the time of reccurence event or
@@ -42,10 +43,11 @@ different subjects may have different origins.  However, one subject
 must have the same origin.  In addition to numeric values, \code{Date}
 and \code{difftime} are also supported and converted to numeric values.}
 
-\item{check}{A logical value suggesting whether to perform data checking
-procedure. The default value is \code{TRUE}. \code{FALSE} should be set
-with caution and only for processed data already in recerruent event
-data framework.}
+\item{check}{A character value specifying how to perform the checks for
+recurrent event data.  Errors or warnings will be thrown, respectively,
+if the \code{check} is specified to be \code{"hard"} (by default) or
+\code{"soft"}.  If \code{check = "none"} is specified, no data checking
+procedure will be run.}
 
 \item{...}{Other arguments for future usage.  A warning will be thrown if
 any invalid argument is specified.}

@@ -65,7 +65,7 @@ setClass(
 ##'     subject in the sorted data.
 ##' @slot last_idx An integer vector indicating the last record of each subject
 ##'     in the sorted data.
-##' @slot check A logical value indicating whether the data checking is
+##' @slot check A character string indicating how the data checking is
 ##'     performed.
 ##'
 ##' @seealso \code{\link{Recur}}
@@ -79,7 +79,7 @@ setClass(
         rev_ord = "integer",
         first_idx = "integer",
         last_idx = "integer",
-        check = "logical"
+        check = "character"
     )
 )
 

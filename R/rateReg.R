@@ -239,7 +239,7 @@ rateReg <- function(formula, data, subset, df = NULL, knots = NULL, degree = 0L,
                     "are removed.\nChecking the new dataset again...\n",
                     appendLF = FALSE)
         if (is.Recur(resp)) {
-            resp <- check_Recur(resp)
+            resp <- check_Recur(resp, check = "hard")
         } else {
             resp <- check_Survr(resp, check = TRUE)
         }

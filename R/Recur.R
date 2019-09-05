@@ -64,7 +64,8 @@ NULL
 ##'
 ##' @usage
 ##'
-##' Recur(time, id, event, death, origin, check = TRUE, ...)
+##' Recur(time, id, event, death, origin,
+##'       check = c("hard", "soft", "none"), ...)
 ##'
 ##' @param time A numerical vector representing the time of reccurence event or
 ##'     censoring, or a list with elements named \code{"time1"} and
@@ -96,10 +97,11 @@ NULL
 ##'     different subjects may have different origins.  However, one subject
 ##'     must have the same origin.  In addition to numeric values, \code{Date}
 ##'     and \code{difftime} are also supported and converted to numeric values.
-##' @param check A logical value suggesting whether to perform data checking
-##'     procedure. The default value is \code{TRUE}. \code{FALSE} should be set
-##'     with caution and only for processed data already in recerruent event
-##'     data framework.
+##' @param check A character value specifying how to perform the checks for
+##'     recurrent event data.  Errors or warnings will be thrown, respectively,
+##'     if the \code{check} is specified to be \code{"hard"} (by default) or
+##'     \code{"soft"}.  If \code{check = "none"} is specified, no data checking
+##'     procedure will be run.
 ##' @param ... Other arguments for future usage.  A warning will be thrown if
 ##'     any invalid argument is specified.
 ##'
@@ -110,10 +112,14 @@ NULL
 ##' @example inst/examples/ex_Recur.R
 ##'
 ##' @export
-Recur <- function(time, id, event, death, origin, check = TRUE, ...)
+Recur <- function(time, id, event, death, origin,
+                  check = c("hard", "soft", "none"), ...)
 {
     ## warning on `...`
     warn_dots(...)
+
+    ## get check
+    check <- match.arg(check)
 
     ## "time" cannot be missing
     if (missing(time)) {
@@ -257,104 +263,150 @@ Recur <- function(time, id, event, death, origin, check = TRUE, ...)
                         check = check)
 
     ## perform optional checks
-    if (check) {
-        check_Recur(out, ...)
-    }
+    check_Recur(out, check = check)
 
     ## return
     out
 }
 
-## helper function that performs detailed checks
-check_Recur <- function(obj)
+
+##' Checks for Recurrent Event Data
+##'
+##' Perform several checks for recurrent event data and update object
+##' attributions if some rows of the contained data (in the \code{.Data} slot)
+##' have been removed by such as \code{na.action}.
+##'
+##' @usage
+##'
+##' check_Recur(x, check = c("hard", "soft", "none"))
+##'
+##' @inheritParams Recur
+##' @param x An \code{Recur} object.
+##'
+##' @return An \code{Recur} object.
+##' @export
+check_Recur <- function(x, check = c("hard", "soft", "none"))
 {
-    ## sort data by id, time2, and - event
-    ord <- attr(obj, "ord")
-    if (is.null(ord) || length(ord) != length(attr(obj, "ID"))) {
-        obj@ord <- ord <- order(obj[, "id"], obj[, "time2"], - obj[, "event"])
-        obj@rev_ord <- order(ord)
+    ## is x of class Recur
+    if (! is.Recur(x)) {
+        stop("The 'x' must be an 'Recur' object.", call. = FALSE)
     }
-    sObj <- obj[ord, , drop = FALSE]
+
+    ## get check
+    x@check <- check <- match.arg(check)
+
+    ## determine whether some rows in x has been removed
+    n_row <- nrow(x@.Data)
+    slots_need_check <- c("ID", "ord", "rev_ord", "first_idx", "last_idx")
+    is_obj_diff <- any(vapply(slots_need_check, function(a) {
+        length(attr(x, a)) != n_row
+    }, FUN.VALUE = logical(1), USE.NAMES = FALSE))
 
     ## if data input has an attr 'ID' for internal usage
-    sID <- attr(sObj, "ID")[ord]
-    if (is.null(sID)) {
-        sID <- sObj[, "id"]
+    if (is_obj_diff) {
+        ## update ID
+        attr_id <- as.numeric(x@ID)
+        match_idx <- match(attr_id, x[, "id"])
+        if (anyNA(match_idx)) {
+            warning("Found unknown ID.", call. = FALSE)
+        }
+        x@ID <- x@ID[match_idx]
+        ## update ord and rev_ord
+        x@ord <- ord <- order(x[, "id"], x[, "time2"], - x[, "event"])
+        x@rev_ord <- order(ord)
+        ## update first_idx and last_idx
+        first_idx <- ! duplicated(x[ord, "id"])
+        x@first_idx <- which(first_idx[x@rev_ord])
+        last_idx <- ! duplicated(x[ord, "id"], fromLast = TRUE)
+        x@last_idx <- which(last_idx[x@rev_ord])
+    } else {
+        ord <- x@ord
+        first_idx <- x@first_idx[ord]
+        last_idx <- x@last_idx[ord]
     }
+    ## sort data by id, time2, and - event
+    sObj <- x[ord, , drop = FALSE]
+    sID <- x@ID[ord]
     sTime1 <- sObj[, "time1"]
     sTime2 <- sObj[, "time2"]
     sEvent <- sObj[, "event"]
     sDeath <- sObj[, "death"]
     sCensor <- sEvent <= 0 | sDeath > 0
 
-    ## set index of the first and the last record of each subject
-    first_idx <- attr(sObj, "first_idx")
-    if (is.null(first_idx)) {
-        first_idx <- ! duplicated(sID)
-        obj@first_idx <- which(first_idx[obj@rev_ord])
-    }
-    last_idx <- attr(sObj, "last_idx")
-    if (is.null(last_idx)) {
-        last_idx <- ! duplicated(sID, fromLast = TRUE)
-        obj@last_idx <- which(last_idx[obj@rev_ord])
+    if (check != "none") {
+        msg_fun <- if (check == "hard") { stop } else { warning }
+        ## stop if event time after censoring time or without censoring time
+        idx <- ! sCensor[last_idx]
+        if (any(idx)) {
+            msg_fun(wrapMessages(
+                "Every subject must have one censoring time",
+                "that is not earlier than any event time.",
+                "Please check subject:",
+                paste0(paste(sID[last_idx][idx], collapse = ", "), ".")
+            ), call. = FALSE)
+        }
+
+        ## stop if more than one censoring time
+        deathID <- sID[sDeath > 0]
+        idx <- duplicated(deathID)
+        if (any(idx)) {
+            msg_fun(wrapMessages(
+                "Every subject must have only one terminal event time.",
+                "Please check subject:",
+                paste0(paste(deathID[idx], collapse = ", "), ".")
+            ), call. = FALSE)
+        }
+
+        ## stop if more than one censoring time
+        cenID <- sID[sCensor]
+        idx <- duplicated(cenID)
+        if (any(idx)) {
+            msg_fun(wrapMessages(
+                "Every subject must have only one censoring time.",
+                "Please check subject:",
+                paste0(paste(cenID[idx], collapse = ", "), ".")
+            ), call. = FALSE)
+        }
+
+        ## stop if missing value of 'time'
+        idx <- is.na(sTime1) | is.na(sTime2)
+        if (any(idx)) {
+            msg_fun(wrapMessages(
+                "Event or censoring times cannot be missing.",
+                "Please check subject:",
+                paste0(paste(unique(sID[idx]), collapse = ", "), ".")
+            ), call. = FALSE)
+        }
+
+        ## 'time2' has to be later than the 'time1'
+        idx <- sTime2 < sTime1
+        if (any(idx)) {
+            msg_fun(wrapMessages(
+                "Event times cannot be earlier than the origin time.",
+                "Please check subject:",
+                paste0(paste(unique(sID[idx]), collapse = ", "), ".")
+            ), call. = FALSE)
+        }
     }
 
-    ## stop if event time after censoring time or without censoring time
-    idx <- ! sCensor[last_idx]
-    if (any(idx)) {
-        stop(wrapMessages(
-            "Every subject must have one censoring time",
-            "that is not earlier than any event time.",
-            "Please check subject:",
-            paste0(paste(sID[last_idx][idx], collapse = ", "), ".")
-        ), call. = FALSE)
-    }
-
-    ## stop if more than one censoring time
-    deathID <- sID[sDeath > 0]
-    idx <- duplicated(deathID)
-    if (any(idx)) {
-        stop(wrapMessages(
-            "Every subject must have only one terminal event time.",
-            "Please check subject:",
-            paste0(paste(deathID[idx], collapse = ", "), ".")
-        ), call. = FALSE)
-    }
-
-    ## stop if more than one censoring time
-    cenID <- sID[sCensor]
-    idx <- duplicated(cenID)
-    if (any(idx)) {
-        stop(wrapMessages(
-                 "Every subject must have only one censoring time.",
-                 "Please check subject:",
-                 paste0(paste(cenID[idx], collapse = ", "), ".")
-             ), call. = FALSE)
-    }
-
-    ## stop if missing value of 'time'
-    idx <- is.na(sTime1) | is.na(sTime2)
-    if (any(idx)) {
-        stop(wrapMessages(
-            "Event or censoring times cannot be missing.",
-            "Please check subject:",
-            paste0(paste(unique(sID[idx]), collapse = ", "), ".")
-        ), call. = FALSE)
-    }
-
-    ## 'time2' has to be later than the 'time1'
-    idx <- sTime2 < sTime1
-    if (any(idx)) {
-        stop(wrapMessages(
-            "Event times cannot be earlier than the origin time.",
-            "Please check subject:",
-            paste0(paste(unique(sID[idx]), collapse = ", "), ".")
-        ), call. = FALSE)
-    }
-
-    ## return (updated) object invisibly
-    invisible(obj)
+    ## return the (updated) xect
+    x
 }
+
+
+##' Is the xect from the Recur class?
+##'
+##' Return \code{TRUE} if the specified xect is from the \code{\link{Recur}}
+##' class, \code{FALSE} otherwise.
+##'
+##' @param x An \code{R} xect.
+##' @return A logical value.
+##' @export
+is.Recur <- function(x)
+{
+    is(x, "Recur")
+}
+
 
 ## helper function to process 'time'
 process_time <- function(x) {

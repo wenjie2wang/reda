@@ -32,7 +32,7 @@ subject in the sorted data.}
 \item{\code{last_idx}}{An integer vector indicating the last record of each subject
 in the sorted data.}
 
-\item{\code{check}}{A logical value indicating whether the data checking is
+\item{\code{check}}{A character string indicating how the data checking is
 performed.}
 }}
 

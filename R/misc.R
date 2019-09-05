@@ -134,10 +134,6 @@ isLogicalOne <- function(x, sub_env = "grandparent", ...) {
 is.Survr <- function(x) {
     is(x, "Survr")
 }
-is.Recur <- function(x)
-{
-    inherits(x, "Recur")
-}
 ## is x a mcf.sample object
 is.mcf.formula <- function(x) {
     is(x, "mcf.formula")
