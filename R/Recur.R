@@ -156,8 +156,11 @@ Recur <- function(time, id, event, death, origin,
     ## "event" can be left unspecified
     ## sort the data by id, time1, time2, and event
     if (! missing(event)) {
-        if (isLogicalVector(event)) {
+        if (isLogicalVector(event, error_na = TRUE)) {
             event <- as.numeric(event)
+        } else if (! isNumVector(event, error_na = TRUE)) {
+            stop("The 'event' has to be either numeric or logical vector.",
+                 call. = FALSE)
         }
         ## convert non-positive event all to zero
         ## for consistency with SAS on computing sample MCF
@@ -222,8 +225,11 @@ Recur <- function(time, id, event, death, origin,
     if (missing(death)) {
         sorted_death[last_idx] <- 0
     } else {
-        if (isLogicalVector(death)) {
+        if (isLogicalVector(death, error_na = TRUE)) {
             death <- as.numeric(death)
+        } else if (! isNumVector(death, error_na = TRUE)) {
+            stop("The 'death' has to be either numeric or logical vector.",
+                 call. = FALSE)
         }
         ## check the length of 'death'
         len_death <- length(death)
