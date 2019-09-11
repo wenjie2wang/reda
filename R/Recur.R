@@ -159,7 +159,7 @@ Recur <- function(time, id, event, death, origin,
         if (isLogicalVector(event, error_na = TRUE)) {
             event <- as.numeric(event)
         } else if (! isNumVector(event, error_na = TRUE)) {
-            stop("The 'event' has to be either numeric or logical vector.",
+            stop("Invalid 'event', see '?Recur' for details.",
                  call. = FALSE)
         }
         ## convert non-positive event all to zero
@@ -184,7 +184,7 @@ Recur <- function(time, id, event, death, origin,
                 origin <- as.numeric(origin)
             }
             if (! isNumVector(origin)) {
-                stop("The 'origin' must be 'numeric' or 'Date'.",
+                stop("Invalid 'origin'! See '?Recur' for details.",
                      call. = FALSE)
             }
             ## check the length of 'origin'
@@ -199,8 +199,7 @@ Recur <- function(time, id, event, death, origin,
                 sorted_origin <- origin
             } else {
                 stop(wrapMessages(
-                    "The length of 'origin' should be equal to one,",
-                    "the number of unique ID's, or the number of records."
+                    "Invalid length for `origin`. See '?Recur' for details."
                 ), call. = FALSE)
             }
         }
@@ -210,8 +209,7 @@ Recur <- function(time, id, event, death, origin,
         ## throw warning if origin is specified
         if (! missing(origin)) {
             warning(wrapMessages(
-                "The specified 'origin' was ignored due to",
-                "the presence of 'time1'."
+                "The specified 'origin' was ignored given 'time1'.",
             ), call. = FALSE)
         }
         sorted_time1 <- time1[ord]
@@ -228,7 +226,7 @@ Recur <- function(time, id, event, death, origin,
         if (isLogicalVector(death, error_na = TRUE)) {
             death <- as.numeric(death)
         } else if (! isNumVector(death, error_na = TRUE)) {
-            stop("The 'death' has to be either numeric or logical vector.",
+            stop("Invalid 'death'.  See '?Recur' for details.",
                  call. = FALSE)
         }
         ## check the length of 'death'
@@ -241,8 +239,7 @@ Recur <- function(time, id, event, death, origin,
             sorted_death[last_idx] <- death
         } else {
             stop(wrapMessages(
-                "The length of 'death' should be equal to",
-                "the number of unique ID's, or the number of records."
+                "Invalid length for 'death'.  See '?Recur' for details."
             ), call. = FALSE)
         }
     }
@@ -345,9 +342,7 @@ check_Recur <- function(x, check = c("hard", "soft", "none"))
         idx <- ! sCensor[last_idx]
         if (any(idx)) {
             msg_fun(wrapMessages(
-                "Every subject must have one censoring time",
-                "that is not earlier than any event time.",
-                "Please check subject:",
+                "Subjects censored before events:",
                 paste0(paste(sID[last_idx][idx], collapse = ", "), ".")
             ), call. = FALSE)
         }
@@ -357,8 +352,7 @@ check_Recur <- function(x, check = c("hard", "soft", "none"))
         idx <- duplicated(deathID)
         if (any(idx)) {
             msg_fun(wrapMessages(
-                "Every subject must have only one terminal event time.",
-                "Please check subject:",
+                "Subjects having multiple terminal events:",
                 paste0(paste(deathID[idx], collapse = ", "), ".")
             ), call. = FALSE)
         }
@@ -368,8 +362,7 @@ check_Recur <- function(x, check = c("hard", "soft", "none"))
         idx <- duplicated(cenID)
         if (any(idx)) {
             msg_fun(wrapMessages(
-                "Every subject must have only one censoring time.",
-                "Please check subject:",
+                "Subjects having multiple censoring times:",
                 paste0(paste(cenID[idx], collapse = ", "), ".")
             ), call. = FALSE)
         }
@@ -378,7 +371,7 @@ check_Recur <- function(x, check = c("hard", "soft", "none"))
         idx <- is.na(sTime1) | is.na(sTime2)
         if (any(idx)) {
             msg_fun(wrapMessages(
-                "Event or censoring times cannot be missing.",
+                "Missing times!",
                 "Please check subject:",
                 paste0(paste(unique(sID[idx]), collapse = ", "), ".")
             ), call. = FALSE)
@@ -388,7 +381,7 @@ check_Recur <- function(x, check = c("hard", "soft", "none"))
         idx <- sTime2 < sTime1
         if (any(idx)) {
             msg_fun(wrapMessages(
-                "Event times cannot be earlier than the origin time.",
+                "Event times must be >= origin.",
                 "Please check subject:",
                 paste0(paste(unique(sID[idx]), collapse = ", "), ".")
             ), call. = FALSE)
@@ -421,7 +414,7 @@ process_time <- function(x) {
     if (inherits(x, "difftime") || inherits(x, "Date"))
         x <- as.numeric(x)
     if (! is.numeric(x))
-        stop("The time variables must be 'numeric', 'difftime' or 'Date'.",
+        stop("Invalid times.  See '?Recur' for details.",
              call. = FALSE)
     ## return
     x

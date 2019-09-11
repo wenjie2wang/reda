@@ -59,8 +59,8 @@ setClass(
 ##' @slot ID A charactrer vector for original identificators of subjects.
 ##' @slot ord An integer vector for increasingly ordering data by \code{id},
 ##'     \code{time2}, and \code{- event}.
-##' @slot rev_ord An integer vector for reversing the increasing ordered data to
-##'     the original ordering.
+##' @slot rev_ord An integer vector for reverting the ordering of the sorted
+##'     data to its original ordering.
 ##' @slot first_idx An integer vector indicating the first record of each
 ##'     subject in the sorted data.
 ##' @slot last_idx An integer vector indicating the last record of each subject
