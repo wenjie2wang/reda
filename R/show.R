@@ -42,25 +42,29 @@ setMethod(f = "show", signature = "Recur",
                   object@.Data[, c("time1", "time2")]
               ))
               tmpList <- strsplit(charNum, "\\.")
-              sigMax <- max(sapply(tmpList, function(a) {
-                  if (length(a) > 1)
-                      return(nchar(a[2L]))
-                  0
-              }))
+              sigMax <- min(
+                  max(sapply(tmpList, function(a) {
+                      if (length(a) > 1)
+                          return(nchar(a[2L]))
+                      0
+                  })),
+                  max(3, getOption("digits") - 3)
+              )
               fmt <- sprintf("(%s.%df, %s.%df%s]",
                              "%", sigMax, "%", sigMax, "%s")
+              sorted_dat <- object@.Data[object@ord, , drop = FALSE]
               ## create a character vector representing the recurrent events
               char_rec <- tapply(
-                  seq_along(object@ord), object@ID,
+                  seq_along(object@ord), object@ID[object@ord],
                   function(idx) {
-                      sub_time1 <- object@.Data[idx, "time1"]
-                      sub_time2 <- object@.Data[idx, "time2"]
-                      sub_death <- max(object@.Data[idx, "death"])
+                      sub_time1 <- sorted_dat[idx, "time1"]
+                      sub_time2 <- sorted_dat[idx, "time2"]
+                      sub_death <- max(sorted_dat[idx, "death"], na.rm = TRUE)
                       sub_end <- ifelse(sub_death > 0, "*", "+")
                       sub_sign <- rep("", length(idx))
                       sub_sign[length(idx)] <- sub_end
-                      out <- sprintf(fmt, sort(sub_time1),
-                                     sort(sub_time2), sub_sign)
+                      out <- sprintf(fmt, sub_time1,
+                                     sub_time2, sub_sign)
                       char_id <- sprintf("%s:", object@ID[idx[1L]])
                       paste(char_id, paste(out, collapse = ", "))
                   })
