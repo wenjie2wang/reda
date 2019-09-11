@@ -23,8 +23,8 @@ Indicators of terminal events.}}
 \item{\code{ord}}{An integer vector for increasingly ordering data by \code{id},
 \code{time2}, and \code{- event}.}
 
-\item{\code{rev_ord}}{An integer vector for reversing the increasing ordered data to
-the original ordering.}
+\item{\code{rev_ord}}{An integer vector for reverting the ordering of the sorted
+data to its original ordering.}
 
 \item{\code{first_idx}}{An integer vector indicating the first record of each
 subject in the sorted data.}
