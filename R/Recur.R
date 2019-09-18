@@ -64,7 +64,7 @@ NULL
 ##'
 ##' @usage
 ##'
-##' Recur(time, id, event, death, origin,
+##' Recur(time, id, event, terminal, origin,
 ##'       check = c("hard", "soft", "none"), ...)
 ##'
 ##' @param time A numerical vector representing the time of reccurence event or
@@ -81,14 +81,14 @@ NULL
 ##'     of the recurrent events. Logical vector is allowed and converted to
 ##'     numeric vector. Non-positive values are internally converted to zero
 ##'     indicating censoring status.
-##' @param death A numeric vector that may represent the status, costs, or types
+##' @param terminal A numeric vector that may represent the status, costs, or types
 ##'     of the terminal events.  Logival vector is allowed and converted to
 ##'     numeric vector.  Non-positive values are internally converted to zero
 ##'     indicating censoring status.  If a scalar value is specified, all
 ##'     subjects will have the same status of terminal events at their last
-##'     recurrent episodes.  The length of the specified \code{death} should be
+##'     recurrent episodes.  The length of the specified \code{terminal} should be
 ##'     equal to the number of subjects, or number of data rows.  In the latter
-##'     case, each subject may have at most one positive entry of \code{death}
+##'     case, each subject may have at most one positive entry of \code{terminal}
 ##'     at the last recurrent episode.
 ##' @param origin The time origin of each subject.  If a scalar value is
 ##'     specified, all subjects will have the same origin at the specified
@@ -112,7 +112,7 @@ NULL
 ##' @example inst/examples/ex_Recur.R
 ##'
 ##' @export
-Recur <- function(time, id, event, death, origin,
+Recur <- function(time, id, event, terminal, origin,
                   check = c("hard", "soft", "none"), ...)
 {
     ## warning on `...`
@@ -217,29 +217,29 @@ Recur <- function(time, id, event, death, origin,
         sorted_origin <- origin[match(sorted_id, uid[ord_id])]
     }
 
-    ## "death" can be left unspecified
+    ## "terminal" can be left unspecified
     ## all censoring by default
-    sorted_death <- rep(0, nRec)
-    if (missing(death)) {
-        sorted_death[last_idx] <- 0
+    sorted_terminal <- rep(0, nRec)
+    if (missing(terminal)) {
+        sorted_terminal[last_idx] <- 0
     } else {
-        if (isLogicalVector(death, error_na = TRUE)) {
-            death <- as.numeric(death)
-        } else if (! isNumVector(death, error_na = TRUE)) {
-            stop("Invalid 'death'.  See '?Recur' for details.",
+        if (isLogicalVector(terminal, error_na = TRUE)) {
+            terminal <- as.numeric(terminal)
+        } else if (! isNumVector(terminal, error_na = TRUE)) {
+            stop("Invalid 'terminal'.  See '?Recur' for details.",
                  call. = FALSE)
         }
-        ## check the length of 'death'
-        len_death <- length(death)
-        if (len_death == nRec) {
-            sorted_death <- death[ord]
-        } else if (len_death == nSubject) {
-            sorted_death[last_idx] <- death[ord_id]
-        } else if (len_death == 1L) {
-            sorted_death[last_idx] <- death
+        ## check the length of 'terminal'
+        len_terminal <- length(terminal)
+        if (len_terminal == nRec) {
+            sorted_terminal <- terminal[ord]
+        } else if (len_terminal == nSubject) {
+            sorted_terminal[last_idx] <- terminal[ord_id]
+        } else if (len_terminal == 1L) {
+            sorted_terminal[last_idx] <- terminal
         } else {
             stop(wrapMessages(
-                "Invalid length for 'death'.  See '?Recur' for details."
+                "Invalid length for 'terminal'.  See '?Recur' for details."
             ), call. = FALSE)
         }
     }
@@ -249,7 +249,7 @@ Recur <- function(time, id, event, death, origin,
                         time2 = sorted_time2,
                         id = sorted_id,
                         event = sorted_event,
-                        death = sorted_death,
+                        terminal = sorted_terminal,
                         origin = sorted_origin)
 
     ## convert to original ordering
@@ -333,8 +333,8 @@ check_Recur <- function(x, check = c("hard", "soft", "none"))
     sTime1 <- sObj[, "time1"]
     sTime2 <- sObj[, "time2"]
     sEvent <- sObj[, "event"]
-    sDeath <- sObj[, "death"]
-    sCensor <- sEvent <= 0 | sDeath > 0
+    sTerminal <- sObj[, "terminal"]
+    sCensor <- sEvent <= 0 | sTerminal > 0
 
     if (check != "none") {
         msg_fun <- if (check == "hard") { stop } else { warning }
@@ -348,12 +348,12 @@ check_Recur <- function(x, check = c("hard", "soft", "none"))
         }
 
         ## stop if more than one censoring time
-        deathID <- sID[sDeath > 0]
-        idx <- duplicated(deathID)
+        terminalID <- sID[sTerminal > 0]
+        idx <- duplicated(terminalID)
         if (any(idx)) {
             msg_fun(wrapMessages(
                 "Subjects having multiple terminal events:",
-                paste0(paste(deathID[idx], collapse = ", "), ".")
+                paste0(paste(terminalID[idx], collapse = ", "), ".")
             ), call. = FALSE)
         }
 

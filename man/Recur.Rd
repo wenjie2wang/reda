@@ -4,7 +4,7 @@
 \alias{Recur}
 \title{Formula Response for Recurrent Event Data}
 \usage{
-Recur(time, id, event, death, origin,
+Recur(time, id, event, terminal, origin,
       check = c("hard", "soft", "none"), ...)
 }
 \arguments{
@@ -25,14 +25,14 @@ of the recurrent events. Logical vector is allowed and converted to
 numeric vector. Non-positive values are internally converted to zero
 indicating censoring status.}
 
-\item{death}{A numeric vector that may represent the status, costs, or types
+\item{terminal}{A numeric vector that may represent the status, costs, or types
 of the terminal events.  Logival vector is allowed and converted to
 numeric vector.  Non-positive values are internally converted to zero
 indicating censoring status.  If a scalar value is specified, all
 subjects will have the same status of terminal events at their last
-recurrent episodes.  The length of the specified \code{death} should be
+recurrent episodes.  The length of the specified \code{terminal} should be
 equal to the number of subjects, or number of data rows.  In the latter
-case, each subject may have at most one positive entry of \code{death}
+case, each subject may have at most one positive entry of \code{terminal}
 at the last recurrent episode.}
 
 \item{origin}{The time origin of each subject.  If a scalar value is

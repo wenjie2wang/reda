@@ -15,8 +15,8 @@ objects of this class.  See ``Slots'' for details.
 \item{\code{.Data}}{A numeric matrix that consists of the following columns:
 \itemize{ \item \code{time1}: the beginning of time segements; \item
 \code{time2}: the end of time segements; \item \code{id}: Identificators
-of subjects; \item \code{event}: Event indicators; \item: \code{death}:
-Indicators of terminal events.}}
+of subjects; \item \code{event}: Event indicators; \item:
+\code{terminal}: Indicators of terminal events.}}
 
 \item{\code{ID}}{A charactrer vector for original identificators of subjects.}
 
