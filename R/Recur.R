@@ -347,7 +347,7 @@ check_Recur <- function(x, check = c("hard", "soft", "none"))
             ), call. = FALSE)
         }
 
-        ## stop if more than one censoring time
+        ## stop if more than one terminal event time
         terminalID <- sID[sTerminal > 0]
         idx <- duplicated(terminalID)
         if (any(idx)) {
@@ -357,15 +357,16 @@ check_Recur <- function(x, check = c("hard", "soft", "none"))
             ), call. = FALSE)
         }
 
+        ## the following check is not disabled for time-verying covariates
         ## stop if more than one censoring time
-        cenID <- sID[sCensor]
-        idx <- duplicated(cenID)
-        if (any(idx)) {
-            msg_fun(wrapMessages(
-                "Subjects having multiple censoring times:",
-                paste0(paste(cenID[idx], collapse = ", "), ".")
-            ), call. = FALSE)
-        }
+        ## cenID <- sID[sCensor]
+        ## idx <- duplicated(cenID)
+        ## if (any(idx)) {
+        ##     msg_fun(wrapMessages(
+        ##         "Subjects having multiple censoring times:",
+        ##         paste0(paste(cenID[idx], collapse = ", "), ".")
+        ##     ), call. = FALSE)
+        ## }
 
         ## stop if missing value of 'time'
         idx <- is.na(sTime1) | is.na(sTime2)
@@ -386,6 +387,19 @@ check_Recur <- function(x, check = c("hard", "soft", "none"))
                 paste0(paste(unique(sID[idx]), collapse = ", "), ".")
             ), call. = FALSE)
         }
+
+        ## 'time1' has to be not earlier than last 'time2'
+        lag_sTime2 <- c(NA, sTime2[- n_row])
+        lag_sTime2[first_idx] <- NA
+        idx <-  ! is.na(lag_sTime2) & sTime1 < lag_sTime2
+        if (any(idx)) {
+            msg_fun(wrapMessages(
+                "Recurrent episodes cannot be overlapped.",
+                "Please check subject:",
+                paste0(paste(unique(sID[idx]), collapse = ", "), ".")
+            ), call. = FALSE)
+        }
+
     }
 
     ## return the (updated) xect
