@@ -136,7 +136,7 @@ Recur <- function(time, id, event, terminal, origin,
 
     ## "id" can be left unspecified but cannot contain NA's
     if (missing(id)) {
-        ord_id <- sorted_id <- id <- seq_along(time2)
+        ord_id <- sorted_id <- id <- uid <- seq_along(time2)
         ID <- factor(id)
         nSubject <- length(time2)
     } else if (anyNA(id)) {
@@ -209,7 +209,7 @@ Recur <- function(time, id, event, terminal, origin,
         ## throw warning if origin is specified
         if (! missing(origin)) {
             warning(wrapMessages(
-                "The specified 'origin' was ignored given 'time1'.",
+                "The specified 'origin' was ignored given 'time1'."
             ), call. = FALSE)
         }
         sorted_time1 <- time1[ord]
