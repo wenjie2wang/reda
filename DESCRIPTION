@@ -1,7 +1,7 @@
 Package: reda
 Title: Recurrent Event Data Analysis
-Version: 0.5.0.9001
-Date: 2019-10-06
+Version: 0.5.0.9002
+Date: 2019-10-07
 Authors@R: c(
     person(given = "Wenjie", family = "Wang",
            email = "wenjie.2.wang@uconn.edu",
