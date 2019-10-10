@@ -59,10 +59,11 @@ setMethod(f = "show", signature = "Recur",
                   function(idx) {
                       sub_time1 <- sorted_dat[idx, "time1"]
                       sub_time2 <- sorted_dat[idx, "time2"]
+                      sub_is_censored <- sorted_dat[idx, "event"] == 0
                       sub_terminal <- max(sorted_dat[idx, "terminal"],
                                           na.rm = TRUE)
                       sub_end <- ifelse(sub_terminal > 0, "*", "+")
-                      sub_sign <- rep("", length(idx))
+                      sub_sign <- ifelse(sub_is_censored, "+", "")
                       sub_sign[length(idx)] <- sub_end
                       out <- sprintf(fmt, sub_time1,
                                      sub_time2, sub_sign)
