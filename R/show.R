@@ -70,6 +70,18 @@ setMethod(f = "show", signature = "Recur",
                       char_id <- sprintf("%s:", object@ID[idx[1L]])
                       paste(char_id, paste(out, collapse = ", "))
                   })
+              ## avoid printing long strings
+              maxPrint <- 3
+              rights <- lapply(strsplit(char_rec, ''), function(x) which(x == ']'))
+              if (any(lapply(rights, length) > maxPrint)) {
+                  toTruc <- lapply(rights, length) > maxPrint
+                  char_rec[which(toTruc)] <- sapply(which(toTruc), function(x) {
+                      txt <- char_rec[[x]]
+                      paste(substr(txt, 0, rights[[x]][maxPrint - 1]),
+                            substr(txt, tail(rights[[x]], 2)[1] + 1, tail(rights[[x]], 1)),
+                            sep = ", ...")    
+                  })
+              }
               char_rec <- unname(as.character(char_rec))
               print(char_rec, quote = FALSE)
               invisible(object)
