@@ -53,6 +53,8 @@ setMethod(f = "show", signature = "Recur",
               fmt <- sprintf("(%s.%df, %s.%df%s]",
                              "%", sigMax, "%", sigMax, "%s")
               sorted_dat <- object@.Data[object@ord, , drop = FALSE]
+              ## get options on max print
+              max_print <- max(2L, as.integer(getOption("reda.Recur.maxPrint")))
               ## create a character vector representing the recurrent events
               char_rec <- tapply(
                   seq_along(object@ord), object@ID[object@ord],
@@ -68,7 +70,15 @@ setMethod(f = "show", signature = "Recur",
                       out <- sprintf(fmt, sub_time1,
                                      sub_time2, sub_sign)
                       char_id <- sprintf("%s:", object@ID[idx[1L]])
-                      paste(char_id, paste(out, collapse = ", "))
+                      out_char <- if (length(sub_time1) > max_print) {
+                                      paste(c(out[seq_len(max_print - 1)],
+                                              "...",
+                                              out[length(out)]),
+                                              collapse = ", ")
+                                  } else {
+                                      paste(out, collapse = ", ")
+                                  }
+                      paste(char_id, out_char)
                   })
               char_rec <- unname(as.character(char_rec))
               print(char_rec, quote = FALSE)
