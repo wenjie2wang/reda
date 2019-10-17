@@ -421,6 +421,73 @@ is.Recur <- function(x)
 }
 
 
+##' Convert An Recur Object to A Character Vector
+##'
+##' Summarize and convert the recurrent episodes for each subjects into
+##' character strings.
+##'
+##' This function is intended to be a helper function for the `show()` method of
+##' `Recur` objects.  To be precise, the function set the maximum number of
+##' recurrent episodes for each subject to be `max(2L,
+##' as.integer(getOption("reda.Recur.maxPrint")))`.  By default, at most three
+##' recurrent episodes will be summarized for printing.  When subjects having
+##' more than three recurrent episodes, the first
+##' `getOption("reda.Recur.maxPrint") - 1` number of recurrent episodes and the
+##' last one will be summarized.  One may use `options()` to adjust the setting.
+##' For example, the default value is equivalent to `options(reda.Recur.maxPrint
+##' = 3)`.
+##'
+##' @param x An Recur object.
+##' @param ... Other arguments for future usage.
+setMethod(f = "as.character", signature = "Recur",
+          definition = function(x, ...) {
+              ## determine the number of significant digits
+              charNum <- unique(as.character(
+                  x@.Data[, c("time1", "time2")]
+              ))
+              tmpList <- strsplit(charNum, "\\.")
+              sigMax <- min(
+                  max(sapply(tmpList, function(a) {
+                      if (length(a) > 1)
+                          return(nchar(a[2L]))
+                      0
+                  })),
+                  max(3, getOption("digits") - 3)
+              )
+              fmt <- sprintf("(%s.%df, %s.%df%s]",
+                             "%", sigMax, "%", sigMax, "%s")
+              sorted_dat <- x@.Data[x@ord, , drop = FALSE]
+              ## get options on max print
+              max_print <- max(2L, as.integer(getOption("reda.Recur.maxPrint")))
+              ## create a character vector representing the recurrent events
+              char_rec <- tapply(
+                  seq_along(x@ord), x@ID[x@ord],
+                  function(idx) {
+                      sub_time1 <- sorted_dat[idx, "time1"]
+                      sub_time2 <- sorted_dat[idx, "time2"]
+                      sub_is_censored <- sorted_dat[idx, "event"] == 0
+                      sub_terminal <- max(sorted_dat[idx, "terminal"],
+                                          na.rm = TRUE)
+                      sub_end <- ifelse(sub_terminal > 0, "*", "+")
+                      sub_sign <- ifelse(sub_is_censored, "+", "")
+                      sub_sign[length(idx)] <- sub_end
+                      out <- sprintf(fmt, sub_time1,
+                                     sub_time2, sub_sign)
+                      char_id <- sprintf("%s:", x@ID[idx[1L]])
+                      out_char <- if (length(sub_time1) > max_print) {
+                                      paste(c(out[seq_len(max_print - 1)],
+                                              "...",
+                                              out[length(out)]),
+                                              collapse = ", ")
+                                  } else {
+                                      paste(out, collapse = ", ")
+                                  }
+                      paste(char_id, out_char)
+                  })
+              unname(as.character(char_rec))
+          })
+
+
 ## helper function to process 'time'
 process_time <- function(x) {
     ## skip if x is null or a list
