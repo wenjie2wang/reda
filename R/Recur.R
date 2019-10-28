@@ -165,6 +165,7 @@ Recur <- function(time, id, event, terminal, origin,
         ## convert non-positive event all to zero
         ## for consistency with SAS on computing sample MCF
         event[event <= 0] <- 0
+        ## sort by id, time1, (time2,) and - event
         ord <- order(id, time2, - event)
         sorted_event <- event[ord]
     } else {
@@ -334,7 +335,7 @@ check_Recur <- function(x, check = c("hard", "soft", "none"))
     sTime2 <- sObj[, "time2"]
     sEvent <- sObj[, "event"]
     sTerminal <- sObj[, "terminal"]
-    sCensor <- sEvent <= 0 | sTerminal > 0
+    sCensor <- sEvent <= 0
 
     if (check != "none") {
         msg_fun <- if (check == "hard") { stop } else { warning }
@@ -342,7 +343,7 @@ check_Recur <- function(x, check = c("hard", "soft", "none"))
         idx <- ! sCensor[last_idx]
         if (any(idx)) {
             msg_fun(wrapMessages(
-                "Subjects censored before events:",
+                "Subjects having events at or after censoring:",
                 paste0(paste(sID[last_idx][idx], collapse = ", "), ".")
             ), call. = FALSE)
         }
@@ -354,6 +355,15 @@ check_Recur <- function(x, check = c("hard", "soft", "none"))
             msg_fun(wrapMessages(
                 "Subjects having multiple terminal events:",
                 paste0(paste(terminalID[idx], collapse = ", "), ".")
+            ), call. = FALSE)
+        }
+
+        ## stop if any terminal event happens before the last time
+        idx <- sTerminal[! last_idx] > 0
+        if (any(idx)) {
+            msg_fun(wrapMessages(
+                "Subjects having terminal events before censoring:",
+                paste0(paste(unique(sID[idx]), collapse = ", "), ".")
             ), call. = FALSE)
         }
 
@@ -399,9 +409,7 @@ check_Recur <- function(x, check = c("hard", "soft", "none"))
                 paste0(paste(unique(sID[idx]), collapse = ", "), ".")
             ), call. = FALSE)
         }
-
     }
-
     ## return the (updated) xect
     x
 }
