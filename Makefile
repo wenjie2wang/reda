@@ -32,7 +32,7 @@ pkgdown:
 	Rscript -e "library(methods); pkgdown::build_site();"
 
 $(tar): $(objects)
-	@rm -rf src/RcppExports.cpp R/RcppExports.R
+	@$(RM) -rf src/RcppExports.cpp R/RcppExports.R
 	@Rscript -e "library(methods);" \
 	-e "Rcpp::compileAttributes()" \
 	-e "devtools::document();";
@@ -58,4 +58,4 @@ TAGS:
 
 .PHONY: clean
 clean:
-	@rm -rf *~ */*~ *.Rhistroy *.tar.gz src/*.so src/*.o *.Rcheck/ .\#*
+	@$(RM) -rf *~ */*~ *.Rhistroy *.tar.gz src/*.so src/*.o *.Rcheck/ .\#*
