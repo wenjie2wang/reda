@@ -14,6 +14,7 @@
 ^\.Rproj\.user$
 ^\.\#
 ^\.git$
+^\.clang_complete$
 ^\.travis\.yml$
 ^_pkgdown\.yml$
 ^appveyor\.yml$
