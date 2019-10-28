@@ -287,6 +287,23 @@ mcfDiff.test <- function(mcf1, mcf2 = NULL,
     ## non-sense to pass R CMD check for "no visible binding"
     time <- NULL
 
+    ## FIXME
+    ## temp solution: convert output of Recur to Survr
+    conv2Survr <- function(mcf_obj) {
+        dat <- mcf_obj@data
+        first_idx <- ! duplicated(dat$id)
+        origin_vec <- rep(dat$time1[first_idx], table(factor(dat$id)))
+        out <- data.frame(ID = dat$id, time = dat$time2,
+                          event = dat$event, origin = origin_vec)
+        dat$time1 <- dat$time2 <- dat$id <- dat$event <- dat$terminal <- NULL
+        mcf_obj@data <- cbind(out, dat)
+        mcf_obj
+    }
+    mcf1 <- conv2Survr(mcf1)
+    if (! is.null(mcf2)) {
+        mcf2 <- conv2Survr(mcf2)
+    }
+
     if (mcf1@multiGroup) {
         nLevel <- length(mcf1@origin)
         if (nLevel > 2)
