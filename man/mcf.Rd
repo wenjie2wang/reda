@@ -10,11 +10,12 @@
 mcf(object, ...)
 
 \S4method{mcf}{formula}(object, data, subset, na.action,
-    variance = c("LawlessNadeau", "Poisson", "bootstrap"), logConfInt = FALSE,
-    level = 0.95, control = list(), ...)
+    variance = c("LawlessNadeau", "Poisson", "bootstrap"),
+    logConfInt = FALSE, adjust_riskset = TRUE, level = 0.95,
+    control = list(), ...)
 
-\S4method{mcf}{rateReg}(object, newdata, groupName, groupLevels, level = 0.95,
-    na.action, control = list(), ...)
+\S4method{mcf}{rateReg}(object, newdata, groupName, groupLevels,
+    level = 0.95, na.action, control = list(), ...)
 }
 \arguments{
 \item{object}{An object used to dispatch a method.}
@@ -46,6 +47,13 @@ on the names is allowed.}
 confidence interval are constructed based on the normality of the MCF
 estimates. Otherwise, the confidence intervals of given level are
 constucted based on the normality of logarithm of the MCF estimates.}
+
+\item{adjust_riskset}{A logical value indicating whether to adjust the size
+of risk-set.  If \code{TRUE} by default, the size of risk-set will be
+adjusted based on at-risk indicators and Nelson-Aalen estimator will be
+returned.  Otherwise, the cumulative sample mean function given by Cook
+and Lawless (2007) will be returned without adjustment on size of
+risk-set.}
 
 \item{level}{An optional numeric value indicating the confidence level
 required. The default value is 0.95.}
@@ -190,9 +198,10 @@ plot(valveMcf0, conf.int = TRUE, mark.time = TRUE, addOrigin = TRUE) +
 valveMcf1 <- mcf(Recur(Days, ID, No.) ~ 1,
                  data = valveSeats, variance = "Poisson")
 ## variance estimates by bootstrap method (with 1,000 bootstrap samples)
+set.seed(123)
 valveMcf2 <- mcf(Recur(Days, ID, No.) ~ 1,
                  data = valveSeats, variance = "bootstrap",
-                 control = list(B = 2e2))
+                 control = list(B = 1e3))
 
 ## comparing the variance estimates from different methods
 library(ggplot2)

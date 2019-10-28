@@ -11,9 +11,10 @@ plot(valveMcf0, conf.int = TRUE, mark.time = TRUE, addOrigin = TRUE) +
 valveMcf1 <- mcf(Recur(Days, ID, No.) ~ 1,
                  data = valveSeats, variance = "Poisson")
 ## variance estimates by bootstrap method (with 1,000 bootstrap samples)
+set.seed(123)
 valveMcf2 <- mcf(Recur(Days, ID, No.) ~ 1,
                  data = valveSeats, variance = "bootstrap",
-                 control = list(B = 2e2))
+                 control = list(B = 1e3))
 
 ## comparing the variance estimates from different methods
 library(ggplot2)
