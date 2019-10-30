@@ -21,19 +21,26 @@ of subjects; \item \code{event}: Event indicators; \item:
 \item{\code{ID}}{A charactrer vector for original identificators of subjects.}
 
 \item{\code{ord}}{An integer vector for increasingly ordering data by \code{id},
-\code{time2}, and \code{- event}.}
+\code{time2}, and \code{- event}.  Sorting is often done in the
+model-fitting steps, where the indices stored in this slot can be used
+directly.}
 
 \item{\code{rev_ord}}{An integer vector for reverting the ordering of the sorted
-data to its original ordering.}
+data (by \code{ord}) to its original ordering.  This slot is provided to
+easily revert the sorting.}
 
 \item{\code{first_idx}}{An integer vector indicating the first record of each
-subject in the sorted data.}
+subject in the sorted matrix.  It helps in the data checking produce and
+may be helpful in model-fitting step, such as getting the origin time.}
 
 \item{\code{last_idx}}{An integer vector indicating the last record of each subject
-in the sorted data.}
+in the sorted data.  Similar to \code{first_idx}, it helps in the data
+checking produce and may be helpful in the model-fitting step, such as
+locating the terminal events.}
 
 \item{\code{check}}{A character string indicating how the data checking is
-performed.}
+performed.  It just records the option that users specified on data
+checking.}
 }}
 
 \seealso{
