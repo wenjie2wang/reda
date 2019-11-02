@@ -15,21 +15,21 @@ vignette: >
 ---
 
 
-In this vignette, we introduce how to explore recurrent event data by
-nonparametric sample mean function (also called Nelson-Aalen estimator) and
-modeling the event counts of interest by gamma frailty model with the **reda**
-package through examples. Most functions in the package are S4 methods that
-produce S4 class objects.  The details of function syntax and the produced
-objects are available in the package manual, which will thus not be covered in
-this vignette.
+In this vignette, we introduce how to explore recurrent event data by mean
+cumulative function, and modeling the event counts of interest by gamma frailty
+model with the **reda** package through examples.  Most functions in the package
+are S4 methods that produce S4 class objects.  The details of function syntax
+and the produced objects are available in the package manual, which will thus
+not be covered in this vignette.
 
 
 # Introduction
 
 ## Simulated recurrent event data {#simuDat}
 
-```{r setup, echo = 1}
+```{r setup, echo = c(1, 2)}
 library(reda)
+packageVersion("reda")
 knitr::opts_chunk$set(fig.height = 5, fig.width = 7)
 ```
 
@@ -53,53 +53,54 @@ where
 
 The dataset was simulated by thinning method [@lewis1979nrlq] and further
 processed for a better demonstration purpose. (Note that **reda** also provides
-functions for simulating survival data, recurrent event data, or multiple state
-data. See another package vignette for details.)
+functions for simulating survival data, and recurrent event data. See
+`vignette("reda-simulate")` for details.)
 
 
 ## Data checking
 
-The subjects' ID, event or censoring times, event indicators or costs, and time
-origins of the follow-up is specified through the corresponding arguments,
-`time`, `id`, `event`, and `origin` in function `Recur`, where the argument
-`event` takes negative values as censoring, and positive values as costs or event
-indicators.  The function `Recur` serves as the formula response and contains a
-considerate data checking procedure for recurrent event data modeled by methods
-based on counts and rate function. The observations of the covariates specified
-in the formula will be checked first, where the checking rules include
-
-* Subjects' ID, event times or censoring times cannot be missing;
-* For every subject, the event time cannot not be later than censoring time;
-* Each subject must have one and only one censoring time;
-* Subjects may have different time origins. But one subject must has only one
-  time origin.
-
-The subject's ID will be pinpointed (in most cases) if its observation violates
-any given checking rule.
+The process's ID, event times, event indicators or costs, time origins, and
+possible terminal events of the follow-up is specified in the function
+`Recur()`, which serves as the formula response and contains considerate data
+checking procedures for recurrent event data.  See `vignette("reda-Recur")` for
+details.
 
 
 # Exploratory analysis
 
-## Computing sample MCF {#mcf-formula}
+## Nonparametric Mean Cumulative Function Estimates {#mcf-formula}
 
-The nonparametric sample mean cumulative function (MCF) is also called
-Nelson-Aalen Estimator [@nelson2003siam]. The point estimate of MCF at each time
-point does not assume any particular underlying model.  The variance estimates
-at each time point is computed by the Lawless and Nadeau method
-[@lawless1995technometrics], Poisson process method or based on the well-known
-bootstrap method [@efron1979aos] with subjects as resampling units.  The
-approximate confidence intervals are provided as well, which are constructed
-based on the asymptotic normality of the MCF estimates itself (the default) or
+The nonparametric mean cumulative function (MCF) estimates are widely utilized
+in exploring the trend of recurrent event data.  MCF is also called cumulative
+mean function (CMF) in literature [see e.g., @lawless1995technometrics].  Let
+$N_i(t)$ denote the number of events that occurred up to time $t$ of process
+$i$.  The MCF of $N_i(t)$ denoted by $M_i(t)$, is defined as follows:
+$$M_i(t)=\mathbb{E}\{N_i(t)\}.$$ For $k$ independent processes having the same
+MCF, the Nelson-Aalen Estimator [@nelson2003siam] is often used, which is
+defined as follows: $$ \hat{M}(t) = \int_0^t \frac{dN(s)}{\delta(s)}, $$ where
+$dN(s)=\sum_{i=1}^k dN_i(s)$, $dN_i(s)$ is the jump size of process $i$ at time
+$s$, $\delta(s) = \sum_{i=1}^k \delta_i(s)$, $\delta_i(s)$ is the at-risk
+indicator of process $i$ at time $s$.  One variant is called the cumulative
+sample mean (CSM) function introduced by @cookLawless2007springer, which assumes
+that $\delta_i(s) = 1$ for $s \ge 0$.
+
+The nonparametric estimate of MCF at each time point does not assume any
+particular underlying model.  The variance estimates at each time point can be
+computed by the Lawless and Nadeau method [@lawless1995technometrics], Poisson
+process method, the bootstrap method [@efron1979aos] with subjects as resampling
+units.  For CSM, the cumulative sample variance (CSV) method can be used
+instead.  The approximate confidence intervals are provided as well, which are
+constructed based on the asymptotic normality of the MCF estimates itself or
 logarithm of the MCF estimates.
 
-The function `mcf` is a generic function for the MCF estimates from a sample
+The function `mcf()` is a generic function for the MCF estimates from a sample
 data or a fitted gamma frailty model (as demonstrated later). If a formula with
-`Recur` as response is specified in function `mcf`, the formula method for
-estimating the sample MCF will be called.  The covariate specified at the right
-hand side of the formula should be either `1` or any "linear" combination of
-factor variables in the data.  The former computes the overall sample MCF.  The
-latter computes the sample MCF for each level of the combination of the factor
-variable(s) specified, respectively.
+`Recur()` as formula response is specified in function `mcf()`, the formula
+method for estimating the sample MCF will be called.  The covariate specified at
+the right hand side of the formula should be either `1` or any "linear"
+combination of factor variables in the data.  The former computes the overall
+sample MCF.  The latter computes the sample MCF for each level of the
+combination of the factor variable(s) specified, respectively.
 
 The valve-seat dataset in @nelson1995technometrics and the simulated sample data
 are used for demonstration as follows:
@@ -110,13 +111,13 @@ valveMcf0 <- mcf(Recur(Days, ID, No.) ~ 1, data = valveSeats)
 
 ## Example 2. the simulated data
 simuMcf <- mcf(Recur(time, ID, event) ~ group + gender,
-               data = simuDat, subset = ID %in% 1 : 50)
+               data = simuDat, subset = ID %in% seq_len(50))
 ```
 
-After estimation, we may plot the sample MCF by function `plot`, which actually
-returns a `ggplot` object so that the plot produced can be easily further
-customized by **ggplot2**.  The `legendname` and `legendLevels` can be specified
-to easily customize the legend in the plot. Two examples are given as follows:
+After estimation, we may plot the sample MCF by function `plot()`, which returns
+a `ggplot` object so that the plot produced can be easily further customized by
+**ggplot2**.  The `legendname` and `legendLevels` can be specified to easily
+customize the legend in the plot. Two examples are given as follows:
 
 ```{r plot:sampleMcf}
 ## overall sample MCF for valve-seat data in Nelson (1995)
@@ -124,13 +125,13 @@ plot(valveMcf0, conf.int = TRUE, mark.time = TRUE, addOrigin = TRUE, col = 2) +
     ggplot2::xlab("Days") + ggplot2::theme_bw()
 
 ## sample MCF for different groups (the default theme)
-plot(simuMcf, conf.int = TRUE, lty = 1 : 4, legendName = "Treatment & Gender")
+plot(simuMcf, conf.int = TRUE, lty = 1:4, legendName = "Treatment & Gender")
 ```
 
-Notice that in the first plot, the censoring times was marked on the step curve
-by specifying `mark.time = TRUE` and the time origins was included in the curve
-by specifying `addOrigin = TRUE`.  In addition, the type and color of the line
-can be specified through `lty` and `col`, respectively.
+Note that in the first plot, the censoring times was marked on the step curve by
+specifying `mark.time = TRUE` and the time origins was included in the curve by
+specifying `addOrigin = TRUE`.  In addition, the type and color of the line can
+be specified through `lty` and `col`, respectively.
 
 As for the variance estimates, the Poisson process method assumes that the
 underlying counting process is a Poisson process and may underestimate the
@@ -170,22 +171,22 @@ ggplot(ciDat, aes(x = time)) +
 ```
 
 From the comparison, we may find that the SE estimates and the confidence
-intervals from the Lawless and Nadaeu method and the bootstrap method have good
-agreement, while the Poisson process method gives slightly smaller SE estimates
-and a narrower confidence band. In practice, the Lawless and Nadeau method is
-suggested if it is hard to justify the Poisson process assumption.
+intervals from the Lawless and Nadaeu method and the bootstrap method have a
+good agreement, while the Poisson process method gives slightly smaller SE
+estimates and a narrower confidence band. In practice, the Lawless and Nadeau
+method is suggested if it is hard to justify the Poisson process assumption.
 
 
 ## Comparing two-sample MCFs {#mcfDiff}
 
-The function `mcfDiff.test` is an implementation of the pseudo-score tests for
+The function `mcfDiff.test()` is an implementation of the pseudo-score tests for
 comparing two-sample MCFs proposed by @cook1996biometrics, while the function
-`mcfDiff` gives the difference estimates and wraps the pseudo-score testing
-results from `mcfDiff.test` (by default).
+`mcfDiff()` gives the difference estimates and wraps the pseudo-score testing
+results from `mcfDiff.test()` (by default).
 
 Suppose we are interested in comparing the two-sample MCFs between the treatment
 and control group in the simulated data. We may simply feed the `mcf.formula`
-object returned from the function `mcf` to function `mcfDiff` as follows:
+object returned from the function `mcf()` to function `mcfDiff()` as follows:
 
 ```{r mcfDiff1}
 ## one sample MCF object of two groups
@@ -208,7 +209,7 @@ mcf2 <- mcf(Recur(time, ID, event) ~ 1, simuDat, group %in% "Treat")
 mcf1 - mcf2
 ```
 
-Similarly, a `plot` method based on **ggplot2** is available for visual
+Similarly, a `plot()` method based on **ggplot2** is available for visual
 comparison.
 
 ```{r plot:mcfDiff}
@@ -228,8 +229,9 @@ gamma prior.
 (constFit <- rateReg(Recur(time, ID, event) ~ group + x1, data = simuDat))
 ```
 
-The function `rateReg` returns `rateReg` object, which can be printed out by
-calling the object.  (Internally, `show` method for `rateReg` object is called.)
+The function `rateReg()` returns `rateReg` object, which can be printed out by
+calling the object.  (Internally, `show()` method for `rateReg` object is
+called.)
 
 
 ## Model with piecewise constant rate function {#piecesFit}
@@ -298,8 +300,8 @@ base, plus one if intercept is included in spline bases.
 
 ## Summary of model fits {#summary-rateReg}
 
-A brief summary of the fitted model is given by `show` method as shown in the
-previous examples. Further, `summary` method for `rateReg` object provides a
+A brief summary of the fitted model is given by `show()` method as shown in the
+previous examples. Further, `summary()` method for `rateReg` object provides a
 more specific summary of the model fitted. For instance, the summary of the
 models fitted in section of model fitting can be called as follows:
 
@@ -314,13 +316,13 @@ estimated parameter of frailty variable, internal knots (if exist), boundary
 knots, degree of spline bases if splines are applied, coefficients of rate
 function bases (pieces), and log-likelihood of the model fitted. Outputs of
 function call or knots, may be suppressed by specifying argument `showCall` or
-`showKnots` to be `FALSE`, respectively, in `summary` method, which would be
+`showKnots` to be `FALSE`, respectively, in `summary()` method, which would be
 especially useful for a relatively concise summary in a reproducible report
 using **Rmarkdown**, etc.
 
-What's more, the corresponding `coef` and `confint` method for point estimates
-and confidence interval for covariate coefficients are provided as well.  Let's
-take the fitted model with spline rate function as an example.
+What's more, the corresponding `coef()` and `confint()` method for point
+estimates and confidence interval for covariate coefficients are provided as
+well.  Let's take the fitted model with spline rate function as an example.
 
 ```{r est}
 ## point estimates of covariate coefficients
@@ -333,8 +335,8 @@ confint(splineFit, level = 0.95)
 
 Two handy functions are provided for model selection.  We may compare and select
 the models with different baseline rate function based on Akaike Information
-Criterion (AIC) by function `AIC` or Bayesian Information Criterion (BIC) by
-function `BIC`.  A friendly warning will be thrown out if the numbers of
+Criterion (AIC) by function `AIC()` or Bayesian Information Criterion (BIC) by
+function `BIC()`.  A friendly warning will be thrown out if the numbers of
 observation were different in the model comparison by AIC.
 
 ```{r modelSelect}
@@ -344,8 +346,8 @@ BIC(constFit, piecesFit, splineFit)
 
 ## Baseline rate function {#baseRate}
 
-Function `baseRate` produces `baseRate.rateReg` object representing the
-estimated baseline rate function for a fitter model. An associated `plot` method
+Function `baseRate()` produces `baseRate.rateReg` object representing the
+estimated baseline rate function for a fitter model. An associated `plot()` method
 is available. For example, the baseline rate function and its confidence band
 estimated by cubic splines can be plotted as follows:
 
@@ -356,7 +358,7 @@ plot(baseRateObj, conf.int = TRUE)
 
 ## Estimated MCF from the fitted model {#mcf-rateReg}
 
-If `rateReg` object is supplied to function `mcf`, the method for `rateReg` is
+If `rateReg` object is supplied to function `mcf()`, the method for `rateReg` is
 called, which returns the estimated baseline MCF from the fitted model if
 `newdata` is not specified in the function.  The example estimating and plotting
 the baseline MCF from the fitted model with piecewise constant rate function is

@@ -17,16 +17,17 @@ vignette: >
 
 In this vignette, we briefly introduce how to simulate survival and recurrent
 event data from stochastic process point of view with the **reda** package.  The
-core function named `simEvent` provides an intuitive and flexible interface for
-simulating survival and recurrent event times from one stochastic process.
-Another function named `simEventData` is simply a wrapper that calls `simEvent`
-internally and collects the event times and the covariates of a given number of
-processes into a data frame.  Examples of generating random samples from common
-survival and recurrent models are provided. In fact, the function `simEvent` and
-`simEventData` may serve as the building blocks for simulating multitype event
-data including multiple type event data, recurrent events with termination, and
-competing risk data.  The details of function syntax and the objects produced
-are available in the package manual and thus not covered in this vignette.
+core function named `simEvent()` provides an intuitive and flexible interface
+for simulating survival and recurrent event times from one stochastic process.
+Another function named `simEventData()` is simply a wrapper that calls
+`simEvent()` internally and collects the event times and the covariates of a
+given number of processes into a data frame.  Examples of generating random
+samples from common survival and recurrent models are provided. In fact, the
+function `simEvent()` and `simEventData()` may serve as the building blocks for
+simulating multitype event data including multiple type event data, recurrent
+events with termination, and competing risk data.  The details of function
+syntax and the objects produced are available in the package manual and thus not
+covered in this vignette.
 
 
 # Introduction {#intro}
@@ -34,7 +35,7 @@ are available in the package manual and thus not covered in this vignette.
 ## Intensity function {#intensity}
 
 We introduce the general form of hazard rate function considered and implemented
-in the function `simEvent`, which can be generalized to two classes called the
+in the function `simEvent()`, which can be generalized to two classes called the
 relative risk model, and the accelerated failure time model.  The introduction
 is based on Section 2.2 and Section 2.3 of @kalbfleisch2002wiley.  Other helpful
 references include @aalen2008springer, @kleinbaum2011springer, among others.
@@ -119,7 +120,7 @@ p \boldsymbol{\beta}(t)^{\top}\mathbf{z}_i(t)\bigr).$$
 
 ### Intensity function in general form
 
-The function `simEvent` and `simEventData` allow users to specify an intensity
+The function `simEvent()` and `simEventData()` allow users to specify an intensity
 function in an even more general form given below.  $$\lambda\bigl(t \mid
 \mathbf{z}_i(t), u_i\bigr) = u_i\,\rho\bigl(t, \mathbf{z}_i(t),
 \boldsymbol{\beta}(t)\bigr) \,r\bigl(\mathbf{z}_i(t),
@@ -131,11 +132,11 @@ corresponds to the argument `frailty`, `rho`, and `relativeRisk`, respectively.
 
 The thinning method [@lewis1979nrlq] and the inversion method
 [@cinlar1975printice] are implemented for sampling event times. It can be shown
-that both methods achieve the given hazard rate. For function `simEvent`, the
+that both methods achieve the given hazard rate. For function `simEvent()`, the
 thinning method is the default method when the hazard rate function is bounded
 within follow-ups. Otherwise, the inversion method will be used. We may specify
-the sampling method via the argument `method` in function `simEvent` and
-`simEventData`.
+the sampling method via the argument `method` in function `simEvent()` and
+`simEventData()`.
 
 
 # Getting started {#getting-started}
@@ -154,7 +155,7 @@ set.seed(123)                    # set random number seed
 A homogeneous/stationary Poisson process (HPP) has a constant hazard rate over
 time with the interarrival times (between two successive arrivals/events)
 following exponential distribution.  Two simple examples of simulating a
-homogeneous Poisson process using `simEvent` are given as follows:
+homogeneous Poisson process using `simEvent()` are given as follows:
 
 ```{r hpp}
 ## HPP from time 1 to 5 of intensity 1 without covariates
@@ -163,8 +164,9 @@ simEvent(rho = 1, origin = 1, endTime = 5)
 simEvent(z = c(0.2, 0.5), zCoef = c(0.5, - 0.1), rho = 0.5, endTime = 10)
 ```
 
-The function `simEventData` enable us to simulate multiple processes and collect
-the simulated event times into a survival or recurrent event data format.
+The function `simEventData()` enable us to simulate multiple processes and
+collect the simulated event times into a survival or recurrent event data
+format.
 
 ```{r hpp-data-1}
 ## recurrent events from two processes with same covariates
@@ -183,12 +185,12 @@ simEventData(z = cbind(rnorm(2), 0.5), zCoef = c(1, - 0.5),
 ```
 
 We can also simulate survival data by taking the first event of each process.
-Setting `recurrent = FALSE` in function `simEvent` (or function `simEventData`)
-gives us the survival time(s) or the right censoring time(s).  In the example
-given below, we specified `endTime = "rnorm"` and `arguments = list(endTime =
-list(mean = 10))` for generating a random censoring times from normal
-distribution with mean ten and unit standard deviation. Also note that the
-specified `origin` is recycled for these ten processes.
+Setting `recurrent = FALSE` in function `simEvent()` (or function
+`simEventData()`) gives us the survival time(s) or the right censoring time(s).
+In the example given below, we specified `endTime = "rnorm"` and `arguments =
+list(endTime = list(mean = 10))` for generating a random censoring times from
+normal distribution with mean ten and unit standard deviation. Also note that
+the specified `origin` is recycled for these ten processes.
 
 ```{r hpp-data-3}
 ## survival data by set 'recurrent = FALSE'
@@ -201,8 +203,8 @@ simEventData(z = cbind(rnorm(10), 1), zCoef = c(0.2, - 0.5), rho = 0.1,
 
 In contrast to HPP, a nonhomogeneous Poisson process (NHPP) has a time-varying
 hazard rate function. In that case, we may specify the baseline hazard rate
-function `rho` to be a function object whose first argument represents the time
-variable. A quick example is given below, where the baseline hazard rate
+function `rhoFun()` to be a function object whose first argument represents the
+time variable. A quick example is given below, where the baseline hazard rate
 function $\rho(t) = \sin(t) + 1$.
 
 ```{r nhpp}
@@ -227,9 +229,9 @@ In the Poisson process, the interarrival times between two successive arrivals
 distribution of interarrival times and consider more general renewal processes.
 
 
-In function `simEvent` (and `simEventData`), we may specify the distribution of
+In function `simEvent()` (and `simEventData()`), we may specify the distribution of
 the interarrival times via the argument `interarrival`, which takes the function
-`stats::rexp` for generating interarrival times following exponential
+`stats::rexp()` for generating interarrival times following exponential
 distribution by default. In general, the argument `interarrival` takes a
 function with at least one argument named `rate` for generating random
 (nonnegative) interarrival times from a certain distribution at the given
@@ -241,7 +243,7 @@ set.seed(123)
 simEvent(interarrival = function(n, rate) rgamma(n, shape = 1 / rate))
 ```
 
-If the specified function has an argument named `n`, the function `simEvent`
+If the specified function has an argument named `n`, the function `simEvent()`
 will assume that the function can generate `n` number of random interarrival
 times at one time and take advantage of the vectorization for a potentially
 better performance. However, it is optional. The example given below produces an
@@ -256,12 +258,12 @@ simEvent(interarrival = function(rate) rgamma(n = 1, shape = 1 / rate))
 
 ## Time-variant covariates
 
-In practice, some covariates such as patients' age, automobile's mileage may vary
-over time.  The argument `z` in the function `simEvent` and `simEventData` may
-take a function of time that returns a vector of covariates for generating event
-times with the time-varying covariates. Let's consider an example of generating
-recurrent event times with three covariates, where two of which are
-time-variant.
+In practice, some covariates such as patients' age, automobile's mileage may
+vary over time.  The argument `z` in the function `simEvent()` and
+`simEventData()` may take a function of time that returns a vector of covariates
+for generating event times with the time-varying covariates. Let's consider an
+example of generating recurrent event times with three covariates, where two of
+which are time-variant.
 
 ```{r time-varying-covariates-1}
 set.seed(123)
@@ -362,7 +364,7 @@ The named list `list(shape = 2, scale = 0.5)` was passed to the function
 we might compare the results with the first example of time-variant
 covariates. Note that it is users' job to make sure the specified distribution
 of the frailty factor has mean one (or makes sense in a certain way). The
-function `simEvent` and `simEventData` only check the sign of the simulated
+function `simEvent()` and `simEventData()` only check the sign of the simulated
 frailty effect. An error will be thrown out if the generated frailty effect is
 not positive.
 
@@ -396,8 +398,8 @@ simEvent(z = zFun1, zCoef = c(0.1, 0.5, - 0.5), frailty = logNorm2,
 ```
 
 If the function specified for `frailty` has an argument named `n`, that `n = 1`
-will be specified internally by the function `simEvent`, which is designed for
-using the functions generating random numbers, such as `rgamma` and `rlnorm`
+will be specified internally by the function `simEvent()`, which is designed for
+using the functions generating random numbers, such as `rgamma()` and `rlnorm()`
 from the **stats** package.
 
 
@@ -409,8 +411,8 @@ in last section where frailty factors are different among individual processes
 is a special case when the cluster size is one.
 
 
-In the function `simEvent` (`simEventData`), the argument `frailty` may take a
-numeric number (vector) as input for specific shared frailty effect for
+In the function `simEvent()` (and `simEventData()`), the argument `frailty` may
+take a numeric number (vector) as input for specific shared frailty effect for
 clusters. For instance, we may simulate the recurrent event times for four
 processes coming from two clusters with shared gamma frailty within cluster,
 where the first two processes come from one cluster while the remaining two come
@@ -507,11 +509,11 @@ simEventData(z = cbind(1, rnorm(nProcess), rbinom(nProcess, 1, 0.5)),
              arguments = list(rho = list(p = 1.5)))
 ```
 
-Notice that in the function `rho_loglogistic` for the hazard function of the
+Notice that in the function `rho_loglogistic()` for the hazard function of the
 log-logistic model, we wrapped the parametrization of the covariates and
 covariate coefficients with the function `parametrize` and specified that `FUN =
 "exponential"`. In addition, we specified `relativeRisk = "none"` when calling
-`simEventData` for AFT models.
+`simEventData()` for AFT models.
 
 
 ## Log-normal model

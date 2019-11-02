@@ -22,7 +22,7 @@ library(reda)
 packageVersion("reda")
 ```
 
-# Introduction
+# Overview
 
 The `Recur()` function provides a flexible and widely applicable formula
 response interface for modeling recurrent event data with considerate data
@@ -31,7 +31,7 @@ checking procedures.  It combined the flexible interface of `reSurv()`
 embedded in the `Survr()` (deprecated in **reda** version 0.5.0).
 
 
-## Function Interface
+# Function Interface
 
 The function interface of `Recur()` is given below.
 
@@ -56,7 +56,7 @@ More details of arguments are provided in the function documentation by
 `?Recur`.
 
 
-## The `Recur` Object
+# The `Recur` Object
 
 The function `Recur()` returns an S4-class `Recur` object representing model
 response for recurrent event data.  The `Recur` class object mainly contains a
@@ -83,12 +83,13 @@ matrix.  The other slots are
   just records the option that users specified on data checking.
 
 
-## Usage
+# Usage
 
 Among all the arguments, only the argument `time` does not have default values
 and thus has to be specified by users.
 
-### When only `time` is given
+
+## When only `time` is given
 
 - The function assumes that each time point is specified for each subject.
 - The `id` takes its default value: `seq_along(time)`.
@@ -101,7 +102,8 @@ ex1 <- Recur(3:5)
 head(ex1)
 ```
 
-### When `time` and `id` are given
+
+## When `time` and `id` are given
 
 - The `event` takes its default values: `0` (censoring) at the last record of
   each subject, and `1` (event) before censoring.
@@ -118,7 +120,7 @@ head(ex2[ex2@ord, ])
   `time2`, and `- event`.
 
 
-### Helper `%to%` for recurrent episodes
+## Helper `%to%` for recurrent episodes
 
 The function `Recur()` allows users to input recurrent episodes by `time1` and
 `time2`, which can be specified with help of `%to%` (or its alias `%2%`) in
@@ -140,7 +142,7 @@ stopifnot(all.equal(ex3, ex4))
 ```
 
 
-### About `origin`  and `terminal`
+## About `origin`  and `terminal`
 
 - Both `origin` and `terminal` take a numeric vector.
 - The length of specified vector can be one, equal to the number of subjects, or
@@ -216,7 +218,7 @@ Recur(c(0, 2, 6) %to% c(1, 3, 8), id = rep("A1", 3), event = c(0, 1, 0))
 ```
 
 
-## Show Method
+# The `Show()` Method
 
 A `show()` method is added for the `Recur` object in a similar fashion to the
 output of the function `survival:::print.Surv()`, which internally converts the
@@ -233,7 +235,7 @@ episodes to be printed for each process.  By default,
 `options(reda.Recur.maxPrint = 3)` is set.
 
 
-### The Valve Seats Example
+## The Valve Seats Example
 
 We may illustrate the results of the `show()` method by the example valve seats
 data, where terminal events are artificially added.
@@ -244,7 +246,7 @@ term_events <- rbinom(length(unique(valveSeats$ID)), 1, 0.5)
 with(valveSeats, Recur(Days, ID, No., term_events))
 ```
 
-### On Missing times
+## On Missing times
 
 The updated `show()` method preserves `NA`'s when `check = "none"`.  However,
 `NA`'s will always appear because times are sorted internally.
@@ -253,7 +255,7 @@ The updated `show()` method preserves `NA`'s when `check = "none"`.  However,
 Recur(c(NA, 3:6, NA), id = rep(1:2, 3), check = "none")
 ```
 
-### Number of digits
+## Number of digits
 
 The `show()` method takes the value of `options("digits") - 3` to determine the
 largest number of digits for printing.
