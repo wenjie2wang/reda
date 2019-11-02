@@ -23,9 +23,9 @@ NULL
 
 ##' Formula Response for Recurrent Event Data
 ##'
-##' \code{Survr} is an S4 class that represents
-##' formula response for recurrent event data
-##' modeled by methods based on counts and rate function.
+##' Create an S4 class that represents formula response for recurrent event data
+##' modeled by methods based on counts and rate function.  Note that the
+##' function is deprecated since version 0.5.0 and will be removed in future.
 ##'
 ##' This is a similar function to \code{Survr} in package
 ##' \pkg{survrec} but with a more considerate checking procedure embedded for
@@ -66,10 +66,12 @@ Survr <- function(ID, time, event, origin = 0, check = TRUE, ...)
 {
     ## deprecated from version 0.5.0
     .Deprecated(new = "Recur",
-                msg = sprintf(paste("'%s()' is deprecated.",
-                                    "Please use '%s()' instead.",
-                                    "\n'help(\"Recur\")' for details."),
-                              "Survr", "Recur"))
+                msg = sprintf(paste(
+                    "'%s()' is deprecated and will be removed in future.",
+                    "Please use '%s()' instead.",
+                    "\n'help(\"Recur\")' for details."),
+                    "Survr", "Recur"
+                    ))
 
     if (missing(ID))
         stop("ID variable cannot be missing.")

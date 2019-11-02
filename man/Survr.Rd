@@ -32,9 +32,9 @@ data framework.}
 \item{...}{Other arguments for future usage.}
 }
 \description{
-\code{Survr} is an S4 class that represents
-formula response for recurrent event data
-modeled by methods based on counts and rate function.
+Create an S4 class that represents formula response for recurrent event data
+modeled by methods based on counts and rate function.  Note that the
+function is deprecated since version 0.5.0 and will be removed in future.
 }
 \details{
 This is a similar function to \code{Survr} in package

@@ -9,7 +9,9 @@ rateReg(formula, data, subset, df = NULL, knots = NULL,
         start = list(), control = list(), contrasts = NULL, ...)
 }
 \arguments{
-\item{formula}{\code{Recur} object produced by function \code{\link{Recur}}.}
+\item{formula}{\code{Recur} object produced by function \code{\link{Recur}}.
+The terminal events and risk-free episodes specified in \code{Recur}
+will be ignored since the model does not support them.}
 
 \item{data}{An optional data frame, list or environment containing the
 variables in the model.  If not found in data, the variables are taken

@@ -25,15 +25,15 @@ of the recurrent events. Logical vector is allowed and converted to
 numeric vector. Non-positive values are internally converted to zero
 indicating censoring status.}
 
-\item{terminal}{A numeric vector that may represent the status, costs, or types
-of the terminal events.  Logival vector is allowed and converted to
-numeric vector.  Non-positive values are internally converted to zero
+\item{terminal}{A numeric vector that may represent the status, costs, or
+types of the terminal events.  Logival vector is allowed and converted
+to numeric vector.  Non-positive values are internally converted to zero
 indicating censoring status.  If a scalar value is specified, all
 subjects will have the same status of terminal events at their last
-recurrent episodes.  The length of the specified \code{terminal} should be
-equal to the number of subjects, or number of data rows.  In the latter
-case, each subject may have at most one positive entry of \code{terminal}
-at the last recurrent episode.}
+recurrent episodes.  The length of the specified \code{terminal} should
+be equal to the number of subjects, or number of data rows.  In the
+latter case, each subject may have at most one positive entry of
+\code{terminal} at the last recurrent episode.}
 
 \item{origin}{The time origin of each subject.  If a scalar value is
 specified, all subjects will have the same origin at the specified
@@ -60,16 +60,8 @@ Create an S4 class object that represents formula response for recurrent
 event data with optional checking procedures embedded.
 }
 \details{
-This is a successor function of the deprecated function \code{Survr}.
-The checking rules apply to each subject respectively and include that
-\itemize{
-    \item Subject identification, event times, censoring time, and event
-        indicator cannot be missing or contain missing values.
-    \item There has to be only one censoring time not earlier than
-        any event time.
-    \item The time origin has to be the same and not later than any event
-        time.
-}
+This is a successor function of the deprecated function \code{Survr}.  See
+the vignette by `vignette("reda-Recur")` for details.
 }
 \examples{
 library(reda)

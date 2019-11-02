@@ -82,6 +82,8 @@ NULL
 ##'         start = list(), control = list(), contrasts = NULL, ...)
 ##'
 ##' @param formula \code{Recur} object produced by function \code{\link{Recur}}.
+##'     The terminal events and risk-free episodes specified in \code{Recur}
+##'     will be ignored since the model does not support them.
 ##' @param data An optional data frame, list or environment containing the
 ##'     variables in the model.  If not found in data, the variables are taken
 ##'     from \code{environment(formula)}, usually the environment from which

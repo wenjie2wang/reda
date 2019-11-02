@@ -33,17 +33,19 @@ NULL
 ##' @param variance A character specifying the method for variance estimates.
 ##'     The available options are \code{"LawlessNadeau"} (the default) for
 ##'     Lawless and Nadeau (1995) method, \code{"Poisson"} for Poisson process
-##'     method, and \code{"bootstrap"} for bootstrap method.  Partial matching
-##'     on the names is allowed.
+##'     method, \code{"bootstrap"} for bootstrap method, and \code{"CSV"} for
+##'     variance estimates of the corresponding cumulative sample mean function
+##'     (CSM) by the cumulative sample variance method (Cook and Lawless, 2007).
+##'     Partial matching on the names is allowed.
 ##' @param logConfInt A logical value. If \code{FALSE} (the default), the
 ##'     confidence interval are constructed based on the normality of the MCF
 ##'     estimates. Otherwise, the confidence intervals of given level are
 ##'     constucted based on the normality of logarithm of the MCF estimates.
-##' @param adjust_riskset A logical value indicating whether to adjust the size
+##' @param adjustRiskset A logical value indicating whether to adjust the size
 ##'     of risk-set.  If \code{TRUE} by default, the size of risk-set will be
 ##'     adjusted based on at-risk indicators and Nelson-Aalen estimator will be
-##'     returned.  Otherwise, the cumulative sample mean function given by Cook
-##'     and Lawless (2007) will be returned without adjustment on size of
+##'     returned.  Otherwise, the cumulative sample mean (CSM) function given by
+##'     Cook and Lawless (2007) will be returned without adjustment on size of
 ##'     risk-set.
 ##'
 ##' @aliases mcf,formula-method
@@ -53,8 +55,9 @@ NULL
 setMethod(
     f = "mcf", signature = "formula",
     definition = function(object, data, subset, na.action,
-                          variance = c("LawlessNadeau", "Poisson", "bootstrap"),
-                          logConfInt = FALSE, adjust_riskset = TRUE,
+                          variance = c("LawlessNadeau", "Poisson",
+                                       "bootstrap", "CSV"),
+                          logConfInt = FALSE, adjustRiskset = TRUE,
                           level = 0.95, control = list(), ...)
     {
         ## specify the type of variance
@@ -119,9 +122,11 @@ setMethod(
 
         ## update control list
         control <- do.call(mcf_formula_control, control)
-        point_method <- as.integer(adjust_riskset)
-        var_method <- match(variance,
-                            c("LawlessNadeau", "Poisson", "bootstrap"))
+        point_method <- as.integer(adjustRiskset)
+        var_method <- match(
+            variance,
+            c("LawlessNadeau", "Poisson", "bootstrap", "CSV")
+        )
         ci_method <- if (variance == "bootstrap" &&
                          control$ci.method == "percentile") {
                          3

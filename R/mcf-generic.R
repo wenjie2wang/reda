@@ -24,28 +24,35 @@ NULL
 ##' Mean Cumulative Function (MCF)
 ##'
 ##' An S4 class generic function that returns the mean cumulative function (MCF)
-##' estimates from a fitted model or returns the nonparametric MCF estimates
-##' (also called the Nelson-Aalen estimator) from the sample data.
+##' estimates from a fitted model or returns the nonparametric MCF estimates (by
+##' Nelson-Aalen estimator or Cook-Lawless cumulative sample mean estimator)
+##' from the sample data.
 ##'
 ##' For \code{formula} object with \code{\link{Recur}} object as response, the
 ##' covariate specified at the right hand side of the formula should be either
 ##' \code{1} or any "linear" conbination of categorical variable in the data.
 ##' The former computes the overall sample MCF.  The latter computes the sample
 ##' MCF for each level of the combination of the categorical variable(s)
-##' specified, respectively.  The sample MCF is also called Nelson-Aalen
-##' nonparametric estimator (Nelson 2003) and computed on each time point from
-##' sample data.  The point estimate of sample MCF at each time point does not
-##' assume any particular underlying model. The variance estimates at each time
-##' point is computed following the Lawless and Nadeau method (LawLess and
-##' Nadeau 1995), the Poisson process method, or the bootstrap methods.  The
-##' approximate confidence intervals are provided as well, which are constructed
-##' based on the asymptotic normality of the MCF itself (by default) or the
-##' logarithm of MCF.
+##' specified, respectively.
 ##'
-##' For \code{rateReg} object, \code{mcf} estimates the baseline
-##' MCF and its confidence interval at each time grid if argument \code{newdata}
-##' is not specified.  Otherwise, \code{mcf} estimates MCF and its confidence
-##' interval for the given newdata based on Delta-method.
+##' The MCF estimates are computed on each unique time point of the sample data.
+##' By default, the size of risk set is adjusted over time based on the at-risk
+##' indicators, which results in the Nelson-Aalen nonparametric estimator
+##' (Nelson 2003).  If the size of risk set remains a constant (total number of
+##' processes) over time (specified by \code{adjustRiskset = FALSE}), the
+##' cumulative sample mean (CSM) function introduced in Chapter 1 of Cook and
+##' Lawless (2007) will be computed instead.  The point estimate of sample MCF
+##' at each time point does not assume any particular underlying model. The
+##' variance estimates at each time point is computed following the Lawless and
+##' Nadeau method (LawLess and Nadeau 1995), the Poisson process method, or the
+##' bootstrap methods.  The approximate confidence intervals are provided as
+##' well, which are constructed based on the asymptotic normality of the MCF
+##' itself (by default) or the logarithm of MCF.
+##'
+##' For \code{rateReg} object, \code{mcf} estimates the baseline MCF and its
+##' confidence interval at each time grid if argument \code{newdata} is not
+##' specified.  Otherwise, \code{mcf} estimates MCF and its confidence interval
+##' for the given \code{newdata} based on Delta-method.
 ##'
 ##' @param object An object used to dispatch a method.
 ##' @param na.action A function that indicates what should the procedure do if
@@ -139,6 +146,9 @@ NULL
 ##' }
 ##'
 ##' @references
+##'
+##' Cook, R. J., and Lawless, J. (2007). \emph{The statistical analysis of
+##' recurrent events}, Springer Science & Business Media.
 ##'
 ##' Lawless, J. F. and Nadeau, C. (1995). Some Simple Robust Methods for the
 ##' Analysis of Recurrent Events. \emph{Technometrics}, 37, 158--168.
