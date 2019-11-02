@@ -1,6 +1,38 @@
-# reda 0.4.2.9000
+# reda 0.5.0
 
-* No updates yet.
+## New features
+
+* Add function `Recur` as a successor or function `Survr` for model formula
+  response.
+
+* Added a new package vignette introducing the function `Recur`.
+
+* Added a new argument `adjustRiskset` to the method `mcf.formula` for
+  specifying whether to adjust the size of risk set.  The cumulative sample mean
+  function estimates will be computed by setting `adjustRiskset = FALSE`.
+
+* Added a new option of `"CSV"` for cumulative sample variance estimates to the
+  argument `variance` of the method `mcf.formula`.
+
+## Major changes
+
+* The function `Survr` is deprecated since this version and will be removed in
+  future.
+
+* Added implementation of nonparametric MCF estimates in **C++** with help of
+  **Rcpp** and replaced original implementation in **R** with the new
+  implementation for a better computational performance.
+
+## Minor changes
+
+* Updated testing suite by using **tinytest** instead of **testthat**.
+
+## Bug fixes
+
+* Fixed `numRisk` (the size of risk set) for tied censoring times in
+  `mcf.formula` objects returned from method `mcf.formula`.  Thanks William
+  Anderson (wnilesanderson AT gmail.com) for bug reporting with detailed
+  examples.
 
 
 # reda 0.4.1
