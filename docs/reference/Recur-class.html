@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Confidence Intervals for Covariate Coefficients — confint,rateReg-method • reda</title>
+<title>An S4 Class Representing Formula Response for Recurrent Event Data — Recur-class • reda</title>
 
 
 <!-- jquery -->
@@ -35,10 +35,10 @@
 
 
 
-<meta property="og:title" content="Confidence Intervals for Covariate Coefficients — confint,rateReg-method" />
-<meta property="og:description" content="confint,rateReg-method is an S4 class method for
-rateReg object, which returns approximate confidence intervals
-for all or specified covariates." />
+<meta property="og:title" content="An S4 Class Representing Formula Response for Recurrent Event Data — Recur-class" />
+<meta property="og:description" content="The class Recur is an S4 that represents a formula response for
+recurrent event data model.  The function Recur produces
+objects of this class.  See ``Slots'' for details." />
 <meta name="twitter:card" content="summary" />
 
 
@@ -128,77 +128,70 @@ for all or specified covariates." />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Confidence Intervals for Covariate Coefficients</h1>
-    <small class="dont-index">Source: <a href='https://github.com/wenjie2wang/reda/blob/master/R/coef.R'><code>R/coef.R</code></a></small>
-    <div class="hidden name"><code>confint-rateReg-method.Rd</code></div>
+    <h1>An S4 Class Representing Formula Response for Recurrent Event Data</h1>
+    <small class="dont-index">Source: <a href='https://github.com/wenjie2wang/reda/blob/master/R/class.R'><code>R/class.R</code></a></small>
+    <div class="hidden name"><code>Recur-class.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p><code>confint,rateReg-method</code> is an S4 class method for
-<code><a href='rateReg.html'>rateReg</a></code> object, which returns approximate confidence intervals
-for all or specified covariates.</p>
+    <p>The class <code>Recur</code> is an S4 that represents a formula response for
+recurrent event data model.  The function <code><a href='Recur.html'>Recur</a></code> produces
+objects of this class.  See ``Slots'' for details.</p>
     </div>
 
-    <pre class="usage"><span class='co'># S4 method for rateReg</span>
-<span class='fu'><a href='https://rdrr.io/r/stats/confint.html'>confint</a></span>(<span class='no'>object</span>, <span class='no'>parm</span>, <span class='kw'>level</span> <span class='kw'>=</span> <span class='fl'>0.95</span>, <span class='no'>...</span>)</pre>
 
-    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
-    <table class="ref-arguments">
-    <colgroup><col class="name" /><col class="desc" /></colgroup>
-    <tr>
-      <th>object</th>
-      <td><p>A <code>rateReg</code> object.</p></td>
-    </tr>
-    <tr>
-      <th>parm</th>
-      <td><p>A specification of which parameters are to be given confidence
-intervals, either a vector of numbers or a vector of names.  If missing,
-all parameters are considered.</p></td>
-    </tr>
-    <tr>
-      <th>level</th>
-      <td><p>An optional numeric value to specify the confidence level
-required.  By default, the value is 0.95, which produces 95% confidence
-intervals.</p></td>
-    </tr>
-    <tr>
-      <th>...</th>
-      <td><p>Other arguments for future usage.</p></td>
-    </tr>
-    </table>
 
-    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
+    <h2 class="hasAnchor" id="slots"><a class="anchor" href="#slots"></a>Slots</h2>
 
-    <p>A numeric matrix with row names and column names.</p>
-    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
+    
 
-    <p>Under regularity condition (Shao 2003, Theorem 4.16 and Theorem 4.17, page
-287, 290), the approximate confidence intervals are constructed loosely
-based on Fisher information matrix and estimates of coefficients.</p>
-    <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
+<dl class='dl-horizontal'>
+<dt><code>.Data</code></dt><dd><p>A numeric matrix that consists of the following columns:
+<ul>
+<li><p><code>time1</code>: the beginning of time segements;</p></li>
+<li><p><code>time2</code>: the end of time segements;</p></li>
+<li><p><code>id</code>: Identificators
+of subjects;</p></li>
+<li><p><code>event</code>: Event indicators;</p></li>
+<li><p>:
+<code>terminal</code>: Indicators of terminal events.</p></li>
+</ul></p></dd>
 
-    <p>Shao, J. (2003), <em>Mathematical statistics</em>,
-Springer texts in statistics, New York: Springer, 2nd Edition.</p>
+<dt><code>ID</code></dt><dd><p>A charactrer vector for original identificators of subjects.</p></dd>
+
+<dt><code>ord</code></dt><dd><p>An integer vector for increasingly ordering data by <code>id</code>,
+<code>time2</code>, and <code>- event</code>.  Sorting is often done in the
+model-fitting steps, where the indices stored in this slot can be used
+directly.</p></dd>
+
+<dt><code>rev_ord</code></dt><dd><p>An integer vector for reverting the ordering of the sorted
+data (by <code>ord</code>) to its original ordering.  This slot is provided to
+easily revert the sorting.</p></dd>
+
+<dt><code>first_idx</code></dt><dd><p>An integer vector indicating the first record of each
+subject in the sorted matrix.  It helps in the data checking produce and
+may be helpful in model-fitting step, such as getting the origin time.</p></dd>
+
+<dt><code>last_idx</code></dt><dd><p>An integer vector indicating the last record of each subject
+in the sorted data.  Similar to <code>first_idx</code>, it helps in the data
+checking produce and may be helpful in the model-fitting step, such as
+locating the terminal events.</p></dd>
+
+<dt><code>check</code></dt><dd><p>A character string indicating how the data checking is
+performed.  It just records the option that users specified on data
+checking.</p></dd>
+
+</dl>
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
-    <div class='dont-index'><p><code><a href='rateReg.html'>rateReg</a></code> for model fitting;
-<code><a href='coef-rateReg-method.html'>coef,rateReg-method</a></code> for point estimates
-of covariate coefficients;
-<code><a href='summary-rateReg-method.html'>summary,rateReg-method</a></code> for summary of a fitted model.</p></div>
+    <div class='dont-index'><p><code><a href='Recur.html'>Recur</a></code></p></div>
 
-    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'>## See examples given in function rateReg.
-</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
     <ul class="nav nav-pills nav-stacked">
-      <li><a href="#arguments">Arguments</a></li>
-      <li><a href="#value">Value</a></li>
-      <li><a href="#details">Details</a></li>
-      <li><a href="#references">References</a></li>
+      <li><a href="#slots">Slots</a></li>
       <li><a href="#see-also">See also</a></li>
-      <li><a href="#examples">Examples</a></li>
     </ul>
 
   </div>

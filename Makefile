@@ -27,8 +27,6 @@ preview: $(vignettes)
 
 .PHONY: pkgdown
 pkgdown:
-	@mkdir -p docs/inst/bib/; cp inst/bib/$(pkg).bib docs/inst/bib/;
-	@echo "added/updated the package bib file"
 	Rscript -e "library(methods); pkgdown::build_site();"
 
 $(tar): $(objects)

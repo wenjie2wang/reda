@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Confidence Intervals for Covariate Coefficients — confint,rateReg-method • reda</title>
+<title>Checks for Recurrent Event Data — check_Recur • reda</title>
 
 
 <!-- jquery -->
@@ -35,10 +35,10 @@
 
 
 
-<meta property="og:title" content="Confidence Intervals for Covariate Coefficients — confint,rateReg-method" />
-<meta property="og:description" content="confint,rateReg-method is an S4 class method for
-rateReg object, which returns approximate confidence intervals
-for all or specified covariates." />
+<meta property="og:title" content="Checks for Recurrent Event Data — check_Recur" />
+<meta property="og:description" content="Perform several checks for recurrent event data and update object
+attributions if some rows of the contained data (in the .Data slot)
+have been removed by such as na.action." />
 <meta name="twitter:card" content="summary" />
 
 
@@ -128,77 +128,46 @@ for all or specified covariates." />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Confidence Intervals for Covariate Coefficients</h1>
-    <small class="dont-index">Source: <a href='https://github.com/wenjie2wang/reda/blob/master/R/coef.R'><code>R/coef.R</code></a></small>
-    <div class="hidden name"><code>confint-rateReg-method.Rd</code></div>
+    <h1>Checks for Recurrent Event Data</h1>
+    <small class="dont-index">Source: <a href='https://github.com/wenjie2wang/reda/blob/master/R/Recur.R'><code>R/Recur.R</code></a></small>
+    <div class="hidden name"><code>check_Recur.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p><code>confint,rateReg-method</code> is an S4 class method for
-<code><a href='rateReg.html'>rateReg</a></code> object, which returns approximate confidence intervals
-for all or specified covariates.</p>
+    <p>Perform several checks for recurrent event data and update object
+attributions if some rows of the contained data (in the <code>.Data</code> slot)
+have been removed by such as <code>na.action</code>.</p>
     </div>
 
-    <pre class="usage"><span class='co'># S4 method for rateReg</span>
-<span class='fu'><a href='https://rdrr.io/r/stats/confint.html'>confint</a></span>(<span class='no'>object</span>, <span class='no'>parm</span>, <span class='kw'>level</span> <span class='kw'>=</span> <span class='fl'>0.95</span>, <span class='no'>...</span>)</pre>
+    <pre class="usage"><span class='fu'>check_Recur</span>(<span class='no'>x</span>, <span class='kw'>check</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"hard"</span>, <span class='st'>"soft"</span>, <span class='st'>"none"</span>))</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>object</th>
-      <td><p>A <code>rateReg</code> object.</p></td>
+      <th>x</th>
+      <td><p>An <code>Recur</code> object.</p></td>
     </tr>
     <tr>
-      <th>parm</th>
-      <td><p>A specification of which parameters are to be given confidence
-intervals, either a vector of numbers or a vector of names.  If missing,
-all parameters are considered.</p></td>
-    </tr>
-    <tr>
-      <th>level</th>
-      <td><p>An optional numeric value to specify the confidence level
-required.  By default, the value is 0.95, which produces 95% confidence
-intervals.</p></td>
-    </tr>
-    <tr>
-      <th>...</th>
-      <td><p>Other arguments for future usage.</p></td>
+      <th>check</th>
+      <td><p>A character value specifying how to perform the checks for
+recurrent event data.  Errors or warnings will be thrown, respectively,
+if the <code>check</code> is specified to be <code>"hard"</code> (by default) or
+<code>"soft"</code>.  If <code>check = "none"</code> is specified, no data checking
+procedure will be run.</p></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>A numeric matrix with row names and column names.</p>
-    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
+    <p>An <code>Recur</code> object.</p>
 
-    <p>Under regularity condition (Shao 2003, Theorem 4.16 and Theorem 4.17, page
-287, 290), the approximate confidence intervals are constructed loosely
-based on Fisher information matrix and estimates of coefficients.</p>
-    <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
-
-    <p>Shao, J. (2003), <em>Mathematical statistics</em>,
-Springer texts in statistics, New York: Springer, 2nd Edition.</p>
-    <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
-
-    <div class='dont-index'><p><code><a href='rateReg.html'>rateReg</a></code> for model fitting;
-<code><a href='coef-rateReg-method.html'>coef,rateReg-method</a></code> for point estimates
-of covariate coefficients;
-<code><a href='summary-rateReg-method.html'>summary,rateReg-method</a></code> for summary of a fitted model.</p></div>
-
-    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'>## See examples given in function rateReg.
-</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
     <ul class="nav nav-pills nav-stacked">
       <li><a href="#arguments">Arguments</a></li>
       <li><a href="#value">Value</a></li>
-      <li><a href="#details">Details</a></li>
-      <li><a href="#references">References</a></li>
-      <li><a href="#see-also">See also</a></li>
-      <li><a href="#examples">Examples</a></li>
     </ul>
 
   </div>
