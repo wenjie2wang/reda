@@ -30,7 +30,7 @@
 ## Bug fixes
 
 * Fixed `numRisk` (the size of risk set) for tied censoring times in
-  `mcf.formula` objects returned from method `mcf.formula`.  Thanks William
+  `mcf.formula` objects returned from method `mcf.formula`.  Thank William
   Anderson (wnilesanderson AT gmail.com) for bug reporting with detailed
   examples.
 
