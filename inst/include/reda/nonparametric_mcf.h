@@ -87,7 +87,6 @@ namespace Reda {
             s_time2_ = time2.elem(id_sort_idx);
             s_event_ = event.elem(id_sort_idx);
             u_id_ = arma::unique(id); // sorted unique id
-            const unsigned int n_obs { s_id_.n_rows };
             arma::uvec id_first_idx { find_first_unique(s_id_) };
             arma::uvec id_last_idx { find_last_unique(s_id_) };
             // create processes
@@ -345,6 +344,7 @@ namespace Reda {
         if (point_method == 0) return;
         this->compute_point_estimate();
         // variance estimates of MCF
+        this->var_method_ = var_method;
         arma::mat boot_mat;
         switch(var_method) {
             // if no variance estimates
