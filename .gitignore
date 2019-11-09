@@ -1,7 +1,4 @@
-test/
-simulation/
-manuscript/
-TODO.md
+working
 *.tar.gz
 *.Rcheck/
 *.o
