@@ -67,6 +67,6 @@ the vignette by `vignette("reda-Recur")` for details.
 library(reda)
 with(valveSeats, Recur(Days, ID))
 with(valveSeats, Recur(Days, ID, No.))
-with(valveSeats, Recur(Days, ID, No., death = 1))
+with(valveSeats, Recur(Days, ID, No., terminal = 1))
 with(valveSeats, Recur(Days, ID, No., origin = 10))
 }
