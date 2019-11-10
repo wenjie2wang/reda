@@ -28,11 +28,11 @@ install.packages("reda")
 
 ## Getting Started
 
-- [Online documentation][homepage] provides function documentations and includes
-  package vignettes for
-  - [exploring and modeling recurrent event data][reda-intro].
-  - [introduction to formula response function Recur()][reda-Recur]
-  - [simulating survival and recurrent event data][reda-simulate].
+[Online documentation][homepage] provides function documentations and includes
+package vignettes for
+- [exploring and modeling recurrent event data][reda-intro].
+- [introduction to formula response function Recur()][reda-Recur]
+- [simulating survival and recurrent event data][reda-simulate].
 
 
 ## Development
