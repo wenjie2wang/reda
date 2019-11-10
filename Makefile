@@ -2,14 +2,10 @@ objects := $(wildcard R/*.R) DESCRIPTION
 version := $(shell grep "Version" DESCRIPTION | awk '{print $$NF}')
 pkg := $(shell grep "Package" DESCRIPTION | awk '{print $$NF}')
 tar := $(pkg)_$(version).tar.gz
+tinytest := $(wildcard inst/tinytest/*.R)
 checkLog := $(pkg).Rcheck/00check.log
-citation := inst/CITATION
-yr := $(shell date +"%Y")
-dt := $(shell date +"%Y-%m-%d")
-
 rmd := $(wildcard vignettes/*.Rmd)
 vignettes := $(patsubst %.Rmd,%.html,$(rmd))
-cprt := COPYRIGHT
 
 
 .PHONY: check
@@ -37,7 +33,7 @@ $(tar): $(objects)
 	@$(MAKE) updateTimestamp
 	R CMD build .
 
-$(checkLog): $(tar)
+$(checkLog): $(tar) $(tinytest)
 	R CMD check --as-cran $(tar)
 
 vignettes/%.html: vignettes/%.Rmd

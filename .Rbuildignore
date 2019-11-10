@@ -15,6 +15,7 @@
 ^\.\#
 ^\.git$
 ^\.clang_complete$
+^\.gitlab-ci\.yml$
 ^\.travis\.yml$
 ^_pkgdown\.yml$
 ^appveyor\.yml$

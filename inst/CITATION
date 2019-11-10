@@ -9,5 +9,5 @@ bibentry(
                         as.person("Jun Yan")),
     year = "2019",
     url = "https://github.com/wenjie2wang/reda",
-    note = "{R} package version 0.5.0"
+    note = "{R} package version 0.5.1.9000"
 )
