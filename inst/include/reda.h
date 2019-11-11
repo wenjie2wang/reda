@@ -1,6 +1,7 @@
-#ifndef reda_H
-#define reda_H
+#ifndef REDA_H
+#define REDA_H
 
+#include "reda/Process.h"
 #include "reda/nonparametric_mcf.h"
 #include "reda/utils.h"
 
