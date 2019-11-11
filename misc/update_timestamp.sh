@@ -33,7 +33,7 @@ else
     done
 
     # update copyright year in all C++ scripts
-    for cppfile in src/*.cpp #{h,cpp}
+    for cppfile in src/*.cpp inst/include/*.h inst/include/reda/*.h
     do
         if ! grep -q 'Copyright (C)' $cppfile; then
             cat $cprt_cpp $cppfile > tmp
