@@ -1,4 +1,5 @@
 working
+.man-roxygen
 *.tar.gz
 *.Rcheck/
 *.o

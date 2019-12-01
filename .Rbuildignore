@@ -1,7 +1,6 @@
 \.Rcheck$
 \.Rproj$
 \.tar\.gz$
-^COPYRIGHT$
 ^GPATH$
 ^GRTAGS$
 ^GTAGS$
@@ -13,9 +12,10 @@
 ^\.Rhistory$
 ^\.Rproj\.user$
 ^\.\#
-^\.git$
 ^\.clang_complete$
+^\.git$
 ^\.gitlab-ci\.yml$
+^\.man-roxygen$
 ^\.travis\.yml$
 ^_pkgdown\.yml$
 ^appveyor\.yml$

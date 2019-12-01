@@ -4,7 +4,8 @@
 \alias{parametrize}
 \title{Parametrizations of Covariates and Covariate Coefficients}
 \usage{
-parametrize(z, zCoef, FUN = c("exponential", "linear", "excess"), ...)
+parametrize(z, zCoef, FUN = c("exponential", "linear", "excess"),
+            ...)
 }
 \arguments{
 \item{z}{A numeric matrix, each row of which represents the covariate vector

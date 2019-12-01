@@ -29,11 +29,19 @@ $(tar): $(objects)
 	@$(RM) -rf src/RcppExports.cpp R/RcppExports.R
 	@Rscript -e "library(methods);" \
 	-e "Rcpp::compileAttributes()" \
-	-e "devtools::document();";
+	-e "devtools::document();"
+	@$(RM) -rf .man-oxygen
+	@cp -r man .man-roxygen
+	@Rscript -e "library(methods);" \
+	-e "source('misc/after-roxygen.R', echo = FALSE);"
 	@$(MAKE) updateTimestamp
 	R CMD build .
 
 $(checkLog): $(tar) $(tinytest)
+	R CMD check $(tar)
+
+.PHONY: check-as-cran
+check-as-cran: $(tar)
 	R CMD check --as-cran $(tar)
 
 vignettes/%.html: vignettes/%.Rmd

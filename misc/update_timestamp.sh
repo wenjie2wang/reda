@@ -54,9 +54,6 @@ else
     regexp4="/intsurv-package/,/^\)$/ s/20[0-9]{2}/$yr/"
     sed -i -E "$regexp4" $citation
 
-    # remove unnecessary lines
-    sed -i "/^RoxygenNote/d" DESCRIPTION
-
     # done
     printf "All updated.\n"
 fi
