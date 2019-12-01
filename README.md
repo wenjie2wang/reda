@@ -65,7 +65,7 @@ FITNESS FOR A PARTICULAR PURPOSE.
 [travis]: https://travis-ci.org/wenjie2wang/reda
 [travis-master]: https://travis-ci.org/wenjie2wang/reda.svg?branch=master
 [appveyor]: https://ci.appveyor.com/project/wenjie2wang/reda
-[appveyor-master]: https://ci.appveyor.com/api/projects/status/w6pr8b4clsnyfp32?svg=true
+[appveyor-master]: https://ci.appveyor.com/api/projects/status/lul85310wb0ykj26/branch/master?svg=true
 [github-url]: https://github.com/wenjie2wang/reda
 [homepage]: https://wenjie-stat.me/reda/
 [reda-intro]: https://wenjie-stat.me/reda/articles/reda-intro.html
