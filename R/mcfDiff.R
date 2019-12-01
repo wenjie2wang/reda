@@ -58,6 +58,7 @@ NULL
 ##' (2007, Section 3.7.5) for more details.
 ##'
 ##' @aliases mcfDiff
+##' @aliases -,mcf.formula,mcf.formula-method
 ##'
 ##' @usage
 ##' mcfDiff(mcf1, mcf2 = NULL, level = 0.95, ...)
@@ -216,13 +217,6 @@ mcfDiff <- function(mcf1, mcf2 = NULL, level = 0.95, ...)
 }
 
 
-##' @rdname mcfDiff
-##' @aliases `-`,mcf.formula-method
-##'
-##' @param e1 The first \code{mcf.formula} object, \code{mcf1}.
-##' @param e2 The second \code{mcf.formula} object, \code{mcf2}.
-##'
-##' @export
 setMethod(
     f = "-",
     signature = c("mcf.formula", "mcf.formula"),
