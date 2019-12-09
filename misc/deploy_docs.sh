@@ -3,7 +3,7 @@
 set -e
 
 ## run on wenjie's droplets
-pkg=reda
+pkg=$(grep "Package" DESCRIPTION | awk '{print $NF}')
 build_dir=$(pwd)
 target_dir=$HOME/wenjie/wenjie-stat.me/static/$pkg
 tmp_log=.git_status.log

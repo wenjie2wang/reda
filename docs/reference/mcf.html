@@ -150,8 +150,8 @@ from the sample data.</p>
     <span class='kw'>control</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(), <span class='no'>...</span>)
 
 <span class='co'># S4 method for rateReg</span>
-<span class='fu'>mcf</span>(<span class='no'>object</span>, <span class='no'>newdata</span>, <span class='no'>groupName</span>, <span class='no'>groupLevels</span>,
-    <span class='kw'>level</span> <span class='kw'>=</span> <span class='fl'>0.95</span>, <span class='no'>na.action</span>, <span class='kw'>control</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(), <span class='no'>...</span>)</pre>
+<span class='fu'>mcf</span>(<span class='no'>object</span>, <span class='no'>newdata</span>, <span class='no'>groupName</span>, <span class='no'>groupLevels</span>, <span class='kw'>level</span> <span class='kw'>=</span> <span class='fl'>0.95</span>,
+    <span class='no'>na.action</span>, <span class='kw'>control</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(), <span class='no'>...</span>)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -338,12 +338,12 @@ itself (by default) or the logarithm of MCF.</p>
 confidence interval at each time grid if argument <code>newdata</code> is not
 specified.  Otherwise, <code>mcf</code> estimates MCF and its confidence interval
 for the given <code>newdata</code> based on Delta-method.</p>
-    <h2 class="hasAnchor" id="methods-by-class-"><a class="anchor" href="#methods-by-class-"></a>Methods (by class)</h2>
+    <h2 class="hasAnchor" id="functions"><a class="anchor" href="#functions"></a>Functions</h2>
 
     
 <ul>
-<li><p><code>formula</code>: Sample MCF from data.</p></li>
-<li><p><code>rateReg</code>: Estimated MCF from a fitted model.</p></li>
+<li><p><code>mcf,formula-method</code>: Sample MCF from data.</p></li>
+<li><p><code>mcf,rateReg-method</code>: Estimated MCF from a fitted model.</p></li>
 </ul>
     <h2 class="hasAnchor" id="references"><a class="anchor" href="#references"></a>References</h2>
 
@@ -441,7 +441,7 @@ Repairs, Disease Recurrences, and Other Applications</em> (Vol. 10). SIAM.</p>
       <li><a href="#arguments">Arguments</a></li>
       <li><a href="#value">Value</a></li>
       <li><a href="#details">Details</a></li>
-      <li><a href="#methods-by-class-">Methods (by class)</a></li>
+      <li><a href="#functions">Functions</a></li>
       <li><a href="#references">References</a></li>
       <li><a href="#see-also">See also</a></li>
       <li><a href="#examples">Examples</a></li>

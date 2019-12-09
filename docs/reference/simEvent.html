@@ -145,12 +145,14 @@ recurrent events into a data frame. More examples are available in one of
 the package vignettes in addition to the function documentation.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>simEvent</span>(<span class='kw'>z</span> <span class='kw'>=</span> <span class='fl'>0</span>, <span class='kw'>zCoef</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='kw'>rho</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='kw'>rhoCoef</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='kw'>origin</span> <span class='kw'>=</span> <span class='fl'>0</span>, <span class='kw'>endTime</span> <span class='kw'>=</span> <span class='fl'>3</span>,
-         <span class='kw'>frailty</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='kw'>recurrent</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>interarrival</span> <span class='kw'>=</span> <span class='st'>"rexp"</span>,
+    <pre class="usage"><span class='fu'>simEvent</span>(<span class='kw'>z</span> <span class='kw'>=</span> <span class='fl'>0</span>, <span class='kw'>zCoef</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='kw'>rho</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='kw'>rhoCoef</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='kw'>origin</span> <span class='kw'>=</span> <span class='fl'>0</span>,
+         <span class='kw'>endTime</span> <span class='kw'>=</span> <span class='fl'>3</span>, <span class='kw'>frailty</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='kw'>recurrent</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
+         <span class='kw'>interarrival</span> <span class='kw'>=</span> <span class='st'>"rexp"</span>,
          <span class='kw'>relativeRisk</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"exponential"</span>, <span class='st'>"linear"</span>, <span class='st'>"excess"</span>, <span class='st'>"none"</span>),
          <span class='kw'>method</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"thinning"</span>, <span class='st'>"inversion"</span>), <span class='kw'>arguments</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(), <span class='no'>...</span>)
 
-<span class='fu'>simEventData</span>(<span class='no'>nProcess</span>, <span class='kw'>z</span> <span class='kw'>=</span> <span class='fl'>0</span>, <span class='kw'>origin</span> <span class='kw'>=</span> <span class='fl'>0</span>, <span class='kw'>endTime</span> <span class='kw'>=</span> <span class='fl'>3</span>, <span class='kw'>frailty</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='no'>...</span>)</pre>
+<span class='fu'>simEventData</span>(<span class='no'>nProcess</span>, <span class='kw'>z</span> <span class='kw'>=</span> <span class='fl'>0</span>, <span class='kw'>origin</span> <span class='kw'>=</span> <span class='fl'>0</span>, <span class='kw'>endTime</span> <span class='kw'>=</span> <span class='fl'>3</span>, <span class='kw'>frailty</span> <span class='kw'>=</span> <span class='fl'>1</span>,
+             <span class='no'>...</span>)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">

@@ -141,13 +141,10 @@ Nadeau 1995). The two-sample pseudo-score test proposed by Cook, Lawless,
 and Nadeau (1996) is also performed by default.</p>
     </div>
 
-    <pre class="usage">mcfDiff(mcf1, mcf2 = NULL, level = 0.95, ...)
+    <pre class="usage"><span class='fu'>mcfDiff</span>(<span class='no'>mcf1</span>, <span class='kw'>mcf2</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>level</span> <span class='kw'>=</span> <span class='fl'>0.95</span>, <span class='no'>...</span>)
 
-# S4 method for mcf.formula,mcf.formula
--(e1, e2)
-
-mcfDiff.test(mcf1, mcf2 = NULL,
-             testVariance = c("robust", "Poisson", "none"), ...)</pre>
+<span class='fu'>mcfDiff.test</span>(<span class='no'>mcf1</span>, <span class='kw'>mcf2</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+             <span class='kw'>testVariance</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"robust"</span>, <span class='st'>"Poisson"</span>, <span class='st'>"none"</span>), <span class='no'>...</span>)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -169,14 +166,6 @@ default value is 0.95.</p></td>
     <tr>
       <th>...</th>
       <td><p>Other arguments passed to <code>mcfDiff.test</code>.</p></td>
-    </tr>
-    <tr>
-      <th>e1</th>
-      <td><p>The first <code>mcf.formula</code> object, <code>mcf1</code>.</p></td>
-    </tr>
-    <tr>
-      <th>e2</th>
-      <td><p>The second <code>mcf.formula</code> object, <code>mcf2</code>.</p></td>
     </tr>
     <tr>
       <th>testVariance</th>
