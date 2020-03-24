@@ -1,6 +1,6 @@
 ##
 ## R package reda by Wenjie Wang, Haoda Fu, and Jun Yan
-## Copyright (C) 2015-2019
+## Copyright (C) 2015-2020
 ##
 ## This file is part of the R package reda.
 ##
@@ -278,20 +278,17 @@ sMcf <- function(inpDat, point_method, var_method, ci_method, ci_level,
         ), call. = FALSE)
     }
     ## call cpp routine
-    res_list <- with(
-        inpDat,
-        cpp_np_mcf(
-            time1 = inpDat$time1,
-            time2 = inpDat$time2,
-            id = inpDat$id,
-            event = inpDat$event,
-            point_method = point_method,
-            var_method = var_method,
-            ci_method = ci_method,
-            ci_level = ci_level,
-            var_bootstrap_method = var_bootstrap_method,
-            var_bootstrap_B = var_bootstrap_B
-            )
+    res_list <- cpp_np_mcf(
+        time1 = inpDat$time1,
+        time2 = inpDat$time2,
+        id = inpDat$id,
+        event = inpDat$event,
+        point_method = point_method,
+        var_method = var_method,
+        ci_method = ci_method,
+        ci_level = ci_level,
+        var_bootstrap_method = var_bootstrap_method,
+        var_bootstrap_B = var_bootstrap_B
     )
     ## return
     data.frame(
