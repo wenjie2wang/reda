@@ -31,7 +31,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">reda</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.5.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.5.1.9000</span>
       </span>
     </div>
 
@@ -85,13 +85,13 @@
 
       
 
-      </header><div class="row">
+      </header><script src="reda-intro_files/header-attrs-2.1/header-attrs.js"></script><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1>Introduction to reda through Examples</h1>
                         <h4 class="author">Wenjie Wang</h4>
             
-            <h4 class="date">2019-11-03</h4>
+            <h4 class="date">2020-03-25</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/wenjie2wang/reda/blob/master/vignettes/reda-intro.Rmd"><code>vignettes/reda-intro.Rmd</code></a></small>
       <div class="hidden name"><code>reda-intro.Rmd</code></div>
@@ -109,7 +109,7 @@
 <a href="#simuDat" class="anchor"></a>Simulated recurrent event data</h2>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span>(reda)</span>
 <span id="cb1-2"><a href="#cb1-2"></a><span class="kw"><a href="https://rdrr.io/r/utils/packageDescription.html">packageVersion</a></span>(<span class="st">"reda"</span>)</span></code></pre></div>
-<pre><code>## [1] '0.5.0'</code></pre>
+<pre><code>## [1] '0.5.1.9000'</code></pre>
 <p>First of all, the sample recurrent event data we are going to use in the following examples is called <code>simuDat</code>, which contains totally 500 observations of 6 variables.</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a><span class="kw"><a href="https://rdrr.io/r/utils/head.html">head</a></span>(simuDat)</span></code></pre></div>
 <pre><code>##   ID time event group    x1 gender
@@ -170,10 +170,10 @@
 <div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1"></a><span class="co">## overall sample MCF for valve-seat data in Nelson (1995)</span></span>
 <span id="cb8-2"><a href="#cb8-2"></a><span class="kw"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span>(valveMcf0, <span class="dt">conf.int =</span> <span class="ot">TRUE</span>, <span class="dt">mark.time =</span> <span class="ot">TRUE</span>, <span class="dt">addOrigin =</span> <span class="ot">TRUE</span>, <span class="dt">col =</span> <span class="dv">2</span>) <span class="op">+</span></span>
 <span id="cb8-3"><a href="#cb8-3"></a><span class="st">    </span>ggplot2<span class="op">::</span><span class="kw"><a href="https://ggplot2.tidyverse.org/reference/labs.html">xlab</a></span>(<span class="st">"Days"</span>) <span class="op">+</span><span class="st"> </span>ggplot2<span class="op">::</span><span class="kw"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_bw</a></span>()</span></code></pre></div>
-<p><img src="reda-intro_files/figure-html/plot:sampleMcf-1.png" width="672"></p>
+<p><img src="reda-intro_files/figure-html/plot-sampleMcf-1.png" width="672"></p>
 <div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1"></a><span class="co">## sample MCF for different groups (the default theme)</span></span>
 <span id="cb9-2"><a href="#cb9-2"></a><span class="kw"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span>(simuMcf, <span class="dt">conf.int =</span> <span class="ot">TRUE</span>, <span class="dt">lty =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">4</span>, <span class="dt">legendName =</span> <span class="st">"Treatment &amp; Gender"</span>)</span></code></pre></div>
-<p><img src="reda-intro_files/figure-html/plot:sampleMcf-2.png" width="672"></p>
+<p><img src="reda-intro_files/figure-html/plot-sampleMcf-2.png" width="672"></p>
 <p>Note that in the first plot, the censoring times was marked on the step curve by specifying <code>mark.time = TRUE</code> and the time origins was included in the curve by specifying <code>addOrigin = TRUE</code>. In addition, the type and color of the line can be specified through <code>lty</code> and <code>col</code>, respectively.</p>
 <p>As for the variance estimates, the Poisson process method assumes that the underlying counting process is a Poisson process and may underestimate the variance if the assumption cannot be justified. While, the Lawless and Nadeau method is more robust to departures from the Poisson process assumption. The nonparametric bootstrap method can be considered as well if an extra computational burden is not of concern. We may perform a quick comparison among the standard error estimates and the confidence intervals from these methods for the valve seats data as follows:</p>
 <div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1"></a><span class="co">## Poisson process method</span></span>
@@ -192,14 +192,14 @@
 <span id="cb10-14"><a href="#cb10-14"></a><span class="kw"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span>(ciDat, <span class="kw"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span>(<span class="dt">x =</span> time, <span class="dt">y =</span> se)) <span class="op">+</span></span>
 <span id="cb10-15"><a href="#cb10-15"></a><span class="st">    </span><span class="kw"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html">geom_step</a></span>(<span class="kw"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span>(<span class="dt">color =</span> Method, <span class="dt">linetype =</span> Method)) <span class="op">+</span></span>
 <span id="cb10-16"><a href="#cb10-16"></a><span class="st">    </span><span class="kw"><a href="https://ggplot2.tidyverse.org/reference/labs.html">xlab</a></span>(<span class="st">"Days"</span>) <span class="op">+</span><span class="st"> </span><span class="kw"><a href="https://ggplot2.tidyverse.org/reference/labs.html">ylab</a></span>(<span class="st">"SE estimates"</span>) <span class="op">+</span><span class="st"> </span><span class="kw"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_bw</a></span>()</span></code></pre></div>
-<p><img src="reda-intro_files/figure-html/plot:mcfSE-1.png" width="672"></p>
+<p><img src="reda-intro_files/figure-html/plot-mcfSE-1.png" width="672"></p>
 <div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1"></a><span class="co">## comparing the confidence intervals</span></span>
 <span id="cb11-2"><a href="#cb11-2"></a><span class="kw"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span>(ciDat, <span class="kw"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span>(<span class="dt">x =</span> time)) <span class="op">+</span></span>
 <span id="cb11-3"><a href="#cb11-3"></a><span class="st">    </span><span class="kw"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html">geom_step</a></span>(<span class="kw"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span>(<span class="dt">y =</span> MCF), <span class="dt">color =</span> <span class="st">"grey"</span>) <span class="op">+</span></span>
 <span id="cb11-4"><a href="#cb11-4"></a><span class="st">    </span><span class="kw"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html">geom_step</a></span>(<span class="kw"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span>(<span class="dt">y =</span> lower, <span class="dt">color =</span> Method, <span class="dt">linetype =</span> Method)) <span class="op">+</span></span>
 <span id="cb11-5"><a href="#cb11-5"></a><span class="st">    </span><span class="kw"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html">geom_step</a></span>(<span class="kw"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span>(<span class="dt">y =</span> upper, <span class="dt">color =</span> Method, <span class="dt">linetype =</span> Method)) <span class="op">+</span></span>
 <span id="cb11-6"><a href="#cb11-6"></a><span class="st">    </span><span class="kw"><a href="https://ggplot2.tidyverse.org/reference/labs.html">xlab</a></span>(<span class="st">"Days"</span>) <span class="op">+</span><span class="st"> </span><span class="kw"><a href="https://ggplot2.tidyverse.org/reference/labs.html">ylab</a></span>(<span class="st">"Confidence intervals"</span>) <span class="op">+</span><span class="st"> </span><span class="kw"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_bw</a></span>()</span></code></pre></div>
-<p><img src="reda-intro_files/figure-html/plot:mcfCI-1.png" width="672"></p>
+<p><img src="reda-intro_files/figure-html/plot-mcfCI-1.png" width="672"></p>
 <p>From the comparison, we may find that the SE estimates and the confidence intervals from the Lawless and Nadaeu method and the bootstrap method have a good agreement, while the Poisson process method gives slightly smaller SE estimates and a narrower confidence band. In practice, the Lawless and Nadeau method is suggested if it is hard to justify the Poisson process assumption.</p>
 </div>
 <div id="mcfDiff" class="section level2">
@@ -239,7 +239,7 @@
 ## Variance Estimator: robust</code></pre>
 <p>Similarly, a <code><a href="https://rdrr.io/r/graphics/plot.html">plot()</a></code> method based on <strong>ggplot2</strong> is available for visual comparison.</p>
 <div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1"></a><span class="kw"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span>(mcf_diff0)</span></code></pre></div>
-<p><img src="reda-intro_files/figure-html/plot:mcfDiff-1.png" width="672"></p>
+<p><img src="reda-intro_files/figure-html/plot-mcfDiff-1.png" width="672"></p>
 </div>
 </div>
 <div id="rateReg" class="section level1">
@@ -510,13 +510,13 @@
 <span id="cb44-2"><a href="#cb44-2"></a><span class="st">    </span><span class="kw"><a href="https://ggplot2.tidyverse.org/reference/geom_ribbon.html">geom_ribbon</a></span>(<span class="dt">data =</span> estmcf<span class="op">@</span>MCF, <span class="dt">alpha =</span> <span class="fl">0.2</span>,</span>
 <span id="cb44-3"><a href="#cb44-3"></a>                <span class="kw"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span>(<span class="dt">x =</span> time, <span class="dt">ymin =</span> lower, <span class="dt">ymax =</span> upper, <span class="dt">fill =</span> Group)) <span class="op">+</span></span>
 <span id="cb44-4"><a href="#cb44-4"></a><span class="st">    </span><span class="kw"><a href="https://ggplot2.tidyverse.org/reference/labs.html">ggtitle</a></span>(<span class="st">"Control vs. Treatment"</span>) <span class="op">+</span><span class="st"> </span><span class="kw"><a href="https://ggplot2.tidyverse.org/reference/labs.html">xlab</a></span>(<span class="st">"Days"</span>)</span></code></pre></div>
-<p><img src="reda-intro_files/figure-html/plot:ribbon-1.png" width="672"></p>
+<p><img src="reda-intro_files/figure-html/plot-ribbon-1.png" width="672"></p>
 </div>
 </div>
 <div id="reference" class="section level1 unnumbered">
 <h1 class="hasAnchor">
 <a href="#reference" class="anchor"></a>Reference</h1>
-<div id="refs" class="references">
+<div id="refs" class="references hanging-indent">
 <div id="ref-cookLawless2007springer">
 <p>Cook, Richard J, and Jerald Lawless. 2007. <em>The Statistical Analysis of Recurrent Events</em>. Springer Science &amp; Business Media.</p>
 </div>
@@ -552,19 +552,22 @@
 <a href="#tocnav" class="anchor"></a>Contents</h2>
       <ul class="nav nav-pills nav-stacked">
 <li>
-<a href="#introduction">Introduction</a><ul class="nav nav-pills nav-stacked">
+<a href="#introduction">Introduction</a>
+      <ul class="nav nav-pills nav-stacked">
 <li><a href="#simuDat">Simulated recurrent event data</a></li>
       <li><a href="#data-checking">Data checking</a></li>
       </ul>
 </li>
       <li>
-<a href="#exploratory-analysis">Exploratory analysis</a><ul class="nav nav-pills nav-stacked">
+<a href="#exploratory-analysis">Exploratory analysis</a>
+      <ul class="nav nav-pills nav-stacked">
 <li><a href="#mcf-formula">Nonparametric Mean Cumulative Function Estimates</a></li>
       <li><a href="#mcfDiff">Comparing two-sample MCFs</a></li>
       </ul>
 </li>
       <li>
-<a href="#rateReg">Gamma frailty model</a><ul class="nav nav-pills nav-stacked">
+<a href="#rateReg">Gamma frailty model</a>
+      <ul class="nav nav-pills nav-stacked">
 <li><a href="#constFit">Model with constant rate function</a></li>
       <li><a href="#piecesFit">Model with piecewise constant rate function</a></li>
       <li><a href="#splineFit">Model with spline rate function</a></li>

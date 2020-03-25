@@ -31,7 +31,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">reda</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.5.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.5.1.9000</span>
       </span>
     </div>
 
@@ -85,13 +85,13 @@
 
       
 
-      </header><div class="row">
+      </header><script src="reda-simulate_files/header-attrs-2.1/header-attrs.js"></script><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1>Simulate Survival and Recurrent Event Data with reda</h1>
                         <h4 class="author">Wenjie Wang</h4>
             
-            <h4 class="date">2019-11-03</h4>
+            <h4 class="date">2020-03-25</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/wenjie2wang/reda/blob/master/vignettes/reda-simulate.Rmd"><code>vignettes/reda-simulate.Rmd</code></a></small>
       <div class="hidden name"><code>reda-simulate.Rmd</code></div>
@@ -122,14 +122,14 @@ u_i\,\rho(t)\,r\bigl(\mathbf{z}_i(t), \boldsymbol{\beta}(t)\bigr).\]</span></p>
 <div id="accelerated-failure-time-model" class="section level3">
 <h3 class="hasAnchor">
 <a href="#accelerated-failure-time-model" class="anchor"></a>Accelerated failure time model</h3>
-<p>The relative risk models incorporate the covariates and their coefficients through a relative risk function multiplied by the baseline hazard rate, which provides an intuitive interpretation. However, we may consider a direct relationship between the covraiates <span class="math inline">\(\mathbf{z}\)</span> (including the intercept term) and the time to failure <span class="math inline">\(T&gt;0\)</span>, <span class="math inline">\(\log(T) = \alpha + \sigma W\)</span>, where <span class="math inline">\(W\)</span> is a standardized random error variable with density function <span class="math inline">\(f_W(w)\)</span>, suvival function <span class="math inline">\(S_W(w)\)</span> and hazard function <span class="math inline">\(\rho(w) = f_W(w) / S_W(w)\)</span>, <span class="math inline">\(\sigma\)</span> represents the standard error, and <span class="math inline">\(\alpha = \boldsymbol{\beta}^{\top}\mathbf{z}\)</span>. We assume that <span class="math inline">\(W\)</span> is independent of <span class="math inline">\(\boldsymbol{\beta}\)</span> given the covariates <span class="math inline">\(\mathbf{z}\)</span>. Taking exponentiation gives <span class="math inline">\(T=\exp(\boldsymbol{\beta}^{\top}\mathbf{z})\exp(W)\)</span> with density <span class="math inline">\(f_T(t) = \frac{1}{\sigma t}f_W\bigl((\log(t) - \alpha)/\sigma\bigr)\)</span>, survival function <span class="math inline">\(S_T(t) = S_W\bigl((\log(t) - \alpha)/\sigma\bigr)\)</span>, and hazard function <span class="math display">\[\lambda(t \mid \mathbf{z}_i) = \frac{1}{\sigma t}\rho\bigl((\log(t) -
-\alpha)/\sigma\bigr).\]</span> Let <span class="math inline">\(\lambda_{\mathbf{z}}=\exp(- \alpha)\)</span> and <span class="math inline">\(p = 1 / \sigma\)</span>, we may rewrite the hazard function as follows: <span class="math display">\[\lambda(t \mid
-\mathbf{z}_i) = \frac{p}{t}\rho\bigl(p\log(\lambda_{\mathbf{z}} t)\bigr).\]</span> The resulting model is called accelerated failure time (AFT) model.</p>
-<p>For example, suppose <span class="math inline">\(W\)</span> follows standard logistic distribution with density <span class="math inline">\(f_W(w) = e^w / (1 + e^w) ^ 2\)</span>, survival function <span class="math inline">\(S_W(w) = 1 / (1 + e^w)\)</span>, and hazard function <span class="math inline">\(\rho(w) = e^w / (1 + e^w)\)</span>. This leads to log-logistic model of <span class="math inline">\(T\)</span> with hazard function <span class="math display">\[\lambda(t \mid \mathbf{z}_i) = \frac{p
-(t\lambda_{\mathbf{z}})^p/t}{1 + (t\lambda_{\mathbf{z}})^p}.\]</span></p>
+<p>The relative risk models incorporate the covariates and their coefficients through a relative risk function multiplied by the baseline hazard rate, which provides an intuitive interpretation. However, we may consider a direct relationship between the covraiates <span class="math inline">\(\mathbf{z}\)</span> (including the intercept term) and the time to failure <span class="math inline">\(T&gt;0\)</span>, <span class="math inline">\(\log(T) = \alpha + \sigma W\)</span>, where <span class="math inline">\(W\)</span> is a standardized random error variable with density function <span class="math inline">\(f_W(w)\)</span>, suvival function <span class="math inline">\(S_W(w)\)</span> and hazard function <span class="math inline">\(\rho(w) = f_W(w) / S_W(w)\)</span>, <span class="math inline">\(\sigma\)</span> represents the standard error, and <span class="math inline">\(\alpha = \boldsymbol{\beta}^{\top}\mathbf{z}\)</span>. We assume that <span class="math inline">\(W\)</span> is independent of <span class="math inline">\(\boldsymbol{\beta}\)</span> given the covariates <span class="math inline">\(\mathbf{z}\)</span>. Taking exponentiation gives <span class="math inline">\(T=\exp(\boldsymbol{\beta}^{\top}\mathbf{z})\exp(\sigma W)\)</span> with density <span class="math inline">\(f_T(t)=\frac{1}{\sigma t}f_W\bigl((\log(t) - \alpha)/\sigma\bigr)\)</span>, survival function <span class="math inline">\(S_T(t) = S_W\bigl((\log(t) - \alpha)/\sigma\bigr)\)</span>, and hazard function <span class="math display">\[\lambda(t \mid \mathbf{z}_i) = \frac{1}{\sigma t}\rho\bigl((\log(t) -
+\alpha)/\sigma\bigr).\]</span> Let <span class="math inline">\(\lambda_{\mathbf{z}}=\exp(- \alpha)\)</span> and <span class="math inline">\(v = 1 / \sigma\)</span>, we may rewrite the hazard function as follows: <span class="math display">\[\lambda(t \mid
+\mathbf{z}_i) = \frac{v}{t}\rho\bigl(v\log(\lambda_{\mathbf{z}} t)\bigr).\]</span> The resulting model is called accelerated failure time (AFT) model.</p>
+<p>For example, suppose <span class="math inline">\(W\)</span> follows standard logistic distribution with density <span class="math inline">\(f_W(w) = e^w / (1 + e^w) ^ 2\)</span>, survival function <span class="math inline">\(S_W(w) = 1 / (1 + e^w)\)</span>, and hazard function <span class="math inline">\(\rho(w) = e^w / (1 + e^w)\)</span>. This leads to log-logistic model of <span class="math inline">\(T\)</span> with hazard function <span class="math display">\[\lambda(t \mid \mathbf{z}_i) = \frac{v
+(t\lambda_{\mathbf{z}})^v/t}{1 + (t\lambda_{\mathbf{z}})^v}.\]</span></p>
 <p>Similarly, we may further consider frailty factor, time-variant covariates, and time-varying covariate coefficients. So a general form of the intensity function may be given as follows: <span class="math display">\[\lambda\bigl(t \mid \mathbf{z}_i(t), u_i\bigr) =
-\frac{u_i\,p}{t}\,\rho\bigl( p \log(t) -
-p \boldsymbol{\beta}(t)^{\top}\mathbf{z}_i(t)\bigr).\]</span></p>
+\frac{u_i\,v}{t}\,\rho\bigl( v \log(t) - v\,
+\boldsymbol{\beta}(t)^{\top}\mathbf{z}_i(t)\bigr).\]</span></p>
 </div>
 <div id="intensity-function-in-general-form" class="section level3">
 <h3 class="hasAnchor">
@@ -151,7 +151,7 @@ p \boldsymbol{\beta}(t)^{\top}\mathbf{z}_i(t)\bigr).\]</span></p>
 <a href="#getting-started" class="anchor"></a>Getting started</h1>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span>(reda)                    <span class="co"># attach reda package to the search path</span></span>
 <span id="cb1-2"><a href="#cb1-2"></a><span class="kw"><a href="https://rdrr.io/r/utils/packageDescription.html">packageVersion</a></span>(<span class="st">"reda"</span>)           <span class="co"># check the package version</span></span></code></pre></div>
-<pre><code>## [1] '0.5.0'</code></pre>
+<pre><code>## [1] '0.5.1.9000'</code></pre>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a><span class="kw"><a href="https://rdrr.io/r/base/options.html">options</a></span>(<span class="dt">digits =</span> <span class="dv">3</span>)              <span class="co"># set the number of significant digits to print</span></span>
 <span id="cb3-2"><a href="#cb3-2"></a><span class="kw"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span>(<span class="dv">123</span>)                    <span class="co"># set random number seed</span></span></code></pre></div>
 </div>
@@ -520,7 +520,7 @@ p \boldsymbol{\beta}(t)^{\top}\mathbf{z}_i(t)\bigr).\]</span></p>
 <div id="reference" class="section level1 unnumbered">
 <h1 class="hasAnchor">
 <a href="#reference" class="anchor"></a>Reference</h1>
-<div id="refs" class="references">
+<div id="refs" class="references hanging-indent">
 <div id="ref-aalen2008springer">
 <p>Aalen, Odd, Ornulf Borgan, and Hakon Gjessing. 2008. <em>Survival and Event History Analysis: A Process Point of View</em>. Springer Science &amp; Business Media.</p>
 </div>
@@ -556,33 +556,38 @@ p \boldsymbol{\beta}(t)^{\top}\mathbf{z}_i(t)\bigr).\]</span></p>
 <a href="#tocnav" class="anchor"></a>Contents</h2>
       <ul class="nav nav-pills nav-stacked">
 <li>
-<a href="#intro">Introduction</a><ul class="nav nav-pills nav-stacked">
+<a href="#intro">Introduction</a>
+      <ul class="nav nav-pills nav-stacked">
 <li><a href="#intensity">Intensity function</a></li>
       <li><a href="#sampling-methods">Sampling methods</a></li>
       </ul>
 </li>
       <li><a href="#getting-started">Getting started</a></li>
       <li>
-<a href="#poisson-process">Poisson process</a><ul class="nav nav-pills nav-stacked">
+<a href="#poisson-process">Poisson process</a>
+      <ul class="nav nav-pills nav-stacked">
 <li><a href="#hpp">Homogeneous Poisson process</a></li>
       <li><a href="#nhpp">Nonhomogeneous Poisson process</a></li>
       </ul>
 </li>
       <li><a href="#renewal-processes">Renewal processes</a></li>
       <li>
-<a href="#beyond-time-invariance">Beyond time-invariance</a><ul class="nav nav-pills nav-stacked">
+<a href="#beyond-time-invariance">Beyond time-invariance</a>
+      <ul class="nav nav-pills nav-stacked">
 <li><a href="#time-variant-covariates">Time-variant covariates</a></li>
       <li><a href="#time-variant-covariate-coefficients">Time-variant covariate coefficients</a></li>
       </ul>
 </li>
       <li>
-<a href="#frailty">Frailty models</a><ul class="nav nav-pills nav-stacked">
+<a href="#frailty">Frailty models</a>
+      <ul class="nav nav-pills nav-stacked">
 <li><a href="#individual-frailty">Frailty for individual processes</a></li>
       <li><a href="#shared-frailty">Shared frailty for clusters</a></li>
       </ul>
 </li>
       <li>
-<a href="#common-parametric-survival-models">Common parametric survival models</a><ul class="nav nav-pills nav-stacked">
+<a href="#common-parametric-survival-models">Common parametric survival models</a>
+      <ul class="nav nav-pills nav-stacked">
 <li><a href="#weibull-model">Weibull model</a></li>
       <li><a href="#gompertz-model">Gompertz model</a></li>
       <li><a href="#log-logistic-model">Log-logistic model</a></li>

@@ -31,7 +31,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">reda</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.5.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.5.1.9000</span>
       </span>
     </div>
 
@@ -85,13 +85,13 @@
 
       
 
-      </header><div class="row">
+      </header><script src="reda-Recur_files/header-attrs-2.1/header-attrs.js"></script><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1>Introduction to Formula Response Function Recur()</h1>
                         <h4 class="author">Wenjie Wang</h4>
             
-            <h4 class="date">2019-11-03</h4>
+            <h4 class="date">2020-03-25</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/wenjie2wang/reda/blob/master/vignettes/reda-Recur.Rmd"><code>vignettes/reda-Recur.Rmd</code></a></small>
       <div class="hidden name"><code>reda-Recur.Rmd</code></div>
@@ -102,7 +102,7 @@
     
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span>(reda)</span>
 <span id="cb1-2"><a href="#cb1-2"></a><span class="kw"><a href="https://rdrr.io/r/utils/packageDescription.html">packageVersion</a></span>(<span class="st">"reda"</span>)</span></code></pre></div>
-<pre><code>## [1] '0.5.0'</code></pre>
+<pre><code>## [1] '0.5.1.9000'</code></pre>
 <div id="overview" class="section level1">
 <h1 class="hasAnchor">
 <a href="#overview" class="anchor"></a>Overview</h1>
@@ -147,7 +147,7 @@
 <li>
 <code>ID</code>: a factor storing the original subject’s ID, which originally can be a character vector, a numeric vector, or a factor). It is needed to pinpoint data issues for particular subjects with their original ID’s.</li>
 <li>
-<code>ord</code>: indices that sort the response matrix (by rows) increasingly by <code>id</code>, <code>time2</code>, and <code>- event</code>. Sorting is often done in the model-fitting steps, where the indices stored in this slot can be used directly.</li>
+<code>ord</code>: indices that sort the response matrix (by rows) increasingly by <code>id</code>, <code>time2</code>, and `- event`. Sorting is often done in the model-fitting steps, where the indices stored in this slot can be used directly.</li>
 <li>
 <code>rev_ord</code>: indices that revert the increasingly sorted response matrix by <code>ord</code> to its original ordering. This slot is provided to easily revert the sorting.</li>
 <li>
@@ -204,7 +204,7 @@
 [5,]     1     3  2     1        0      0
 [6,]     3     5  2     0        0      0</code></pre>
 <ul>
-<li>The slot <code>ord</code> stores the indices that sort the response matrix by <code>id</code>, <code>time2</code>, and <code>- event</code>.</li>
+<li>The slot <code>ord</code> stores the indices that sort the response matrix by <code>id</code>, <code>time2</code>, and `- event`.</li>
 </ul>
 </div>
 <div id="helper-to-for-recurrent-episodes" class="section level2">
@@ -310,46 +310,46 @@
 <span id="cb36-2"><a href="#cb36-2"></a>term_events &lt;-<span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/stats/Binomial.html">rbinom</a></span>(<span class="kw"><a href="https://rdrr.io/r/base/length.html">length</a></span>(<span class="kw"><a href="https://rdrr.io/r/base/unique.html">unique</a></span>(valveSeats<span class="op">$</span>ID)), <span class="dv">1</span>, <span class="fl">0.5</span>)</span>
 <span id="cb36-3"><a href="#cb36-3"></a><span class="kw"><a href="https://rdrr.io/r/base/with.html">with</a></span>(valveSeats, <span class="kw"><a href="../reference/Recur.html">Recur</a></span>(Days, ID, No., term_events))</span></code></pre></div>
 <pre><code> [1] 251: (0, 761+]                             
- [2] 328: (0, 759*]                             
- [3] 329: (0, 98], (98, 667*]                   
- [4] 390: (0, 326], (326, 653], ..., (653, 667*]
- [5] 395: (0, 665+]                             
- [6] 397: (0, 84], (84, 667*]                   
- [7] 400: (0, 87], (87, 663*]                   
- [8] 404: (0, 646], (646, 653*]                 
- [9] 407: (0, 92], (92, 653*]                   
-[10] 409: (0, 651*]                             
-[11] 411: (0, 258], (258, 328], ..., (621, 650+]
-[12] 252: (0, 61], (61, 539], (539, 648*]       
-[13] 389: (0, 254], (254, 276], ..., (640, 644*]
+ [2] 252: (0, 759*]                             
+ [3] 327: (0, 98], (98, 667*]                   
+ [4] 328: (0, 326], (326, 653], ..., (653, 667*]
+ [5] 329: (0, 665+]                             
+ [6] 330: (0, 84], (84, 667*]                   
+ [7] 331: (0, 87], (87, 663*]                   
+ [8] 389: (0, 646], (646, 653*]                 
+ [9] 390: (0, 92], (92, 653*]                   
+[10] 391: (0, 651*]                             
+[11] 392: (0, 258], (258, 328], ..., (621, 650+]
+[12] 393: (0, 61], (61, 539], (539, 648*]       
+[13] 394: (0, 254], (254, 276], ..., (640, 644*]
 [14] 395: (0, 76], (76, 538], (538, 642*]       
-[15] 401: (0, 635], (635, 641*]                 
-[16] 404: (0, 349], (349, 404], ..., (561, 649+]
-[17] 409: (0, 631*]                             
-[18] 411: (0, 596*]                             
-[19] 415: (0, 120], (120, 479], (479, 614+]     
-[20] 327: (0, 323], (323, 449], (449, 582+]     
-[21] 389: (0, 139], (139, 139], (139, 589*]     
-[22] 394: (0, 593+]                             
-[23] 394: (0, 573], (573, 589*]                 
-[24] 397: (0, 165], (165, 408], ..., (604, 606+]
-[25] 405: (0, 249], (249, 594*]                 
+[15] 396: (0, 635], (635, 641*]                 
+[16] 397: (0, 349], (349, 404], ..., (561, 649+]
+[17] 398: (0, 631*]                             
+[18] 399: (0, 596*]                             
+[19] 400: (0, 120], (120, 479], (479, 614+]     
+[20] 401: (0, 323], (323, 449], (449, 582+]     
+[21] 402: (0, 139], (139, 139], (139, 589*]     
+[22] 403: (0, 593+]                             
+[23] 404: (0, 573], (573, 589*]                 
+[24] 405: (0, 165], (165, 408], ..., (604, 606+]
+[25] 406: (0, 249], (249, 594*]                 
 [26] 407: (0, 344], (344, 497], (497, 613*]     
-[27] 412: (0, 265], (265, 586], (586, 595+]     
-[28] 420: (0, 166], (166, 206], ..., (348, 389+]
-[29] 390: (0, 601+]                             
-[30] 392: (0, 410], (410, 581], (581, 601+]     
-[31] 395: (0, 611+]                             
-[32] 396: (0, 608+]                             
-[33] 397: (0, 587*]                             
-[34] 400: (0, 367], (367, 603+]                 
-[35] 403: (0, 202], (202, 563], ..., (570, 585*]
-[36] 409: (0, 587+]                             
-[37] 411: (0, 578*]                             
-[38] 413: (0, 578*]                             
-[39] 416: (0, 586*]                             
-[40] 417: (0, 585+]                             
-[41] 421: (0, 582*]                             </code></pre>
+[27] 408: (0, 265], (265, 586], (586, 595+]     
+[28] 409: (0, 166], (166, 206], ..., (348, 389+]
+[29] 410: (0, 601+]                             
+[30] 411: (0, 410], (410, 581], (581, 601+]     
+[31] 412: (0, 611+]                             
+[32] 413: (0, 608+]                             
+[33] 414: (0, 587*]                             
+[34] 415: (0, 367], (367, 603+]                 
+[35] 416: (0, 202], (202, 563], ..., (570, 585*]
+[36] 417: (0, 587+]                             
+[37] 418: (0, 578*]                             
+[38] 419: (0, 578*]                             
+[39] 420: (0, 586*]                             
+[40] 421: (0, 585+]                             
+[41] 422: (0, 582*]                             </code></pre>
 </div>
 <div id="on-missing-times" class="section level2">
 <h2 class="hasAnchor">
@@ -385,7 +385,8 @@
       <li><a href="#function-interface">Function Interface</a></li>
       <li><a href="#the-recur-object">The <code>Recur</code> Object</a></li>
       <li>
-<a href="#usage">Usage</a><ul class="nav nav-pills nav-stacked">
+<a href="#usage">Usage</a>
+      <ul class="nav nav-pills nav-stacked">
 <li><a href="#when-only-time-is-given">When only <code>time</code> is given</a></li>
       <li><a href="#when-time-and-id-are-given">When <code>time</code> and <code>id</code> are given</a></li>
       <li><a href="#helper-to-for-recurrent-episodes">Helper <code>%to%</code> for recurrent episodes</a></li>
@@ -394,7 +395,8 @@
       </ul>
 </li>
       <li>
-<a href="#the-show-method">The <code>Show()</code> Method</a><ul class="nav nav-pills nav-stacked">
+<a href="#the-show-method">The <code>Show()</code> Method</a>
+      <ul class="nav nav-pills nav-stacked">
 <li><a href="#the-valve-seats-example">The Valve Seats Example</a></li>
       <li><a href="#on-missing-times">On Missing times</a></li>
       <li><a href="#number-of-digits">Number of digits</a></li>
