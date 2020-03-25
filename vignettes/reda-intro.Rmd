@@ -119,7 +119,7 @@ a `ggplot` object so that the plot produced can be easily further customized by
 **ggplot2**.  The `legendname` and `legendLevels` can be specified to easily
 customize the legend in the plot. Two examples are given as follows:
 
-```{r plot:sampleMcf}
+```{r plot-sampleMcf}
 ## overall sample MCF for valve-seat data in Nelson (1995)
 plot(valveMcf0, conf.int = TRUE, mark.time = TRUE, addOrigin = TRUE, col = 2) +
     ggplot2::xlab("Days") + ggplot2::theme_bw()
@@ -142,7 +142,7 @@ computational burden is not of concern.  We may perform a quick comparison among
 the standard error estimates and the confidence intervals from these methods for
 the valve seats data as follows:
 
-```{r plot:mcfSE}
+```{r plot-mcfSE}
 ## Poisson process method
 valveMcf1 <- mcf(Recur(Days, ID, No.) ~ 1, valveSeats, variance = "Poisson")
 
@@ -161,7 +161,7 @@ ggplot(ciDat, aes(x = time, y = se)) +
     xlab("Days") + ylab("SE estimates") + theme_bw()
 ```
 
-```{r plot:mcfCI}
+```{r plot-mcfCI}
 ## comparing the confidence intervals
 ggplot(ciDat, aes(x = time)) +
     geom_step(aes(y = MCF), color = "grey") +
@@ -212,7 +212,7 @@ mcf1 - mcf2
 Similarly, a `plot()` method based on **ggplot2** is available for visual
 comparison.
 
-```{r plot:mcfDiff}
+```{r plot-mcfDiff}
 plot(mcf_diff0)
 ```
 
@@ -395,7 +395,7 @@ plot(estmcf, conf.int = TRUE, col = c("royalblue", "red"), lty = c(1, 5)) +
 The data frame containing the MCF estimates is stored in the slot named `MCF`.
 So it is not hard to make further customization to the MCF plot.
 
-```{r plot:ribbon}
+```{r plot-ribbon}
 plot(estmcf) +
     geom_ribbon(data = estmcf@MCF, alpha = 0.2,
                 aes(x = time, ymin = lower, ymax = upper, fill = Group)) +
