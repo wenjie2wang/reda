@@ -94,28 +94,28 @@ function $S_W(w)$ and hazard function $\rho(w) = f_W(w) / S_W(w)$, $\sigma$
 represents the standard error, and $\alpha =
 \boldsymbol{\beta}^{\top}\mathbf{z}$.  We assume that $W$ is independent of
 $\boldsymbol{\beta}$ given the covariates $\mathbf{z}$.  Taking exponentiation
-gives $T=\exp(\boldsymbol{\beta}^{\top}\mathbf{z})\exp(W)$ with density $f_T(t)
-= \frac{1}{\sigma t}f_W\bigl((\log(t) - \alpha)/\sigma\bigr)$, survival function
-$S_T(t) = S_W\bigl((\log(t) - \alpha)/\sigma\bigr)$, and hazard function
-$$\lambda(t \mid \mathbf{z}_i) = \frac{1}{\sigma t}\rho\bigl((\log(t) -
-\alpha)/\sigma\bigr).$$ Let $\lambda_{\mathbf{z}}=\exp(- \alpha)$ and $p = 1 /
+gives $T=\exp(\boldsymbol{\beta}^{\top}\mathbf{z})\exp(\sigma W)$ with density
+$f_T(t)=\frac{1}{\sigma t}f_W\bigl((\log(t) - \alpha)/\sigma\bigr)$, survival
+function $S_T(t) = S_W\bigl((\log(t) - \alpha)/\sigma\bigr)$, and hazard
+function $$\lambda(t \mid \mathbf{z}_i) = \frac{1}{\sigma t}\rho\bigl((\log(t) -
+\alpha)/\sigma\bigr).$$ Let $\lambda_{\mathbf{z}}=\exp(- \alpha)$ and $v = 1 /
 \sigma$, we may rewrite the hazard function as follows: $$\lambda(t \mid
-\mathbf{z}_i) = \frac{p}{t}\rho\bigl(p\log(\lambda_{\mathbf{z}} t)\bigr).$$
-The resulting model is called accelerated failure time (AFT) model.
+\mathbf{z}_i) = \frac{v}{t}\rho\bigl(v\log(\lambda_{\mathbf{z}} t)\bigr).$$ The
+resulting model is called accelerated failure time (AFT) model.
 
 
 For example, suppose $W$ follows standard logistic distribution with density
 $f_W(w) = e^w / (1 + e^w) ^ 2$, survival function $S_W(w) = 1 / (1 + e^w)$, and
 hazard function $\rho(w) = e^w / (1 + e^w)$. This leads to log-logistic model of
-$T$ with hazard function $$\lambda(t \mid \mathbf{z}_i) = \frac{p
-(t\lambda_{\mathbf{z}})^p/t}{1 + (t\lambda_{\mathbf{z}})^p}.$$
+$T$ with hazard function $$\lambda(t \mid \mathbf{z}_i) = \frac{v
+(t\lambda_{\mathbf{z}})^v/t}{1 + (t\lambda_{\mathbf{z}})^v}.$$
 
 
 Similarly, we may further consider frailty factor, time-variant covariates, and
 time-varying covariate coefficients. So a general form of the intensity function
 may be given as follows: $$\lambda\bigl(t \mid \mathbf{z}_i(t), u_i\bigr) =
-\frac{u_i\,p}{t}\,\rho\bigl( p \log(t) -
-p \boldsymbol{\beta}(t)^{\top}\mathbf{z}_i(t)\bigr).$$
+\frac{u_i\,v}{t}\,\rho\bigl( v \log(t) - v\,
+\boldsymbol{\beta}(t)^{\top}\mathbf{z}_i(t)\bigr).$$
 
 
 ### Intensity function in general form
