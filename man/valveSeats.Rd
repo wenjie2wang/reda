@@ -4,7 +4,9 @@
 \name{valveSeats}
 \alias{valveSeats}
 \title{Valve Seats Dataset}
-\format{A data frame with 89 rows and 3 variables.}
+\format{
+A data frame with 89 rows and 3 variables.
+}
 \description{
 Valve seats wear out in certain diesel engines, each with 16 valve seats.
 The dataset served as an example of recurrence data in Nelson (1995),

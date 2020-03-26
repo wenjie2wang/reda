@@ -4,7 +4,9 @@
 \name{simuDat}
 \alias{simuDat}
 \title{Simulated Sample Dataset for Demonstration}
-\format{A data frame with 500 rows and 6 variables.}
+\format{
+A data frame with 500 rows and 6 variables.
+}
 \description{
 A simulated data frame with covariates named
 \code{ID}, \code{time}, \code{event}, \code{group}, \code{x1},
