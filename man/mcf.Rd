@@ -9,9 +9,9 @@
 mcf(object, ...)
 
 \S4method{mcf}{formula}(object, data, subset, na.action,
-    variance = c("LawlessNadeau", "Poisson", "bootstrap", "CSV"),
-    logConfInt = FALSE, adjustRiskset = TRUE, level = 0.95,
-    control = list(), ...)
+    variance = c("LawlessNadeau", "Poisson", "bootstrap", "CSV", "none"),
+    logConfInt = FALSE, adjustRiskset = TRUE, level = 0.95, control = list(),
+    ...)
 
 \S4method{mcf}{rateReg}(object, newdata, groupName, groupLevels, level = 0.95,
     na.action, control = list(), ...)
@@ -39,10 +39,11 @@ setting of \code{\link[base]{options}}.  The "factory-fresh" default is
 \item{variance}{A character specifying the method for variance estimates.
 The available options are \code{"LawlessNadeau"} (the default) for
 Lawless and Nadeau (1995) method, \code{"Poisson"} for Poisson process
-method, \code{"bootstrap"} for bootstrap method, and \code{"CSV"} for
+method, \code{"bootstrap"} for bootstrap method, \code{"CSV"} for
 variance estimates of the corresponding cumulative sample mean function
-(CSM) by the cumulative sample variance method (Cook and Lawless, 2007).
-Partial matching on the names is allowed.}
+(CSM) by the cumulative sample variance method (Cook and Lawless, 2007),
+and \code{"none"} for no variance estimates.  Partial matching on the
+names is allowed.}
 
 \item{logConfInt}{A logical value. If \code{FALSE} (the default), the
 confidence interval are constructed based on the normality of the MCF
@@ -209,7 +210,7 @@ valveMcf1 <- mcf(Recur(Days, ID, No.) ~ 1,
 set.seed(123)
 valveMcf2 <- mcf(Recur(Days, ID, No.) ~ 1,
                  data = valveSeats, variance = "bootstrap",
-                 control = list(B = 1e3))
+                 control = list(B = 200))
 
 ## comparing the variance estimates from different methods
 library(ggplot2)

@@ -14,7 +14,7 @@ valveMcf1 <- mcf(Recur(Days, ID, No.) ~ 1,
 set.seed(123)
 valveMcf2 <- mcf(Recur(Days, ID, No.) ~ 1,
                  data = valveSeats, variance = "bootstrap",
-                 control = list(B = 1e3))
+                 control = list(B = 200))
 
 ## comparing the variance estimates from different methods
 library(ggplot2)
