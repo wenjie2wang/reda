@@ -54,11 +54,6 @@ NULL
 ##' This is a successor function of the deprecated function \code{Survr}.  See
 ##' the vignette by `vignette("reda-Recur")` for details.
 ##'
-##' @usage
-##'
-##' Recur(time, id, event, terminal, origin,
-##'       check = c("hard", "soft", "none"), ...)
-##'
 ##' @param time A numerical vector representing the time of reccurence event or
 ##'     censoring, or a list with elements named \code{"time1"} and
 ##'     \code{"time2"} for specifying the follow-up of recurrent events.  In the
@@ -271,10 +266,6 @@ Recur <- function(time, id, event, terminal, origin,
 ##' Perform several checks for recurrent event data and update object
 ##' attributions if some rows of the contained data (in the \code{.Data} slot)
 ##' have been removed by such as \code{na.action}.
-##'
-##' @usage
-##'
-##' check_Recur(x, check = c("hard", "soft", "none"))
 ##'
 ##' @inheritParams Recur
 ##' @param x An \code{Recur} object.

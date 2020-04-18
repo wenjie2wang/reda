@@ -8,8 +8,12 @@
 \usage{
 mcfDiff(mcf1, mcf2 = NULL, level = 0.95, ...)
 
-mcfDiff.test(mcf1, mcf2 = NULL,
-             testVariance = c("robust", "Poisson", "none"), ...)
+mcfDiff.test(
+  mcf1,
+  mcf2 = NULL,
+  testVariance = c("robust", "Poisson", "none"),
+  ...
+)
 }
 \arguments{
 \item{mcf1}{A \code{mcf.formula} object representing the MCF for one or two

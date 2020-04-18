@@ -30,10 +30,6 @@ $(tar): $(objects)
 	@Rscript -e "library(methods);" \
 	-e "Rcpp::compileAttributes()" \
 	-e "devtools::document();"
-	@$(RM) -rf .man-oxygen
-	@cp -r man .man-roxygen
-	@Rscript -e "library(methods);" \
-	-e "source('misc/after-roxygen.R', echo = FALSE);"
 	@$(MAKE) updateTimestamp
 	R CMD build .
 

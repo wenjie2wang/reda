@@ -4,8 +4,15 @@
 \alias{Recur}
 \title{Formula Response for Recurrent Event Data}
 \usage{
-Recur(time, id, event, terminal, origin,
-      check = c("hard", "soft", "none"), ...)
+Recur(
+  time,
+  id,
+  event,
+  terminal,
+  origin,
+  check = c("hard", "soft", "none"),
+  ...
+)
 }
 \arguments{
 \item{time}{A numerical vector representing the time of reccurence event or

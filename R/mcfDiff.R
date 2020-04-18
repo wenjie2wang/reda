@@ -60,9 +60,6 @@ NULL
 ##' @aliases mcfDiff
 ##' @aliases -,mcf.formula,mcf.formula-method
 ##'
-##' @usage
-##' mcfDiff(mcf1, mcf2 = NULL, level = 0.95, ...)
-##'
 ##' @param mcf1 A \code{mcf.formula} object representing the MCF for one or two
 ##'     groups.
 ##' @param mcf2 An optional second \code{mcf.formula} object or \code{NULL}.
@@ -233,10 +230,6 @@ setMethod(
 
 ##' @rdname mcfDiff
 ##' @aliases mcfDiff.test
-##'
-##' @usage
-##' mcfDiff.test(mcf1, mcf2 = NULL,
-##'              testVariance = c("robust", "Poisson", "none"), ...)
 ##'
 ##' @param testVariance A character string specifying the method for computing
 ##'     the variance estimate for the pseudo-score test statistic proposed by

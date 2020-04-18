@@ -76,11 +76,6 @@ NULL
 ##'         from this function.
 ##' }
 ##'
-##' @usage
-##' rateReg(formula, data, subset, df = NULL, knots = NULL,
-##'         degree = 0L, na.action, spline = c("bSplines", "mSplines"),
-##'         start = list(), control = list(), contrasts = NULL, ...)
-##'
 ##' @param formula \code{Recur} object produced by function \code{\link{Recur}}.
 ##'     The terminal events and risk-free episodes specified in \code{Recur}
 ##'     will be ignored since the model does not support them.

@@ -4,9 +4,20 @@
 \alias{rateReg}
 \title{Recurrent Events Regression Based on Counts and Rate Function}
 \usage{
-rateReg(formula, data, subset, df = NULL, knots = NULL,
-        degree = 0L, na.action, spline = c("bSplines", "mSplines"),
-        start = list(), control = list(), contrasts = NULL, ...)
+rateReg(
+  formula,
+  data,
+  subset,
+  df = NULL,
+  knots = NULL,
+  degree = 0L,
+  na.action,
+  spline = c("bSplines", "mSplines"),
+  start = list(),
+  control = list(),
+  contrasts = NULL,
+  ...
+)
 }
 \arguments{
 \item{formula}{\code{Recur} object produced by function \code{\link{Recur}}.

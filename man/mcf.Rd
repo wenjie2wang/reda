@@ -8,13 +8,29 @@
 \usage{
 mcf(object, ...)
 
-\S4method{mcf}{formula}(object, data, subset, na.action,
-    variance = c("LawlessNadeau", "Poisson", "bootstrap", "CSV", "none"),
-    logConfInt = FALSE, adjustRiskset = TRUE, level = 0.95, control = list(),
-    ...)
+\S4method{mcf}{formula}(
+  object,
+  data,
+  subset,
+  na.action,
+  variance = c("LawlessNadeau", "Poisson", "bootstrap", "CSV", "none"),
+  logConfInt = FALSE,
+  adjustRiskset = TRUE,
+  level = 0.95,
+  control = list(),
+  ...
+)
 
-\S4method{mcf}{rateReg}(object, newdata, groupName, groupLevels, level = 0.95,
-    na.action, control = list(), ...)
+\S4method{mcf}{rateReg}(
+  object,
+  newdata,
+  groupName,
+  groupLevels,
+  level = 0.95,
+  na.action,
+  control = list(),
+  ...
+)
 }
 \arguments{
 \item{object}{An object used to dispatch a method.}

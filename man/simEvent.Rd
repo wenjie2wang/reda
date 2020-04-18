@@ -5,14 +5,23 @@
 \alias{simEventData}
 \title{Simulated Survival times or Recurrent Events}
 \usage{
-simEvent(z = 0, zCoef = 1, rho = 1, rhoCoef = 1, origin = 0,
-         endTime = 3, frailty = 1, recurrent = TRUE,
-         interarrival = "rexp",
-         relativeRisk = c("exponential", "linear", "excess", "none"),
-         method = c("thinning", "inversion"), arguments = list(), ...)
+simEvent(
+  z = 0,
+  zCoef = 1,
+  rho = 1,
+  rhoCoef = 1,
+  origin = 0,
+  endTime = 3,
+  frailty = 1,
+  recurrent = TRUE,
+  interarrival = "rexp",
+  relativeRisk = c("exponential", "linear", "excess", "none"),
+  method = c("thinning", "inversion"),
+  arguments = list(),
+  ...
+)
 
-simEventData(nProcess, z = 0, origin = 0, endTime = 3, frailty = 1,
-             ...)
+simEventData(nProcess = 1, z = 0, origin = 0, endTime = 3, frailty = 1, ...)
 }
 \arguments{
 \item{z}{Time-invariant or time-varying covariates. The default value is
