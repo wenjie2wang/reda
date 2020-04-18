@@ -16,6 +16,10 @@ test_mcf <- mcf(Recur(Days, ID, No.) ~ group_,
                 control = list(B = 30))
 expect_equal(nrow(valveSeats) - nrow(test_mcf@data), 1L)
 
+## point estimates only without se and ci estimates
+mcf_res1 <- mcf(Recur(time, ID, event) ~ 1, data = simuDat, variance = "none")
+expect_equivalent(rep(NA_real_, nrow(mcf_res1@MCF)), mcf_res1@MCF$se)
+
 ## test bootstrap variance
 expect_equivalent(class(
     mcf(Recur(Days, ID, No.) ~ group_, valveSeats,
