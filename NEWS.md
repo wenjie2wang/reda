@@ -1,13 +1,26 @@
+# reda 0.5.1
+
+## New features
+
+* Added a new option `variance = "none"` to return sample MCF estimates without
+  variance estimates.
+
+## Minor changes
+
+* Removed titles in `plot()` method for `mcf` objects for a more minimal output
+  by default.
+
+
 # reda 0.5.0
 
 ## New features
 
-* Add function `Recur` as a successor or function `Survr` for model formula
-  response.
+* Added function `Recur()` as a successor or function `Survr()` for model
+  formula response.
 
-* Added a new package vignette introducing the function `Recur`.
+* Added a new package vignette introducing the function `Recur()`.
 
-* Added a new argument `adjustRiskset` to the method `mcf.formula` for
+* Added a new argument `adjustRiskset` to the method `mcf.formula()` for
   specifying whether to adjust the size of risk set.  The cumulative sample mean
   function estimates will be computed by setting `adjustRiskset = FALSE`.
 

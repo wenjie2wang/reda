@@ -60,7 +60,7 @@ FITNESS FOR A PARTICULAR PURPOSE.
 
 
 [r-pkg-badge]: https://www.r-pkg.org/badges/version/reda
-[cranlog-badge]: https://cranlogs.r-pkg.org/badges/splines2
+[cranlog-badge]: https://cranlogs.r-pkg.org/badges/reda
 [cran-url]: https://CRAN.R-project.org/package=reda
 [travis]: https://travis-ci.org/wenjie2wang/reda
 [travis-master]: https://travis-ci.org/wenjie2wang/reda.svg?branch=master
