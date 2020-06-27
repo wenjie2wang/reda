@@ -125,10 +125,10 @@ setMethod(
             ## caution: this value may vary if mcf-formula method changes
             numColMcf <- 7L
             desDat <- MCFdat[, - seq_len(numColMcf), drop = FALSE]
-            groupName <- paste(colnames(desDat), collapse = "&")
+            groupName <- paste(colnames(desDat), collapse = " & ")
             ## keep order for factor variables
             desDat <- desDat[do.call(order, as.list(desDat)), , drop = FALSE]
-            desVec <- do.call(paste, c(as.list(desDat), sep = "&"))
+            desVec <- do.call(paste, c(as.list(desDat), sep = " & "))
             desLevs <- unique(desVec)
             MCFdat$design <- factor(desVec, levels = desLevs)
             nDesign <- length(desLevs)
@@ -196,10 +196,7 @@ setMethod(
                               linetype = "3313")
             }
         }
-        p <- p + ylab("MCF") + ggtitle("Sample Mean Cumulative Function")
-        ## centered alignment
-        p <- p + theme(plot.title = element_text(hjust = 0.5))
-        p
+        p + ylab("MCF Estimates")
     })
 
 
@@ -264,10 +261,7 @@ setMethod(
                               linetype = "3313")
             }
         }
-        p <- p + ylab("MCF") + ggtitle("Estimated Mean Cumulative Function")
-        ## centered alignment
-        p <- p + theme(plot.title = element_text(hjust = 0.5))
-        p
+        p + ylab("MCF Estimates")
     })
 
 
@@ -295,11 +289,7 @@ setMethod(
                 geom_line(mapping = aes(x = time, y = upper),
                           linetype = "3313", color = col)
         }
-        p <- p + ylab("Hazard Rate") +
-            ggtitle("Estimated Baseline Rate Function")
-        ## centered alignment
-        p <- p + theme(plot.title = element_text(hjust = 0.5))
-        p
+        p + ylab("Baseline Hazard Rate Estimates")
     })
 
 
@@ -340,7 +330,7 @@ setMethod(
                 geom_step(mapping = aes(x = time, y = upper),
                           linetype = "3313", color = col)
         }
-        p <- p + ylab("MCF difference")
+        p <- p + ylab("MCF Difference")
         p
     })
 
