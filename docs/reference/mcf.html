@@ -10,23 +10,27 @@
 
 
 <!-- jquery -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
 <!-- Bootstrap -->
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha256-916EbMg70RQy9LHiGkXzG8hSg9EdNy97GazNG/aiY1w=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous" />
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script>
+
+<!-- bootstrap-toc -->
+<link rel="stylesheet" href="../bootstrap-toc.css">
+<script src="../bootstrap-toc.js"></script>
 
 <!-- Font Awesome icons -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.7.1/css/all.min.css" integrity="sha256-nAmazAk6vS34Xqo0BSrTb+abbtFlgsFK7NKSi6o7Y78=" crossorigin="anonymous" />
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.7.1/css/v4-shims.min.css" integrity="sha256-6qHlizsOWFskGlwVOKuns+D1nB6ssZrHQrNj1wGplHc=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous" />
 
 <!-- clipboard.js -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.4/clipboard.min.js" integrity="sha256-FiZwavyI2V6+EXO1U+xzLG3IKldpiTFf3153ea9zikQ=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script>
 
 <!-- headroom.js -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.9.4/headroom.min.js" integrity="sha256-DJFC1kqIhelURkuza0AvYal5RxMtpzLjFhsnVIeuk+U=" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.9.4/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script>
 
 <!-- pkgdown -->
 <link href="../pkgdown.css" rel="stylesheet">
@@ -40,7 +44,6 @@
 estimates from a fitted model or returns the nonparametric MCF estimates (by
 Nelson-Aalen estimator or Cook-Lawless cumulative sample mean estimator)
 from the sample data." />
-<meta name="twitter:card" content="summary" />
 
 
 
@@ -58,7 +61,7 @@ from the sample data." />
 
   </head>
 
-  <body>
+  <body data-spy="scroll" data-target="#toc">
     <div class="container template-reference-topic">
       <header>
       <div class="navbar navbar-default navbar-fixed-top" role="navigation">
@@ -72,7 +75,7 @@ from the sample data." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">reda</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.5.1.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.5.1</span>
       </span>
     </div>
 
@@ -111,7 +114,7 @@ from the sample data." />
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li>
-  <a href="https://github.com/wenjie2wang/reda">
+  <a href="https://github.com/wenjie2wang/reda/">
     <span class="fab fa fab fa-github fa-lg"></span>
      
   </a>
@@ -144,14 +147,30 @@ from the sample data.</p>
     <pre class="usage"><span class='fu'>mcf</span>(<span class='no'>object</span>, <span class='no'>...</span>)
 
 <span class='co'># S4 method for formula</span>
-<span class='fu'>mcf</span>(<span class='no'>object</span>, <span class='no'>data</span>, <span class='no'>subset</span>, <span class='no'>na.action</span>,
-    <span class='kw'>variance</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"LawlessNadeau"</span>, <span class='st'>"Poisson"</span>, <span class='st'>"bootstrap"</span>, <span class='st'>"CSV"</span>),
-    <span class='kw'>logConfInt</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>adjustRiskset</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>level</span> <span class='kw'>=</span> <span class='fl'>0.95</span>,
-    <span class='kw'>control</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(), <span class='no'>...</span>)
+<span class='fu'>mcf</span>(
+  <span class='no'>object</span>,
+  <span class='no'>data</span>,
+  <span class='no'>subset</span>,
+  <span class='no'>na.action</span>,
+  <span class='kw'>variance</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"LawlessNadeau"</span>, <span class='st'>"Poisson"</span>, <span class='st'>"bootstrap"</span>, <span class='st'>"CSV"</span>, <span class='st'>"none"</span>),
+  <span class='kw'>logConfInt</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
+  <span class='kw'>adjustRiskset</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
+  <span class='kw'>level</span> <span class='kw'>=</span> <span class='fl'>0.95</span>,
+  <span class='kw'>control</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(),
+  <span class='no'>...</span>
+)
 
 <span class='co'># S4 method for rateReg</span>
-<span class='fu'>mcf</span>(<span class='no'>object</span>, <span class='no'>newdata</span>, <span class='no'>groupName</span>, <span class='no'>groupLevels</span>, <span class='kw'>level</span> <span class='kw'>=</span> <span class='fl'>0.95</span>,
-    <span class='no'>na.action</span>, <span class='kw'>control</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(), <span class='no'>...</span>)</pre>
+<span class='fu'>mcf</span>(
+  <span class='no'>object</span>,
+  <span class='no'>newdata</span>,
+  <span class='no'>groupName</span>,
+  <span class='no'>groupLevels</span>,
+  <span class='kw'>level</span> <span class='kw'>=</span> <span class='fl'>0.95</span>,
+  <span class='no'>na.action</span>,
+  <span class='kw'>control</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(),
+  <span class='no'>...</span>
+)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -180,20 +199,21 @@ used in the fitting process.</p></td>
       <th>na.action</th>
       <td><p>A function that indicates what should the procedure do if
 the data contains <code>NA</code>s.  The default is set by the na.action
-setting of <code><a href='https://rdrr.io/r/base/options.html'>options</a></code>.  The "factory-fresh" default is
-<code><a href='https://rdrr.io/r/stats/na.fail.html'>na.omit</a></code>.  Other possible values inlcude
-<code><a href='https://rdrr.io/r/stats/na.fail.html'>na.fail</a></code>, <code><a href='https://rdrr.io/r/stats/na.fail.html'>na.exclude</a></code>, and
-<code><a href='https://rdrr.io/r/stats/na.fail.html'>na.pass</a></code>.  <code><a href='https://rdrr.io/r/utils/help.html'>help(na.fail)</a></code> for details.</p></td>
+setting of <code>options</code>.  The "factory-fresh" default is
+<code>na.omit</code>.  Other possible values inlcude
+<code>na.fail</code>, <code>na.exclude</code>, and <code>na.pass</code>.
+<code><a href='https://rdrr.io/r/stats/na.fail.html'>help(na.fail)</a></code> for details.</p></td>
     </tr>
     <tr>
       <th>variance</th>
       <td><p>A character specifying the method for variance estimates.
 The available options are <code>"LawlessNadeau"</code> (the default) for
 Lawless and Nadeau (1995) method, <code>"Poisson"</code> for Poisson process
-method, <code>"bootstrap"</code> for bootstrap method, and <code>"CSV"</code> for
+method, <code>"bootstrap"</code> for bootstrap method, <code>"CSV"</code> for
 variance estimates of the corresponding cumulative sample mean function
-(CSM) by the cumulative sample variance method (Cook and Lawless, 2007).
-Partial matching on the names is allowed.</p></td>
+(CSM) by the cumulative sample variance method (Cook and Lawless, 2007),
+and <code>"none"</code> for no variance estimates.  Partial matching on the
+names is allowed.</p></td>
     </tr>
     <tr>
       <th>logConfInt</th>
@@ -231,7 +251,7 @@ required. The default value is 0.95.</p></td>
             right boundary knots (for <code>rateReg</code> object).</p></li>
 </ul><p>The option <code>length.out</code>, <code>from</code>, <code>to</code> will be ignored if
     <code>grid</code> is specified directly. Otherwise, the grid will be generated
-    by function <code><a href='https://rdrr.io/r/base/seq.html'>seq.int</a></code> with specified <code>from</code>,
+    by function <code>seq.int</code> with specified <code>from</code>,
     <code>to</code> and <code>length.out</code>.</p>
 <p>For formula method, the available named elements are given as follows:</p><ul>
 <li><p><code>B</code>: The number of bootstrap replicates for using
@@ -366,7 +386,7 @@ Repairs, Disease Recurrences, and Other Applications</em> (Vol. 10). SIAM.</p>
 <span class='co'>## Example 1. valve-seat data</span>
 <span class='co'>## the default variance estimates by Lawless and Nadeau (1995) method</span>
 <span class='no'>valveMcf0</span> <span class='kw'>&lt;-</span> <span class='fu'>mcf</span>(<span class='fu'><a href='Recur.html'>Recur</a></span>(<span class='no'>Days</span>, <span class='no'>ID</span>, <span class='no'>No.</span>) ~ <span class='fl'>1</span>, <span class='kw'>data</span> <span class='kw'>=</span> <span class='no'>valveSeats</span>)
-<span class='fu'><a href='https://rdrr.io/r/graphics/plot.html'>plot</a></span>(<span class='no'>valveMcf0</span>, <span class='kw'>conf.int</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>mark.time</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>addOrigin</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>) +
+<span class='fu'><a href='https://rdrr.io/r/base/plot.html'>plot</a></span>(<span class='no'>valveMcf0</span>, <span class='kw'>conf.int</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>mark.time</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>addOrigin</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>) +
     <span class='kw pkg'>ggplot2</span><span class='kw ns'>::</span><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/labs.html'>xlab</a></span>(<span class='st'>"Days"</span>) + <span class='kw pkg'>ggplot2</span><span class='kw ns'>::</span><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/ggtheme.html'>theme_bw</a></span>()</div><div class='img'><img src='mcf-1.png' alt='' width='700' height='433' /></div><div class='input'>
 <span class='co'>## variance estimates following Poisson process model</span>
 <span class='no'>valveMcf1</span> <span class='kw'>&lt;-</span> <span class='fu'>mcf</span>(<span class='fu'><a href='Recur.html'>Recur</a></span>(<span class='no'>Days</span>, <span class='no'>ID</span>, <span class='no'>No.</span>) ~ <span class='fl'>1</span>,
@@ -375,7 +395,7 @@ Repairs, Disease Recurrences, and Other Applications</em> (Vol. 10). SIAM.</p>
 <span class='fu'><a href='https://rdrr.io/r/base/Random.html'>set.seed</a></span>(<span class='fl'>123</span>)
 <span class='no'>valveMcf2</span> <span class='kw'>&lt;-</span> <span class='fu'>mcf</span>(<span class='fu'><a href='Recur.html'>Recur</a></span>(<span class='no'>Days</span>, <span class='no'>ID</span>, <span class='no'>No.</span>) ~ <span class='fl'>1</span>,
                  <span class='kw'>data</span> <span class='kw'>=</span> <span class='no'>valveSeats</span>, <span class='kw'>variance</span> <span class='kw'>=</span> <span class='st'>"bootstrap"</span>,
-                 <span class='kw'>control</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(<span class='kw'>B</span> <span class='kw'>=</span> <span class='fl'>1e3</span>))
+                 <span class='kw'>control</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(<span class='kw'>B</span> <span class='kw'>=</span> <span class='fl'>200</span>))
 
 <span class='co'>## comparing the variance estimates from different methods</span>
 <span class='fu'><a href='https://rdrr.io/r/base/library.html'>library</a></span>(<span class='no'>ggplot2</span>)
@@ -395,7 +415,7 @@ Repairs, Disease Recurrences, and Other Applications</em> (Vol. 10). SIAM.</p>
 <span class='co'>## Example 2. the simulated data</span>
 <span class='no'>simuMcf</span> <span class='kw'>&lt;-</span> <span class='fu'>mcf</span>(<span class='fu'><a href='Recur.html'>Recur</a></span>(<span class='no'>time</span>, <span class='no'>ID</span>, <span class='no'>event</span>) ~ <span class='no'>group</span> + <span class='no'>gender</span>,
                <span class='kw'>data</span> <span class='kw'>=</span> <span class='no'>simuDat</span>, <span class='no'>ID</span> <span class='kw'>%in%</span> <span class='fl'>1</span> : <span class='fl'>50</span>)
-<span class='fu'><a href='https://rdrr.io/r/graphics/plot.html'>plot</a></span>(<span class='no'>simuMcf</span>, <span class='kw'>conf.int</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>lty</span> <span class='kw'>=</span> <span class='fl'>1</span> : <span class='fl'>4</span>,
+<span class='fu'><a href='https://rdrr.io/r/base/plot.html'>plot</a></span>(<span class='no'>simuMcf</span>, <span class='kw'>conf.int</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>lty</span> <span class='kw'>=</span> <span class='fl'>1</span> : <span class='fl'>4</span>,
      <span class='kw'>legendName</span> <span class='kw'>=</span> <span class='st'>"Treatment &amp; Gender"</span>)</div><div class='img'><img src='mcf-4.png' alt='' width='700' height='433' /></div><div class='input'>
 <span class='co'>### estimate MCF difference between two groups</span>
 <span class='co'>## one sample MCF object of two groups</span>
@@ -410,7 +430,7 @@ Repairs, Disease Recurrences, and Other Applications</em> (Vol. 10). SIAM.</p>
 #&gt; 
 #&gt; Variance Estimator: robust </div><div class='input'><span class='co'>## difference estimates over time</span>
 <span class='no'>mcf0_diff</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='mcfDiff.html'>mcfDiff</a></span>(<span class='no'>mcf0</span>, <span class='kw'>testVariance</span> <span class='kw'>=</span> <span class='st'>"none"</span>)
-<span class='fu'><a href='https://rdrr.io/r/graphics/plot.html'>plot</a></span>(<span class='no'>mcf0_diff</span>)</div><div class='img'><img src='mcf-5.png' alt='' width='700' height='433' /></div><div class='input'>
+<span class='fu'><a href='https://rdrr.io/r/base/plot.html'>plot</a></span>(<span class='no'>mcf0_diff</span>)</div><div class='img'><img src='mcf-5.png' alt='' width='700' height='433' /></div><div class='input'>
 <span class='co'>## or explicitly ask for the difference of two sample MCF</span>
 <span class='no'>mcf1</span> <span class='kw'>&lt;-</span> <span class='fu'>mcf</span>(<span class='fu'><a href='Recur.html'>Recur</a></span>(<span class='no'>time</span>, <span class='no'>ID</span>, <span class='no'>event</span>) ~ <span class='fl'>1</span>, <span class='kw'>data</span> <span class='kw'>=</span> <span class='no'>simuDat</span>,
             <span class='kw'>subset</span> <span class='kw'>=</span> <span class='no'>group</span> <span class='kw'>%in%</span> <span class='st'>"Contr"</span>)
@@ -430,23 +450,15 @@ Repairs, Disease Recurrences, and Other Applications</em> (Vol. 10). SIAM.</p>
 #&gt; ---
 #&gt; Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 #&gt; 
-#&gt; Variance Estimator: robust </div><div class='input'><span class='fu'><a href='https://rdrr.io/r/graphics/plot.html'>plot</a></span>(<span class='no'>mcf12_diff1</span>)</div><div class='img'><img src='mcf-6.png' alt='' width='700' height='433' /></div><div class='input'>
+#&gt; Variance Estimator: robust </div><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/plot.html'>plot</a></span>(<span class='no'>mcf12_diff1</span>)</div><div class='img'><img src='mcf-6.png' alt='' width='700' height='433' /></div><div class='input'>
 ### For estimated MCF from a fitted model,
 ### see examples given in function rateReg.
 </div></pre>
   </div>
-  <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
-    <h2>Contents</h2>
-    <ul class="nav nav-pills nav-stacked">
-      <li><a href="#arguments">Arguments</a></li>
-      <li><a href="#value">Value</a></li>
-      <li><a href="#details">Details</a></li>
-      <li><a href="#functions">Functions</a></li>
-      <li><a href="#references">References</a></li>
-      <li><a href="#see-also">See also</a></li>
-      <li><a href="#examples">Examples</a></li>
-    </ul>
-
+  <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
+    <nav id="toc" data-toggle="toc" class="sticky-top">
+      <h2 data-toc-skip>Contents</h2>
+    </nav>
   </div>
 </div>
 
@@ -457,7 +469,7 @@ Repairs, Disease Recurrences, and Other Applications</em> (Vol. 10). SIAM.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.4.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
 </div>
 
       </footer>
