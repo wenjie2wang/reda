@@ -47,10 +47,10 @@ used in the fitting process.}
 
 \item{na.action}{A function that indicates what should the procedure do if
 the data contains \code{NA}s.  The default is set by the na.action
-setting of \code{\link[base]{options}}.  The "factory-fresh" default is
-\code{\link[stats]{na.omit}}.  Other possible values inlcude
-\code{\link[stats]{na.fail}}, \code{\link[stats]{na.exclude}}, and
-\code{\link[stats]{na.pass}}.  \code{help(na.fail)} for details.}
+setting of \code{options}.  The "factory-fresh" default is
+\code{na.omit}.  Other possible values inlcude
+\code{na.fail}, \code{na.exclude}, and \code{na.pass}.
+\code{help(na.fail)} for details.}
 
 \item{variance}{A character specifying the method for variance estimates.
 The available options are \code{"LawlessNadeau"} (the default) for
@@ -91,7 +91,7 @@ required. The default value is 0.95.}
     }
     The option \code{length.out}, \code{from}, \code{to} will be ignored if
     \code{grid} is specified directly. Otherwise, the grid will be generated
-    by function \code{\link[base]{seq.int}} with specified \code{from},
+    by function \code{seq.int} with specified \code{from},
     \code{to} and \code{length.out}.
 
     For formula method, the available named elements are given as follows:

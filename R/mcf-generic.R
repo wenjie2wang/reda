@@ -57,10 +57,10 @@ NULL
 ##' @param object An object used to dispatch a method.
 ##' @param na.action A function that indicates what should the procedure do if
 ##'     the data contains \code{NA}s.  The default is set by the na.action
-##'     setting of \code{\link[base]{options}}.  The "factory-fresh" default is
-##'     \code{\link[stats]{na.omit}}.  Other possible values inlcude
-##'     \code{\link[stats]{na.fail}}, \code{\link[stats]{na.exclude}}, and
-##'     \code{\link[stats]{na.pass}}.  \code{help(na.fail)} for details.
+##'     setting of \code{options}.  The "factory-fresh" default is
+##'     \code{na.omit}.  Other possible values inlcude
+##'     \code{na.fail}, \code{na.exclude}, and \code{na.pass}.
+##'     \code{help(na.fail)} for details.
 ##' @param level An optional numeric value indicating the confidence level
 ##'     required. The default value is 0.95.
 ##' @param control An optional named list specifying other options.  For
@@ -78,7 +78,7 @@ NULL
 ##'     }
 ##'     The option \code{length.out}, \code{from}, \code{to} will be ignored if
 ##'     \code{grid} is specified directly. Otherwise, the grid will be generated
-##'     by function \code{\link[base]{seq.int}} with specified \code{from},
+##'     by function \code{seq.int} with specified \code{from},
 ##'     \code{to} and \code{length.out}.
 ##'
 ##'     For formula method, the available named elements are given as follows:

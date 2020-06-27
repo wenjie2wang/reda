@@ -79,7 +79,7 @@ whether to generate recurrent event data or survival data.}
 
 \item{interarrival}{A function object for randomly generating (positive)
 interarrival time between two successive arrivals/events.  The default
-value is \code{"rexp"} (i.e., function \code{\link[stats]{rexp}}) for
+value is \code{"rexp"} (i.e., function \code{stats::rexp}) for
 generating interarrival times following exponential distribution, which
 leads to a Poisson process. If the assumption of exponential
 interarrival times cannot be justified, we may consider a renewal
