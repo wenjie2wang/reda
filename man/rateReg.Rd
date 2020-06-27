@@ -65,8 +65,7 @@ function.  See more in Section details.}
 matrices or character strings naming functions) to be used as
 replacement values for the contrasts replacement function and whose
 names are the names of columns of data containing factors.  See
-\code{contrasts.arg} of \code{\link[stats]{model.matrix.default}} for
-details.}
+\code{contrasts.arg} of \code{model.matrix.default} for details.}
 
 \item{...}{Other arguments for future usage.}
 }
