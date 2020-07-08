@@ -64,6 +64,6 @@ remotes::install_github("wenjie2wang/reda", upgrade = "never")
 [reda-intro]: https://wenjie-stat.me/reda/articles/reda-intro.html
 [reda-Recur]: https://wenjie-stat.me/reda/articles/reda-Recur.html
 [reda-simulate]: https://wenjie-stat.me/reda/articles/reda-simulate.html
-[gpl-url]: https://www.gnu.org/licenses/
+[gpl]: https://www.gnu.org/licenses/
 [codecov]: https://codecov.io/gh/wenjie2wang/reda
 [codecov-master]: https://codecov.io/gh/wenjie2wang/reda/branch/master/graph/badge.svg
