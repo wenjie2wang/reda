@@ -1,13 +1,19 @@
-#/bin/bash
+#!/bin/bash
 
 set -e
 
 ## run on wenjie's droplets
 pkg=$(grep "Package" DESCRIPTION | awk '{print $NF}')
 build_dir=$(pwd)
-target_dir=$HOME/wenjie/wenjie-stat.me/static/$pkg
+docs_repo=$HOME/wenjie/wenjie-stat.me
+target_dir=$docs_repo/static/$pkg
 tmp_log=.git_status.log
-cd $HOME/wenjie/wenjie-stat.me/
+
+## update docs by pkgdown
+make pkgdown
+
+# go to the repository for wenjie-stat.me
+cd $docs_repo
 git checkout -f
 git checkout master
 git pull origin master
