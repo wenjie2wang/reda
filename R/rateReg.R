@@ -170,7 +170,7 @@ NULL
 ##' @importFrom splines2 bSpline cSpline ibs iSpline mSpline
 ##'
 ##' @importFrom stats .getXlevels constrOptim model.extract na.fail na.omit
-##'     na.exclude na.pass predict
+##'     na.exclude na.pass predict deriv
 ##'
 ##' @export
 rateReg <- function(formula, data, subset, df = NULL, knots = NULL, degree = 0L,
@@ -270,24 +270,24 @@ rateReg <- function(formula, data, subset, df = NULL, knots = NULL, degree = 0L,
 
     ## generate knots if knots is unspecified
     if (spline == "bSplines") {
-        ## B-spline
+        ## for B-spline
         iMat <- splines2::ibs(x = dat$time, df = df, knots = knots,
                               degree = degree, intercept = TRUE,
                               Boundary.knots = Boundary.knots)
-        bMat <- attr(iMat, "bsMat")
     } else {
-        ## M-spline
+        ## for M-spline
         iMat <- splines2::iSpline(x = dat$time, df = df, knots = knots,
                                   degree = degree, intercept = TRUE,
                                   Boundary.knots = Boundary.knots)
-        bMat <- attr(iMat, "msMat")
     }
+    bMat <- deriv(iMat)
     iMat0 <- predict(iMat, dat$origin)
     iMat <- iMat - iMat0
 
     ## update df, knots, degree, and Boundary.knots
     knots <- as.numeric(attr(iMat, "knots"))
-    df <- (degree <- attr(iMat, "degree")) + length(knots) + 1L
+    degree <- as.integer(attr(iMat, "degree"))
+    df <- degree + length(knots) + 1L
     Boundary.knots <- attr(iMat, "Boundary.knots")
     ## name each basis for alpha output
     alphaName <- nameBases(df = df, spline = spline)
