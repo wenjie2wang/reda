@@ -1,3 +1,11 @@
+# reda 0.5.2
+
+## Minor changes
+
+* Used `deriv` method from **splines2** objects for derivatives instead of
+  extraction of attributions.
+
+
 # reda 0.5.1
 
 ## New features
