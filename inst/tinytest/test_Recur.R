@@ -51,7 +51,7 @@ expect_equal(ex3@rev_ord, 1:3)
 expect_equal(ex3@check, "hard")
 
 ex4 <- Recur(list(time1 = time1, time2 = time2), id = c("A1", "A1", "A2"))
-expect_equal(ex3, ex4)
+expect_equivalent(ex3, ex4)
 
 ## with `origin` and `terminal`
 ex5 <- Recur(3:5, origin = 1, terminal = 1)
@@ -70,7 +70,7 @@ expect_equal(ex5@check, "hard")
 ex6 <- Recur(3:5, id = c("A1", "A1", "A2"), origin = 1:2, terminal = c(0, 1))
 ex7 <- Recur(3:5, id = c("A1", "A1", "A2"),
              origin = c(1, 1, 2), terminal = c(0, 0, 1))
-expect_equal(ex6, ex7)
+expect_equivalent(ex6, ex7)
 
 ## error due to inappropriate length
 expect_error(Recur(1:10, origin = c(1, 2)))

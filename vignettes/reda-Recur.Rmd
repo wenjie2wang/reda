@@ -63,6 +63,7 @@ response for recurrent event data.  The `Recur` class object mainly contains a
 numerical matrix object (in the `.Data` slot) that serves as a model response
 matrix.  The other slots are
 
+- `call`: a function call producing the object.
 - `ID`: a factor storing the original subject's ID, which originally can be a
   character vector, a numeric vector, or a factor).  It is needed to pinpoint
   data issues for particular subjects with their original ID's.
@@ -138,7 +139,7 @@ Internally, the function `%to%` returns a list with element named `"time1"` and
 
 ```{r ex-4}
 ex4 <- Recur(list(time1 = left, time2 = right), id = c("A1", "A1", "A2"))
-stopifnot(all.equal(ex3, ex4))
+stopifnot(all.equal(ex3, ex4, check.attributes = FALSE))
 ```
 
 
@@ -161,7 +162,7 @@ head(ex6)
 ```{r ex-7}
 ex7 <- Recur(3:5, id = c("A1", "A1", "A2"),
              origin = c(1, 1, 2), terminal = c(0, 0, 1))
-stopifnot(all.equal(ex6, ex7))
+stopifnot(all.equal(ex6, ex7, check.attributes = FALSE))
 ```
 
 - An error message will be thrown out if the length is inappropriate.
@@ -271,6 +272,3 @@ options(digits = 10)
 Recur(pi, 1)
 options(op) # reset (all) initial options
 ```
-
-
-
