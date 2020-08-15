@@ -115,6 +115,19 @@ setMethod(f = "show", signature = "summary.rateReg",
               invisible(object)
           })
 
+#' @export
+setMethod(f = "show", signature = "summary.Recur",
+          definition = function(object) { 
+              cat("Call: \n")
+              print(object@call)
+              cat("Sample size:                                   ", object@sampleSize, "\n")
+              cat("Number of recurrent event observed:            ", object@reSize, "\n")
+              cat("Average number of recurrent event per subject: ", round(object@avgReSize, 3), "\n")
+              cat("Proportion of subjects with a terminal event:  ", round(object@propTem, 3), "\n")
+              if (object@medTem > 0)
+                  cat("Median time-to-event:                          ", round(object@medTem, 3), "\n")
+              invisible(object)
+          })
 
 ##' @rdname show-method
 ##' @aliases show,mcf.formula-method

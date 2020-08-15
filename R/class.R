@@ -81,6 +81,7 @@ setClass(
     "Recur",
     contains = "matrix",
     slots = c(
+        Call = "call", 
         ID = "factor",
         ord = "integer",
         rev_ord = "integer",
@@ -208,6 +209,19 @@ setClass(
         TRUE
     }
 )
+
+#' @export
+setClass(
+    Class = "summary.Recur",
+    slots = c(
+        call = "call",
+        sampleSize = "numeric",
+        reSize = "numeric",
+        avgReSize = "numeric",
+        propTem = "numeric",
+        medTem = "numeric")
+)
+
 
 
 ##' An S4 Class Representing Sample MCF

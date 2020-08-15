@@ -90,3 +90,29 @@ setMethod(f = "summary", signature = "rateReg",
               ## return
               results
           })
+
+
+
+#' @export
+setMethod(f = "summary", signature = "Recur",
+          definition = function(object, ...) {
+              Call <- object@call
+              n <- length(object@first_idx)
+              d0 <- object@.Data[object@.Data[,"event"] == 0,] 
+              y <- d0[,"time2"]
+              d <- d0[,"terminal"]
+              d <- d[order(y)]
+              y <- y[order(y)]
+              r <- n - rank(y, ties.method = "min") + 1
+              s <- cumprod(1 - (d / r)[!duplicated(y)])
+              medTem <- ifelse(min(s) > .5, 0, y[!duplicated(y)][which.max(s - .5 < 0)])
+              medTem <- ifelse(is.na(medTem), 0, medTem)
+              results <- new("summary.Recur",
+                             call = Call,
+                             sampleSize = n,
+                             reSize = sum(object@.Data[,"event"]),
+                             avgReSize = sum(object@.Data[,"event"]) / n,
+                             propTem = sum(object@.Data[,"terminal"]) / n,
+                             medTem = medTem)
+              results
+          })
