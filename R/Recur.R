@@ -245,8 +245,8 @@ Recur <- function(time, id, event, terminal, origin,
 
     ## create Recur object for checking
     out <- methods::new("Recur",
-                        call = match.call(),
                         .Data = sorted_mat[rev_ord, , drop = FALSE],
+                        call = match.call(),
                         ID = ID,
                         ord = ord,
                         rev_ord = rev_ord,

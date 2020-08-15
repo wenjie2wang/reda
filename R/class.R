@@ -56,6 +56,7 @@ setClass(
 ##'     \code{time2}: the end of time segements; \item \code{id}: Identificators
 ##'     of subjects; \item \code{event}: Event indicators; \item:
 ##'     \code{terminal}: Indicators of terminal events.}
+##' @slot call A function call producing the object.
 ##' @slot ID A charactrer vector for original identificators of subjects.
 ##' @slot ord An integer vector for increasingly ordering data by \code{id},
 ##'     \code{time2}, and \code{- event}.  Sorting is often done in the
@@ -81,7 +82,7 @@ setClass(
     "Recur",
     contains = "matrix",
     slots = c(
-        Call = "call", 
+        call = "call",
         ID = "factor",
         ord = "integer",
         rev_ord = "integer",
@@ -210,18 +211,31 @@ setClass(
     }
 )
 
-#' @export
+
+##' An S4 Class for Summarized Recur Object
+##'
+##' @slot call A function call.
+##' @slot sampleSize An integer representing the sample size (number of
+##'     subjects).
+##' @slot reSize An integer representing the number of recurrent events.
+##' @slot avgReSize A numeric value representing the average number of recurrent
+##'     events per subject.
+##' @slot propTem A numeric value representing the proportion of subjects having
+##'     terminal event.
+##' @slot medTem A numeric value for median survival time of the terminal
+##'     events.
+##'
+##' @export
 setClass(
     Class = "summary.Recur",
     slots = c(
         call = "call",
-        sampleSize = "numeric",
-        reSize = "numeric",
+        sampleSize = "integer",
+        reSize = "integer",
         avgReSize = "numeric",
         propTem = "numeric",
         medTem = "numeric")
 )
-
 
 
 ##' An S4 Class Representing Sample MCF

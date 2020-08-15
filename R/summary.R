@@ -92,27 +92,37 @@ setMethod(f = "summary", signature = "rateReg",
           })
 
 
-
-#' @export
+##' Summarize an \code{Recur} object
+##'
+##' @param object An \code{Recur} object.
+##' @param ... Other arguments not used.
+##'
+##' @return \code{summary.Recur} object.
+##'
+##' @export
 setMethod(f = "summary", signature = "Recur",
           definition = function(object, ...) {
               Call <- object@call
               n <- length(object@first_idx)
-              d0 <- object@.Data[object@.Data[,"event"] == 0,] 
-              y <- d0[,"time2"]
-              d <- d0[,"terminal"]
-              d <- d[order(y)]
-              y <- y[order(y)]
+              d0 <- object@.Data[object@.Data[, "event"] == 0, ]
+              y <- d0[, "time2"]
+              d <- d0[, "terminal"]
+              oy <- order(y)
+              d <- d[oy]
+              y <- y[oy]
               r <- n - rank(y, ties.method = "min") + 1
-              s <- cumprod(1 - (d / r)[!duplicated(y)])
-              medTem <- ifelse(min(s) > .5, 0, y[!duplicated(y)][which.max(s - .5 < 0)])
-              medTem <- ifelse(is.na(medTem), 0, medTem)
-              results <- new("summary.Recur",
-                             call = Call,
-                             sampleSize = n,
-                             reSize = sum(object@.Data[,"event"]),
-                             avgReSize = sum(object@.Data[,"event"]) / n,
-                             propTem = sum(object@.Data[,"terminal"]) / n,
-                             medTem = medTem)
-              results
+              is_first_y <- ! duplicated(y)
+              s <- cumprod(1 - (d / r)[is_first_y])
+              medTem <- if (s[length(s)] > .5) {
+                            NA_real_
+                        } else {
+                            as.numeric(y[is_first_y][which.max(s - .5 < 0)])
+                        }
+              new("summary.Recur",
+                  call = Call,
+                  sampleSize = as.integer(n),
+                  reSize = as.integer(sum(object@.Data[, "event"] > 0)),
+                  avgReSize = sum(object@.Data[, "event"]) / n,
+                  propTem = sum(object@.Data[, "terminal"]) / n,
+                  medTem = medTem)
           })
