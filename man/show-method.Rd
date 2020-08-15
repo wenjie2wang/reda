@@ -6,6 +6,7 @@
 \alias{show,rateReg-method}
 \alias{show,summary.rateReg-method}
 \alias{show,summaryRateReg-method}
+\alias{show,summary.Recur-method}
 \alias{show,mcf.formula-method}
 \alias{show,mcf.rateReg-method}
 \alias{show,simEvent-method}
@@ -18,6 +19,8 @@
 \S4method{show}{rateReg}(object)
 
 \S4method{show}{summary.rateReg}(object)
+
+\S4method{show}{summary.Recur}(object)
 
 \S4method{show}{mcf.formula}(object)
 

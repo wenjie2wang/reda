@@ -18,6 +18,8 @@ objects of this class.  See ``Slots'' for details.
 of subjects; \item \code{event}: Event indicators; \item:
 \code{terminal}: Indicators of terminal events.}}
 
+\item{\code{call}}{A function call producing the object.}
+
 \item{\code{ID}}{A charactrer vector for original identificators of subjects.}
 
 \item{\code{ord}}{An integer vector for increasingly ordering data by \code{id},
