@@ -1,10 +1,10 @@
 Package: reda
 Title: Recurrent Event Data Analysis
 Version: 0.5.3.9000
-Date: 2020-08-15
+Date: 2020-08-17
 Authors@R: c(
     person(given = "Wenjie", family = "Wang",
-           email = "wenjie.2.wang@uconn.edu",
+           email = "wang@wwenjie.org",
            role = c("aut", "cre"),
            comment = c(ORCID = "0000-0003-0363-3180")),
     person(given = "Haoda", family = "Fu", role = "aut"),

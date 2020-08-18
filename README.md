@@ -60,10 +60,10 @@ remotes::install_github("wenjie2wang/reda", upgrade = "never")
 [appveyor]: https://ci.appveyor.com/project/wenjie2wang/reda
 [appveyor-master]: https://ci.appveyor.com/api/projects/status/lul85310wb0ykj26/branch/master?svg=true
 [github-url]: https://github.com/wenjie2wang/reda
-[homepage]: https://wenjie-stat.me/reda/
-[reda-intro]: https://wenjie-stat.me/reda/articles/reda-intro.html
-[reda-Recur]: https://wenjie-stat.me/reda/articles/reda-Recur.html
-[reda-simulate]: https://wenjie-stat.me/reda/articles/reda-simulate.html
+[homepage]: https://wwenjie.org/reda/
+[reda-intro]: https://wwenjie.org/reda/articles/reda-intro.html
+[reda-Recur]: https://wwenjie.org/reda/articles/reda-Recur.html
+[reda-simulate]: https://wwenjie.org/reda/articles/reda-simulate.html
 [gpl]: https://www.gnu.org/licenses/
 [codecov]: https://codecov.io/gh/wenjie2wang/reda
 [codecov-master]: https://codecov.io/gh/wenjie2wang/reda/branch/master/graph/badge.svg
