@@ -88,7 +88,8 @@ setClass(
         rev_ord = "integer",
         first_idx = "integer",
         last_idx = "integer",
-        check = "character"
+        check = "character",
+        isDate = "logical"
     )
 )
 
