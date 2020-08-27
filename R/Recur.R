@@ -119,7 +119,7 @@ Recur <- function(time, id, event, terminal, origin,
     if (is.list(time)) {
         time1 <- process_time(time$time1)
         time2 <- process_time(time$time2)
-        time_class <- union(class(time1), class(time2))
+        time_class <- union(class(time$time1), class(time$time2))
     }
     nRec <- length(time2)
 
