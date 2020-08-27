@@ -75,6 +75,7 @@ setClass(
 ##' @slot check A character string indicating how the data checking is
 ##'     performed.  It just records the option that users specified on data
 ##'     checking.
+##' @slot time_class A character vector preserving the class(es) of input times.
 ##'
 ##' @seealso \code{\link{Recur}}
 ##' @export
@@ -89,7 +90,7 @@ setClass(
         first_idx = "integer",
         last_idx = "integer",
         check = "character",
-        isDate = "logical"
+        time_class = "character"
     )
 )
 

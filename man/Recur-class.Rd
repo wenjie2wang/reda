@@ -43,6 +43,8 @@ locating the terminal events.}
 \item{\code{check}}{A character string indicating how the data checking is
 performed.  It just records the option that users specified on data
 checking.}
+
+\item{\code{time_class}}{A character vector preserving the class(es) of input times.}
 }}
 
 \seealso{

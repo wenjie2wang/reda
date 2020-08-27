@@ -114,12 +114,12 @@ Recur <- function(time, id, event, terminal, origin,
     }
     time1 <- NULL
     time2 <- process_time(time)
-    isDate <- is(time, "Date")
+    time_class <- class(time)
     ## is time1 contained inside of a list of "time"
     if (is.list(time)) {
         time1 <- process_time(time$time1)
         time2 <- process_time(time$time2)
-        isDate <- is(time$time1, "Date") || is(time$time2, "Date")
+        time_class <- union(class(time1), class(time2))
     }
     nRec <- length(time2)
 
@@ -255,7 +255,7 @@ Recur <- function(time, id, event, terminal, origin,
                         first_idx = which(first_idx[rev_ord]),
                         last_idx = which(last_idx[rev_ord]),
                         check = check,
-                        isDate = isDate)
+                        time_class = time_class)
 
     ## perform optional checks
     check_Recur(out, check = check)
