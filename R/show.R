@@ -134,7 +134,7 @@ setMethod(f = "show", signature = "summary.Recur",
               cat("Proportion of subjects with a terminal event:  ",
                   round(object@propTem, dg), "\n")
               if (! is.na(object@medTem))
-                  cat("Median time-to-event:                          ",
+                  cat("Median time-to-terminal event:                 ",
                       round(object@medTem, dg), "\n")
               invisible(object)
           })
