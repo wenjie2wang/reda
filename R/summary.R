@@ -105,7 +105,7 @@ setMethod(f = "summary", signature = "Recur",
               Call <- object@call
               n <- length(object@first_idx)
               d0 <- object@.Data[object@.Data[, "event"] == 0, ]
-              y <- d0[, "time2"]
+              y <- d0[, "time2"] - d0[, "origin"]
               d <- d0[, "terminal"]
               oy <- order(y)
               d <- d[oy]
@@ -124,5 +124,6 @@ setMethod(f = "summary", signature = "Recur",
                   reSize = as.integer(sum(object@.Data[, "event"] > 0)),
                   avgReSize = sum(object@.Data[, "event"]) / n,
                   propTem = sum(object@.Data[, "terminal"]) / n,
+                  medFU = median(y),
                   medTem = medTem)
           })

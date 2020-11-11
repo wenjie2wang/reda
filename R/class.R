@@ -236,6 +236,7 @@ setClass(
         reSize = "integer",
         avgReSize = "numeric",
         propTem = "numeric",
+        medFU = "numeric",
         medTem = "numeric")
 )
 
