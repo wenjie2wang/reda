@@ -224,6 +224,7 @@ setClass(
 ##'     events per subject.
 ##' @slot propTem A numeric value representing the proportion of subjects having
 ##'     terminal event.
+##' @slot medFU A numeric value for median follow-up time.
 ##' @slot medTem A numeric value for median survival time of the terminal
 ##'     events.
 ##'

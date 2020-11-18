@@ -23,6 +23,8 @@ events per subject.}
 \item{\code{propTem}}{A numeric value representing the proportion of subjects having
 terminal event.}
 
+\item{\code{medFU}}{A numeric value for median follow-up time.}
+
 \item{\code{medTem}}{A numeric value for median survival time of the terminal
 events.}
 }}

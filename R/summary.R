@@ -99,6 +99,8 @@ setMethod(f = "summary", signature = "rateReg",
 ##'
 ##' @return \code{summary.Recur} object.
 ##'
+##' @importFrom stats median
+##'
 ##' @export
 setMethod(f = "summary", signature = "Recur",
           definition = function(object, ...) {
