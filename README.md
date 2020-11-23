@@ -1,9 +1,8 @@
 # reda
 
 [![CRAN_Status_Badge][r-pkg-badge]][cran-url]
-[![Build Status][travis-master]][travis]
-[![AppVeyor Build Status][appveyor-master]][appveyor]
-[![codecov][codecov-master]][codecov]
+[![Build Status][gha-icon]][gha-url]
+[![codecov][codecov-main]][codecov]
 
 ## Overview
 
@@ -17,7 +16,7 @@ The R package **reda** provides functions for
 - comparing two-sample recurrent event responses with the pseudo-score tests.
 
 
-## Installation
+## Installation of CRAN Version
 
 You can install the released version from [CRAN][cran-url].
 
@@ -25,26 +24,24 @@ You can install the released version from [CRAN][cran-url].
 install.packages("reda")
 ```
 
-
-## Getting Started
-
-[Online documentation][homepage] provides function documentations and includes
-package vignettes for
-- [exploring and modeling recurrent event data][reda-intro].
-- [introduction to formula response function Recur()][reda-Recur]
-- [simulating survival and recurrent event data][reda-simulate].
-
-
 ## Development
 
 The latest version of the package is under development at [GitHub][github-url].
-If it is able to pass the building check by Travis CI, you may consider
-installing it with the help of **remotes** by
+If it is able to pass the automated package checks, one may install it by
 
 ```R
 if (! require(remotes)) install.packages("remotes")
 remotes::install_github("wenjie2wang/reda", upgrade = "never")
 ```
+
+## Getting Started
+
+[Online documentation][homepage] provides function documentations and includes
+package vignettes for
+
+- [exploring and modeling recurrent event data][reda-intro].
+- [introduction to formula response function Recur()][reda-Recur]
+- [simulating survival and recurrent event data][reda-simulate].
 
 
 ## License
@@ -55,15 +52,13 @@ remotes::install_github("wenjie2wang/reda", upgrade = "never")
 [r-pkg-badge]: https://www.r-pkg.org/badges/version/reda
 [cranlog-badge]: https://cranlogs.r-pkg.org/badges/reda
 [cran-url]: https://CRAN.R-project.org/package=reda
-[travis]: https://travis-ci.org/wenjie2wang/reda
-[travis-master]: https://travis-ci.org/wenjie2wang/reda.svg?branch=master
-[appveyor]: https://ci.appveyor.com/project/wenjie2wang/reda
-[appveyor-master]: https://ci.appveyor.com/api/projects/status/lul85310wb0ykj26/branch/master?svg=true
 [github-url]: https://github.com/wenjie2wang/reda
+[gha-icon]: https://github.com/wenjie2wang/reda/workflows/R-CMD-check/badge.svg
+[gha-url]: https://github.com/wenjie2wang/reda/actions
+[codecov]: https://codecov.io/gh/wenjie2wang/reda
+[codecov-main]: https://codecov.io/gh/wenjie2wang/reda/branch/main/graph/badge.svg
 [homepage]: https://wwenjie.org/reda/
 [reda-intro]: https://wwenjie.org/reda/articles/reda-intro.html
 [reda-Recur]: https://wwenjie.org/reda/articles/reda-Recur.html
 [reda-simulate]: https://wwenjie.org/reda/articles/reda-simulate.html
 [gpl]: https://www.gnu.org/licenses/
-[codecov]: https://codecov.io/gh/wenjie2wang/reda
-[codecov-master]: https://codecov.io/gh/wenjie2wang/reda/branch/master/graph/badge.svg
