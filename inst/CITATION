@@ -7,7 +7,7 @@ bibentry(
     author = personList(as.person("Wenjie Wang"),
                         as.person("Haoda Fu"),
                         as.person("Jun Yan")),
-    year = "2020",
+    year = "2021",
     url = "https://github.com/wenjie2wang/reda",
     note = "{R} package version 0.5.3.9000"
 )
