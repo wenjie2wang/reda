@@ -63,12 +63,24 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// rcpp_factorize
+Rcpp::List rcpp_factorize(SEXP x);
+RcppExport SEXP _reda_rcpp_factorize(SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type x(xSEXP);
+    rcpp_result_gen = Rcpp::wrap(rcpp_factorize(x));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_reda_cpp_np_mcf", (DL_FUNC) &_reda_cpp_np_mcf, 10},
     {"_reda_rrisk_exponential", (DL_FUNC) &_reda_rrisk_exponential, 2},
     {"_reda_rrisk_linear", (DL_FUNC) &_reda_rrisk_linear, 2},
     {"_reda_rrisk_excess", (DL_FUNC) &_reda_rrisk_excess, 2},
+    {"_reda_rcpp_factorize", (DL_FUNC) &_reda_rcpp_factorize, 1},
     {NULL, NULL, 0}
 };
 

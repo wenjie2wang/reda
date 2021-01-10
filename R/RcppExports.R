@@ -17,3 +17,7 @@ rrisk_excess <- function(z, zCoef) {
     .Call('_reda_rrisk_excess', PACKAGE = 'reda', z, zCoef)
 }
 
+rcpp_factorize <- function(x) {
+    .Call('_reda_rcpp_factorize', PACKAGE = 'reda', x)
+}
+

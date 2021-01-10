@@ -57,7 +57,7 @@ setClass(
 ##'     of subjects; \item \code{event}: Event indicators; \item:
 ##'     \code{terminal}: Indicators of terminal events.}
 ##' @slot call A function call producing the object.
-##' @slot ID A charactrer vector for original identificators of subjects.
+##' @slot ID A character vector for unique original identificators of subjects.
 ##' @slot ord An integer vector for increasingly ordering data by \code{id},
 ##'     \code{time2}, and \code{- event}.  Sorting is often done in the
 ##'     model-fitting steps, where the indices stored in this slot can be used
@@ -84,7 +84,7 @@ setClass(
     contains = "matrix",
     slots = c(
         call = "call",
-        ID = "factor",
+        ID = "character",
         ord = "integer",
         rev_ord = "integer",
         first_idx = "integer",

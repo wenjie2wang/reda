@@ -146,8 +146,8 @@ is.rateReg <- function(x) {
 ## throw warnings if `...` is specified by mistake
 warn_dots <- function(...) {
     dotsList <- list(...)
-    .fun_name <- as.character(sys.call(- 1L)[[1L]])
     if (length(dotsList) > 0) {
+        .fun_name <- as.character(sys.call(- 1L)[[1L]])
         list_names <- names(dotsList)
         if (is.null(list_names)) {
             warning(wrapMessages(
