@@ -281,7 +281,7 @@ Recur <- function(time, id, event, terminal, origin,
 ##' @inheritParams Recur
 ##' @param x An \code{Recur} object.
 ##'
-##' @return An \code{Recur} object.
+##' @return An \code{Recur} object invisibly.
 ##' @export
 check_Recur <- function(x, check = c("hard", "soft", "none"))
 {
@@ -305,103 +305,101 @@ check_Recur <- function(x, check = c("hard", "soft", "none"))
             stop("Found unknown ID.")
         }
         ## update ord and rev_ord
-        x@ord <- ord <- order(x[, "id"], x[, "time2"], - x[, "event"])
-        x@rev_ord <- order(ord)
+        x@ord <- order(x[, "id"], x[, "time2"], - x[, "event"])
+        x@rev_ord <- order(x@ord)
         ## update first_idx and last_idx
-        first_idx <- ! duplicated.default(x[ord, "id"])
-        x@first_idx <- which(first_idx)
-        last_idx <- ! duplicated.default(x[ord, "id"], fromLast = TRUE)
-        x@last_idx <- which(last_idx)
-        x@ID <- x@ID[x[x@ord, "id"]][x@first_idx]
-    } else {
-        ord <- x@ord
-        first_idx <- x@first_idx
-        last_idx <- x@last_idx
+        sorted_id <- x[x@ord, "id"]
+        x@first_idx <- which(! duplicated.default(sorted_id))
+        x@last_idx <- which(! duplicated.default(sorted_id, fromLast = TRUE))
+        x@ID <- x@ID[sorted_id][x@first_idx]
     }
+    ## early exit
+    if (check == "none") {
+        return(invisible(x))
+    }
+
     ## sort data by id, time2, and - event
-    sObj <- x[ord, , drop = FALSE]
-    sID <- x@ID[x[ord, "id"]]
+    sObj <- x@.Data[x@ord, , drop = FALSE]
+    sID <- x@ID[sObj[, "id"]]
     sTime1 <- sObj[, "time1"]
     sTime2 <- sObj[, "time2"]
     sEvent <- sObj[, "event"]
     sTerminal <- sObj[, "terminal"]
     sCensor <- sEvent <= 0
 
-    if (check != "none") {
-        msg_fun <- if (check == "hard") { stop } else { warning }
-        ## stop if event time after censoring time or without censoring time
-        idx <- ! sCensor[last_idx]
-        if (any(idx)) {
-            msg_fun(wrapMessages(
-                "Subjects having events at or after censoring:",
-                paste0(paste(sID[last_idx][idx], collapse = ", "), ".")
-            ), call. = FALSE)
-        }
-
-        ## stop if more than one terminal event time
-        terminalID <- sID[sTerminal > 0]
-        idx <- duplicated(terminalID)
-        if (any(idx)) {
-            msg_fun(wrapMessages(
-                "Subjects having multiple terminal events:",
-                paste0(paste(terminalID[idx], collapse = ", "), ".")
-            ), call. = FALSE)
-        }
-
-        ## stop if any terminal event happens before the last time
-        idx <- sTerminal[- last_idx] > 0
-        if (any(idx)) {
-            msg_fun(wrapMessages(
-                "Subjects having terminal events before censoring:",
-                paste0(paste(unique(sID[idx]), collapse = ", "), ".")
-            ), call. = FALSE)
-        }
-
-        ## the following check is not disabled for time-verying covariates
-        ## stop if more than one censoring time
-        ## cenID <- sID[sCensor]
-        ## idx <- duplicated(cenID)
-        ## if (any(idx)) {
-        ##     msg_fun(wrapMessages(
-        ##         "Subjects having multiple censoring times:",
-        ##         paste0(paste(cenID[idx], collapse = ", "), ".")
-        ##     ), call. = FALSE)
-        ## }
-
-        ## stop if missing value of 'time'
-        idx <- is.na(sTime1) | is.na(sTime2)
-        if (any(idx)) {
-            msg_fun(wrapMessages(
-                "Missing times!",
-                "Please check subject:",
-                paste0(paste(unique(sID[idx]), collapse = ", "), ".")
-            ), call. = FALSE)
-        }
-
-        ## 'time2' has to be later than the 'time1'
-        idx <- sTime2 < sTime1
-        if (any(idx)) {
-            msg_fun(wrapMessages(
-                "Event times must be >= origin.",
-                "Please check subject:",
-                paste0(paste(unique(sID[idx]), collapse = ", "), ".")
-            ), call. = FALSE)
-        }
-
-        ## 'time1' has to be not earlier than last 'time2'
-        lag_sTime2 <- c(NA, sTime2[- n_row])
-        lag_sTime2[x@first_idx] <- NA
-        idx <-  ! is.na(lag_sTime2) & sTime1 < lag_sTime2
-        if (any(idx)) {
-            msg_fun(wrapMessages(
-                "Recurrent episodes cannot be overlapped.",
-                "Please check subject:",
-                paste0(paste(unique(sID[idx]), collapse = ", "), ".")
-            ), call. = FALSE)
-        }
+    msg_fun <- if (check == "hard") { stop } else { warning }
+    ## stop if event time after censoring time or without censoring time
+    idx <- ! sCensor[x@last_idx]
+    if (any(idx)) {
+        msg_fun(wrapMessages(
+            "Subjects having events at or after censoring:",
+            paste0(paste(sID[x@last_idx][idx], collapse = ", "), ".")
+        ), call. = FALSE)
     }
-    ## return the (updated) xect
-    x
+
+    ## stop if more than one terminal event time
+    terminalID <- sID[sTerminal > 0]
+    idx <- duplicated(terminalID)
+    if (any(idx)) {
+        msg_fun(wrapMessages(
+            "Subjects having multiple terminal events:",
+            paste0(paste(terminalID[idx], collapse = ", "), ".")
+        ), call. = FALSE)
+    }
+
+    ## stop if any terminal event happens before the last time
+    idx <- sTerminal[- x@last_idx] > 0
+    if (any(idx)) {
+        msg_fun(wrapMessages(
+            "Subjects having terminal events before censoring:",
+            paste0(paste(unique(sID[idx]), collapse = ", "), ".")
+        ), call. = FALSE)
+    }
+
+    ## the following check is not disabled for time-verying covariates
+    ## stop if more than one censoring time
+    ## cenID <- sID[sCensor]
+    ## idx <- duplicated(cenID)
+    ## if (any(idx)) {
+    ##     msg_fun(wrapMessages(
+    ##         "Subjects having multiple censoring times:",
+    ##         paste0(paste(cenID[idx], collapse = ", "), ".")
+    ##     ), call. = FALSE)
+    ## }
+
+    ## stop if missing value of 'time'
+    idx <- is.na(sTime1) | is.na(sTime2)
+    if (any(idx)) {
+        msg_fun(wrapMessages(
+            "Missing times!",
+            "Please check subject:",
+            paste0(paste(unique(sID[idx]), collapse = ", "), ".")
+        ), call. = FALSE)
+    }
+
+    ## 'time2' has to be later than the 'time1'
+    idx <- sTime2 < sTime1
+    if (any(idx)) {
+        msg_fun(wrapMessages(
+            "Event times must be >= origin.",
+            "Please check subject:",
+            paste0(paste(unique(sID[idx]), collapse = ", "), ".")
+        ), call. = FALSE)
+    }
+
+    ## 'time1' has to be not earlier than last 'time2'
+    lag_sTime2 <- c(NA, sTime2[- n_row])
+    lag_sTime2[x@first_idx] <- NA
+    idx <-  ! is.na(lag_sTime2) & sTime1 < lag_sTime2
+    if (any(idx)) {
+        msg_fun(wrapMessages(
+            "Recurrent episodes cannot be overlapped.",
+            "Please check subject:",
+            paste0(paste(unique(sID[idx]), collapse = ", "), ".")
+        ), call. = FALSE)
+    }
+    ## return the (updated) x
+    invisible(x)
 }
 
 

@@ -35,7 +35,7 @@ na_warning <- function(x, sub_env = c("current", "parent", "grandparent"),
         "grandparent" = parent.frame(num_grandparent)
     )
     objName = deparse(substitute(x, sub_env))
-    if (any(is.na(x)))
+    if (anyNA(x))
         warning(wrapMessages(
             sprintf("Found `NA` values in `%s`.", objName)
         ), call. = FALSE)
@@ -53,7 +53,7 @@ na_stop <- function(x, sub_env = c("current", "parent", "grandparent"),
         "grandparent" = parent.frame(num_grandparent)
     )
     objName = deparse(substitute(x, sub_env))
-    if (any(is.na(x)))
+    if (anyNA(x))
         stop(wrapMessages(
             sprintf("Found `NA` values in `%s`.", objName)
         ), call. = FALSE)
