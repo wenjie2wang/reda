@@ -16,7 +16,7 @@ if the \code{check} is specified to be \code{"hard"} (by default) or
 procedure will be run.}
 }
 \value{
-An \code{Recur} object.
+An \code{Recur} object invisibly.
 }
 \description{
 Perform several checks for recurrent event data and update object

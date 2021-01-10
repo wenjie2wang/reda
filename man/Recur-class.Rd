@@ -20,7 +20,7 @@ of subjects; \item \code{event}: Event indicators; \item:
 
 \item{\code{call}}{A function call producing the object.}
 
-\item{\code{ID}}{A character vector for original identificators of subjects.}
+\item{\code{ID}}{A character vector for unique original identificators of subjects.}
 
 \item{\code{ord}}{An integer vector for increasingly ordering data by \code{id},
 \code{time2}, and \code{- event}.  Sorting is often done in the
