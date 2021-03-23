@@ -123,7 +123,7 @@ setMethod(
 
         ## update control list
         control <- do.call(mcf_formula_control, control)
-        point_method <- as.integer(adjustRiskset)
+        point_method <- 2L - as.integer(adjustRiskset)
         var_method <- match(
             variance,
             c("LawlessNadeau", "Poisson", "bootstrap", "CSV")
