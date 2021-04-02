@@ -1,3 +1,17 @@
+# reda 0.5.3
+
+## Minor changes
+
+* Added `summary()` method for `Recur()` objects.
+* Added a new slot named `time_class` to `Recur()` object.
+* Updated the `id` slot of `Recur()` object to unique ID's.
+
+## Bug fixes
+
+* Fixed empty MCF estimates when `adjustRiskset = FALSE` is specified.
+* Fixed slot `first_idx` and `last_idx` in `Recur` object.
+
+
 # reda 0.5.2
 
 ## Minor changes

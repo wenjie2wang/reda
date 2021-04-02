@@ -1,7 +1,6 @@
 Package: reda
 Title: Recurrent Event Data Analysis
-Version: 0.6.0.9000
-Date: 2021-03-26
+Version: 0.5.3
 Authors@R: c(
     person(given = "Wenjie", family = "Wang",
            email = "wang@wwenjie.org",
@@ -31,7 +30,9 @@ Imports:
     methods,
     splines2,
     stats
-LinkingTo: Rcpp, RcppArmadillo
+LinkingTo:
+    Rcpp,
+    RcppArmadillo
 Suggests:
     knitr,
     rmarkdown,
