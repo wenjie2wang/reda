@@ -63,7 +63,7 @@ Collate:
     'simEvent.R'
     'summary.R'
     'zzz.R'
-URL: https://github.com/wenjie2wang/reda
+URL: https://wwenjie.org/reda, https://github.com/wenjie2wang/reda
 BugReports: https://github.com/wenjie2wang/reda/issues
 Encoding: UTF-8
 RoxygenNote: 7.1.1
