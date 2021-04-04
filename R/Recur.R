@@ -481,7 +481,7 @@ setMethod(f = "as.character", signature = "Recur",
                                   }
                       paste(char_id, out_char)
                   })
-              unname(as.character(char_rec))
+              unname(as.character(char_rec[unique(sorted_id)]))
           })
 
 
