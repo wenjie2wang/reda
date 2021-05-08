@@ -94,7 +94,8 @@ setMethod(
 
         ## reconstruct spline basis matrix
         bList <- list(x = gridTime, knots = knots, degree = degree,
-                      intercept = TRUE, Boundary.knots = Boundary.knots)
+                      intercept = TRUE, Boundary.knots = Boundary.knots,
+                      periodic = splinesList$periodic)
         splineName <- splinesList$spline
         bMat <- if (splineName == "bSplines") {
                     do.call(splines2::bSpline, bList)

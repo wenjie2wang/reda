@@ -28,7 +28,7 @@ Imports:
     graphics,
     grDevices,
     methods,
-    splines2,
+    splines2 (>= 0.4.3),
     stats
 LinkingTo:
     Rcpp,

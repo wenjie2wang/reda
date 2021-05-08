@@ -62,16 +62,18 @@ setMethod(
 
         ## baseline rate basis matrix
         spline <- object@spline$spline
-        if (identical(spline, "bSplines")) {
+        if (spline == "bSplines") {
             iMat <- splines2::ibs(x = gridTime, knots = knots,
                                   degree = degree, intercept = TRUE,
                                   Boundary.knots = Boundary.knots)
-            bMat <- attr(iMat, "bsMat")
-        } else if (identical(spline, "mSplines")) {
-            iMat <- splines2::iSpline(x = gridTime, knots = knots,
-                                      degree = degree, intercept = TRUE,
-                                      Boundary.knots = Boundary.knots)
-            bMat <- attr(iMat, "msMat")
+        } else if (spline == "mSplines") {
+            iMat <- splines2::mSpline(x = gridTime,
+                                      knots = knots,
+                                      degree = degree,
+                                      intercept = TRUE,
+                                      integral = TRUE,
+                                      Boundary.knots = Boundary.knots,
+                                      periodic = object@spline$periodic)
         } else
             stop("Unknown splines.")
 
@@ -194,11 +196,11 @@ rateReg_mcf_control <- function(grid, length.out = 1e3, from, to, ...,
     } else {
         grid <- seq.int(from = from, to = to, length.out = length.out)
     }
-    if (min(grid) < Boundary.knots_[1] || max(grid) > Boundary.knots_[2])
-        stop(wrapMessages(
-            "The 'grid' specified must be within",
-            "the coverage of the boundary knots."
-        ), call. = FALSE)
+    ## if (min(grid) < Boundary.knots_[1] || max(grid) > Boundary.knots_[2])
+    ##     stop(wrapMessages(
+    ##         "The 'grid' specified must be within",
+    ##         "the coverage of the boundary knots."
+    ##     ), call. = FALSE)
 
     ## return
     list(grid = grid, length.out = length.out, from = from, to = to)

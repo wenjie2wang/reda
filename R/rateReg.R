@@ -267,6 +267,7 @@ rateReg <- function(formula, data, subset, df = NULL, knots = NULL, degree = 0L,
                       } else {
                           control4rateReg$Boundary.knots
                       }
+    periodic <- control4rateReg$periodic
 
     ## generate knots if knots is unspecified
     if (spline == "bSplines") {
@@ -276,8 +277,9 @@ rateReg <- function(formula, data, subset, df = NULL, knots = NULL, degree = 0L,
                               Boundary.knots = Boundary.knots)
     } else {
         ## for M-spline
-        iMat <- splines2::iSpline(x = dat$time, df = df, knots = knots,
+        iMat <- splines2::mSpline(x = dat$time, df = df, knots = knots,
                                   degree = degree, intercept = TRUE,
+                                  integral = TRUE, periodic = periodic,
                                   Boundary.knots = Boundary.knots)
     }
     bMat <- deriv(iMat)
@@ -287,7 +289,11 @@ rateReg <- function(formula, data, subset, df = NULL, knots = NULL, degree = 0L,
     ## update df, knots, degree, and Boundary.knots
     knots <- as.numeric(attr(iMat, "knots"))
     degree <- as.integer(attr(iMat, "degree"))
-    df <- degree + length(knots) + 1L
+    df <- if (periodic) {
+              length(knots) + 1L
+          } else {
+              degree + length(knots) + 1L
+          }
     Boundary.knots <- attr(iMat, "Boundary.knots")
     ## name each basis for alpha output
     alphaName <- nameBases(df = df, spline = spline)
@@ -399,6 +405,7 @@ rateReg <- function(formula, data, subset, df = NULL, knots = NULL, degree = 0L,
                                df = df,
                                knots = knots,
                                degree = degree,
+                               periodic = periodic,
                                Boundary.knots = Boundary.knots),
                  estimates = list(beta = est_beta,
                                   theta = est_theta,
@@ -516,12 +523,15 @@ logL_rateReg_grad <- function(par, nBeta, nSub, xMat, ind_event, ind_cens,
 
 
 rateReg_control <- function(Boundary.knots = NULL,
-                            verbose = TRUE, ...)
+                            periodic = FALSE,
+                            verbose = TRUE,
+                            ...)
 {
     if (! isLogicalOne(verbose))
         stop("The option 'verbose' must be a logical value.", call. = FALSE)
     ## return
     list(control4rateReg = list(Boundary.knots = Boundary.knots,
+                                periodic = periodic,
                                 verbose = verbose),
          control4optim = list(...))
 }
