@@ -7,6 +7,11 @@
 
 using namespace Rcpp;
 
+#ifdef RCPP_USE_GLOBAL_ROSTREAM
+Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
+Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
+#endif
+
 // cpp_np_mcf
 Rcpp::List cpp_np_mcf(const arma::vec& time1, const arma::vec& time2, const arma::uvec& id, const arma::vec& event, const unsigned int& point_method, const unsigned int& var_method, const unsigned int& ci_method, const double& ci_level, const unsigned int& var_bootstrap_method, const unsigned int& var_bootstrap_B);
 RcppExport SEXP _reda_cpp_np_mcf(SEXP time1SEXP, SEXP time2SEXP, SEXP idSEXP, SEXP eventSEXP, SEXP point_methodSEXP, SEXP var_methodSEXP, SEXP ci_methodSEXP, SEXP ci_levelSEXP, SEXP var_bootstrap_methodSEXP, SEXP var_bootstrap_BSEXP) {
