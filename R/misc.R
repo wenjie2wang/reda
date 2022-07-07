@@ -172,3 +172,17 @@ warn_dots <- function(...) {
     }
     invisible(NULL)
 }
+
+## simplified version of utils::modifyList with keep.null = TRUE
+modify_list <- function (x, val) {
+    stopifnot(is.list(x), is.list(val))
+    xnames <- names(x)
+    vnames <- names(val)
+    vnames <- vnames[nzchar(vnames)]
+    for (v in vnames) {
+        x[v] <- if (v %in% xnames && is.list(x[[v]]) && is.list(val[[v]]))
+                    list(modify_list(x[[v]], val[[v]]))
+                else val[v]
+    }
+    x
+}

@@ -117,9 +117,6 @@ expect_equal(dim(BIC(constFit, piecesFit, splineFit)), c(3L, 2L))
 br_constFit <- baseRate(constFit)
 expect_equivalent(class(br_constFit), "baseRate.rateReg")
 expect_equivalent(class(baseRate(splineFit)), "baseRate.rateReg")
-tmpFit <- splineFit
-tmpFit@spline$spline <- "iSplines"
-expect_error(baseRate(tmpFit), "Unknown splines type.")
 ## test plot,baseRate.rateReg-method
 expect_equivalent(class(plot(br_constFit, conf.int = TRUE)),
                   c("gg", "ggplot"))
@@ -143,8 +140,8 @@ expect_equivalent(class(mcf_piecesFit), "mcf.rateReg")
 expect_equivalent(class(mcf_splineFit), "mcf.rateReg")
 expect_error(mcf(splineFit, control = list(grid = factor(1:2))),
              "grid")
-expect_error(mcf(splineFit, control = list(grid = seq.int(0, 200))),
-             "boundary")
+expect_warning(mcf(splineFit, control = list(grid = seq.int(0, 200))),
+               "boundary")
 ## test plot,mcf.rateReg-method
 expect_equivalent(class(
     plot(mcf_constFit, conf.int = TRUE, lty = 2, col = "red")

@@ -61,22 +61,13 @@ setMethod(
         n_xx <- control$length.out
 
         ## baseline rate basis matrix
-        spline <- object@spline$spline
-        if (spline == "bSplines") {
-            iMat <- splines2::ibs(x = gridTime, knots = knots,
-                                  degree = degree, intercept = TRUE,
-                                  Boundary.knots = Boundary.knots)
-        } else if (spline == "mSplines") {
-            iMat <- splines2::mSpline(x = gridTime,
-                                      knots = knots,
-                                      degree = degree,
-                                      intercept = TRUE,
-                                      integral = TRUE,
-                                      Boundary.knots = Boundary.knots,
-                                      periodic = object@spline$periodic)
-        } else
-            stop("Unknown splines.")
-
+        iMat <- splines2::mSpline(x = gridTime,
+                                  knots = knots,
+                                  degree = degree,
+                                  intercept = TRUE,
+                                  integral = TRUE,
+                                  Boundary.knots = Boundary.knots,
+                                  periodic = object@spline$periodic)
         ## estimated MCF
         estMcf <- as.vector(iMat %*% alpha)
 
