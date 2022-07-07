@@ -55,7 +55,7 @@ package vignettes for
 [github-url]: https://github.com/wenjie2wang/reda
 [gha-icon]: https://github.com/wenjie2wang/reda/workflows/R-CMD-check/badge.svg
 [gha-url]: https://github.com/wenjie2wang/reda/actions
-[codecov]: https://codecov.io/gh/wenjie2wang/reda
+[codecov]: https://app.codecov.io/gh/wenjie2wang/reda
 [codecov-main]: https://codecov.io/gh/wenjie2wang/reda/branch/main/graph/badge.svg
 [homepage]: https://wwenjie.org/reda/
 [reda-intro]: https://wwenjie.org/reda/articles/reda-intro.html
