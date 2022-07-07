@@ -60,12 +60,9 @@ NULL
 ##'     \item \code{alpha}: Coefficient(s) of baseline rate function,
 ##'         set to be all 0.05 by default.
 ##' }
-##' The argument \code{control} is an optional list
-##' that allows users to control the process of minimization of
-##' negative log likelihood function passed to \code{constrOptim}
-##' and specify the boundary knots of baseline rate function.
-##' The available options additional to those that can be passed from
-##' \code{control} to \code{constrOptim}.
+##' The argument \code{control} allows users to control the process of
+##' minimization of negative log likelihood function passed to
+##' \code{constrOptim} and specify the boundary knots of baseline rate function.
 ##'
 ##' @param formula \code{Recur} object produced by function \code{\link{Recur}}.
 ##'     The terminal events and risk-free episodes specified in \code{Recur}
@@ -79,9 +76,9 @@ NULL
 ##' @param na.action A function that indicates what should the procedure do if
 ##'     the data contains \code{NA}s.  The default is set by the na.action
 ##'     setting of \code{options}.  The "factory-fresh" default is
-##'     \code{na.omit}.  Other possible values inlcude
-##'     \code{na.fail}, \code{na.exclude}, and
-##'     \code{na.pass}.  \code{help(na.fail)} for details.
+##'     \code{na.omit}.  Other possible values inlcude \code{na.fail},
+##'     \code{na.exclude}, and \code{na.pass}. See \code{help(na.fail)} for
+##'     details.
 ##' @param start An optional list of starting values for the parameters to be
 ##'     estimated in the model.  See more in Section details.
 ##' @param control An optional list of parameters to control the maximization
@@ -92,7 +89,8 @@ NULL
 ##'     replacement values for the contrasts replacement function and whose
 ##'     names are the names of columns of data containing factors.  See
 ##'     \code{contrasts.arg} of \code{model.matrix.default} for details.
-##' @param ... Other arguments passed to \code{rateReg.control()}.
+##' @param ... Other arguments passed to \code{rateReg.control()} and
+##'     \code{stats::constrOptim()}.
 ##'
 ##' @return A \code{rateReg} object, whose slots include
 ##' \itemize{

@@ -2,20 +2,27 @@
 % Please edit documentation in R/rateReg.R
 \name{rateReg}
 \alias{rateReg}
+\alias{rateReg.control}
 \title{Recurrent Events Regression Based on Counts and Rate Function}
 \usage{
 rateReg(
   formula,
   data,
   subset,
-  df = NULL,
-  knots = NULL,
-  degree = 0L,
   na.action,
-  spline = c("bSplines", "mSplines"),
   start = list(),
   control = list(),
   contrasts = NULL,
+  ...
+)
+
+rateReg.control(
+  df = NULL,
+  degree = 0L,
+  knots = NULL,
+  Boundary.knots = NULL,
+  periodic = FALSE,
+  verbose = TRUE,
   ...
 )
 }
@@ -32,27 +39,12 @@ function \code{\link{rateReg}} is called.}
 \item{subset}{An optional vector specifying a subset of observations to be
 used in the fitting process.}
 
-\item{df}{An optional nonnegative integer to specify the degree of freedom
-of baseline rate function. If argument \code{knots} or \code{degree} are
-specified, \code{df} will be neglected whether it is specified or not.}
-
-\item{knots}{An optional numeric vector that represents all the internal
-knots of baseline rate function.  The default is \code{NULL},
-representing no any internal knots.}
-
-\item{degree}{An optional nonnegative integer to specify the degree of
-spline bases.}
-
 \item{na.action}{A function that indicates what should the procedure do if
 the data contains \code{NA}s.  The default is set by the na.action
 setting of \code{options}.  The "factory-fresh" default is
-\code{na.omit}.  Other possible values inlcude
-\code{na.fail}, \code{na.exclude}, and
-\code{na.pass}.  \code{help(na.fail)} for details.}
-
-\item{spline}{An optional character that specifies the flavor of splines.
-The possible option is \code{bSplines} for B-splines or \code{mSplines}
-for M-splines.}
+\code{na.omit}.  Other possible values inlcude \code{na.fail},
+\code{na.exclude}, and \code{na.pass}. See \code{help(na.fail)} for
+details.}
 
 \item{start}{An optional list of starting values for the parameters to be
 estimated in the model.  See more in Section details.}
@@ -67,7 +59,29 @@ replacement values for the contrasts replacement function and whose
 names are the names of columns of data containing factors.  See
 \code{contrasts.arg} of \code{model.matrix.default} for details.}
 
-\item{...}{Other arguments for future usage.}
+\item{...}{Other arguments passed to \code{rateReg.control()} and
+\code{stats::constrOptim()}.}
+
+\item{df}{A nonnegative integer to specify the degree of freedom of baseline
+rate function. If argument \code{knots} or \code{degree} are specified,
+\code{df} will be neglected whether it is specified or not.}
+
+\item{degree}{A nonnegative integer to specify the degree of spline bases.}
+
+\item{knots}{A numeric vector that represents all the internal knots of
+baseline rate function.  The default is \code{NULL}, representing no any
+internal knots.}
+
+\item{Boundary.knots}{A length-two numeric vector to specify the boundary
+knots for baseline rate funtion. By default, the left boundary knot is
+the smallest origin time and the right one takes the largest censoring
+time from data.}
+
+\item{periodic}{A logical value indicating if periodic splines should be
+used.}
+
+\item{verbose}{A logical value with default \code{TRUE}.  Set it to
+\code{FALSE} to supress messages from this function.}
 }
 \value{
 A \code{rateReg} object, whose slots include
@@ -144,21 +158,9 @@ The available numeric vector elements in the list include
     \item \code{alpha}: Coefficient(s) of baseline rate function,
         set to be all 0.05 by default.
 }
-The argument \code{control} is an optional list
-that allows users to control the process of minimization of
-negative log likelihood function passed to \code{constrOptim}
-and specify the boundary knots of baseline rate function.
-The available options additional to those that can be passed from
-\code{control} to \code{constrOptim} include
-\itemize{
-    \item \code{Boundary.knots}: A length-two numeric vector to specify
-        the boundary knots for baseline rate funtion. By default,
-        the left boundary knot is the smallest origin time and
-        the right one takes the largest censoring time from data.
-    \item \code{verbose}: A optional logical value with default \code{TRUE}.
-        Set it to be \code{FALSE} to supress any possible message
-        from this function.
-}
+The argument \code{control} allows users to control the process of
+minimization of negative log likelihood function passed to
+\code{constrOptim} and specify the boundary knots of baseline rate function.
 }
 \examples{
 library(reda)
