@@ -23,7 +23,7 @@
 #include "Process.h"
 #include "utils.h"
 
-namespace Reda {
+namespace reda {
 
     class MCF {
     private:

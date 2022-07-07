@@ -32,7 +32,7 @@ Rcpp::List cpp_np_mcf(
     const unsigned int& var_bootstrap_B = 30
     )
 {
-    Reda::MCF mcf_obj { Reda::MCF(time1, time2, id, event) };
+    reda::MCF mcf_obj { time1, time2, id, event };
     mcf_obj.estimate(
         point_method,
         var_method,

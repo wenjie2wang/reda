@@ -21,7 +21,7 @@
 #include <RcppArmadillo.h>
 #include "utils.h"
 
-namespace Reda {
+namespace reda {
 
     // Process class
     class Process {

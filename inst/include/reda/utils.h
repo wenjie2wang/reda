@@ -31,7 +31,7 @@
 #include <RcppArmadillo.h>
 
 
-namespace Reda {
+namespace reda {
 
     // compare double-precision numbers for almost equality
     inline bool isAlmostEqual(double A, double B)
