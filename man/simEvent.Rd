@@ -10,6 +10,7 @@ simEvent(
   zCoef = 1,
   rho = 1,
   rhoCoef = 1,
+  rhoMax = NULL,
   origin = 0,
   endTime = 3,
   frailty = 1,
@@ -49,6 +50,11 @@ baseline hazard rate vector (or scalar value) at each time point.}
 \item{rhoCoef}{Coefficients of baseline rate function. The default value is
 \code{1}. It can be useful when \code{rho} is a function generating
 spline bases.}
+
+\item{rhoMax}{A positive number representing an upper bound of the specified
+baseline rate function for the thinning method.  If this argument is
+left unspecified, the function will try to determine the upper bound
+internally.}
 
 \item{origin}{The time origin set to be \code{0} by default. It should be
 either a numeric value less than \code{endTime} or a function that

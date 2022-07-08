@@ -97,6 +97,10 @@ NULL
 ##' @param rhoCoef Coefficients of baseline rate function. The default value is
 ##'     \code{1}. It can be useful when \code{rho} is a function generating
 ##'     spline bases.
+##' @param rhoMax A positive number representing an upper bound of the specified
+##'     baseline rate function for the thinning method.  If this argument is
+##'     left unspecified, the function will try to determine the upper bound
+##'     internally.
 ##' @param origin The time origin set to be \code{0} by default. It should be
 ##'     either a numeric value less than \code{endTime} or a function that
 ##'     returns such a numeric value.
@@ -200,7 +204,7 @@ NULL
 ##' @importFrom splines2 bSpline
 ##' @export
 simEvent <- function(z = 0, zCoef = 1,
-                     rho = 1, rhoCoef = 1,
+                     rho = 1, rhoCoef = 1, rhoMax = NULL,
                      origin = 0, endTime = 3,
                      frailty = 1,
                      recurrent = TRUE,
@@ -431,24 +435,33 @@ simEvent <- function(z = 0, zCoef = 1,
     }
 
     if (method == "thinning") {
-        ## step 1: calculate the supremum value of rate function
-        rhoMaxObj <- tryCatch(
-            stats::optim((origin + endTime) / 2, rateFun,
-                         lower = origin, upper = endTime,
-                         method = "L-BFGS-B",
-                         control = list(fnscale = - 1)),
-            error = function(e) e
-        )
-        ## if the supremum is finite, use thinning method
-        if ("error" %in% class(rhoMaxObj)) {
-            method <- "inversion"
-            warning(wrapMessages(
-                "The rate function may go to infinite.",
-                "The Inversion method was used."
-            ), call. = FALSE)
+        if (is.null(rhoMax)) {
+            ## step 1: calculate the supremum value of rate function
+            rhoMaxObj <- tryCatch(
+                stats::optim((origin + endTime) / 2, rateFun,
+                             lower = origin, upper = endTime,
+                             method = "L-BFGS-B",
+                             control = list(fnscale = - 1)),
+                error = function(e) e
+            )
+            ## if the supremum is finite, use thinning method
+            if ("error" %in% class(rhoMaxObj)) {
+                method <- "inversion"
+                warning(wrapMessages(
+                    "The rate function may go to infinite.",
+                    "The Inversion method was used."
+                ), call. = FALSE)
+            } else {
+                rho_max <- rhoMaxObj$value
+            }
         } else {
-            rho_max <- rhoMaxObj$value
+            if (rhoMax <= 0) {
+                stop("The 'rhoMax' must be positive.")
+            }
+            rho_max <- rhoMax
         }
+    } else {
+        rho_max <- NULL
     }
     ## values at end time (censoring time)
     cenList <- rateFun(endTime, forOptimize = FALSE)
@@ -654,7 +667,8 @@ simEvent <- function(z = 0, zCoef = 1,
                      rho = rhoMat,
                      fun = rhoFun,
                      args = rhoArgs,
-                     timevarying = ! rhoVecIdx
+                     timevarying = ! rhoVecIdx,
+                     max = rho_max
                  ),
                  rhoCoef = rhoCoef,
                  frailty = list(
