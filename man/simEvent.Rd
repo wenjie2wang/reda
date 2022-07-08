@@ -51,9 +51,10 @@ baseline hazard rate vector (or scalar value) at each time point.}
 \code{1}. It can be useful when \code{rho} is a function generating
 spline bases.}
 
-\item{rhoMax}{A positive number representing an upper bound of the specified
-baseline rate function for the thinning method.  If this argument is
-left unspecified, the function will try to determine the upper bound
+\item{rhoMax}{A positive number representing an upper bound of the
+underlying rate function (excluding the frailty term but including the
+covariate effect) for the thinning method.  If this argument is left
+unspecified, the function will try to determine an upper bound
 internally.}
 
 \item{origin}{The time origin set to be \code{0} by default. It should be

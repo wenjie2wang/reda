@@ -97,9 +97,10 @@ NULL
 ##' @param rhoCoef Coefficients of baseline rate function. The default value is
 ##'     \code{1}. It can be useful when \code{rho} is a function generating
 ##'     spline bases.
-##' @param rhoMax A positive number representing an upper bound of the specified
-##'     baseline rate function for the thinning method.  If this argument is
-##'     left unspecified, the function will try to determine the upper bound
+##' @param rhoMax A positive number representing an upper bound of the
+##'     underlying rate function (excluding the frailty term but including the
+##'     covariate effect) for the thinning method.  If this argument is left
+##'     unspecified, the function will try to determine an upper bound
 ##'     internally.
 ##' @param origin The time origin set to be \code{0} by default. It should be
 ##'     either a numeric value less than \code{endTime} or a function that
@@ -458,7 +459,7 @@ simEvent <- function(z = 0, zCoef = 1,
             if (rhoMax <= 0) {
                 stop("The 'rhoMax' must be positive.")
             }
-            rho_max <- rhoMax
+            rho_max <- frailtyEffect * rhoMax
         }
     } else {
         rho_max <- NULL
@@ -668,7 +669,7 @@ simEvent <- function(z = 0, zCoef = 1,
                      fun = rhoFun,
                      args = rhoArgs,
                      timevarying = ! rhoVecIdx,
-                     max = rho_max
+                     max = rhoMax
                  ),
                  rhoCoef = rhoCoef,
                  frailty = list(
