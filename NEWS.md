@@ -1,3 +1,15 @@
+# reda 0.5.4
+
+## Minor changes
+
+* The `show()` method for `Recur` class objects prints in the same order as the
+  internally sorted ID's.
+* Added a new argument named `rhoMax` to the function `simEvent()` for users to
+  specify an upper bound of the rate function in case the function cannot
+  determine an appropriate upper bound
+  internally. [#7](https://github.com/wenjie2wang/reda/issues/7)
+
+
 # reda 0.5.3
 
 ## Minor changes
