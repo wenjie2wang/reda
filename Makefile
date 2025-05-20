@@ -44,12 +44,6 @@ vignettes/%.html: vignettes/%.Rmd
 updateTimestamp:
 	@bash misc/update_timestamp.sh
 
-## make tags
-.PHONY: TAGS
-TAGS:
-	Rscript -e "utils::rtags(path = 'R', ofile = 'TAGS')"
-	gtags
-
 .PHONY: clean
 clean:
 	@$(RM) -rf *~ */*~ *.Rhistroy *.tar.gz src/*.so src/*.o *.Rcheck/ .\#*
