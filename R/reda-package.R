@@ -1,6 +1,6 @@
 ##
 ## R package reda by Wenjie Wang, Haoda Fu, and Jun Yan
-## Copyright (C) 2015-2022
+## Copyright (C) 2015-2025
 ##
 ## This file is part of the R package reda.
 ##
@@ -42,6 +42,7 @@
 ##' See the package vignettes for more introduction and demonstration.
 ##'
 ##' @importFrom methods is new setClass setGeneric setMethod validObject
-##' @docType package
-##' @name reda-package
-NULL
+##' @importFrom Rcpp sourceCpp
+##' @useDynLib reda
+##' @keywords internal
+"_PACKAGE"

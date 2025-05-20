@@ -41,9 +41,9 @@ function.
 }
 \section{Functions}{
 \itemize{
-\item \code{baseRate,rateReg-method}: Estiamted baseline rate from a fitted model.
-}}
+\item \code{baseRate(rateReg)}: Estiamted baseline rate from a fitted model.
 
+}}
 \examples{
 ## See examples given in function rateReg.
 }

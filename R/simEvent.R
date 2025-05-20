@@ -1,6 +1,6 @@
 ##
 ## R package reda by Wenjie Wang, Haoda Fu, and Jun Yan
-## Copyright (C) 2015-2022
+## Copyright (C) 2015-2025
 ##
 ## This file is part of the R package reda.
 ##
@@ -149,7 +149,7 @@ NULL
 ##'     \code{none} for not incorporating the covariates through a relative risk
 ##'     function. A customized function can be specified. The specified function
 ##'     must have at least one argument named \code{z} for the covariate vector
-##'     and another argument named {zCoef} for covariate coefficient vector.
+##'     and another argument named \code{zCoef} for covariate coefficient vector.
 ##'     The function should return a numeric value for given \code{z} vector and
 ##'     \code{zCoef} vector.  Other arguments can be specified through a named
 ##'     list inside \code{arguments}.
@@ -197,9 +197,6 @@ NULL
 ##' 26(3), Wiley Online Library: 403--13.
 ##'
 ##' @example inst/examples/ex_simEvent.R
-##'
-##' @importFrom Rcpp sourceCpp
-##' @useDynLib reda
 ##'
 ##' @importFrom stats integrate optimize qexp rexp runif rgamma rpois uniroot
 ##' @importFrom splines2 bSpline

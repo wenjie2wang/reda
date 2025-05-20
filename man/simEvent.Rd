@@ -109,7 +109,7 @@ regular Cox model or Andersen-Gill model, \code{linear} for linear model
 \code{none} for not incorporating the covariates through a relative risk
 function. A customized function can be specified. The specified function
 must have at least one argument named \code{z} for the covariate vector
-and another argument named {zCoef} for covariate coefficient vector.
+and another argument named \code{zCoef} for covariate coefficient vector.
 The function should return a numeric value for given \code{z} vector and
 \code{zCoef} vector.  Other arguments can be specified through a named
 list inside \code{arguments}.}

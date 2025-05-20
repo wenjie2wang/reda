@@ -204,11 +204,11 @@ for the given \code{newdata} based on Delta-method.
 }
 \section{Functions}{
 \itemize{
-\item \code{mcf,formula-method}: Sample MCF from data.
+\item \code{mcf(formula)}: Sample MCF from data.
 
-\item \code{mcf,rateReg-method}: Estimated MCF from a fitted model.
+\item \code{mcf(rateReg)}: Estimated MCF from a fitted model.
+
 }}
-
 \examples{
 library(reda)
 

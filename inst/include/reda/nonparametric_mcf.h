@@ -1,6 +1,6 @@
 //
 // R package reda by Wenjie Wang, Haoda Fu, and Jun Yan
-// Copyright (C) 2015-2022
+// Copyright (C) 2015-2025
 //
 // This file is part of the R package reda.
 //

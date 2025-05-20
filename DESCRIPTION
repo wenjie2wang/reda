@@ -58,7 +58,7 @@ Collate:
     'misc.R'
     'plot.R'
     'rateReg.R'
-    'reda.R'
+    'reda-package.R'
     'show.R'
     'simEvent.R'
     'summary.R'
@@ -66,4 +66,4 @@ Collate:
 URL: https://wwenjie.org/reda, https://github.com/wenjie2wang/reda
 BugReports: https://github.com/wenjie2wang/reda/issues
 Encoding: UTF-8
-RoxygenNote: 7.2.0
+RoxygenNote: 7.3.2
