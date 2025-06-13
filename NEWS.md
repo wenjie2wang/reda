@@ -1,3 +1,11 @@
+# reda 0.5.5
+
+## Minor changes
+
+* Updated the testing example for the `plot()` method for `mcf,formula-method`
+  and fixed a typo in function documentation.
+
+
 # reda 0.5.4
 
 ## Minor changes
