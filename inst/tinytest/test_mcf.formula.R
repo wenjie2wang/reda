@@ -41,16 +41,17 @@ expect_equivalent(class(
 
 ## test its plot-method
 mcf0 <- mcf(Recur(Days, ID, No.) ~ 1, valveSeats)
-expect_equivalent(class(
+library(ggplot2)
+expect_true(is_ggplot(
     plot(mcf0, conf.int = TRUE, addOrigin = TRUE, mark.time = TRUE)
-), c("gg", "ggplot"))
-expect_equivalent(class(
+))
+expect_true(is_ggplot(
     plot(test_mcf, conf.int = TRUE, addOrigin = TRUE, mark.time = TRUE,
          legendLevels = c("G1", "G2"), legendName = "Group")
-), c("gg", "ggplot"))
-expect_equivalent(class(
+))
+expect_true(is_ggplot(
     plot(test_mcf, lty = 1:2, col = 1:2)
-), c("gg", "ggplot"))
+))
 
 ## show method
 expect_equal(show(mcf0), mcf0)
