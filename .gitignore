@@ -1,6 +1,9 @@
-working
-docs
 .man-roxygen
+docs
+nohup.out
+revdep
+revdep_check.Rout
+working
 *.tar.gz
 *.Rcheck/
 *.o

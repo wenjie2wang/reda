@@ -23,7 +23,10 @@
 ^docs$
 ^manuscript$
 ^misc$
+^nohup\.out$
 ^reference$
+^revdep$
+^revdep_check\.Rout$
 ^simulation$
 ^test$
 ^working$

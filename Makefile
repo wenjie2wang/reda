@@ -25,6 +25,13 @@ preview: $(vignettes)
 pkgdown:
 	Rscript -e "library(methods); pkgdown::build_site();"
 
+.PHONY: check-revdep
+check-revdep: $(tar)
+	@mkdir -p revdep
+	@rm -rf revdep/{*.Rcheck,*.tar.gz}
+	@cp $(tar) revdep
+	nohup R CMD BATCH --no-save --no-restore misc/revdep_check.R &
+
 $(tar): $(objects)
 	@$(RM) -rf src/RcppExports.cpp R/RcppExports.R
 	@Rscript -e "library(methods);" \
