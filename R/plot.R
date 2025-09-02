@@ -47,10 +47,6 @@
 ##' \code{\link{mcf}} for estimation of MCF;
 ##' \code{\link{rateReg}} for model fitting.
 ##'
-##' @importFrom ggplot2 aes aes_string element_text geom_line geom_step
-##'     geom_text ggplot ggtitle scale_color_manual scale_linetype_manual theme
-##'     ylab
-##'
 ##' @importFrom graphics plot
 NULL
 
@@ -85,7 +81,20 @@ setMethod(
     {
         ## nonsense, just to suppress Note from R CMD check --as-cran
         MCF <- instRate <- lower <- upper <- design <- time <- NULL
-
+        suggest_pkg("ggplot2")
+        ## aliases
+        aes <- ggplot2::aes
+        aes_string <- ggplot2::aes_string
+        element_text <- ggplot2::element_text
+        geom_line <- ggplot2::geom_line
+        geom_step <- ggplot2::geom_step
+        geom_text <- ggplot2::geom_text
+        ggplot <- ggplot2::ggplot
+        ggtitle <- ggplot2::ggtitle
+        scale_color_manual <- ggplot2::scale_color_manual
+        scale_linetype_manual <- ggplot2::scale_linetype_manual
+        theme <- ggplot2::theme
+        ylab <- ggplot2::ylab
         ## mcf data
         MCFdat <- x@MCF
         ## if it is overall sample MCF
@@ -211,6 +220,20 @@ setMethod(
     {
         ## nonsense, just to suppress Note from R CMD check --as-cran
         MCF <- lower <- upper <- time <- NULL
+        suggest_pkg("ggplot2")
+        ## aliases
+        aes <- ggplot2::aes
+        aes_string <- ggplot2::aes_string
+        element_text <- ggplot2::element_text
+        geom_line <- ggplot2::geom_line
+        geom_step <- ggplot2::geom_step
+        geom_text <- ggplot2::geom_text
+        ggplot <- ggplot2::ggplot
+        ggtitle <- ggplot2::ggtitle
+        scale_color_manual <- ggplot2::scale_color_manual
+        scale_linetype_manual <- ggplot2::scale_linetype_manual
+        theme <- ggplot2::theme
+        ylab <- ggplot2::ylab
         ## mcf data
         MCFdat <- x@MCF
         ## if MCF is just for one certain group
@@ -276,7 +299,21 @@ setMethod(
     {
         ## nonsense, just to suppress Note from R CMD check --as-cran
         lower <- upper <- time <- NULL
-
+        suggest_pkg("ggplot2")
+        ## aliases
+        aes <- ggplot2::aes
+        aes_string <- ggplot2::aes_string
+        element_text <- ggplot2::element_text
+        geom_line <- ggplot2::geom_line
+        geom_step <- ggplot2::geom_step
+        geom_text <- ggplot2::geom_text
+        ggplot <- ggplot2::ggplot
+        ggtitle <- ggplot2::ggtitle
+        scale_color_manual <- ggplot2::scale_color_manual
+        scale_linetype_manual <- ggplot2::scale_linetype_manual
+        theme <- ggplot2::theme
+        ylab <- ggplot2::ylab
+        ## data
         dat <- x@baseRate
         if (missing(lty)) lty <- 1
         if (missing(col)) col <- "black"
@@ -307,7 +344,20 @@ setMethod(
     {
         ## nonsense, just to suppress Note from R CMD check --as-cran
         MCF <- lower <- upper <- time <- NULL
-
+        suggest_pkg("ggplot2")
+        ## aliases
+        aes <- ggplot2::aes
+        aes_string <- ggplot2::aes_string
+        element_text <- ggplot2::element_text
+        geom_line <- ggplot2::geom_line
+        geom_step <- ggplot2::geom_step
+        geom_text <- ggplot2::geom_text
+        ggplot <- ggplot2::ggplot
+        ggtitle <- ggplot2::ggtitle
+        scale_color_manual <- ggplot2::scale_color_manual
+        scale_linetype_manual <- ggplot2::scale_linetype_manual
+        theme <- ggplot2::theme
+        ylab <- ggplot2::ylab
         ## mcf data
         MCFdat <- x@MCF
         if (addOrigin) {
@@ -337,8 +387,8 @@ setMethod(
 
 ### internal function ==========================================================
 ## function to emulate the default colors used in ggplot2
-##' @importFrom grDevices hcl
 gg_color_hue <- function(n) {
+    suggest_pkg("grDevices")
     hues <- seq(15, 375, length = n + 1)
     grDevices::hcl(h = hues, l = 65, c = 100)[seq_len(n)]
 }

@@ -186,3 +186,13 @@ modify_list <- function (x, val) {
     }
     x
 }
+
+## check if the suggested package is available
+suggest_pkg <- function(pkg_name)
+{
+    if (! requireNamespace(pkg_name, quietly = TRUE)) {
+        stop(sprintf("The package '%s' is required for this function.",
+                     pkg_name), call. = FALSE)
+    }
+    invisible()
+}
