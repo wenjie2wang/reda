@@ -1,6 +1,7 @@
 ## Testing exception handling of rateReg
 
 library(reda)
+library(ggplot2)
 
 isNumMatrix <- reda:::isNumMatrix
 isNumOne <- reda:::isNumOne
@@ -118,8 +119,7 @@ br_constFit <- baseRate(constFit)
 expect_equivalent(class(br_constFit), "baseRate.rateReg")
 expect_equivalent(class(baseRate(splineFit)), "baseRate.rateReg")
 ## test plot,baseRate.rateReg-method
-expect_equivalent(class(plot(br_constFit, conf.int = TRUE)),
-                  c("gg", "ggplot"))
+expect_true(is_ggplot(plot(br_constFit, conf.int = TRUE)))
 ## trigger warnings
 ## set.seed(123)
 ## sinDat <- simEventData(100, rho = function(tVec) 1 - sin(tVec))
@@ -143,13 +143,13 @@ expect_error(mcf(splineFit, control = list(grid = factor(1:2))),
 expect_warning(mcf(splineFit, control = list(grid = seq.int(0, 200))),
                "boundary")
 ## test plot,mcf.rateReg-method
-expect_equivalent(class(
+expect_true(is_ggplot(
     plot(mcf_constFit, conf.int = TRUE, lty = 2, col = "red")
-), c("gg", "ggplot"))
-expect_equivalent(class(
+))
+expect_true(is_ggplot(
     plot(mcf_splineFit, conf.int = TRUE, lty = 1:4, col = 1:4)
-), c("gg", "ggplot"))
-expect_equivalent(class(plot(mcf_splineFit)), c("gg", "ggplot"))
+))
+expect_true(is_ggplot(plot(mcf_splineFit)))
 
 ## show methods
 expect_equal(show(piecesFit), piecesFit)

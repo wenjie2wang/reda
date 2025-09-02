@@ -1,4 +1,5 @@
 library(reda)
+library(ggplot2)
 
 data(valveSeats)
 valveSeats$group <- cut(valveSeats$ID, c(250, 400, 450))
@@ -52,9 +53,9 @@ diff12 <- mcfDiff(mcf1, mcf2)
 expect_equal(mcf1 - mcf2, diff12)
 
 ## test plot,mcfDiff-method
-expect_equal(class(
+expect_true(is_ggplot(
     plot(mcfDiff(mcf0, testVariance = "none"), addOrigin = TRUE)
-), c("gg", "ggplot"))
+))
 
 ## show method
 expect_equal(show(diff12), diff12)
