@@ -1,3 +1,12 @@
+# reda 0.5.6
+
+## Minor changes
+
+* Moved packages {ggplot2} and {grDevices} to *Suggests* as they are needed for
+  `plot()` methods only.
+* Updated testing examples for `ggplot` objects.
+
+
 # reda 0.5.5
 
 ## Minor changes

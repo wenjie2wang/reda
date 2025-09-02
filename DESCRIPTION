@@ -1,6 +1,6 @@
 Package: reda
 Title: Recurrent Event Data Analysis
-Version: 0.5.5
+Version: 0.5.6
 Authors@R: c(
     person(given = "Wenjie", family = "Wang",
            email = "wang@wwenjie.org",
@@ -24,9 +24,7 @@ Description: Contains implementations of recurrent event data analysis routines
     Fu, et al. (2016) <doi:10.1080/10543406.2014.992524>.
 Imports:
     Rcpp,
-    ggplot2,
     graphics,
-    grDevices,
     methods,
     splines2 (>= 0.4.3),
     stats
@@ -34,9 +32,11 @@ LinkingTo:
     Rcpp,
     RcppArmadillo
 Suggests:
+    ggplot2,
+    grDevices,
     knitr,
     rmarkdown,
-    tinytest
+    tinytest,
 Depends:
     R (>= 3.2.3)
 License: GPL (>= 3)
