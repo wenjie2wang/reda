@@ -44,6 +44,7 @@ Useful links:
 
 Authors:
 \itemize{
+  \item Wenjie Wang \email{wang@wwenjie.org} (\href{https://orcid.org/0000-0003-0363-3180}{ORCID})
   \item Haoda Fu
 }
 
